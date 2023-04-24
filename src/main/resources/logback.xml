@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--<configuration>-->
+
+<!--    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">-->
+<!--        &lt;!&ndash; encoders are assigned the type-->
+<!--             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default &ndash;&gt;-->
+<!--        <encoder>-->
+<!--            <pattern>%d{HH:mm:ss} %msg%n</pattern>-->
+<!--        </encoder>-->
+<!--    </appender>-->
+
+<!--    <root level="INFO">-->
+<!--        <appender-ref ref="STDOUT"/>-->
+<!--    </root>-->
+<!--</configuration>-->
+
+<configuration>
+    <property name="appender" value="%X{appender}" />
+    <appender name="FILE" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>logName</key>
+            <defaultValue>target/logs/stdout</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="FILE-${logName}" class="ch.qos.logback.core.FileAppender">
+                <file>${logName}.log</file>
+                <append>false</append>
+                <layout class="ch.qos.logback.classic.PatternLayout">
+                    <pattern>%d{HH:mm:ss} %msg%n</pattern>
+                </layout>
+            </appender>
+        </sift>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="collectLogs" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="scenarioLog" level="INFO">
+        <appender-ref ref="FILE" />
+    </logger>
+
+    <logger name="consoleLog" level="INFO">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+    <logger name="collectLogs" level="INFO">
+        <appender-ref ref="collectLogs" />
+    </logger>
+
+<!--    <root level="INFO">-->
+<!--        <appender-ref ref="STDOUT" />-->
+<!--    </root>-->
+</configuration>

@@ -1,0 +1,9 @@
+- Название: efrstand
+  protocol: http
+  hostApplication: efrstand
+  portApplication: 8888
+
+- Название: dor6
+  protocol: http
+  hostApplication: 172.16.35.205
+  portApplication: 8888

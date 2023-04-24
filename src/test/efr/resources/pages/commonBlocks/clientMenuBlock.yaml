@@ -1,0 +1,3 @@
+Название: Клиентское меню
+Элементы:
+  Пункт меню: //div[@class='clients-tab']//span[@class='tab-name']/..
