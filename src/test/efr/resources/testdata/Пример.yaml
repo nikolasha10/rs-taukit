@@ -1,21 +1,21 @@
 - Сценарий: 01.01 Заполнение анкеты клиента
   Пользователь:
-    класс: rs.taukit.config.Employee
+    класс: rs.taukit.testData.Employee
     параметры:
      - MANAGER_OPERATOR_GO
   Клиент:
-    класс: rs.taukit.config.Client
+    класс: rs.taukit.testData.Client
     параметры:
       - Клиент для первого сценария
   Печатная форма: ${Сценарий}.pdf
 
 - Сценарий: 01.02 Заполнение анкеты клиента
   Пользователь:
-    класс: rs.taukit.config.Employee
+    класс: rs.taukit.testData.Employee
     параметры:
       - MANAGER_OPERATOR_GO
   Клиент:
-    класс: rs.taukit.config.Client
+    класс: rs.taukit.testData.Client
     параметры:
       - Клиент для первого сценария
   Печатная форма: ${Сценарий}.pdf

@@ -42,6 +42,10 @@ public class Config {
                 .orElse(CONFIG_PROPERTIES.getProperty(propertyName));
     }
 
+    public static Boolean getBooleanProperty(String propertyName){
+        return Boolean.getBoolean(getProperty(propertyName));
+    }
+
 //    private static final int SECOND = 1000;
 //    private static Stand currentStand;
 //

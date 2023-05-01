@@ -3,9 +3,6 @@ package rs.taukit.utils;
 import com.google.gson.Gson;
 import lombok.Getter;
 import rs.taukit.config.Config;
-import rs.taukit.context.TestContext;
-import rs.taukit.drivers.DriverManager;
-import rs.taukit.drivers.PlaywrightDriver;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 
 import java.io.File;
@@ -34,6 +31,7 @@ public class AllureReport {
         getFileList(scenarioName, testEndTime).forEach(file -> replaceReport(file, scenarioName, functionality));
     }
 
+    @SuppressWarnings("unchecked")
     private static void replaceReport(File file, String scenarioName, String functionality) {
         try {
             String fileContent = Files.readString(file.toPath());

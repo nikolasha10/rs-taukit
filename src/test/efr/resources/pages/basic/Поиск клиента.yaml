@@ -5,6 +5,7 @@
   Серия: field-name-docSeries
   Номер: field-name-docNumber
   Найти: search-button
+  Новый клиент: create-button
 Обязательные элементы:
   - Серия
   - Номер

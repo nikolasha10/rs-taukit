@@ -1,6 +1,6 @@
-package rs.taukit.drivers;
+package rs.taukit.driver;
 
-import io.qameta.allure.Story;
+import rs.taukit.driver.playwright.PlaywrightDriver;
 
 import java.util.*;
 
@@ -28,6 +28,6 @@ public class DriverManager {
         return currentDriverContainer.get(Thread.currentThread().threadId());
     }
     public void closeDrivers(){
-        currentDriverContainer.forEach((key, value) -> value.close());
+        currentDriverContainer.forEach((key, value) -> value.closeDriver());
     }
 }

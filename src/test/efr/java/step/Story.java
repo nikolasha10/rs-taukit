@@ -1,30 +1,29 @@
 package step;
 
-import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
-import rs.taukit.config.Employee;
-import rs.taukit.context.TestContext;
-import rs.taukit.utils.TauLogger;
+import rs.taukit.testdata.TestData;
+import step.utils.Utils;
 
-public class Story extends rs.taukit.step.Story {
-    @Step("войти в '{appName}' под учётными данными сотрудника '{employeeDesc}'")
-    public static void loginIntoApplication(String appName, String employeeDesc) {
-        Employee user = new Employee(employeeDesc);
-        if (Logic.isNobodyLoggedIn() || Logic.needToChangeUser(user)) {
+public class Story extends rs.taukit.step.BasicStory {
+    @Step("войти в '{appName}' под учётными данными сотрудника '{TestDataDesc}'")
+    public static void loginIntoApplication(String appName, String TestDataDesc) {
+        TestData user = testContext().getScenarioData().get("Пользователь");
+        if (Utils.isNobodyLoggedIn() || Utils.needToChangeUser(user)) {
+            openBrowser();
             openPage("Страница входа в приложение");
-            fill("Имя пользователя", user.getLogin());
-            fill("Пароль", user.getPassword());
-            click("Войти");
+            setValue("Имя пользователя", user.get("логин"));
+            setValue("Пароль", user.get("пароль"));
+            clickElement("Войти");
             waitForPageLoad("Поиск клиента");
-            TestContext.getInstance().setCurrentUser(user);
+            testContext().setCurrentUser(user);
         }
     }
 
     @Step("найти клиента по серии '{series}' и номеру '{number}' паспорта")
     public static void findClientByPassport(String series, String number) {
-        fill("Серия", series);
-        fill("Номер", number);
-        click("Найти");
+        setValue("Серия", series);
+        setValue("Номер", number);
+        clickElement("Найти");
         waitForPageLoad("Продукты клиента");
     }
 

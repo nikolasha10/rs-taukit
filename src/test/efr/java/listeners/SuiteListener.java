@@ -1,12 +1,11 @@
 package listeners;
 
-import io.cucumber.testng.*;
 import org.slf4j.MDC;
 import org.testng.ISuite;
 import org.testng.ISuiteListener;
 import org.testng.xml.XmlSuite;
 import rs.taukit.config.Config;
-import rs.taukit.drivers.DriverManager;
+import rs.taukit.driver.DriverManager;
 
 public class SuiteListener implements ISuiteListener {
     @Override

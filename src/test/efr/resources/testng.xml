@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="RSHB test suite" parallel="tests">
+    <test name="Android phone tests" verbose="1">
+      <classes>
+        <class name="TestRunner">
+          <methods>
+            <include name="runByTag" />
+<!--            <include name="numberedScenario" />-->
+          </methods>
+<!--          <parameter name="system" value="WEB"></parameter>-->
+        </class>
+      </classes>
+    </test>
+
+
+    <!--<test name="Ios phone test" verbose="1" >
+    <parameter name="system" value="ios_ax" />
+    <packages>
+            <package name="com.pflb.rshb.test"/>
+        </packages>
+    </test>
+
+    <test name="Android phone tests" verbose="1">
+        <parameter name="system" value="android_arm"/>
+        <packages>
+            <package name="com.pflb.rshb.test"/>
+        </packages>
+    </test>
+
+    <test name="Ios emulator test" verbose="1" >
+        <parameter name="system" value="ios_x86" />
+        <packages>
+            <package name="com.pflb.rshb.test"/>
+        </packages>
+    </test>-->
+</suite>

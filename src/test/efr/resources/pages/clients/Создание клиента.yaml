@@ -1,0 +1,20 @@
+Адрес:
+Обязательная часть адреса: mainProcessKey=ClientCreateProcess
+Название: Создание клиента
+Элементы:
+  Полная идентификация: client-data-full-identification
+  Упрощенная идентификация: client-data-simple-identification
+  Пол:
+    Тип: список
+    Локатор: //span[text()='Пол']/following::div[@class='field-value'][1]
+    Элементы списка: //li//button
+    Названия элементов: //li//button/div
+  Серия: field-name-docSeries
+  Номер: field-name-docNumber
+  Найти: search-button
+Обязательные элементы:
+  - Полная идентификация
+  - Упрощенная идентификация
+Общие блоки элементов:
+  - Главное меню
+Максимальное время ожидания: по умолчанию

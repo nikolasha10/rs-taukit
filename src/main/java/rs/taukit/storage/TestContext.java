@@ -1,0 +1,53 @@
+package rs.taukit.storage;
+
+import io.cucumber.testng.Pickle;
+import io.cucumber.testng.PickleWrapper;
+import lombok.Getter;
+import lombok.Setter;
+import rs.taukit.testdata.ScenarioData;
+import rs.taukit.page.PageObject;
+import rs.taukit.page.PageStorage;
+import rs.taukit.testdata.TestData;
+
+import java.util.function.BooleanSupplier;
+
+@Getter
+public class TestContext {
+    private final Pickle pickle;
+    private final String scenarioName;
+    private final String functionality;
+    @Setter
+    private ScenarioData scenarioData;
+    @Setter
+    private TestData currentUser;
+    @Setter
+    private String currentPageName;
+    @Setter
+    private String savedPageName;
+    @Setter
+    private String stepActionPageName;
+    private BooleanSupplier stepAction;
+
+
+    public TestContext(PickleWrapper pickleWrapper, String functionality) {
+        this.pickle = pickleWrapper.getPickle();
+        this.scenarioName = pickle.getName();
+        this.functionality = functionality;
+    }
+
+    public void setStepAction(BooleanSupplier stepAction) {
+        this.stepAction = () -> {
+            PageObject pageObject = PageStorage.getInstance().getPage(stepActionPageName);
+            try {
+                pageObject.waitForLoad();
+                return stepAction.getAsBoolean();
+            } catch (Exception e){
+                return false;
+            }
+        };
+    }
+
+    public void save(String parameterName, Object stringValue) {
+        scenarioData.put(parameterName, stringValue);
+    }
+}

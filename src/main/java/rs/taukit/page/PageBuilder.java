@@ -1,15 +1,13 @@
 package rs.taukit.page;
 
-import com.microsoft.playwright.Page;
 import rs.taukit.config.Config;
+import rs.taukit.driver.DriverManager;
 import rs.taukit.exceptions.PageFileNotFoundException;
 import rs.taukit.utils.TimeStringParser;
 import rs.taukit.utils.YamlParser;
 
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class PageBuilder {
     private static Map<String, ?> loadPageConfig(String pageName) {
@@ -25,16 +23,15 @@ public class PageBuilder {
     }
 
     public static PageObject buildPage(String pageName) {
+        PageObject page = DriverManager.getInstance().getDriver().initPage(pageName);
         Map<String, ?> pageConfig = loadPageConfig(pageName);
         String pageUrl = pageConfig.get("Адрес").toString();
         String pageControlUrl = pageConfig.get("Обязательная часть адреса").toString();
         Map<String, String> pageElements = YamlParser.convert(pageConfig.get("Элементы"));
         List<String> expectedElements = YamlParser.convert(pageConfig.get("Обязательные элементы"));
-        double pageTimeout = TimeStringParser.getTime(pageConfig.get("Максимальное время ожидания").toString());
-        Page.WaitForConditionOptions options = new Page.WaitForConditionOptions().setTimeout(pageTimeout);
-        Page.ScreenshotOptions screenshotOptions = new Page.ScreenshotOptions()
-                .setPath(Paths.get(pageName + ".png"))
-                .setFullPage(true);
-        return new PageObject(pageName, pageUrl, pageControlUrl, pageElements, expectedElements, options, screenshotOptions);
+        String pageTimeoutString = pageConfig.get("Максимальное время ожидания").toString();
+        double pageTimeout = TimeStringParser.getTime(pageTimeoutString.equalsIgnoreCase("по умолчанию")
+                ? Config.getProperty("pageLoadingTimeout") : pageTimeoutString);
+        return page;
     }
 }

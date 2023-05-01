@@ -1,11 +1,8 @@
 package step;
 
-import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ru.И;
-import rs.taukit.config.TestData;
-import rs.taukit.step.Utils;
 
-import static rs.taukit.step.Utils.eval;
+import static rs.taukit.step.utils.BasicUtils.eval;
 
 public class Scenario {
 

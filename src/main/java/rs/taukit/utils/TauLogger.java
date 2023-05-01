@@ -7,7 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import rs.taukit.config.Config;
+import rs.taukit.driver.DriverManager;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
+import rs.taukit.exceptions.TestDataException;
+import rs.taukit.step.utils.BasicUtils;
+import rs.taukit.testdata.TestDataFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -72,89 +76,87 @@ public final class TauLogger {
 //    public static void infoDB(String message, Throwable e) {
 //        logger.info(message, e);
 //    }
-//
-//    /**
-//     * Выводит сообщение об ошибке в действии и делает скриншот.
-//     */
-//    @Step("Некритическая ошибка: {message}")
-//    public static void warn(String message) {
-//        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
-//        Storage.put("WARNING", "PASSED with ERRORS");
+
+    /**
+     * Выводит сообщение об ошибке в действии, и делает скриншот.
+     */
+    @Step("Некритическая ошибка: {message}")
+    public static void warn(String message) {
+        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
+        BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
+        attachFullScreenshot();
+    }
+
+    public static void warn(String format, Object... args) {
+        warn(String.format(format, args));
+    }
+
+    /**
+     * Выводит сообщение об ошибке в действии, и НЕ делает скриншот.
+     */
+    @Step("Некритическая ошибка: {message}")
+    public static void warnWOSS(String message) {
+        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
+        BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
+    }
+
+    @Step("Некритическая ошибка: {message}")
+    public static void warnWOSS(String message, Throwable e) {
+        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
+        BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
+    }
+
+    public static void warnWOSS(String message, Object... args) {
+        warnWOSS(String.format(message, args));
+    }
+
+    public static void warnWOSS(Throwable e, String message, Object... args) {
+        warnWOSS(String.format(message, args), e);
+    }
+
+    /**
+     * Выводит сообщение об ошибке в действии и саму ошибку.
+     */
+    @Step("Некритическая ошибка: {message}")
+    public static void warn(String message, Throwable e) {
+        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
+        BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
+        attachFullScreenshot();
+    }
+
+    public static void warn(Throwable e, String format, Object... args) {
+        warn(String.format(format, args), e);
+    }
+
+    /**
+     * Выводит сообщение о фатальной ошибке в действии и делает скриншот.
+     */
+    @Step("{0}")
+    public static void fail(String message) {
 //        attachPageSource();
-//        attachFullScreenshot();
-//    }
-//
-//    public static void warn(String format, Object... args) {
-//        warn(String.format(format, args));
-//    }
-//
-//    /**
-//     * Выводит сообщение об ошибке в действии и НЕ делает скриншот.
-//     */
-//    @Step("Некритическая ошибка: {message}")
-//    public static void warnWOSS(String message) {
-//        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
-//        Storage.put("WARNING", "PASSED with ERRORS");
-//    }
-//
-//    @Step("Некритическая ошибка: {message}")
-//    public static void warnWOSS(String message, Throwable e) {
-//        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
-//        Storage.put("WARNING", "PASSED with ERRORS");
-//    }
-//
-//    public static void warnWOSS(String message, Object... args) {
-//        warnWOSS(String.format(message, args));
-//    }
-//
-//    public static void warnWOSS(Throwable e, String message, Object... args) {
-//        warnWOSS(String.format(message, args), e);
-//    }
-//
-//    /**
-//     * Выводит сообщение об ошибке в действии и саму ошибку.
-//     */
-//    @Step("Некритическая ошибка: {message}")
-//    public static void warn(String message, Throwable e) {
-//        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
-//        Storage.put("WARNING", "PASSED with ERRORS");
+        attachFullScreenshot();
+        throw new AssertionError(message);
+    }
+
+    /**
+     * Выводит сообщение о фатальной ошибке в действии. так же выводит сообщение об ошибке
+     */
+    @Step("{0}")
+    public static void fail(String message, Throwable e) {
 //        attachPageSource();
-//        attachFullScreenshot();
-//    }
-//
-//    public static void warn(Throwable e, String format, Object... args) {
-//        warn(String.format(format, args), e);
-//    }
-//
-//    /**
-//     * Выводит сообщение о фатальной ошибке в действии и делает скриншот.
-//     */
-//    @Step("{0}")
-//    public static void fail(String message) {
-//        attachPageSource();
-//        attachFullScreenshot();
-//        throw new AssertionError(message);
-//    }
-//
-//    /**
-//     * Выводит сообщение о фатальной ошибке в действии. так же выводит сообщение об ошибке
-//     */
-//    @Step("{0}")
-//    public static void fail(String message, Throwable e) {
-//        attachPageSource();
-//        attachFullScreenshot();
-//        throw new AssertionError(message, e);
-//    }
-//
-//    public static void fail(Throwable e, String format, Object... args) {
-//        String message = String.format(format, args);
-//        fail(message, e);
-//    }
-//
-//    public static void fail(String format, Object... args) {
-//        fail(String.format(format, args));
-//    }
-//
+        attachFullScreenshot();
+        throw new AssertionError(message, e);
+    }
+
+    public static void fail(Throwable e, String format, Object... args) {
+        String message = String.format(format, args);
+        fail(message, e);
+    }
+
+    public static void fail(String format, Object... args) {
+        fail(String.format(format, args));
+    }
+
     /**
      * Выводит сообщение о фатальной ошибке в действии и НЕ делает скриншот
      */
@@ -192,32 +194,17 @@ public final class TauLogger {
         MDC.put("logName", logName);
     }
 
-//    /**
-//     * Создает скриншот страницы.
-//     */
-//    @Attachment(value = "Page screenshot", type = "image/jpg")
-//    public static byte[] attachScreenshot() {
-//        if (MBDriverManager.isCurrent()) {
-//            Context currentContext = DriverUtils.getContext();
-//            try {
-//                if (currentContext == Context.WEB_APP) {
-//                    DriverUtils.setNativeContext();
-//                }
-//                return ((TakesScreenshot) MBDriverManager.get()).getScreenshotAs(OutputType.BYTES);
-//            } catch (Exception e) {
-//                return new byte[0];
-//            } finally {
-//                DriverUtils.setContext(currentContext);
-//            }
-//        } else {
-//            WebDriver driver = IKDriverManager.get();
-//            try {
-//                return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
-//            } catch (Exception e) {
-//                return new byte[0];
-//            }
-//        }
-//    }
+    /**
+     * Создает скриншот страницы.
+     */
+    @Attachment(value = "Page screenshot", type = "image/png")
+    public static byte[] attachScreenshot(byte[] imageData) {
+        return imageData;
+    }
+
+    public static void attachFullScreenshot(){
+        attachScreenshot(DriverManager.getInstance().getDriver().getScreenshot());
+    }
 //
 //    public static void attachFullScreenshot() {
 //        try {
@@ -307,15 +294,30 @@ public final class TauLogger {
     public static byte[] attachDataTable(String tableName, DataTable dataTable) {
         return attachData(dataTable);
     }
-//
-//    @Attachment(value = "{fileName}", fileExtension = "{fileExtension}")
-//    public static byte[] attachFile(String fileName, String fileExtension, String filePath) {
-//        File file = new File(filePath);
-//        try {
-//            return Files.readAllBytes(file.toPath());
-//        } catch (IOException ioException) {
-//            warnWOSS(ioException, "Не удалось приложить файл '%s' к отчету", filePath);
-//        }
-//        return null;
-//    }
+
+    @Attachment(value = "{fileName}", fileExtension = "{fileExtension}")
+    public static byte[] attachFile(String fileName, String fileExtension, String filePath) {
+        File file = new File(filePath);
+        try {
+            return Files.readAllBytes(file.toPath());
+        } catch (IOException ioException) {
+            warnWOSS(ioException, "Не удалось приложить файл '%s' к отчету", filePath);
+        }
+        return null;
+    }
+
+    @Attachment(value = "{fileName}", fileExtension = "{fileExtension}")
+    public static byte[] attachFile(String fileName, String fileExtension, byte[] file) {
+        return file;
+    }
+
+    public static void attach(String name, Object object) {
+        if (object instanceof DataTable dataTable) {
+            attachDataTable(name, dataTable);
+        } else if (object instanceof TestDataFile file){
+            attachFile(name,file.getFileExtension(),file.getFilePath());
+        } else {
+            throw new TestDataException("Не удалось прикрепить объект '%s' к отчёту. Не распознан тип вложения.");
+        }
+    }
 }

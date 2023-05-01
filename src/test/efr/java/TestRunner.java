@@ -1,14 +1,14 @@
 import io.cucumber.testng.*;
 import listeners.SuiteListener;
-import org.slf4j.MDC;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import rs.taukit.config.Config;
-import rs.taukit.context.TestContext;
-import rs.taukit.drivers.DriverManager;
+import rs.taukit.storage.StorageManager;
+import rs.taukit.storage.TestContext;
+import rs.taukit.driver.DriverManager;
 import rs.taukit.utils.AllureReport;
 import rs.taukit.utils.TauLogger;
 
@@ -74,18 +74,16 @@ public class TestRunner {
         functionality = functionality.substring(1, functionality.length() - 1);
         DriverManager.getInstance().initDriver();
         TauLogger.setLogPath(functionality, scenarioName);
-        TestContext testContext = TestContext.getInstance();
-        testContext.setCurrentPickle(pickle);
-        testContext.setCurrentFunctionality(functionality);
-        testContext.setCurrentScenarioName(scenarioName);
+        StorageManager.getInstance().initTestContext(pickleWrapper, functionality);
         TauLogger.console("TEST STARTED: [%s] %s", functionality, scenarioName);
         runner.runScenario(pickle);
     }
 
     @AfterMethod()
     public void afterMethod(ITestResult result) {
-        String scenarioName = TestContext.getInstance().getCurrentScenarioName();
-        String functionality = TestContext.getInstance().getCurrentFunctionality();
+        TestContext testContext = StorageManager.getInstance().getTestContext();
+        String scenarioName = testContext.getScenarioName();
+        String functionality = testContext.getFunctionality();
         String testStatus = result.getStatus() == 1 ? "PASSED" : "FAILED";
         TauLogger.console("TEST %s: [%s] %s", testStatus, functionality, scenarioName);
         long scenarioEndTime = result.getEndMillis();
