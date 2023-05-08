@@ -1,4 +1,5 @@
 import io.cucumber.testng.*;
+import io.qameta.allure.Step;
 import listeners.SuiteListener;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
@@ -12,6 +13,7 @@ import rs.taukit.driver.DriverManager;
 import rs.taukit.utils.AllureReport;
 import rs.taukit.utils.TauLogger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,7 +69,7 @@ public class TestRunner {
      * @param cucumberFeature
      */
     @Test(dataProvider = "getScenariosByTag")
-    public void runByTag(PickleWrapper pickleWrapper, FeatureWrapper cucumberFeature) {
+    public void runByTag(PickleWrapper pickleWrapper, FeatureWrapper cucumberFeature) throws IOException {
         Pickle pickle = pickleWrapper.getPickle();
         String scenarioName = pickle.getName();
         String functionality = cucumberFeature.toString();

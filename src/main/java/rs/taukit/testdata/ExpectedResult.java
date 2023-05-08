@@ -2,6 +2,7 @@ package rs.taukit.testdata;
 
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementState;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.page.PageObject;
 import rs.taukit.step.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
@@ -37,6 +38,8 @@ public class ExpectedResult {
         this.condition = () -> {
             if (objectType.equalsIgnoreCase("страница")) {
                 return pageStorage().getPage(objectName).isPageLoaded();
+            } else if (objectType.equalsIgnoreCase("вкладка")) {
+                return driver().setActiveTab(Integer.parseInt(objectName)-1);
             } else {
                 return ElementState.getState(objectState).apply(element(objectName));
             }
@@ -48,8 +51,9 @@ public class ExpectedResult {
             BasicUtils.driver().waitForCondition(condition, checkInterval, checkTimeout, testContext().getStepAction());
             TauLogger.report("%s '%s' %s", objectType, objectName, objectState);
         } catch (Exception e) {
+            if (e instanceof AutoTestBrokenException) throw e;
             String wrongState = ElementState.getWrongState(objectState);
-            TauLogger.fail("Фактический результат не соответствует ожидаемому.%n" +
+            TauLogger.fail(e,"Фактический результат не соответствует ожидаемому.%n" +
                             "Ожидаемый результат: %s '%s' %s%n" +
                             "Фактический результат: %s '%s' %s",
                     objectType, objectName, objectState, objectType, objectName, wrongState);

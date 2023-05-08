@@ -68,7 +68,13 @@ public class DataStorage {
         String format = "\\$\\{(.+?)}";
         Matcher matcher = Pattern.compile(format).matcher(template);
         try {
-            return matcher.replaceAll(matchResult -> get(matchResult.group(1)));
+            return matcher.replaceAll(matchResult -> {
+                if (get(matchResult.group(1)) instanceof ITestData iTestData){
+                    return iTestData.getStringValue();
+                } else {
+                    return get(matchResult.group(1));
+                }
+            });
         } catch (IllegalArgumentException e) {
             String message = String.format("Не удалось вычислить значение параметра '%s'", template);
             throw new TestDataException(e, message);

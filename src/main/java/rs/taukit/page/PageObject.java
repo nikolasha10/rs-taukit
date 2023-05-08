@@ -1,6 +1,8 @@
 package rs.taukit.page;
 
-import rs.taukit.element.IElement;
+import rs.taukit.element.interfaces.IElement;
+
+import java.util.Map;
 
 public interface PageObject {
 
@@ -14,6 +16,8 @@ public interface PageObject {
     byte[] takeScreenshot();
 
     void waitForElement(String elementName, boolean isVisible);
+
+    void waitForPopup(Runnable runnable);
 
     void waitForTimeout(double time);
 

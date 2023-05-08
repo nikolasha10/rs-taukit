@@ -7,9 +7,15 @@ import rs.taukit.testdata.constant.TDDateTime;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,15 +58,15 @@ public class TestDataDateTime implements ITestData {
             dateParseFormat = "dd.MM.yyyy";
         }
         if (!dateParseFormat.isEmpty()) {
-            DateFormat df = new SimpleDateFormat(dateParseFormat);
+            DateFormat df = new SimpleDateFormat(dateParseFormat, Locale.forLanguageTag("ru"));
             try {
                 calendar.setTime(df.parse(basicDateExpr));
             } catch (ParseException e) {
                 throw new TestDataException(e, "Не удалось вычислить значение поля '%s' по формуле '%s'", fieldName, formula);
             }
         }
-        if (matcher.groupCount() > 1) {
-            String modifier = matcher.group(2);
+        String modifier = matcher.group(2);
+        if (modifier != null) {
             String stringAmount = matcher.group(3);
             String units = matcher.group(4);
             int amount = Integer.parseInt(stringAmount);
@@ -81,7 +87,8 @@ public class TestDataDateTime implements ITestData {
 
     @Override
     public String getStringValue() {
-        DateFormat df = new SimpleDateFormat(format);
-        return df.format(calendar.getTime());
+        LocalDate localDate = LocalDate.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DATE));
+        LocalTime localTime = LocalTime.of(calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
+        return DateTimeFormatter.ofPattern(format).format(LocalDateTime.of(localDate, localTime));
     }
 }

@@ -4,7 +4,7 @@ import io.cucumber.datatable.DataTable;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.driver.DriverManager;
 import rs.taukit.driver.WebDriver;
-import rs.taukit.element.IElement;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.TestDataException;
@@ -36,6 +36,9 @@ public class BasicUtils {
     public static TestContext testContext() {
         return storageManager().getTestContext();
     }
+    public static ScenarioData scenarioData() {
+        return testContext().getScenarioData();
+    }
 
     public static PageStorage pageStorage() {
         return PageStorage.getInstance();
@@ -55,13 +58,16 @@ public class BasicUtils {
 
     public static String eval(String template) {
         ScenarioData scenarioData = testContext().getScenarioData();
+        if (scenarioData == null) return template;
         String evalResult = scenarioData.evalObjects(template);
         return scenarioData.evalStrings(evalResult);
     }
 
     public static DataTable eval(DataTable dataTable) {
+        if (testContext().getScenarioData() == null){
+            testContext().setScenarioData(new ScenarioData(testContext().getPickle()));
+        }
         ScenarioData scenarioData = testContext().getScenarioData();
-        if (scenarioData == null) throw new TestDataException();
         Function<String,String> eval = (template) -> {
             if (template == null) return null;
             String format = "\\$\\{(.+?)} -> (.+)";

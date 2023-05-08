@@ -1,31 +1,24 @@
 package rs.taukit.element.playwright;
 
 import io.qameta.allure.Step;
-import rs.taukit.driver.DriverManager;
-import rs.taukit.element.IHasEditableValue;
+import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.utils.TauLogger;
 
-public class TextField extends SimpleElement implements IHasEditableValue {
+import java.util.LinkedHashMap;
+
+public class TextField extends PlaywrightElement implements IHasEditableValue {
     public TextField(String elementName, String locator) {
         super(elementName, locator);
     }
-
-    @Override
-    @Step("заполнить поле '{this.elementName}' значением '{value}'")
-    public String setValue(String value) {
-        element.fill(value);
-        element.blur();
-        String currentValue = element.inputValue();
-        TauLogger.report("Поле '%s' заполнено значением '%s'", elementName, currentValue);
-        return currentValue;
+    public TextField(String elementName, LinkedHashMap<String, String> elementData) {
+        super(elementName, elementData);
     }
 
     @Override
     @Step("заполнить поле '{this.elementName}' значением '{value}'")
     public void setValue(String value, String controlValue) {
-        DriverManager.getInstance().getDriver().waitForCondition(() -> {
-            element.fill(value);
-            element.blur();
+        driver.waitForCondition(() -> {
+            super.setValue(value);
             String currentValue = element.inputValue();
             return currentValue.equals(controlValue);
         });
@@ -33,8 +26,20 @@ public class TextField extends SimpleElement implements IHasEditableValue {
     }
 
     @Override
-    public String getValue() {
+    public String getText() {
         return element.inputValue();
+    }
+
+    @Override
+    @Step("заполнить поле '{this.elementName}' значением '{value}'")
+    public void setValue(String value) {
+        try {
+            super.setValue(value);
+            String currentValue = element.inputValue();
+            TauLogger.report("Поле '%s' заполнено значением '%s'", elementName, currentValue);
+        } catch (Exception e) {
+            TauLogger.fail(e, "Не удалось заполнить поле '%s' значением '%s'", elementName, value);
+        }
     }
 
 }

@@ -7,3 +7,13 @@
   protocol: http
   hostApplication: 172.16.35.205
   portApplication: 8888
+
+- Название: dor5
+  protocol: http
+  hostApplication: 172.16.35.202
+  portApplication: 8888
+
+- Название: dor4
+  protocol: http
+  hostApplication: dor4
+  portApplication: 8888

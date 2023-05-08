@@ -2,6 +2,7 @@ package rs.taukit.driver;
 
 import rs.taukit.page.PageObject;
 
+import java.util.List;
 import java.util.function.BooleanSupplier;
 
 public interface WebDriver {
@@ -25,8 +26,15 @@ public interface WebDriver {
 
     String getCurrentPageUrl();
 
-    byte[] getScreenshot();
-
     void waitForCondition(BooleanSupplier condition);
     void waitForCondition(BooleanSupplier condition, double interval, double timeout, BooleanSupplier previousStep);
+
+    <T> T castTo();
+
+    List<byte[]> takeScreenshots();
+
+    void openNewTab();
+    boolean setActiveTab(int tabIndex);
+
+    void saveDownloadedFileAs(String originalFileName, String fileName);
 }

@@ -1,27 +1,17 @@
 package rs.taukit.element.playwright;
 
-import com.microsoft.playwright.Locator;
-import lombok.Getter;
-import rs.taukit.driver.DriverManager;
-import rs.taukit.driver.playwright.PlaywrightDriver;
-import rs.taukit.element.AElement;
-import rs.taukit.element.IHasAttachment;
+import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.storage.StorageManager;
+import rs.taukit.testdata.TestData;
+import rs.taukit.testdata.TestDataFile;
 
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 
-public class FileAttachment extends AElement implements IHasAttachment {
-    private final String elementName;
-    private final Locator element;
-    private final String locator;
-    @Getter
-    private final LinkedHashMap<String, String> elementObject;
+public class FileAttachment extends PlaywrightElement implements IHasEditableValue {
 
-    public FileAttachment(String elementName, LinkedHashMap<String, String> elementObject) {
-        PlaywrightDriver driver = (PlaywrightDriver) DriverManager.getInstance().getDriver();
-        this.elementObject = elementObject;
-        this.elementName = elementName;
-        this.locator = elementObject.get("Локатор");
-        this.element = driver.getLocator(locator);
+    public FileAttachment(String elementName, LinkedHashMap<String, String> elementData) {
+        super(elementName,elementData);
     }
 
     @Override
@@ -39,4 +29,20 @@ public class FileAttachment extends AElement implements IHasAttachment {
         element.click();
     }
 
+    @Override
+    public void setValue(String value) {
+        TestData testData = StorageManager.getInstance().getTestContext().getScenarioData().get("Клиент");
+        TestDataFile testDataFile = testData.get("аватар");
+        element.setInputFiles(Paths.get(testDataFile.getFilePath()));
+    }
+
+    @Override
+    public void setValue(String value, String controlValue) {
+
+    }
+
+    @Override
+    public String getText() {
+        return null;
+    }
 }

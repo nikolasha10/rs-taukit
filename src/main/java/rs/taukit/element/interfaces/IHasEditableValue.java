@@ -1,8 +1,8 @@
-package rs.taukit.element;
+package rs.taukit.element.interfaces;
 
 public interface IHasEditableValue extends IElement{
-    String setValue(String value);
+    void setValue(String value);
     void setValue(String value, String controlValue);
-    String getValue();
+    String getText();
 
 }

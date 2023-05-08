@@ -4,7 +4,8 @@ import com.microsoft.playwright.Page;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementType;
-import rs.taukit.element.IElement;
+import rs.taukit.element.interfaces.IElement;
+import rs.taukit.element.playwright.PlaywrightElement;
 import rs.taukit.exceptions.ElementNotBuiltException;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.PageFileNotFoundException;
@@ -24,7 +25,7 @@ public class PlaywrightPageObject implements PageObject {
     private final String pageName;
     private final String pageUrl;
     private final String pageControlUrl;
-    private final Map<String, IElement> pageElements;
+    private final Map<String, IElement> pageElements = new HashMap<>();
     private final List<String> expectedElements;
     private final Page.WaitForConditionOptions options;
     private final Page.ScreenshotOptions screenshotOptions;
@@ -38,26 +39,14 @@ public class PlaywrightPageObject implements PageObject {
         this.pageName = pageName;
         this.pageUrl = YamlParser.convert(pageConfig.get("Адрес"));
         this.pageControlUrl = YamlParser.convert(pageConfig.get("Обязательная часть адреса"));
-        this.pageElements = buildElements(YamlParser.convert(pageConfig.get("Элементы")));
-        this.expectedElements = YamlParser.convert(pageConfig.get("Обязательные элементы"));
+        this.pageElements.putAll(buildElements(YamlParser.convert(pageConfig.get("Элементы"))));
+        List<String> expectedElements = YamlParser.convert(pageConfig.get("Обязательные элементы"));
+        this.expectedElements = Optional.ofNullable(expectedElements).orElse(new ArrayList<>());
         this.options = new Page.WaitForConditionOptions().setTimeout(pageTimeout);
         this.screenshotOptions = new Page.ScreenshotOptions()
                 .setPath(Paths.get(pageName + ".png"))
                 .setFullPage(true);
     }
-
-//    private final Function<String, Locator> getElement = (elementName) -> {
-//        Page page = TestContext.getInstance().getPage();
-//        String locator = pageElements.get(elementName);
-//        return locator.startsWith("//") ? page.locator(locator) : page.getByTestId(locator);
-//    };
-
-//    private final Function<String, List<Locator>> getListElement = (elementName) -> {
-//        Map<String, String> list = YamlParser.convert(pageElements.get(elementName));
-//        Locator items = getElement.apply(list.get("Элементы списка"));
-//        Locator itemLabels = getElement.apply(list.get("Названия элементов"));
-//        return Arrays.asList(items, itemLabels);
-//    };
 
     public boolean isUrlCorrect() {
         return page.url().contains(pageControlUrl);
@@ -86,7 +75,14 @@ public class PlaywrightPageObject implements PageObject {
 
     @Override
     public void waitForElement(String elementName, boolean isVisible) {
-        page.waitForCondition(() -> pageElements.get(elementName).isVisible() == isVisible, options);
+        IElement element = Optional.ofNullable(pageElements.get(elementName))
+                .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
+        page.waitForCondition(() -> element.isVisible() == isVisible, options);
+    }
+
+    @Override
+    public void waitForPopup(Runnable runnable) {
+        page.waitForPopup(runnable);
     }
 
     @Override
@@ -117,14 +113,18 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     public void loadPage() {
-        String url = Config.getSTAND().getUrl() + pageUrl;
-        page.navigate(url);
+        String url = pageUrl.startsWith("file") ? pageUrl : Config.getSTAND().getUrl() + pageUrl;
+        try {
+            page.navigate(url);
+        } catch (Exception e){
+
+        }
         waitForLoad();
         StorageManager.getInstance().getTestContext().setCurrentPageName(pageName);
     }
 
     public byte[] takeScreenshot() {
-        return page.screenshot(screenshotOptions);
+        return page.screenshot((new Page.ScreenshotOptions().setFullPage(true)));
     }
 
     private Map<String, ?> loadPageConfig(String pageName) {
@@ -139,27 +139,38 @@ public class PlaywrightPageObject implements PageObject {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, IElement> buildElements(Map<String, ?> elements) {
         Map<String, IElement> result = new HashMap<>();
         elements.forEach((elementName, elementObject) -> {
-            if (elementObject instanceof String) {
-                result.put(elementName, buildElement(elementName, ElementType.SIMPLE_ELEMENT.getElementClass(), elementObject));
-            } else {
-                Map<String, String> object = YamlParser.convert(elementObject);
-                Class<? extends IElement> elementClass = Arrays.stream(ElementType.values())
-                        .filter(elementType -> elementType.getTypeName().equalsIgnoreCase(object.get("Тип")))
-                        .findFirst().orElseThrow().getElementClass();
-                result.put(elementName, buildElement(elementName, elementClass, object));
+            if (elementObject instanceof String locator){
+                result.put(elementName, buildElement(elementName, locator));
+            } else if (elementObject instanceof Map elementData){
+                IElement element = buildElement(elementName, elementData);
+                if (element != null) result.put(elementName, element);
             }
         });
         return result;
     }
 
-    private IElement buildElement(String elementName, Class<? extends IElement> elementClass, Object elementObject) {
+    private IElement buildElement(String elementName, String locator) {
+        return new PlaywrightElement(elementName, locator);
+    }
+
+    private IElement buildElement(String elementName, Map<String, String> elementData) {
+        String elementTypeName = elementData.get("Тип");
+        if (elementTypeName.equals("общий блок")) {
+            return addBlock(elementData);
+        }
+        Class<? extends IElement> elementClass = ElementType.getType(elementTypeName).getElementClass();
+        return buildElement(elementName, elementClass, elementData);
+    }
+    private IElement buildElement(String elementName, Class<? extends IElement> elementClass, Map<String, String> elementData) {
         try {
-            return elementClass.getConstructor(String.class, elementObject.getClass()).newInstance(elementName, elementObject);
+            return elementClass.getConstructor(String.class, elementData.getClass())
+                    .newInstance(elementName, elementData);
         } catch (Exception e) {
-            throw new ElementNotBuiltException(e, elementName, elementClass.getName(), elementObject.toString());
+            throw new ElementNotBuiltException(e, elementName, elementClass.getName(), elementData.toString());
         }
 
     }
@@ -173,7 +184,18 @@ public class PlaywrightPageObject implements PageObject {
     public IElement replaceElement(String elementName, Class<? extends IElement> elementType) {
         IElement currentElement = Optional.ofNullable(pageElements.get(elementName))
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
-        pageElements.replace(elementName, buildElement(elementName, elementType, currentElement.getElementObject()));
+        pageElements.replace(elementName, buildElement(elementName, elementType, currentElement.getElementData()));
         return pageElements.get(elementName);
+    }
+
+    public IElement addBlock(Map<String, String> blockData) {
+        String blockDescription = blockData.get("Описание");
+        String filePath = blockData.get("Файл");
+        List<Map<String, ?>> commonBlocksData = YamlParser.parse(filePath);
+        Map<String, ?> blockElementsData = YamlParser.convert(commonBlocksData.stream()
+                .filter(data -> data.get("Описание").equals(blockDescription)).findFirst().orElseThrow()
+                .get("Элементы"));
+        pageElements.putAll(buildElements(blockElementsData));
+        return null;
     }
 }

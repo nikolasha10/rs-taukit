@@ -2,6 +2,7 @@ package rs.taukit.driver;
 
 import rs.taukit.driver.playwright.PlaywrightDriver;
 
+import java.io.IOException;
 import java.util.*;
 
 public class DriverManager {
@@ -17,7 +18,7 @@ public class DriverManager {
         return DriverManagerHolder.INSTANCE;
     }
 
-    public WebDriver initDriver() {
+    public WebDriver initDriver() throws IOException {
         long threadId = Thread.currentThread().threadId();
         WebDriver driver = currentDriverContainer.getOrDefault(threadId, new PlaywrightDriver());
         currentDriverContainer.putIfAbsent(threadId, driver);

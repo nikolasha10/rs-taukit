@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import rs.taukit.config.Config;
-import rs.taukit.driver.DriverManager;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 import rs.taukit.exceptions.TestDataException;
 import rs.taukit.step.utils.BasicUtils;
@@ -16,7 +15,9 @@ import rs.taukit.testdata.TestDataFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Класс отвечающий за вывод сообщений в лог и allure-отчеты
@@ -84,11 +85,20 @@ public final class TauLogger {
     public static void warn(String message) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
         BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
-        attachFullScreenshot();
+        attachFullScreenshots();
+    }
+    @Step("Некритическая ошибка: {message}")
+    public static void warn(String message, Runnable runnable) {
+        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
+        BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
+        runnable.run();
     }
 
     public static void warn(String format, Object... args) {
         warn(String.format(format, args));
+    }
+    public static void warn(Runnable runnable, String format, Object... args) {
+        warn(String.format(format, args), runnable);
     }
 
     /**
@@ -121,7 +131,7 @@ public final class TauLogger {
     public static void warn(String message, Throwable e) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
         BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
-        attachFullScreenshot();
+        attachFullScreenshots();
     }
 
     public static void warn(Throwable e, String format, Object... args) {
@@ -129,12 +139,12 @@ public final class TauLogger {
     }
 
     /**
-     * Выводит сообщение о фатальной ошибке в действии и делает скриншот.
+     * Выводит сообщение о фатальной ошибке в действии, и делает скриншот.
      */
     @Step("{0}")
     public static void fail(String message) {
 //        attachPageSource();
-        attachFullScreenshot();
+        attachFullScreenshots();
         throw new AssertionError(message);
     }
 
@@ -144,7 +154,7 @@ public final class TauLogger {
     @Step("{0}")
     public static void fail(String message, Throwable e) {
 //        attachPageSource();
-        attachFullScreenshot();
+        attachFullScreenshots();
         throw new AssertionError(message, e);
     }
 
@@ -202,8 +212,17 @@ public final class TauLogger {
         return imageData;
     }
 
-    public static void attachFullScreenshot(){
-        attachScreenshot(DriverManager.getInstance().getDriver().getScreenshot());
+    @Attachment(value = "{name}", type = "image/png")
+    public static byte[] attachScreenshot(String name, byte[] imageData) {
+        return imageData;
+    }
+
+    public static void attachFullScreenshots(){
+        List<byte[]> screenshotList = BasicUtils.driver().takeScreenshots();
+        IntStream.range(0, screenshotList.size())
+                .forEach(index -> attachScreenshot(
+                        String.format("Вкладка %d", index + 1),
+                        screenshotList.get(index)));
     }
 //
 //    public static void attachFullScreenshot() {

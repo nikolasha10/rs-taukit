@@ -4,8 +4,8 @@ import io.cucumber.datatable.DataTable;
 import rs.taukit.driver.DriverManager;
 import rs.taukit.driver.WebDriver;
 import rs.taukit.element.ElementType;
-import rs.taukit.element.IElement;
-import rs.taukit.element.IHasEditableValue;
+import rs.taukit.element.interfaces.IElement;
+import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.page.PageObject;
 

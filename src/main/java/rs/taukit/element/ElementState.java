@@ -1,13 +1,19 @@
 package rs.taukit.element;
 
+import rs.taukit.element.interfaces.IElement;
+import rs.taukit.element.playwright.BrowserTab;
+import rs.taukit.exceptions.ElementStateNotFoundException;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public enum ElementState {
     IS_VISIBLE("отображается", IElement::isVisible, "не отображается"),
-    IS_NOT_VISIBLE("не отображается", element -> !element.isVisible(), "отображается");
+    IS_NOT_VISIBLE("не отображается", element -> !element.isVisible(), "отображается"),
+    IS_OPENED("открыта", element -> element.castTo(BrowserTab.class).isOpened(), "не открыта");
 
     private static final Map<String, ElementState> BY_NAME = new HashMap<>();
 
@@ -30,7 +36,9 @@ public enum ElementState {
     }
 
     public static String getWrongState(String stateName) {
-        return BY_NAME.get(stateName).wrongState;
+        return Optional.ofNullable(BY_NAME.get(stateName))
+                .orElseThrow(() -> new ElementStateNotFoundException(stateName))
+                .wrongState;
     }
 
 }
