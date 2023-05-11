@@ -13,15 +13,15 @@ import java.util.Optional;
 @SuppressWarnings("unchecked")
 @Getter
 public enum ElementType {
-    SIMPLE_ELEMENT("элемент", PlaywrightElement.class),
-    TEXT_FIELD("поле", TextField.class),
-    ELEMENT_LIST("список", ElementList.class),
-    RADIO_BUTTON("радио-кнопка", RadioButton.class),
-    LINK("ссылка", Link.class),
-    ELEMENT_TABLE("таблица", ElementTable.class),
+    SIMPLE_ELEMENT("элемент", PwElement.class),
+    TEXT_FIELD("поле", PwTextField.class),
+    ELEMENT_LIST("список", PwList.class),
+    RADIO_BUTTON("радио-кнопка", PwRadioButton.class),
+    LINK("ссылка", PwLink.class),
+    ELEMENT_TABLE("таблица", PwTable.class),
     FILE("файл", FileAttachment.class),
     DOWNLOAD("загрузка файла", FileDownload.class),
-    DATE("дата", TextField.class);
+    DATE("дата", PwTextField.class);
 
     private static final Map<String, ElementType> BY_TYPE = new HashMap<>();
 

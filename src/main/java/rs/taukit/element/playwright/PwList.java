@@ -7,11 +7,11 @@ import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 
-public class ElementList extends PlaywrightElement implements IHasEditableValue {
+public class PwList extends PwElement implements IHasEditableValue {
     protected final Locator buttons;
     protected final Locator labels;
 
-    public ElementList(String elementName, LinkedHashMap<String, String> elementData) {
+    public PwList(String elementName, LinkedHashMap<String, String> elementData) {
         super(elementName, elementData);
         this.labels = driver.getLocator(elementData.get("Названия"));
         this.buttons = driver.getLocator(elementData.get("Кнопки"));

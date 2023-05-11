@@ -4,6 +4,7 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.testng.Pickle;
+import io.cucumber.testng.TestNGCucumberRunner;
 import io.qameta.allure.Step;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -18,6 +19,7 @@ import rs.taukit.step.utils.BasicUtils;
 import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.testdata.FormData;
 import rs.taukit.testdata.ScenarioData;
+import rs.taukit.testdata.TestDataInstruction;
 import rs.taukit.utils.PdfUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
@@ -121,7 +123,7 @@ public class BasicStory extends BasicUtils {
         page().waitForTimeout(TimeStringParser.getTime(timeValue + " " + timeUnit));
     }
 
-    @Step("ожидаемый результат:")
+    @Step("дождаться выполнения условий:")
     public static void expectedResultCheck(DataTable dataTable) {
         TauLogger.attachDataTable("Ожидаемый результат", dataTable);
         dataTable.asMaps().forEach(data -> new ExpectedResult(data, page()).waitForResult());
@@ -226,6 +228,10 @@ public class BasicStory extends BasicUtils {
         }
     }
 
+    public static void createPdfTemplate(String templateName, String instruction) {
+        TestDataInstruction testDataInstruction = scenarioData().get(instruction);
+        createPdfTemplate(templateName, testDataInstruction.getDataTable());
+    }
     public static void createPdfTemplate(String templateName, DataTable dataTable) {
         try {
             Files.createDirectories(new File("target/templates").toPath());
@@ -233,8 +239,8 @@ public class BasicStory extends BasicUtils {
             if (fileTemplate.exists()) Files.delete(fileTemplate.toPath());
             Files.createFile(fileTemplate.toPath());
             dataTable.asMaps().forEach(item -> {
-                String templateType = TestDataUtils.get(item, "Тип шаблонов");
-                String fragmentName = TestDataUtils.get(item, "Название фрагмента");
+                String templateType = TestDataUtils.get(item, "Директория");
+                String fragmentName = TestDataUtils.get(item, "Фрагмент");
                 File fragment = new File(String.format("src/test/efr/resources/templates/%s/%s", templateType, fragmentName));
                 try {
                     Files.writeString(fileTemplate.toPath(), Files.readString(fragment.toPath()), StandardOpenOption.APPEND);
@@ -247,7 +253,7 @@ public class BasicStory extends BasicUtils {
         }
     }
 
-    public static void createPdfStandard(String originFileName, String templateName, DataTable dataTable) {
+    public static void createPdfStandard(String standardFileName, String originFileName, String templateName, DataTable dataTable) {
         File template = new File("target/templates", templateName);
         String templateContent = null;
         try {
@@ -258,7 +264,7 @@ public class BasicStory extends BasicUtils {
         dataTable.asMaps().forEach(item -> {
             String parameterName = TestDataUtils.get(item, "Параметр");
             String parameterValue = TestDataUtils.get(item, "Значение");
-            testContext().save(parameterName, parameterValue);
+            scenarioData().put(parameterName, parameterValue);
         });
         String evaluatingContent = eval(templateContent);
         File evaluatingTemplate = new File("target/templates", templateName.replace(".txt", " eval.txt"));
@@ -273,23 +279,24 @@ public class BasicStory extends BasicUtils {
         String originFilePath = String.format("target/downloads/%s/%s",
                 testContext().getScenarioName(), originFileName);
         String editedFilePath = String.format("target/downloads/%s/%s",
-                testContext().getScenarioName(), originFileName.replace(".pdf", " эталон.pdf"));
+                testContext().getScenarioName(), standardFileName);
         PdfUtils.replacePdfContent(originFilePath, editedFilePath, evaluatingContent);
+        TauLogger.attachFile("Тест", "html", "d:\\autotest\\efr\\Изображения\\1.html");
     }
 
     @Step("сравнить файл '{originFileName}' с эталоном")
-    public static void comparePdfWithStandard(String originFileName) {
+    public static void comparePdfWithStandard(String originFileName, String standardFileName) {
         String originFilePath = String.format("target/downloads/%s/%s",
                 testContext().getScenarioName(), originFileName);
         String standardFilePath = String.format("target/downloads/%s/%s",
-                testContext().getScenarioName(), originFileName.replace(".pdf", " эталон.pdf"));
+                testContext().getScenarioName(), standardFileName);
         PlaywrightDriver driver = driver().castTo();
         driver.openBrowser(true);
         Page pageOriginal = driver.getPage();
         page().waitForTimeout(2000);
         String originalPdfUrl = new File(originFilePath).toURI().toString();
         pageOriginal.navigate(originalPdfUrl);
-        pageOriginal.waitForCondition(() -> pageOriginal.locator("//div[@class='page' and @data-loaded='true']").isVisible(),
+        pageOriginal.waitForCondition(() -> pageOriginal.locator("//div[@class='page' and @data-loaded='true'][1]").isVisible(),
                 new Page.WaitForConditionOptions().setTimeout(60000));
         Locator scaleSelect = pageOriginal.locator("//select[@id='scaleSelect']");
         if (!scaleSelect.inputValue().equals("page-actual")) {
@@ -303,7 +310,7 @@ public class BasicStory extends BasicUtils {
         String standardPdfUrl = new File(standardFilePath).toURI().toString();
         Page pageStandard = driver.getPage();
         pageStandard.navigate(standardPdfUrl);
-        pageStandard.waitForCondition(() -> pageStandard.locator("//div[@class='page' and @data-loaded='true']").isVisible(),
+        pageStandard.waitForCondition(() -> pageStandard.locator("//div[@class='page' and @data-loaded='true'][1]").isVisible(),
                 new Page.WaitForConditionOptions().setTimeout(60000));
         Locator scaleSelectStandard = pageStandard.locator("//select[@id='scaleSelect']");
         if (!scaleSelectStandard.inputValue().equals("page-actual")) {
@@ -312,34 +319,53 @@ public class BasicStory extends BasicUtils {
         }
         Locator pageNumberStandard = pageStandard.locator("//input[@id='pageNumber']");
         int pageCountStandard = Integer.parseInt(pageNumberStandard.getAttribute("Max"));
-
-        for (int i = 1; i <= pageCountOriginal; i++) {
-            pageOriginal.bringToFront();
-            pageNumberOriginal.fill(String.valueOf(i));
-            pageNumberOriginal.blur();
+        int pageCount = Integer.max(pageCountOriginal, pageCountStandard);
+        for (int i = 1; i <= pageCount; i++) {
             String xpath = String.format("//div[@class='page' and @data-page-number='%d' and @data-loaded='true']/div[1]", i);
             String xpath1 = String.format("//div[@class='page' and @data-page-number='%d' and @data-loaded='true']", i);
-            Locator pageOriginalLocator = pageOriginal.locator(xpath1);
-            pageOriginalLocator.isVisible();
-            int pageWidth = (int) pageOriginal.evaluate("element => element.offsetWidth", pageOriginal.locator(xpath1).elementHandle());
-            int pageHeight = (int) pageOriginal.evaluate("element => element.offsetHeight", pageOriginal.locator(xpath1).elementHandle());
-            pageOriginal.setViewportSize(1280, pageHeight + 20);
-            pageOriginalLocator.isVisible();
-            byte[] originalScreenshotData = pageOriginal.locator(xpath).screenshot();
 
-            pageStandard.bringToFront();
-            pageStandard.setViewportSize(1280, pageHeight + 20);
+            byte[] originalScreenshotData = null;
+            byte[] standardScreenshotData = null;
+            int pageOriginalWidth = 0;
+            int pageOriginalHeight = 0;
+            int pageStandardWidth = 0;
+            int pageStandardHeight = 0;
+            if (i <= pageCountOriginal) {
+                pageOriginal.bringToFront();
+                pageNumberOriginal.fill(String.valueOf(i));
+                pageNumberOriginal.blur();
+                Locator pageOriginalLocator = pageOriginal.locator(xpath1);
+                pageOriginalLocator.isVisible();
+                pageOriginalWidth = (int) pageOriginal.evaluate("element => element.offsetWidth", pageOriginal.locator(xpath1).elementHandle());
+                pageOriginalHeight = 20 + (int) pageOriginal.evaluate("element => element.offsetHeight", pageOriginal.locator(xpath1).elementHandle());
+                pageOriginal.setViewportSize(1280, pageOriginalHeight);
+                pageOriginalLocator.isVisible();
+                originalScreenshotData = pageOriginal.locator(xpath).screenshot();
+            }
+
             if (i <= pageCountStandard){
+                pageStandard.bringToFront();
                 pageNumberStandard.fill(String.valueOf(i));
                 pageNumberStandard.blur();
                 Locator pageStandardLocator = pageStandard.locator(xpath1);
                 pageStandardLocator.isVisible();
+                pageStandardWidth = (int) pageStandard.evaluate("element => element.offsetWidth", pageStandard.locator(xpath1).elementHandle());
+                pageStandardHeight = 20 + (int) pageStandard.evaluate("element => element.offsetHeight", pageStandard.locator(xpath1).elementHandle());
+
+                pageStandard.setViewportSize(1280, pageStandardHeight);
+                standardScreenshotData = pageStandard.locator(xpath).screenshot();
             }
-            byte[] standardScreenshotData = pageStandard.locator(xpath).screenshot();
+
             try {
-                BufferedImage originalImage = ImageIO.read(new ByteArrayInputStream(originalScreenshotData));
+                BufferedImage originalImage = originalScreenshotData == null
+                        ? new BufferedImage(Integer.max(pageOriginalWidth, pageStandardWidth),
+                        Integer.max(pageOriginalHeight, pageStandardHeight), BufferedImage.TYPE_INT_BGR)
+                        : ImageIO.read(new ByteArrayInputStream(originalScreenshotData));
                 Screenshot originalScreenshot = new Screenshot(originalImage);
-                BufferedImage standardImage = ImageIO.read(new ByteArrayInputStream(standardScreenshotData));
+                BufferedImage standardImage = standardScreenshotData == null
+                        ? new BufferedImage(Integer.max(pageOriginalWidth, pageStandardWidth),
+                        Integer.max(pageOriginalHeight, pageStandardHeight), BufferedImage.TYPE_INT_BGR)
+                        : ImageIO.read(new ByteArrayInputStream(standardScreenshotData));
                 Screenshot standardScreenshot = new Screenshot(standardImage);
                 ImageDiff diff = new ImageDiffer().makeDiff(originalScreenshot, standardScreenshot);
                 if (diff.hasDiff()) {
@@ -347,10 +373,16 @@ public class BasicStory extends BasicUtils {
                     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                     ImageIO.write(diffImage, "png", byteArrayOutputStream);
                     byteArrayOutputStream.close();
+                    ByteArrayOutputStream originalBytes = new ByteArrayOutputStream();
+                    ImageIO.write(originalImage, "png", originalBytes);
+                    originalBytes.close();
+                    ByteArrayOutputStream standardBytes = new ByteArrayOutputStream();
+                    ImageIO.write(standardImage, "png", standardBytes);
+                    standardBytes.close();
                     TauLogger.warn(() -> {
                         TauLogger.attachScreenshot("Отличия", byteArrayOutputStream.toByteArray());
-                        TauLogger.attachScreenshot("Фактический результат", originalScreenshotData);
-                        TauLogger.attachScreenshot("Ожидаемый результат", standardScreenshotData);
+                        TauLogger.attachScreenshot("Фактический результат", originalBytes.toByteArray());
+                        TauLogger.attachScreenshot("Ожидаемый результат", standardBytes.toByteArray());
                     }, "страница %d отличается от ожидаемой", i);
                 }
             } catch (IOException e) {
@@ -362,6 +394,6 @@ public class BasicStory extends BasicUtils {
 
     @Step("сохранить значения поля '{elementName}', как '{parameterName}'")
     public static void saveElementValue(String elementName, String parameterName) {
-        testContext().save(parameterName, element(elementName).getText());
+        scenarioData().put(parameterName, element(elementName).getText());
     }
 }

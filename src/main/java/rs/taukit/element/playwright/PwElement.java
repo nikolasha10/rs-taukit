@@ -4,25 +4,23 @@ import com.microsoft.playwright.Locator;
 import lombok.Getter;
 import rs.taukit.driver.playwright.PlaywrightDriver;
 import rs.taukit.element.Element;
-import rs.taukit.element.interfaces.IElement;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 @Getter
-public class PlaywrightElement extends Element {
+public class PwElement extends Element {
     protected final PlaywrightDriver driver;
     protected Locator element;
-    public PlaywrightElement(String elementName, Locator locator) {
+    public PwElement(String elementName, Locator locator) {
         super(elementName, "");
         this.driver = super.driver.castTo();
         this.element = locator;
     }
-    public PlaywrightElement(String elementName, String locator) {
+    public PwElement(String elementName, String locator) {
         this(elementName, new LinkedHashMap<>(Map.of("Локатор", locator)));
     }
-    public PlaywrightElement(String elementName, LinkedHashMap<String, String> elementData) {
+    public PwElement(String elementName, LinkedHashMap<String, String> elementData) {
         super(elementName, elementData);
         this.driver = super.driver.castTo();
         this.element = driver.getLocator(locator);

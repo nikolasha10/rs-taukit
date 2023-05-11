@@ -9,6 +9,7 @@ import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TimeStringParser;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -40,6 +41,10 @@ public class ExpectedResult {
                 return pageStorage().getPage(objectName).isPageLoaded();
             } else if (objectType.equalsIgnoreCase("вкладка")) {
                 return driver().setActiveTab(Integer.parseInt(objectName)-1);
+            } else if (objectType.equalsIgnoreCase("файл")) {
+                String dirName = String.format("%s/%s",
+                        Config.getProperty("downloads.dir"), testContext().getScenarioName());
+                return new File(dirName, objectName).exists();
             } else {
                 return ElementState.getState(objectState).apply(element(objectName));
             }

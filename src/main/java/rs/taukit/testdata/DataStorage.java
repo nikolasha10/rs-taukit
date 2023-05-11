@@ -2,6 +2,7 @@ package rs.taukit.testdata;
 
 import io.cucumber.datatable.DataTable;
 import rs.taukit.exceptions.TestDataException;
+import rs.taukit.storage.StorageManager;
 import rs.taukit.testdata.constant.TestDataField;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
@@ -28,7 +29,6 @@ public class DataStorage {
                 this.dataStorage.put(fieldName, YamlParser.convert(fieldValue));
             }
         });
-
     }
 
     public <T> T get(String fieldName) {

@@ -1,7 +1,11 @@
 package rs.taukit.exceptions;
 
+import rs.taukit.utils.TauLogger;
+
+import java.util.function.Supplier;
+
 /**
- * Элемент не найден в табли
+ * Элемент не найден в таблице
  */
 public class TableElementNotFoundException extends RuntimeException {
 
@@ -23,5 +27,12 @@ public class TableElementNotFoundException extends RuntimeException {
     public TableElementNotFoundException(Throwable e, String format, Object... args) {
         String message = String.format(format, args);
         throw new TableElementNotFoundException(e, message);
+    }
+
+    public static Supplier<RuntimeException> row(String rowName, String tableName){
+        return () -> {
+            TauLogger.fail("Не удалось найти строку (%s) в таблице '%s'", rowName, tableName);
+            return null;
+        };
     }
 }

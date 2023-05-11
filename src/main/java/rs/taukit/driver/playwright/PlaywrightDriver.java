@@ -88,7 +88,6 @@ public class PlaywrightDriver implements WebDriver {
     }
 
     public Page getPage() {
-
         return browserContext.pages().get(pageIndex);
     }
 
@@ -170,15 +169,17 @@ public class PlaywrightDriver implements WebDriver {
 
     @Override
     public void closeDriver() {
-        browserList.forEach(item -> {
-            item.close();
-            TauLogger.console("Закрыт контекст");
-        });
-        browser.close();
-        TauLogger.console("Закрыт браузер");
-        if (playwright != null) {
-            playwright.close();
-            TauLogger.console("Закрыт драйвер");
+        for (int i = 0; i < 5; i++) {
+            if (browser != null && browser.isConnected()){
+                browser.close();
+            }
+            if (playwright != null) {
+                playwright.close();
+                TauLogger.console("Закрыт драйвер");
+                if (browser != null)
+                    System.out.println(browser.isConnected());
+                else System.out.println(browser);
+            }
         }
     }
 
@@ -278,6 +279,16 @@ public class PlaywrightDriver implements WebDriver {
             TauLogger.attachFile(path, "pdf", destinationFile.getPath());
         } catch (Exception e) {
             TauLogger.fail(e, "Не удалось сохранить файл '%s', как '%s'", originalFileName, path);
+        }
+    }
+
+    @Override
+    @Step("перейти по ссылке {url}")
+    public void navigate(String url) {
+        try {
+            getPage().navigate(url);
+        } catch (Exception e){
+            TauLogger.fail(e, "Не удалось перейти по ссылке '%s'", url);
         }
     }
 

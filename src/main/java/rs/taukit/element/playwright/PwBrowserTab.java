@@ -4,8 +4,8 @@ import rs.taukit.element.interfaces.IHasEditableValue;
 
 import java.util.LinkedHashMap;
 
-public class BrowserTab extends PlaywrightElement implements IHasEditableValue {
-    public BrowserTab(String elementName, LinkedHashMap<String, String> elementData) {
+public class PwBrowserTab extends PwElement implements IHasEditableValue {
+    public PwBrowserTab(String elementName, LinkedHashMap<String, String> elementData) {
         super(elementName, elementData);
     }
 

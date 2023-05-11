@@ -84,13 +84,13 @@ public final class TauLogger {
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
-        BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
+        BasicUtils.scenarioData().put("WARNING", "PASSED with ERRORS");
         attachFullScreenshots();
     }
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message, Runnable runnable) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
-        BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
+        BasicUtils.scenarioData().put("WARNING", "PASSED with ERRORS");
         runnable.run();
     }
 
@@ -107,13 +107,13 @@ public final class TauLogger {
     @Step("Некритическая ошибка: {message}")
     public static void warnWOSS(String message) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
-        BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
+        BasicUtils.scenarioData().put("WARNING", "PASSED with ERRORS");
     }
 
     @Step("Некритическая ошибка: {message}")
     public static void warnWOSS(String message, Throwable e) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
-        BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
+        BasicUtils.scenarioData().put("WARNING", "PASSED with ERRORS");
     }
 
     public static void warnWOSS(String message, Object... args) {
@@ -130,7 +130,7 @@ public final class TauLogger {
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message, Throwable e) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
-        BasicUtils.testContext().save("WARNING", "PASSED with ERRORS");
+        BasicUtils.scenarioData().put("WARNING", "PASSED with ERRORS");
         attachFullScreenshots();
     }
 

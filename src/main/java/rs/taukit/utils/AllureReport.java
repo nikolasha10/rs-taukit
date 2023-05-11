@@ -79,6 +79,7 @@ public class AllureReport {
         AtomicInteger resultStatus = new AtomicInteger(1);
         steps.forEach(s -> {
             resultStatus.set(checkBrokenSteps(s) * resultStatus.get());
+            s.replace("parameters", new ArrayList<>());
             if (s.get("name").toString().contains("Некритическая ошибка:")) {
                 s.replace("status", "failed");
                 errorList.add(s.get("name").toString()

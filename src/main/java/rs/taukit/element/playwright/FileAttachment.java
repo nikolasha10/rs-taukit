@@ -8,7 +8,7 @@ import rs.taukit.testdata.TestDataFile;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 
-public class FileAttachment extends PlaywrightElement implements IHasEditableValue {
+public class FileAttachment extends PwElement implements IHasEditableValue {
 
     public FileAttachment(String elementName, LinkedHashMap<String, String> elementData) {
         super(elementName,elementData);

@@ -1,11 +1,18 @@
 package step.utils;
 
-import rs.taukit.testdata.TestData;
 import rs.taukit.driver.DriverManager;
 import rs.taukit.step.BasicStory;
+import rs.taukit.testdata.TestData;
 import rs.taukit.utils.TauLogger;
+import step.SubScenario;
 
 public class Utils extends BasicStory {
+
+    public static SubScenario subScenario = SubScenario.getInstance();
+
+    public static void runScenario(String scenarioName) {
+        subScenario.runScenario(scenarioName);
+    }
 
     public static boolean isNobodyLoggedIn() {
         return getCurrentUser() == null;

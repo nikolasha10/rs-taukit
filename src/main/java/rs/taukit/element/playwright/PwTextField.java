@@ -1,17 +1,17 @@
 package rs.taukit.element.playwright;
 
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 
-public class CustomTextField extends TextField implements IHasEditableValue {
-    public CustomTextField(String elementName, LinkedHashMap<String, String> elementData) {
+public class PwTextField extends PwElement implements IHasEditableValue {
+    public PwTextField(String elementName, String locator) {
+        super(elementName, locator);
+    }
+    public PwTextField(String elementName, LinkedHashMap<String, String> elementData) {
         super(elementName, elementData);
-        this.element = getDriver().getPage().getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions().setName(locator));
     }
 
     @Override

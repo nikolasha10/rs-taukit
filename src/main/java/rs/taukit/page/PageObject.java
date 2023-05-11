@@ -5,6 +5,7 @@ import rs.taukit.element.interfaces.IElement;
 import java.util.Map;
 
 public interface PageObject {
+    String getPageUrl();
 
     void loadPage();
 

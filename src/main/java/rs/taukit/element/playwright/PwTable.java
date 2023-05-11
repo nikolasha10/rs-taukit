@@ -8,25 +8,27 @@ import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasTableElements;
 import rs.taukit.element.interfaces.IHasText;
 import rs.taukit.exceptions.ElementNotBuiltException;
+import rs.taukit.exceptions.TableElementNotFoundException;
 import rs.taukit.utils.TauLogger;
+import rs.taukit.utils.TestDataUtils;
+import rs.taukit.utils.TextUtils;
 import rs.taukit.utils.YamlParser;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static rs.taukit.step.utils.BasicUtils.scenarioData;
 import static rs.taukit.step.utils.BasicUtils.testContext;
 
-public class ElementTable extends PlaywrightElement implements IHasTableElements {
+public class PwTable extends PwElement implements IHasTableElements {
     protected final Locator headers;
     protected final Locator rows;
     protected final Locator cells;
     protected final Map<String, IElement> elements;
+    private Locator activeRow;
 
-    public ElementTable(String elementName, LinkedHashMap<String, String> elementData) {
+    public PwTable(String elementName, LinkedHashMap<String, String> elementData) {
         super(elementName, elementData);
         this.headers = driver.getLocator(elementData.get("Заголовки"));
         this.rows = driver.getLocator(elementData.get("Строки"));
@@ -35,21 +37,38 @@ public class ElementTable extends PlaywrightElement implements IHasTableElements
         this.elements = buildElements(elements);
     }
 
+    private List<String> headerList() {
+        return element.locator(headers).all().stream().map(Locator::textContent).toList();
+    }
+
+    private int headerIndex(String headerName) {
+        return headerList().indexOf(headerName);
+    }
+
+    private Stream<Locator> rowStream() {
+        return element.locator(rows).all().stream();
+    }
+
+    private Predicate<Map<String, String>> condition(Locator row) {
+        return (searchCondition) -> {
+            String headerName = searchCondition.get("Столбец");
+            String expectedValue = searchCondition.get("Значение");
+            String cellContent = row.locator(cells).all().get(headerIndex(headerName)).textContent();
+            return cellContent.contains(expectedValue);
+        };
+    }
+
+    private Predicate<Locator> conditions(DataTable dataTable) {
+        return row -> dataTable.asMaps().stream().allMatch(condition(row));
+    }
+
     @Override
-    public IElement getElementByConditions(String elementName, DataTable conditions) {
-        List<String> headerList = element.locator(headers).all().stream().map(Locator::textContent).toList();
+    public IElement getElementByConditions(String elementName, DataTable searchConditions) {
         try {
-            PlaywrightElement expectedElement = elements.get(elementName).castTo(PlaywrightElement.class);
-            Locator elementLocator = expectedElement.castTo(PlaywrightElement.class).getElement();
-            Locator foundElement = element.locator(rows).all().stream()
-                    .filter(row -> conditions.asMaps().stream()
-                            .allMatch(condition -> {
-                                String headerName = condition.get("Столбец");
-                                int headerIndex = headerList.indexOf(headerName);
-                                String cellContent = row.locator(cells).all().get(headerIndex).textContent();
-                                String expectedValue = condition.get("Значение");
-                                return cellContent.contains(expectedValue);
-                            }))
+            PwElement expectedElement = elements.get(elementName).castTo(PwElement.class);
+            Locator elementLocator = expectedElement.castTo(PwElement.class).getElement();
+            Locator foundElement = rowStream()
+                    .filter(conditions(searchConditions))
                     .findFirst().orElseThrow()
                     .locator(elementLocator);
             return buildElement(expectedElement, foundElement);
@@ -65,6 +84,46 @@ public class ElementTable extends PlaywrightElement implements IHasTableElements
         clickOnElementByConditions(elementName, conditions, false, null);
     }
 
+    @Override
+    @Step("в таблице '{this.elementName}' найти строку ({rowName}), соответствующую условиям:")
+    public void findTableRowByConditions(String rowName, DataTable searchTerms) {
+        activeRow = rowStream().filter(conditions(searchTerms)).findFirst()
+                .orElseThrow(TableElementNotFoundException.row(rowName, elementName));
+        scenarioData().put(rowName, this);
+        TauLogger.attachScreenshot("Строка найдена", activeRow.screenshot());
+    }
+
+    @Override
+    @Step("в строке ({rowName}) найти и сохранить значения элементов:")
+    public void tableRowSaveElementValues(String rowName, DataTable dataTable) {
+        List<List<String>> resultList = new ArrayList<>(dataTable.asLists().subList(0, 0));
+        dataTable.asMaps().forEach(data -> {
+            String tableElement = TestDataUtils.get(data, "Объект");
+            String elementName = TestDataUtils.get(data, "Название");
+            String parameterName = data.getOrDefault("Параметр", elementName);
+            String elementText;
+            if (tableElement.equalsIgnoreCase("столбец")) {
+                elementText = activeRow.locator(cells).all().get(headerIndex(elementName)).innerText();
+                scenarioData().put(parameterName, elementText);
+            } else {
+                PwElement expectedElement = elements.get(elementName).castTo(PwElement.class);
+                Locator expectedLocator = activeRow.locator(expectedElement.getElement());
+                elementText = buildElement(expectedElement, expectedLocator).getText();
+                scenarioData().put(parameterName, elementText);
+            }
+            resultList.add(Arrays.asList(tableElement, elementName, elementText));
+        });
+        TauLogger.attachDataTable("Значения элементов", DataTable.create(resultList, TextUtils.tableConverter));
+    }
+
+    @Override
+    @Step("в строке ({rowName}) нажать на '{elementName}'")
+    public void tableRowElementClick(String rowName, String elementName) {
+        PwElement expectedElement = elements.get(elementName).castTo(PwElement.class);
+        Locator expectedLocator = activeRow.locator(expectedElement.getElement());
+        buildElement(expectedElement, expectedLocator).click();
+    }
+
     private void clickOnElementByConditions(String elementName, DataTable conditions, boolean needToSave, String parameterName) {
         TauLogger.attachDataTable("Условия выбора элемента", conditions);
         try {
@@ -73,7 +132,7 @@ public class ElementTable extends PlaywrightElement implements IHasTableElements
                 if (parameterName == null) {
                     parameterName = elementName;
                 }
-                testContext().save(parameterName, foundElement.castTo(IHasText.class).getText());
+                scenarioData().put(parameterName, foundElement.castTo(IHasText.class).getText());
             }
             foundElement.click();
         } catch (Exception e) {
@@ -92,9 +151,9 @@ public class ElementTable extends PlaywrightElement implements IHasTableElements
     private Map<String, IElement> buildElements(Map<String, ?> elements) {
         Map<String, IElement> result = new HashMap<>();
         elements.forEach((elementName, elementObject) -> {
-            if (elementObject instanceof String elementLocator){
+            if (elementObject instanceof String elementLocator) {
                 result.put(elementName, buildElement(elementName, elementLocator));
-            } else if (elementObject instanceof Map subElementData){
+            } else if (elementObject instanceof Map subElementData) {
                 IElement element = buildElement(elementName, subElementData);
                 result.put(elementName, element);
             }
@@ -103,9 +162,10 @@ public class ElementTable extends PlaywrightElement implements IHasTableElements
     }
 
     private IElement buildElement(String elementName, String locator) {
-        return new PlaywrightElement(elementName, locator);
+        return new PwElement(elementName, locator);
     }
-    private IElement buildElement(PlaywrightElement element, Locator locator) {
+
+    private IElement buildElement(PwElement element, Locator locator) {
         Class<? extends IElement> elementClass = element.getClass();
         try {
             return elementClass.getConstructor(String.class, Locator.class).newInstance(elementName, locator);
@@ -119,6 +179,7 @@ public class ElementTable extends PlaywrightElement implements IHasTableElements
         Class<? extends IElement> elementClass = ElementType.getType(elementTypeName).getElementClass();
         return buildElement(elementName, elementClass, elementData);
     }
+
     private IElement buildElement(String elementName, Class<? extends IElement> elementClass, Map<String, String> elementData) {
         try {
             return elementClass.getConstructor(String.class, elementData.getClass())

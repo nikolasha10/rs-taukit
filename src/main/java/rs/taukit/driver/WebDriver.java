@@ -37,4 +37,6 @@ public interface WebDriver {
     boolean setActiveTab(int tabIndex);
 
     void saveDownloadedFileAs(String originalFileName, String fileName);
+
+    void navigate(String url);
 }

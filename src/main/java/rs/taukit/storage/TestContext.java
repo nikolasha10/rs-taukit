@@ -2,13 +2,16 @@ package rs.taukit.storage;
 
 import io.cucumber.testng.Pickle;
 import io.cucumber.testng.PickleWrapper;
+import io.cucumber.testng.TestNGCucumberRunner;
 import lombok.Getter;
 import lombok.Setter;
+import rs.taukit.testdata.DataStorage;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.PageStorage;
 import rs.taukit.testdata.TestData;
 
+import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 
 @Getter
@@ -27,6 +30,8 @@ public class TestContext {
     @Setter
     private String stepActionPageName;
     private BooleanSupplier stepAction;
+    @Setter
+    private TestNGCucumberRunner runner;
 
 
     public TestContext(PickleWrapper pickleWrapper, String functionality) {
@@ -45,9 +50,5 @@ public class TestContext {
                 return false;
             }
         };
-    }
-
-    public void save(String parameterName, Object stringValue) {
-        scenarioData.put(parameterName, stringValue);
     }
 }

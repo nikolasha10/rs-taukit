@@ -3,10 +3,8 @@ package rs.taukit.testdata;
 import io.cucumber.testng.Pickle;
 import lombok.Getter;
 import rs.taukit.config.Config;
-import rs.taukit.exceptions.TestDataException;
 import rs.taukit.utils.YamlParser;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +31,8 @@ public class ScenarioData {
 
     private Map<String, ?> getScenarioData(List<Map<String, ?>> featureData) {
         return featureData.stream()
-                .filter(data -> data.get("Сценарий").toString().equalsIgnoreCase(scenarioName)).findFirst()
-                .orElse(new LinkedHashMap<>());
+                .filter(data -> data.get("Сценарий").toString().equalsIgnoreCase(scenarioName))
+                .findFirst().orElse(new LinkedHashMap<>());
     }
 
     public LinkedHashMap<String, Object> getAttachments() {

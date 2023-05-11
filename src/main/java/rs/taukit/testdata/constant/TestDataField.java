@@ -1,10 +1,7 @@
 package rs.taukit.testdata.constant;
 
 import rs.taukit.exceptions.TestDataException;
-import rs.taukit.testdata.ITestData;
-import rs.taukit.testdata.TestData;
-import rs.taukit.testdata.TestDataDateTime;
-import rs.taukit.testdata.TestDataFile;
+import rs.taukit.testdata.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,7 +10,8 @@ import java.util.Map;
 public enum TestDataField {
     TEST_DATA("тестовые данные", TestData.class),
     FILE("файл", TestDataFile.class),
-    DATE("дата", TestDataDateTime.class);
+    DATE("дата", TestDataDateTime.class),
+    PDF_TEMPLATE_INSTRUCTION("инструкция шаблона PDF", TestDataInstruction.class);
 
     private static final Map<String, TestDataField> BY_NAME = new HashMap<>();
 

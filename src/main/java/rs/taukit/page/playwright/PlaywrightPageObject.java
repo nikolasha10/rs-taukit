@@ -5,7 +5,7 @@ import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementType;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.playwright.PlaywrightElement;
+import rs.taukit.element.playwright.PwElement;
 import rs.taukit.exceptions.ElementNotBuiltException;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.PageFileNotFoundException;
@@ -19,6 +19,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 
+import static rs.taukit.utils.TestDataUtils.loadPageConfig;
+
 @Getter
 public class PlaywrightPageObject implements PageObject {
     private final Page page;
@@ -29,7 +31,6 @@ public class PlaywrightPageObject implements PageObject {
     private final List<String> expectedElements;
     private final Page.WaitForConditionOptions options;
     private final Page.ScreenshotOptions screenshotOptions;
-
     public PlaywrightPageObject(Page page, String pageName) {
         Map<String, ?> pageConfig = loadPageConfig(pageName);
         String pageTimeoutString = pageConfig.get("Максимальное время ожидания").toString();
@@ -127,18 +128,6 @@ public class PlaywrightPageObject implements PageObject {
         return page.screenshot((new Page.ScreenshotOptions().setFullPage(true)));
     }
 
-    private Map<String, ?> loadPageConfig(String pageName) {
-        try {
-            String pagesDirPath = Config.getProperty("pagesDirPath");
-            String pageMappingFilePath = pagesDirPath + "/pageMapping.yaml";
-            Map<String, String> pageMapping = YamlParser.parse(pageMappingFilePath);
-            String pageFilePath = pagesDirPath + "/" + pageMapping.get(pageName);
-            return YamlParser.parse(pageFilePath);
-        } catch (Exception e) {
-            throw new PageFileNotFoundException(e, pageName);
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private Map<String, IElement> buildElements(Map<String, ?> elements) {
         Map<String, IElement> result = new HashMap<>();
@@ -154,7 +143,7 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     private IElement buildElement(String elementName, String locator) {
-        return new PlaywrightElement(elementName, locator);
+        return new PwElement(elementName, locator);
     }
 
     private IElement buildElement(String elementName, Map<String, String> elementData) {

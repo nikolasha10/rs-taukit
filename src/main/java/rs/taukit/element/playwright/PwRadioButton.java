@@ -6,8 +6,8 @@ import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 
-public class RadioButton extends ElementList implements IHasEditableValue {
-    public RadioButton(String elementName, LinkedHashMap<String, String> elementData) {
+public class PwRadioButton extends PwList implements IHasEditableValue {
+    public PwRadioButton(String elementName, LinkedHashMap<String, String> elementData) {
         super(elementName, elementData);
     }
 

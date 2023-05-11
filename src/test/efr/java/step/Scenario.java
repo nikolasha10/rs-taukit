@@ -1,17 +1,26 @@
 package step;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ru.И;
+import rs.taukit.step.utils.BasicUtils;
+import step.utils.Utils;
 
 import static rs.taukit.step.utils.BasicUtils.eval;
 
 public class Scenario {
 
-    @И("^войти в \"(ЕФР)\" под учётными данными сотрудника \"(.+)\"$")
-    public void loginIntoApplication(String appName, String employeeDesc){
-        Story.loginIntoApplication(appName,employeeDesc);
+    @И("^войти в \"(ЕФР)\"$")
+    public void loginIntoApplication(String appName) {
+        Story.loginIntoApplication(appName);
     }
-    @И("^найти клиента по серии \"(.+)\" и номеру \"(.+)\" паспорта$")
-    public void findClientByPassport(String series, String number){
-        Story.findClientByPassport(eval(series), eval(number));
+
+    @И("^выполнить сценарий \"(.+)\"$")
+    public void runScenario(String scenarioName) {
+        Story.runScenario(scenarioName);
     }
+    @И("^выполнить сценарий \"(.+)\" с параметрами:$")
+    public void runScenario(String scenarioName, DataTable dataTable) {
+        Story.runScenario(scenarioName, eval(dataTable));
+    }
+
 }

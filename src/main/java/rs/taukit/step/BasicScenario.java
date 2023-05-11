@@ -4,8 +4,9 @@ import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ru.И;
 import io.cucumber.java.ru.Когда;
 import io.cucumber.java.ru.Тогда;
-import rs.taukit.element.playwright.ElementList;
-import rs.taukit.element.playwright.ElementTable;
+import rs.taukit.element.interfaces.IHasTableElements;
+import rs.taukit.element.playwright.PwList;
+import rs.taukit.element.playwright.PwTable;
 
 import static rs.taukit.step.utils.BasicUtils.*;
 
@@ -49,6 +50,10 @@ public class BasicScenario {
         BasicStory.openBrowser();
     }
 
+    @И("^перейти по ссылке \"(.+)\"$")
+    public void openUrl(String url) {
+        driver().navigate(eval(url));
+    }
     @И("^открыть страницу \"(.+)\"$")
     public void openPage(String pageName) {
         BasicStory.openPage(pageName);
@@ -74,49 +79,72 @@ public class BasicScenario {
         BasicStory.waitForTimeout(timeValue, timeUnit);
     }
 
-    @Тогда("^ожидаемый результат:$")
+    @Тогда("^дождаться выполнения условий:$")
     public void expectedResultCheck(DataTable datatable) {
         BasicStory.expectedResultCheck(eval(datatable));
     }
 
     @И("^в списке \"(.+)\" выбрать \"(.+)\"$")
     public void listValueClick(String listName, String listValue) {
-        element(listName).castTo(ElementList.class).setValue(eval(listValue));
+        element(listName).castTo(PwList.class).setValue(eval(listValue));
     }
 
     @И("^в таблице \"(.+)\" нажать на \"(.+)\" согласно условиям$")
     public void tableValueClick(String tableName, String elementName, DataTable conditions) {
-        element(tableName).castTo(ElementTable.class).clickOnElementByConditions(elementName, eval(conditions));
+        element(tableName).castTo(PwTable.class).clickOnElementByConditions(elementName, eval(conditions));
     }
+
     @И("^в таблице \"(.+)\" нажать на \"(.+)\", сохранив его значение, согласно условиям$")
     public void tableValueSaveAndClick(String tableName, String elementName, DataTable conditions) {
-        element(tableName).castTo(ElementTable.class).saveAndClickOnElementByConditions(elementName, eval(conditions));
+        element(tableName).castTo(PwTable.class).saveAndClickOnElementByConditions(elementName, eval(conditions));
+    }
+
+    @И("^в таблице \"(.+)\" найти строку \\((.+)\\), соответствующую условиям:$")
+    public void findTableRowByConditions(String tableName, String rowName, DataTable dataTable) {
+        element(tableName).castTo(IHasTableElements.class).findTableRowByConditions(rowName, eval(dataTable));
+    }
+
+    @И("^в строке \\((.+)\\) найти и сохранить значения элементов:$")
+    public void tableRowSaveElementValues(String rowName, DataTable dataTable) {
+        ((IHasTableElements) scenarioData().get(rowName)).tableRowSaveElementValues(rowName, eval(dataTable));
+    }
+
+    @И("^в строке \\((.+)\\) нажать на \"(.+)\"$")
+    public void tableRowElementClick(String rowName, String elementName) {
+        ((IHasTableElements) scenarioData().get(rowName)).tableRowElementClick(rowName, elementName);
     }
 
     @И("^сохранить файл \"(.+)\", как \"(.+)\"$")
     public void saveDownloadedFileAs(String originalFileName, String fileName) {
-        driver().saveDownloadedFileAs(originalFileName, fileName);
+        driver().saveDownloadedFileAs(eval(originalFileName), eval(fileName));
     }
+
     @И("^сравнить печатную форму с эталоном$")
     public void validatePrintForm() {
         BasicStory.validatePrintForm();
+    }
+
+    @И("^сформировать шаблон \"(.+)\" в соответствии с инструкцией \"(.+)\"$")
+    public void createPdfTemplate(String templateName, String instruction) {
+        BasicStory.createPdfTemplate(eval(templateName), eval(instruction));
     }
     @И("^сформировать шаблон \"(.+)\" в соответствии с таблицей$")
     public void createPdfTemplate(String templateName, DataTable dataTable) {
         BasicStory.createPdfTemplate(eval(templateName), eval(dataTable));
     }
-    @И("^сформировать эталон по файлу \"(.+)\" и шаблону \"(.+)\"$")
-    public void createPdfStandard(String originFileName, String templateName, DataTable dataTable) {
-        BasicStory.createPdfStandard(eval(originFileName), eval(templateName), eval(dataTable));
+
+    @И("^сформировать эталон \"(.+)\" по файлу \"(.+)\" и шаблону \"(.+)\"$")
+    public void createPdfStandard(String standardName, String originFileName, String templateName, DataTable dataTable) {
+        BasicStory.createPdfStandard(eval(standardName), eval(originFileName), eval(templateName), eval(dataTable));
     }
-    @И("^сравнить файл \"(.+)\" с эталоном$")
-    public void comparePdfWithStandard(String originFileName) {
-        BasicStory.comparePdfWithStandard(eval(originFileName));
+
+    @И("^сравнить файл \"(.+)\" с эталоном \"(.+)\"$")
+    public void comparePdfWithStandard(String originFileName, String standardName) {
+        BasicStory.comparePdfWithStandard(eval(originFileName), eval(standardName));
     }
+
     @И("^сохранить значения поля \"(.+)\", как \"(.+)\"$")
     public void saveElementValue(String elementName, String parameterName) {
         BasicStory.saveElementValue(elementName, parameterName);
     }
-
-
 }
