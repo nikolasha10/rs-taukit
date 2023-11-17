@@ -6,10 +6,7 @@ import rs.taukit.config.Config;
 import rs.taukit.element.ElementType;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.playwright.PwElement;
-import rs.taukit.exceptions.ElementNotBuiltException;
-import rs.taukit.exceptions.ElementNotDescribedException;
-import rs.taukit.exceptions.PageFileNotFoundException;
-import rs.taukit.exceptions.PageNotLoadException;
+import rs.taukit.exceptions.*;
 import rs.taukit.page.PageObject;
 import rs.taukit.storage.StorageManager;
 import rs.taukit.utils.TimeStringParser;
@@ -40,7 +37,14 @@ public class PlaywrightPageObject implements PageObject {
         this.pageName = pageName;
         this.pageUrl = YamlParser.convert(pageConfig.get("Адрес"));
         this.pageControlUrl = YamlParser.convert(pageConfig.get("Обязательная часть адреса"));
-        this.pageElements.putAll(buildElements(YamlParser.convert(pageConfig.get("Элементы"))));
+        List<String> commonBlockList = YamlParser.convert(pageConfig.get("Общие блоки элементов"));
+        if (commonBlockList != null) {
+            this.pageElements.putAll(addCommonBlocks(commonBlockList));
+        }
+        Map<String, ?> elementList = YamlParser.convert(pageConfig.get("Элементы"));
+        if (elementList != null) {
+            this.pageElements.putAll(ElementBuilder.buildElements(elementList));
+        }
         List<String> expectedElements = YamlParser.convert(pageConfig.get("Обязательные элементы"));
         this.expectedElements = Optional.ofNullable(expectedElements).orElse(new ArrayList<>());
         this.options = new Page.WaitForConditionOptions().setTimeout(pageTimeout);
@@ -74,6 +78,16 @@ public class PlaywrightPageObject implements PageObject {
         }
     }
 
+    public void waitForClose(){
+        try {
+            BooleanSupplier waitCondition = () -> !isUrlCorrect() || !hasPageAllExpectedElements();
+            page.waitForCondition(waitCondition, options);
+        } catch (Exception e) {
+            throw new PageNotClosedException(e, String.format("Не удалось дождаться закрытия страницы '%s'", pageName));
+        }
+
+    }
+
     @Override
     public void waitForElement(String elementName, boolean isVisible) {
         IElement element = Optional.ofNullable(pageElements.get(elementName))
@@ -95,6 +109,15 @@ public class PlaywrightPageObject implements PageObject {
     public boolean isPageLoaded() {
         try {
             waitForLoad();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    @Override
+    public boolean isPageClosed() {
+        try {
+            waitForClose();
             return true;
         } catch (Exception e) {
             return false;
@@ -129,62 +152,63 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, IElement> buildElements(Map<String, ?> elements) {
-        Map<String, IElement> result = new HashMap<>();
-        elements.forEach((elementName, elementObject) -> {
-            if (elementObject instanceof String locator){
-                result.put(elementName, buildElement(elementName, locator));
-            } else if (elementObject instanceof Map elementData){
-                IElement element = buildElement(elementName, elementData);
-                if (element != null) result.put(elementName, element);
-            }
-        });
-        return result;
-    }
-
-    private IElement buildElement(String elementName, String locator) {
-        return new PwElement(elementName, locator);
-    }
-
-    private IElement buildElement(String elementName, Map<String, String> elementData) {
-        String elementTypeName = elementData.get("Тип");
-        if (elementTypeName.equals("общий блок")) {
-            return addBlock(elementData);
-        }
-        Class<? extends IElement> elementClass = ElementType.getType(elementTypeName).getElementClass();
-        return buildElement(elementName, elementClass, elementData);
-    }
-    private IElement buildElement(String elementName, Class<? extends IElement> elementClass, Map<String, String> elementData) {
-        try {
-            return elementClass.getConstructor(String.class, elementData.getClass())
-                    .newInstance(elementName, elementData);
-        } catch (Exception e) {
-            throw new ElementNotBuiltException(e, elementName, elementClass.getName(), elementData.toString());
-        }
-
-    }
+//    private Map<String, IElement> buildElements(Map<String, ?> elements) {
+//        Map<String, IElement> result = new HashMap<>();
+//        elements.forEach((elementName, elementObject) -> {
+//            if (elementObject instanceof String locator){
+//                result.put(elementName, buildElement(elementName, locator));
+//            } else if (elementObject instanceof Map elementData){
+//                IElement element = buildElement(elementName, elementData);
+//                result.put(elementName, element);
+//            }
+//        });
+//        return result;
+//    }
+//
+//    private IElement buildElement(String elementName, String locator) {
+//        return new PwElement(elementName, locator);
+//    }
+//
+//    private IElement buildElement(String elementName, Map<String, Object> elementDataInitial) {
+//        Map<String, Object> elementData = new LinkedHashMap<>();
+//        elementDataInitial.forEach((key, value) -> elementData.put(key.toLowerCase(), value));
+//        String elementTypeName = elementData.get("тип").toString();
+//        Class<? extends IElement> elementClass = ElementType.getType(elementTypeName).getElementClass();
+//        return buildElement(elementName, elementClass, elementData);
+//    }
+//    private IElement buildElement(String elementName, Class<? extends IElement> elementClass, Map<String, String> elementData) {
+//        try {
+//            return elementClass.getConstructor(String.class, elementData.getClass())
+//                    .newInstance(elementName, elementData);
+//        } catch (Exception e) {
+//            throw new ElementNotBuiltException(e, elementName, elementClass.getName(), elementData.toString());
+//        }
+//
+//    }
 
     @Override
     public IElement getElement(String elementName) {
-        return pageElements.get(elementName);
+        return Optional.ofNullable(pageElements.get(elementName))
+                .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
     }
 
     @Override
     public IElement replaceElement(String elementName, Class<? extends IElement> elementType) {
         IElement currentElement = Optional.ofNullable(pageElements.get(elementName))
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
-        pageElements.replace(elementName, buildElement(elementName, elementType, currentElement.getElementData()));
+        pageElements.replace(elementName, ElementBuilder.buildElement(elementName, elementType, currentElement));
         return pageElements.get(elementName);
     }
 
-    public IElement addBlock(Map<String, String> blockData) {
-        String blockDescription = blockData.get("Описание");
-        String filePath = blockData.get("Файл");
-        List<Map<String, ?>> commonBlocksData = YamlParser.parse(filePath);
-        Map<String, ?> blockElementsData = YamlParser.convert(commonBlocksData.stream()
-                .filter(data -> data.get("Описание").equals(blockDescription)).findFirst().orElseThrow()
-                .get("Элементы"));
-        pageElements.putAll(buildElements(blockElementsData));
-        return null;
+    public Map<String, IElement> addCommonBlocks(List<String> blockNameList) {
+        Map<String, IElement> result = new HashMap<>();
+        blockNameList.forEach(blockName -> {
+            String filePath = Optional.ofNullable(Config.getFragmentFilePath(blockName))
+                    .orElseThrow(() -> new PageFragmentNotFoundException(blockName));
+            Map<String, ?> blockData = YamlParser.parse(filePath);
+            Map<String, ?> blockElementsData = YamlParser.convert(blockData.get("Элементы"));
+            result.putAll(ElementBuilder.buildElements(blockElementsData));
+        });
+        return result;
     }
 }

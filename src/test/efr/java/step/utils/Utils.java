@@ -4,7 +4,7 @@ import rs.taukit.driver.DriverManager;
 import rs.taukit.step.BasicStory;
 import rs.taukit.testdata.TestData;
 import rs.taukit.utils.TauLogger;
-import step.SubScenario;
+import step.implementer.SubScenario;
 
 public class Utils extends BasicStory {
 
@@ -36,6 +36,8 @@ public class Utils extends BasicStory {
             TauLogger.report("Вход в приложение был выполнен ранее");
             openPage("Поиск клиента");
         }
+        String str = "";
+        if (Double.parseDouble(str.split(" ")[0])>0.5);
         return checkResult;
     }
 }

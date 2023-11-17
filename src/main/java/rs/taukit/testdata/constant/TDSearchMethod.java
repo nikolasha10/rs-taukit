@@ -14,6 +14,13 @@ public enum TDSearchMethod {
             List<String> list = YamlParser.convert(object);
             return list.contains(value);
         }
+    },
+    VALUE_EQUALS ("значение совпадает"){
+        @Override
+        public boolean search (Object object, String value){
+            String filedValue = object.toString();
+            return filedValue.equals(value);
+        }
     };
 
     private static final Map<String, TDSearchMethod> BY_METHOD_NAME = new HashMap<>();

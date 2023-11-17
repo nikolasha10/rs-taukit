@@ -7,6 +7,7 @@ import java.util.function.BooleanSupplier;
 
 public interface WebDriver {
     void openBrowser();
+    void openBrowser(boolean viewPdf);
 
     void reopenBrowser();
 
@@ -36,7 +37,9 @@ public interface WebDriver {
     void openNewTab();
     boolean setActiveTab(int tabIndex);
 
-    void saveDownloadedFileAs(String originalFileName, String fileName);
-
     void navigate(String url);
+
+    long getDriverId();
+
+    void waitForTimeout(double time);
 }

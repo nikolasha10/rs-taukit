@@ -2,6 +2,8 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import io.qameta.allure.Step;
+import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.utils.TauLogger;
 
@@ -11,10 +13,18 @@ public class PwList extends PwElement implements IHasEditableValue {
     protected final Locator buttons;
     protected final Locator labels;
 
-    public PwList(String elementName, LinkedHashMap<String, String> elementData) {
+    public PwList(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
-        this.labels = driver.getLocator(elementData.get("Названия"));
-        this.buttons = driver.getLocator(elementData.get("Кнопки"));
+        this.labels = driver.getLocator(model.get("названия"));
+        this.buttons = driver.getLocator(model.get("кнопки"));
+    }
+    public PwList(String elementName, ElementModel model) {
+        super(elementName, model);
+        this.labels = driver.getLocator(model.get("названия"));
+        this.buttons = driver.getLocator(model.get("кнопки"));
+    }
+    public PwList(String elementName, IElement element) {
+        this(elementName, element.getModel());
     }
     protected void setValueAction(String value){
         element.locator(labels)

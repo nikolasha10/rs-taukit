@@ -13,7 +13,7 @@ public interface PageObject {
     IElement replaceElement(String elementName, Class<? extends IElement> elementType);
 
     void waitForLoad();
-
+    void waitForClose();
     byte[] takeScreenshot();
 
     void waitForElement(String elementName, boolean isVisible);
@@ -23,4 +23,6 @@ public interface PageObject {
     void waitForTimeout(double time);
 
     boolean isPageLoaded();
+
+    boolean isPageClosed();
 }

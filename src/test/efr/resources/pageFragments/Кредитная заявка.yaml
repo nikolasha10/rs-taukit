@@ -1,0 +1,8 @@
+Название: Кредитная заявка
+Элементы:
+  Заголовок: //div[@data-id='credit-claim-panel']/label[text()='Кредитная заявка']
+  Меню вкладок страницы:
+    Тип: список
+    Локатор: //div[@class='tabs tab-additional']/ul[@class='tabs__labels']
+    Названия: //span[@class='tabs-name']
+    Кнопки: //parent::a

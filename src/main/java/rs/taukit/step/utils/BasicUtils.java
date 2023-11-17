@@ -13,6 +13,7 @@ import rs.taukit.storage.StorageManager;
 import rs.taukit.storage.TestContext;
 import rs.taukit.page.PageStorage;
 import rs.taukit.testdata.TestData;
+import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TextUtils;
 
 import java.util.Map;

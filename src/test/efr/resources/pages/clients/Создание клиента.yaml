@@ -16,7 +16,79 @@
     Тип: радио-кнопка
     Локатор: //span[text()='Пол']/following::div[@class='field-value'][1]
     Названия: //li//button/div
-    Кнопки: /parent::button
+    Кнопки: //parent::button
+  Добавить (гражданство): client-nationalities-link-add
+  Гражданство:
+    тип: справочник
+    локатор: //span[text()='Гражданство']/following::a[@data-id='countryPopupEdit0']/..
+    кнопка: Добавить (гражданство)
+    всплывающее окно: Выберите страну
+    поле поиска: Название
+    кнопка поиска: Показать
+  Место рождения: field-group-client-data-field-name-birthplace
+  Изменить (Место рождения. Страна): change-birth-place-okcm-code
+  Место рождения. Страна:
+    тип: справочник
+    локатор: //span[text()='Гражданство']/following::a[@data-id='countryPopupEdit0']/..
+    кнопка: Изменить (Место рождения. Страна)
+    всплывающее окно: Выберите страну
+    поле поиска: Название
+    кнопка поиска: Показать
+  Изменить (Место рождения. Субъект РФ): change-birth-place-okato-code
+  Место рождения. Субъект РФ:
+    тип: справочник
+    локатор: //span[text()='Гражданство']/following::a[@data-id='countryPopupEdit0']/..
+    кнопка: Изменить (Место рождения. Субъект РФ)
+    всплывающее окно: Субъекты РФ
+    поле поиска: Наименование
+    кнопка поиска: Показать
+  Район (Место рождения): birth-place-district
+  Населённый пункт (Место рождения): birth-place-locality
+  Документ:
+    тип: блок элементов
+    локатор: //div[@class='document-block']
+    элементы:
+      Тип документа:
+        тип: выпадающий список
+        локатор: //div[contains(@data-id,'docType')]
+        элементы: //div[@role='option']
+        значение: //span[@role='option' and @aria-selected='true']
+      Удалить документ: //a[contains(@data-id,'delete')]
+      Серия:
+        тип: поле
+        локатор: //input[contains(@data-id,'docSeries')]
+      Номер:
+        тип: поле
+        локатор: //input[contains(@data-id,'docNumber')]
+      Код подразделения:
+        тип: поле
+        локатор: //input[contains(@data-id,'divisionCode')]
+      Кем выдан:
+        тип: поле
+        локатор: //input[contains(@data-id,'issuedBy')]
+      Дата выдачи:
+        тип: дата
+        локатор: //input[contains(@data-id,'issuedDate-input')]
+      Дата окончания:
+        тип: дата
+        локатор: //input[contains(@data-id,'issuedEndDate-input')]
+      Активен:
+        тип: переключатель
+        локатор: //input[contains(@data-id,'active')]/..
+        включен: //input[contains(@data-id,'active')]/ancestor::label[@class='toggle checked']
+      Основной документ:
+        тип: переключатель
+        локатор: //input[contains(@data-id,'main')]/..
+        включен: //input[contains(@data-id,'main')]/ancestor::label[@class='toggle checked']
+      Признак действительного документа:
+        тип: переключатель
+        локатор: //input[contains(@data-id,'validDocument')]/..
+        включен: //input[contains(@data-id,'validDocument')]/ancestor::label[@class='toggle checked']
+      Скан документа:
+        тип: файл
+        локатор: //input[contains(@data-id,'file-upload')]
+  Добавить документ: button-add-doc
+
 Обязательные элементы:
   - Полная идентификация
   - Упрощенная идентификация

@@ -1,0 +1,16 @@
+Адрес:
+Обязательная часть адреса: mainProcessKey=ClientCreateProcess
+Название: Выберите страну
+Элементы:
+  Заголовок: //div[@class='popup-window-title' and text()='Выберите страну']
+  Название: countries-popup-input-filter
+  Показать: countries-popup-view
+  Очистить фильтр: countries-popup-clear-filter
+  Значения справочника:
+    Тип: список
+    Локатор: link-country
+    Названия: //span[@class='link-text']
+    Кнопки: //parent::a
+Обязательные элементы:
+  - Заголовок
+Максимальное время ожидания: по умолчанию

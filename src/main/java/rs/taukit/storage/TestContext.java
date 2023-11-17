@@ -5,10 +5,10 @@ import io.cucumber.testng.PickleWrapper;
 import io.cucumber.testng.TestNGCucumberRunner;
 import lombok.Getter;
 import lombok.Setter;
-import rs.taukit.testdata.DataStorage;
-import rs.taukit.testdata.ScenarioData;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.PageStorage;
+import rs.taukit.step.allure.BasicApplication;
+import rs.taukit.testdata.ScenarioData;
 import rs.taukit.testdata.TestData;
 
 import java.util.HashMap;
@@ -27,6 +27,7 @@ public class TestContext {
     private String currentPageName;
     @Setter
     private String savedPageName;
+    private final HashMap<String, BasicApplication> application = new HashMap<>();
     @Setter
     private String stepActionPageName;
     private BooleanSupplier stepAction;
@@ -46,9 +47,17 @@ public class TestContext {
             try {
                 pageObject.waitForLoad();
                 return stepAction.getAsBoolean();
-            } catch (Exception e){
+            } catch (Exception e) {
                 return false;
             }
         };
+    }
+
+    public BasicApplication getApplication(String appName) {
+        return application.get(appName);
+    }
+
+    public void putApplication(String appName, BasicApplication app) {
+        application.putIfAbsent(appName, app);
     }
 }

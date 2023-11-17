@@ -1,0 +1,8 @@
+Название: Список настроек
+Элементы:
+  Название: name-filter
+  Показать: search
+  Очистить результаты поиска: clearSearch
+  Создать: ButtonSettingsCreate
+  Удалить: ButtonSettingsRemove
+  Список настроек: gridId-gridTableRowColumn-key

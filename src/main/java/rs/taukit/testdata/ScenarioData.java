@@ -1,8 +1,10 @@
 package rs.taukit.testdata;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.testng.Pickle;
 import lombok.Getter;
 import rs.taukit.config.Config;
+import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.YamlParser;
 
 import java.util.LinkedHashMap;
@@ -22,9 +24,9 @@ public class ScenarioData {
 
     private List<Map<String, ?>> getFeatureData(String featurePath) {
         String scenariosPath = Config.getProperty("scenarios.path");
-        String testDataPath = Config.getProperty("scenarios.data.path");
+//        String testDataPath = Config.getProperty("scenarios.data.path");
         String featureDataPath = featurePath
-                .replace(scenariosPath, testDataPath)
+//                .replace(scenariosPath, testDataPath)
                 .replace("feature", "yaml");
         return YamlParser.parse(featureDataPath);
     }
@@ -46,6 +48,14 @@ public class ScenarioData {
 
     public void put(String fieldName, Object value) {
         dataStorage.put(fieldName, value);
+    }
+
+    public void put(DataTable dataTable) {
+        dataTable.asMaps().forEach(item -> {
+            String parameterName = TestDataUtils.get(item, "Параметр");
+            String parameterValue = TestDataUtils.get(item, "Значение");
+            put(parameterName, parameterValue);
+        });
     }
 
     public <T> T get(String fieldName) {

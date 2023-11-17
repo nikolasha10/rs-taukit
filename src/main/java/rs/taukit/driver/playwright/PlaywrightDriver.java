@@ -4,6 +4,7 @@ import com.microsoft.playwright.*;
 import io.qameta.allure.Step;
 import lombok.Getter;
 import rs.taukit.config.Config;
+import rs.taukit.driver.DriverManager;
 import rs.taukit.driver.WebDriver;
 import rs.taukit.element.playwright.FileDownload;
 import rs.taukit.page.PageObject;
@@ -20,11 +21,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @Getter
 public class PlaywrightDriver implements WebDriver {
@@ -38,9 +38,11 @@ public class PlaywrightDriver implements WebDriver {
     private int browserIndex;
     private int pageIndex;
     private Download download;
+    private final long threadId;
 
     public PlaywrightDriver() throws IOException {
-        chromeDirExternally = new File("target/chromium/open_pdf_externally");
+        threadId = Thread.currentThread().threadId();
+        chromeDirExternally = new File(String.format("target/chromium/%d/open_pdf_externally", threadId));
         File defaultDirExternally = new File(chromeDirExternally.getPath(), "Default");
         File preferencesExternally = new File(defaultDirExternally.getPath(), "Preferences");
         if (!preferencesExternally.exists()) {
@@ -48,7 +50,7 @@ public class PlaywrightDriver implements WebDriver {
             Files.writeString(preferencesExternally.toPath(),
                     "{\"plugins\":{\"always_open_pdf_externally\":true}}", StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         }
-        chromeDirInternally = new File("target/chromium/open_pdf_internally");
+        chromeDirInternally = new File(String.format("target/chromium/%d/open_pdf_internally", threadId));
         File defaultDirInternally = new File(chromeDirInternally.getPath(), "Default");
         File preferencesInternally = new File(defaultDirInternally.getPath(), "Preferences");
         if (!preferencesInternally.exists()) {
@@ -56,7 +58,6 @@ public class PlaywrightDriver implements WebDriver {
             Files.writeString(preferencesInternally.toPath(),
                     "{\"plugins\":{\"always_open_pdf_externally\":false}}", StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         }
-
         playwright = Playwright.create();
         playwright.selectors().setTestIdAttribute(Config.getProperty("autotest.element.id"));
         BrowserType browserType = getBrowserType(playwright, Config.getProperty("browser.type"));
@@ -96,28 +97,28 @@ public class PlaywrightDriver implements WebDriver {
         openBrowser(false);
     }
 
+    @Override
     public void openBrowser(boolean openPdf) {
         List<String> args = new ArrayList<>();
         File persistentContext = chromeDirExternally;
-        if (openPdf){
+        if (openPdf) {
             args.addAll(Arrays.asList(
                     "--load-extension=" + browserExtensionPath,
                     "--disable-extensions-except=" + browserExtensionPath,
                     "--embedded-extension-options=true"));
             persistentContext = chromeDirInternally;
         }
-//        browserContext = browser.newContext(new Browser.NewContextOptions().setAcceptDownloads(true));
         browserContext = browser.browserType()
-                .launchPersistentContext(persistentContext.getAbsoluteFile().toPath(), new BrowserType.LaunchPersistentContextOptions()
-                        .setArgs(args)
-                        .setHeadless(Config.getBooleanProperty("browser.headless")));
-//        if (browserContext.pages().size() == 0) {
-//            browserContext.newPage();
-//        }
+                .launchPersistentContext(
+                        persistentContext.getAbsoluteFile().toPath(),
+                        new BrowserType.LaunchPersistentContextOptions()
+                                .setArgs(args)
+                                .setHeadless(Config.getBooleanProperty("browser.headless")));
         browserList.add(new WebBrowser(browserContext));
         browserIndex = browserList.size() - 1;
         pageIndex = browserContext.pages().size() - 1;
         getPage().setViewportSize(1280, 840);
+        getPage().waitForTimeout(2000);
     }
 
     @Override
@@ -170,15 +171,15 @@ public class PlaywrightDriver implements WebDriver {
     @Override
     public void closeDriver() {
         for (int i = 0; i < 5; i++) {
-            if (browser != null && browser.isConnected()){
-                browser.close();
-            }
             if (playwright != null) {
+                if (browser != null && browser.isConnected()) {
+                    TauLogger.console("Закрываем браузер '%s'", browser.browserType().name());
+                    browser.close();
+                    if (!browser.isConnected()) {
+                        TauLogger.console("Браузер закрыт");
+                    }
+                }
                 playwright.close();
-                TauLogger.console("Закрыт драйвер");
-                if (browser != null)
-                    System.out.println(browser.isConnected());
-                else System.out.println(browser);
             }
         }
     }
@@ -220,7 +221,13 @@ public class PlaywrightDriver implements WebDriver {
 
     @Override
     public void waitForCondition(BooleanSupplier condition) {
-        browserContext.waitForCondition(condition);
+        AtomicReference<Boolean> conditionIsMet = new AtomicReference<>(false);
+        browserContext.waitForCondition(() -> {
+            if (!conditionIsMet.get()) {
+                conditionIsMet.set(condition.getAsBoolean());
+            }
+            return conditionIsMet.get();
+        });
     }
 
     @Override
@@ -261,35 +268,18 @@ public class PlaywrightDriver implements WebDriver {
         });
     }
 
-    @Step("сохранить файл с именем '{path}'")
-    public void saveDownloadedFileAs(String originalFileName, String path) {
-        String originalFilePath = String.format("%s/%s/%s",
-                Config.getProperty("downloads.dir"),
-                BasicUtils.testContext().getScenarioName(),
-                originalFileName);
-        String filePath = String.format("%s/%s/%s",
-                Config.getProperty("downloads.dir"),
-                BasicUtils.testContext().getScenarioName(),
-                path);
-        File file = new File(originalFilePath);
-        File destinationFile = new File(filePath);
-        try {
-            Files.move(file.toPath(), destinationFile.toPath(), REPLACE_EXISTING);
-            TauLogger.report("Файл сохранен в '%s'", destinationFile.getPath());
-            TauLogger.attachFile(path, "pdf", destinationFile.getPath());
-        } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось сохранить файл '%s', как '%s'", originalFileName, path);
-        }
-    }
-
     @Override
     @Step("перейти по ссылке {url}")
     public void navigate(String url) {
         try {
             getPage().navigate(url);
-        } catch (Exception e){
+        } catch (Exception e) {
             TauLogger.fail(e, "Не удалось перейти по ссылке '%s'", url);
         }
+    }
+
+    public long getDriverId() {
+        return DriverManager.getInstance().getDriverId(this);
     }
 
     private static class WebBrowser {
@@ -302,6 +292,14 @@ public class PlaywrightDriver implements WebDriver {
 
         public void close() {
             context.close();
+        }
+    }
+
+    public void waitForTimeout(double time){
+        try {
+            Thread.sleep((long) time);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }

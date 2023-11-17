@@ -1,14 +1,22 @@
 package rs.taukit.element.playwright;
 
 import io.qameta.allure.Step;
+import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 
 public class PwRadioButton extends PwList implements IHasEditableValue {
-    public PwRadioButton(String elementName, LinkedHashMap<String, String> elementData) {
+    public PwRadioButton(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
+    }
+    public PwRadioButton(String elementName, ElementModel model) {
+        super(elementName, model);
+    }
+    public PwRadioButton(String elementName, IElement element) {
+        super(elementName, element);
     }
 
     @Override

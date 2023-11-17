@@ -13,13 +13,9 @@ public class TestDataUtils {
                 .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле '%s'. Присутствуют поля: %s",
                         fieldName, data.keySet()));
     }
-
     public static Map<String, ?> loadPageConfig(String pageName) {
         try {
-            String pagesDirPath = Config.getProperty("pagesDirPath");
-            String pageMappingFilePath = pagesDirPath + "/pageMapping.yaml";
-            Map<String, String> pageMapping = YamlParser.parse(pageMappingFilePath);
-            String pageFilePath = pagesDirPath + "/" + pageMapping.get(pageName);
+            String pageFilePath = Config.getPageFilePath(pageName);
             return YamlParser.parse(pageFilePath);
         } catch (Exception e) {
             throw new PageFileNotFoundException(e, pageName);

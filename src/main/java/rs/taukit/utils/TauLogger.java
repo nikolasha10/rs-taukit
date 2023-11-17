@@ -325,7 +325,7 @@ public final class TauLogger {
         return null;
     }
 
-    @Attachment(value = "{fileName}", fileExtension = "{fileExtension}")
+    @Attachment(value = "{fileName}")
     public static byte[] attachFile(String fileName, String fileExtension, byte[] file) {
         return file;
     }

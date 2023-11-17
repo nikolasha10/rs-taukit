@@ -1,28 +1,48 @@
 package rs.taukit.element.playwright;
 
-import io.qameta.allure.Step;
+import com.microsoft.playwright.Locator;
+import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 
+import static rs.taukit.step.utils.BasicUtils.page;
+
 public class PwTextField extends PwElement implements IHasEditableValue {
     public PwTextField(String elementName, String locator) {
         super(elementName, locator);
     }
-    public PwTextField(String elementName, LinkedHashMap<String, String> elementData) {
+
+    public PwTextField(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
     }
 
+    public PwTextField(String elementName, ElementModel model) {
+        super(elementName, model);
+    }
+    public PwTextField(String elementName, Locator locator, ElementModel model) {
+        super(elementName, locator);
+    }
+
+    public PwTextField(String elementName, IElement element) {
+        super(elementName, element);
+    }
+
     @Override
-    @Step("заполнить поле '{this.elementName}' значением '{value}'")
+    public void setValue(String value) {
+        super.setValue(value);
+    }
+
+    @Override
     public void setValue(String value, String controlValue) {
         driver.waitForCondition(() -> {
             super.setValue(value);
+            page().waitForTimeout(1000);
             String currentValue = element.inputValue();
             return currentValue.equals(controlValue);
         });
-        TauLogger.report("Поле '%s' заполнено значением '%s'", elementName, element.inputValue());
     }
 
     @Override
@@ -30,16 +50,5 @@ public class PwTextField extends PwElement implements IHasEditableValue {
         return element.inputValue();
     }
 
-    @Override
-    @Step("заполнить поле '{this.elementName}' значением '{value}'")
-    public void setValue(String value) {
-        try {
-            super.setValue(value);
-            String currentValue = element.inputValue();
-            TauLogger.report("Поле '%s' заполнено значением '%s'", elementName, currentValue);
-        } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось заполнить поле '%s' значением '%s'", elementName, value);
-        }
-    }
 
 }

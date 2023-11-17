@@ -16,11 +16,16 @@ public enum ElementType {
     SIMPLE_ELEMENT("элемент", PwElement.class),
     TEXT_FIELD("поле", PwTextField.class),
     ELEMENT_LIST("список", PwList.class),
+    ELEMENT_BLOCK("блок элементов", PwBlock.class),
+    MENU("меню", PwMenu.class),
+    TOGGLE("переключатель", PwToggle.class),
     RADIO_BUTTON("радио-кнопка", PwRadioButton.class),
+    DROPDOWN_LIST("выпадающий список", PwDropdownList.class),
     LINK("ссылка", PwLink.class),
     ELEMENT_TABLE("таблица", PwTable.class),
     FILE("файл", FileAttachment.class),
     DOWNLOAD("загрузка файла", FileDownload.class),
+    DICTIONARY("справочник", PwDictionary.class),
     DATE("дата", PwTextField.class);
 
     private static final Map<String, ElementType> BY_TYPE = new HashMap<>();

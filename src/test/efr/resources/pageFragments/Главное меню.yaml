@@ -1,0 +1,8 @@
+Название: Главное меню
+Элементы:
+  Главное меню:
+    тип: меню
+    локатор: //ul[@class='main-menu']
+    пункты меню: //ul[@class='main-menu']/li/a
+    ...: top-menu-dropdown
+    выпадающий список: //div[@class='dropdown-list']/a

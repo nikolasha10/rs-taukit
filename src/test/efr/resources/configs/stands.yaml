@@ -3,17 +3,22 @@
   hostApplication: efrstand
   portApplication: 8888
 
-- Название: dor6
+- Название: dor4
   protocol: http
-  hostApplication: 172.16.35.205
+  hostApplication: dor4
   portApplication: 8888
 
 - Название: dor5
   protocol: http
-  hostApplication: 172.16.35.202
+  hostApplication: 172.16.35.203
   portApplication: 8888
 
-- Название: dor4
+- Название: dor6
   protocol: http
-  hostApplication: dor4
+  hostApplication: 172.16.34.253
+  portApplication: 8888
+
+- Название: home_stand
+  protocol: http
+  hostApplication: localhost
   portApplication: 8888

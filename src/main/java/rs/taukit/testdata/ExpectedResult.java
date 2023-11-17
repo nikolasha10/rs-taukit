@@ -4,12 +4,14 @@ import rs.taukit.config.Config;
 import rs.taukit.element.ElementState;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.page.PageObject;
+import rs.taukit.page.PageState;
 import rs.taukit.step.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TimeStringParser;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
@@ -17,8 +19,6 @@ import java.util.function.BooleanSupplier;
 import static rs.taukit.step.utils.BasicUtils.*;
 
 public class ExpectedResult {
-    private final Map<String, String> data;
-    private final PageObject pageObject;
     private final String objectType;
     private final String objectName;
     private final String objectState;
@@ -26,9 +26,7 @@ public class ExpectedResult {
     private final double checkTimeout;
     private final BooleanSupplier condition;
 
-    public ExpectedResult(Map<String, String> data, PageObject pageObject) {
-        this.data = data;
-        this.pageObject = pageObject;
+    public ExpectedResult(Map<String, String> data) {
         this.objectType = TestDataUtils.get(data, "Объект");
         this.objectName = TestDataUtils.get(data, "Название");
         this.objectState = TestDataUtils.get(data, "Состояние");
@@ -36,19 +34,31 @@ public class ExpectedResult {
         this.checkInterval = TimeStringParser.getTime(checkInterval);
         String checkTimeout = Optional.ofNullable(data.get("Ожидание")).orElse(Config.getProperty("element.check.timeout"));
         this.checkTimeout = TimeStringParser.getTime(checkTimeout);
-        this.condition = () -> {
-            if (objectType.equalsIgnoreCase("страница")) {
-                return pageStorage().getPage(objectName).isPageLoaded();
-            } else if (objectType.equalsIgnoreCase("вкладка")) {
+        this.condition = () -> checkCondition(objectType.toLowerCase());
+    }
+    public ExpectedResult(List<String> data) {
+        this.objectType = data.get(0);
+        this.objectName = data.get(1);
+        this.objectState = data.get(2);
+        String checkInterval = data.size() > 3 ? data.get(3) : Config.getProperty("element.check.interval");
+        this.checkInterval = TimeStringParser.getTime(checkInterval);
+        String checkTimeout = data.size() > 4 ? data.get(4) : Config.getProperty("element.check.timeout");
+        this.checkTimeout = TimeStringParser.getTime(checkTimeout);
+        this.condition = () -> checkCondition(objectType.toLowerCase());
+    }
+
+    private boolean checkCondition(String objectType){
+        switch (objectType){
+            case "страница":
+                return PageState.getState(objectState).apply(pageStorage().getPage(objectName));
+            case "вкладка":
                 return driver().setActiveTab(Integer.parseInt(objectName)-1);
-            } else if (objectType.equalsIgnoreCase("файл")) {
-                String dirName = String.format("%s/%s",
-                        Config.getProperty("downloads.dir"), testContext().getScenarioName());
+            case "файл":
+                String dirName = String.format("%s/%s", Config.getProperty("downloads.dir"), testContext().getScenarioName());
                 return new File(dirName, objectName).exists();
-            } else {
+            default:
                 return ElementState.getState(objectState).apply(element(objectName));
-            }
-        };
+        }
     }
 
     public void waitForResult() {

@@ -1,5 +1,0 @@
-Название: Главное меню
-Элементы:
-  пункт меню: //ul[@class='main-menu']/li/a
-  ...: top-menu-dropdown
-  выпадающий список: //ul[@class='main-menu']//div[@class='dropdown-list']/a
