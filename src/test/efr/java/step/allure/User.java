@@ -1,24 +1,23 @@
-package step.implementer;
+package step.allure;
 
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.testdata.TestData;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
-import static rs.taukit.step.utils.BasicUtils.scenarioData;
+import static rs.taukit.utils.BasicUtils.scenarioData;
 
 public class User {
     @Getter
     private TestData userData;
 
     public User(String userDescription) {
-        LinkedHashMap<String, String> userDataParameters = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> userDataParameters = new LinkedHashMap<>();
         userDataParameters.put("тип", "тестовые данные");
         userDataParameters.put("файл", Config.getProperty("userFilePath"));
-        userDataParameters.put("поиск по полю", "описание");
-        userDataParameters.put("метод поиска", "значение в списке");
-        userDataParameters.put("описание", userDescription);
+        userDataParameters.put("поиск по полям", Map.of("описание", userDescription));
         userData = new TestData(userDescription, userDataParameters);
         scenarioData().put(userDescription, userData);
     }

@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -17,6 +19,7 @@ import java.util.stream.IntStream;
 @Getter
 public class AllureReport {
     private static List<String> errorList = new ArrayList<>();
+
     private static List<File> getFileList(String scenarioName, long testEndTime) {
         File directory = new File(Config.getProperty("allure-results.path"));
         return Arrays.stream(Objects.requireNonNull(directory.listFiles()))
@@ -44,10 +47,21 @@ public class AllureReport {
             Map<Object, Object> report = gson.fromJson(fileContent, Map.class);
             report.replace("name", scenarioName);
             List<Map<String, String>> labels = new ArrayList<>();
+            String format = "\\[(.+)]\\[(.+)]";
+            Matcher matcher = Pattern.compile(format).matcher(functionality);
+            Map<String, String> parentSuitName = new HashMap<>();
             Map<String, String> suiteName = new HashMap<>();
+            parentSuitName.put("name", "parentSuite");
             suiteName.put("name", "suite");
-            suiteName.put("value", functionality);
-            labels.add(suiteName);
+            if (matcher.matches()) {
+                parentSuitName.put("value", matcher.group(1));
+                suiteName.put("value", matcher.group(2));
+                labels.add(parentSuitName);
+                labels.add(suiteName);
+            } else {
+                parentSuitName.put("value", functionality);
+                labels.add(parentSuitName);
+            }
             report.replace("labels", labels);
             report.remove("parameters");
             String testStatus = report.get("status").toString();

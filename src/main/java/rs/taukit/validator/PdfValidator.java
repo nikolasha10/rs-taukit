@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static rs.taukit.step.utils.BasicUtils.*;
+import static rs.taukit.utils.BasicUtils.*;
 
 /**
  * Класс для работы с pdf-документами
@@ -150,7 +150,7 @@ public class PdfValidator {
             AtomicReference<Double> width = new AtomicReference<>();
             pdResources.getFontNames().forEach(font -> {
                 try {
-                    if (font.getName().equals(fontName)){
+                    if (font.getName().equals(fontName)) {
                         pdFont.set(pdResources.getFont(font));
                         width.set((double) pdResources.getFont(font).getStringWidth(text));
                         System.out.println(width.get());
@@ -167,7 +167,7 @@ public class PdfValidator {
         }
     }
 
-    public void comparePdfDocuments(){
+    public void comparePdfDocuments() {
         driver().openBrowser(true);
         String testedPdfUrl = new File(testedFilePath).toURI().toString();
     }

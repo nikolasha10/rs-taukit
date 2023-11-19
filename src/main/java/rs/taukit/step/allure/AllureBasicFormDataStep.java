@@ -39,36 +39,51 @@ public class AllureBasicFormDataStep {
                     .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Название'"));
             String value = Optional.ofNullable(row.get("Значение"))
                     .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Значение'"));
-            String control = row.get("Контроль");
+            String control = row.getOrDefault("Контроль", "");
             Class<IElement> elementType = ElementType.getType(type).getElementClass();
             IHasEditableValue element = pageObject.replaceElement(name, elementType).castTo(IHasEditableValue.class);
-            if (control == null) {
+            if (control.isEmpty()) {
                 element.setValue(value);
             } else {
                 element.setValue(value, control);
             }
         });
+        TauLogger.report("Поля формы заполнены значениями из таблицы");
+        System.out.println(dataTable);
     }
 
-    @Step("заполнить поля формы в блоке '{blockName}' ({blockNumber}) значениями:")
-    public void fillFormBlock(String blockName, int blockNumber){
-        TauLogger.attachDataTable("Значения полей формы", dataTable);
+    private void fillFormBlockAction(String blockName, int blockNumber) {
+        TauLogger.attachDataTable("Значения полей блока", dataTable);
         IHasBlockElements blockElement = pageObject.getElement(blockName).castTo(IHasBlockElements.class);
         data.forEach((row) -> {
-            String type = Optional.ofNullable(row.get("Тип"))
-                    .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Тип'"));
             String name = Optional.ofNullable(row.get("Название"))
                     .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Название'"));
             String value = Optional.ofNullable(row.get("Значение"))
                     .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Значение'"));
             String control = row.get("Контроль");
             IHasEditableValue editableElement = blockElement.getElementByName(blockNumber, name).castTo(IHasEditableValue.class);
-            if (control == null) {
-                editableElement.setValue(value);
-            } else {
-                editableElement.setValue(value, control);
+            try {
+                if (control == null) {
+                    editableElement.setValue(value);
+                } else {
+                    editableElement.setValue(value, control);
+                }
+            } catch (Exception e) {
+                TauLogger.fail(e, "Не удалось заполнить поле '%s' в блоке '%s' (%d) значением '%s'",
+                        name, blockName, blockNumber, value);
             }
-            TauLogger.report("Поле '%s' блока '%s' (%d) заполнено значением '%s'", name, blockName, blockNumber, value);
         });
+        System.out.println(dataTable);
+    }
+
+    @Step("заполнить поля формы в блоке '{blockName}' значениями:")
+    public void fillFormBlock(String blockName) {
+        fillFormBlockAction(blockName, 1);
+    }
+
+    @Step("заполнить поля формы в блоке '{blockName}' ({blockNumber}) значениями:")
+    public void fillFormBlock(String blockName, int blockNumber) {
+        fillFormBlockAction(blockName, blockNumber);
+        TauLogger.report("Поля блока '%s' (%d) заполнены значениями из таблицы", blockName, blockNumber);
     }
 }

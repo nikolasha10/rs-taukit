@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static rs.taukit.step.utils.BasicUtils.testContext;
+import static rs.taukit.utils.BasicUtils.testContext;
 
 public class FileUtils {
     @Step("переименовать файл '{fileName}' в '{newFileName}'")
@@ -70,7 +70,7 @@ public class FileUtils {
         }
     }
 
-    public static Set<File> getDirFileList(String dirPath){
+    public static Set<File> getDirFileList(String dirPath) {
         HashSet<File> result = new HashSet<>();
         File scannedDir = new File(dirPath);
         File[] fileList = scannedDir.listFiles();

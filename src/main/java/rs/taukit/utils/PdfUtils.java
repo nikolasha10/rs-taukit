@@ -13,7 +13,6 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import rs.taukit.driver.playwright.PlaywrightDriver;
-import rs.taukit.testdata.TestDataInstruction;
 import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.comparison.ImageDiff;
 import ru.yandex.qatools.ashot.comparison.ImageDiffer;
@@ -24,7 +23,6 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -32,7 +30,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-import static rs.taukit.step.utils.BasicUtils.*;
+import static rs.taukit.utils.BasicUtils.*;
 
 public class PdfUtils {
     public static void createPdfStandard(String standardFileName, String originFileName, String templateName, DataTable dataTable) {
@@ -64,6 +62,7 @@ public class PdfUtils {
                 testContext().getScenarioName(), standardFileName);
         PdfUtils.replacePdfContent(originFilePath, editedFilePath, evaluatingContent);
     }
+
     @Step("сравнить файл '{testedFileName}' с эталоном")
     public static void comparePdfFiles(String testedFileName, String standardFileName) {
         String testedFilePath = String.format("target/downloads/%s/%s",

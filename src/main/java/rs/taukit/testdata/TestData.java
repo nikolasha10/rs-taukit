@@ -2,9 +2,9 @@ package rs.taukit.testdata;
 
 import lombok.Getter;
 import rs.taukit.exceptions.TestDataException;
-import rs.taukit.testdata.constant.TDSearchMethod;
 import rs.taukit.utils.YamlParser;
 
+import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,17 +21,32 @@ public class TestData implements ITestData {
     }
 
     public TestData(String fieldName, LinkedHashMap<String, ?> parameters) {
+        this(fieldName, parameters, "");
+    }
+
+    public TestData(String fieldName, LinkedHashMap<String, ?> parameters, String dirPath) {
         this.fieldName = fieldName;
         String filePath = YamlParser.convert(parameters.get("файл"));
-        String searchBy = YamlParser.convert(parameters.get("поиск по полю"));
-        String searchMethodName = YamlParser.convert(parameters.get("метод поиска"));
-        TDSearchMethod searchMethod = TDSearchMethod.getMethod(searchMethodName);
-        String searchValue = YamlParser.convert(parameters.get(searchBy));
-        this.searchValue = searchValue;
+        Map<String, String> searchBy = YamlParser.convert(parameters.get("поиск по полям"));
+        File file = new File(filePath);
+        if (!file.exists()) {
+            filePath = dirPath + File.separator + filePath;
+        }
         List<Map<String, ?>> dataList = YamlParser.parse(filePath);
-        Predicate<Map<String, ?>> condition = item -> searchMethod.search(item.get(searchBy), searchValue);
-        Supplier<RuntimeException> e = () -> new TestDataException("Не удалось получить данные для поля '%s'", fieldName);
-        dataStorage = new DataStorage(dataList.stream().filter(condition).findFirst().orElseThrow(e));
+        Predicate<Map<String, ?>> condition = item -> searchBy.entrySet().stream().allMatch(entry -> {
+            String dataFieldName = entry.getKey();
+            String expectedValue = entry.getValue();
+            Object dataFieldValue = item.get(dataFieldName);
+            if (dataFieldValue instanceof List<?> listOfValues) {
+                List<String> values = YamlParser.convert(listOfValues);
+                return values.contains(expectedValue);
+            } else {
+                return dataFieldValue.toString().equalsIgnoreCase(expectedValue);
+            }
+        });
+        Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля '%s'", fieldName);
+        dataStorage = new DataStorage(filePath, dataList.stream().filter(condition).findFirst().orElseThrow(exception));
+
     }
 
     @Override

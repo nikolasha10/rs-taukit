@@ -1,11 +1,9 @@
 package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
-import io.qameta.allure.Step;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
-import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 
@@ -14,33 +12,35 @@ public class PwList extends PwElement implements IHasEditableValue {
     protected final Locator labels;
 
     public PwList(String elementName, LinkedHashMap<String, Object> elementData) {
-        super(elementName, elementData);
+        this(elementName, new ElementModel(elementData));
+    }
+
+    public PwList(String elementName, Locator locator, ElementModel model) {
+        super(elementName, locator);
         this.labels = driver.getLocator(model.get("названия"));
         this.buttons = driver.getLocator(model.get("кнопки"));
     }
+
     public PwList(String elementName, ElementModel model) {
         super(elementName, model);
         this.labels = driver.getLocator(model.get("названия"));
         this.buttons = driver.getLocator(model.get("кнопки"));
     }
+
     public PwList(String elementName, IElement element) {
         this(elementName, element.getModel());
     }
-    protected void setValueAction(String value){
+
+    protected void setValueAction(String value) {
         element.locator(labels)
                 .filter(new Locator.FilterOptions().setHasText(value))
                 .filter(new Locator.FilterOptions().setHas(buttons))
                 .click();
     }
+
     @Override
-    @Step("в списке '{this.elementName}' выбрать значение '{value}'")
     public void setValue(String value) {
-        try {
-            setValueAction(value);
-            TauLogger.report("В списке '%s' выбрано значение '%s'", elementName, value);
-        } catch (Exception e){
-            TauLogger.fail(e,"Не удалось выбрать значение '%s' в списке '%s'", value, elementName);
-        }
+        setValueAction(value);
     }
 
     @Override

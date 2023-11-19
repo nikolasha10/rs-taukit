@@ -3,9 +3,8 @@ package rs.taukit.testdata;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementState;
 import rs.taukit.exceptions.AutoTestBrokenException;
-import rs.taukit.page.PageObject;
 import rs.taukit.page.PageState;
-import rs.taukit.step.utils.BasicUtils;
+import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TimeStringParser;
@@ -16,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
-import static rs.taukit.step.utils.BasicUtils.*;
+import static rs.taukit.utils.BasicUtils.*;
 
 public class ExpectedResult {
     private final String objectType;
@@ -36,6 +35,7 @@ public class ExpectedResult {
         this.checkTimeout = TimeStringParser.getTime(checkTimeout);
         this.condition = () -> checkCondition(objectType.toLowerCase());
     }
+
     public ExpectedResult(List<String> data) {
         this.objectType = data.get(0);
         this.objectName = data.get(1);
@@ -47,12 +47,12 @@ public class ExpectedResult {
         this.condition = () -> checkCondition(objectType.toLowerCase());
     }
 
-    private boolean checkCondition(String objectType){
-        switch (objectType){
+    private boolean checkCondition(String objectType) {
+        switch (objectType) {
             case "страница":
                 return PageState.getState(objectState).apply(pageStorage().getPage(objectName));
             case "вкладка":
-                return driver().setActiveTab(Integer.parseInt(objectName)-1);
+                return driver().setActiveTab(Integer.parseInt(objectName) - 1);
             case "файл":
                 String dirName = String.format("%s/%s", Config.getProperty("downloads.dir"), testContext().getScenarioName());
                 return new File(dirName, objectName).exists();
@@ -68,7 +68,7 @@ public class ExpectedResult {
         } catch (Exception e) {
             if (e instanceof AutoTestBrokenException) throw e;
             String wrongState = ElementState.getWrongState(objectState);
-            TauLogger.fail(e,"Фактический результат не соответствует ожидаемому.%n" +
+            TauLogger.fail(e, "Фактический результат не соответствует ожидаемому.%n" +
                             "Ожидаемый результат: %s '%s' %s%n" +
                             "Фактический результат: %s '%s' %s",
                     objectType, objectName, objectState, objectType, objectName, wrongState);

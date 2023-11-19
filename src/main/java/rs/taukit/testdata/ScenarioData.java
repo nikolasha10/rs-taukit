@@ -3,7 +3,7 @@ package rs.taukit.testdata;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.testng.Pickle;
 import lombok.Getter;
-import rs.taukit.config.Config;
+import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.YamlParser;
 
@@ -15,26 +15,27 @@ import java.util.Map;
 public class ScenarioData {
     private final DataStorage dataStorage;
     private final String scenarioName;
+    private final String featurePath;
 
     public ScenarioData(Pickle pickle) {
-        String featurePath = pickle.getUri().getPath();
+        this.featurePath = pickle.getUri().getPath();
         this.scenarioName = pickle.getName();
-        this.dataStorage = new DataStorage(getScenarioData(getFeatureData(featurePath)));
+        this.dataStorage = new DataStorage(featurePath, getScenarioData(getFeatureData(featurePath)));
     }
 
     private List<Map<String, ?>> getFeatureData(String featurePath) {
-        String scenariosPath = Config.getProperty("scenarios.path");
-//        String testDataPath = Config.getProperty("scenarios.data.path");
-        String featureDataPath = featurePath
-//                .replace(scenariosPath, testDataPath)
-                .replace("feature", "yaml");
+        String featureDataPath = featurePath.replace("feature", "yaml");
         return YamlParser.parse(featureDataPath);
     }
 
     private Map<String, ?> getScenarioData(List<Map<String, ?>> featureData) {
-        return featureData.stream()
+        Map<String, ?> scenarioData = featureData.stream()
                 .filter(data -> data.get("Сценарий").toString().equalsIgnoreCase(scenarioName))
                 .findFirst().orElse(new LinkedHashMap<>());
+        if (scenarioData.isEmpty()) {
+            TauLogger.console("Тестовые данные для текущего сценария отсутствуют");
+        }
+        return scenarioData;
     }
 
     public LinkedHashMap<String, Object> getAttachments() {

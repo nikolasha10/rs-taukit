@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -28,6 +27,10 @@ public class TestDataDateTime implements ITestData {
     private String fieldName;
 
     public TestDataDateTime(String fieldName, LinkedHashMap<String, ?> data) {
+        this(fieldName, data, "");
+    }
+
+    public TestDataDateTime(String fieldName, LinkedHashMap<String, ?> data, String dirPath) {
         this.fieldName = fieldName;
         this.dataStorage = new DataStorage(data);
         this.format = get("формат");
@@ -87,7 +90,7 @@ public class TestDataDateTime implements ITestData {
 
     @Override
     public String getStringValue() {
-        LocalDate localDate = LocalDate.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DATE));
+        LocalDate localDate = LocalDate.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DATE));
         LocalTime localTime = LocalTime.of(calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
         return DateTimeFormatter.ofPattern(format).format(LocalDateTime.of(localDate, localTime));
     }

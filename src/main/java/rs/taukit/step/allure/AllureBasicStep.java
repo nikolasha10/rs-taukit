@@ -1,4 +1,4 @@
-package rs.taukit.step;
+package rs.taukit.step.allure;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.testng.Pickle;
@@ -8,11 +8,10 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import rs.taukit.driver.WebDriver;
-import rs.taukit.element.interfaces.IHasEditableValue;
-import rs.taukit.step.utils.BasicUtils;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.testdata.ExpectedResult;
-import rs.taukit.step.allure.AllureBasicFormDataStep;
 import rs.taukit.testdata.ScenarioData;
+import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
 
@@ -29,7 +28,7 @@ import java.util.stream.IntStream;
  * Методы класса реализуют общие шаги сценариев для всех проектов
  * Аннотация @Step позволяет вывести сообщение в Allure-отчет
  */
-public class BasicStory extends BasicUtils {
+public class AllureBasicStep extends BasicUtils {
     @Step("определить значения тестовых параметров")
     public static void testParameterInit() {
         Pickle pickle = testContext().getPickle();
@@ -47,16 +46,16 @@ public class BasicStory extends BasicUtils {
         TauLogger.report("Открыт браузер '%s'", driver().getBrowserType());
     }
 
-    @Step("открыть страницу '{pageName}'")
-    public static void openPage(String pageName) {
-        pageStorage().getPage(pageName).loadPage();
-        TauLogger.report("Открыта страница '%s'", pageName);
-    }
-
     @Step("нажать на элемент '{elementName}'")
     public static void clickElement(String elementName) {
         element(elementName).click();
         TauLogger.report("Нажали на элемент '%s'", elementName);
+    }
+
+    @Step("нажать на поле '{fieldName}'")
+    public static void clickTextField(String fieldName) {
+        element(fieldName).click();
+        TauLogger.report("Нажали на поле '%s'", fieldName);
     }
 
     @Step("нажать на кнопку '{buttonName}'")
@@ -68,27 +67,7 @@ public class BasicStory extends BasicUtils {
             element(buttonName).click();
             return true;
         });
-
-    }
-
-    @Step("дождаться отображения страницы '{pageName}'")
-    public static void waitForPageLoad(String pageName) {
-        pageStorage().getPage(pageName).waitForLoad();
-        TauLogger.report("Отображается страница '%s'", pageName);
-    }
-
-    @Step("дождаться отображения всплывающего окна '{pageName}'")
-    public static void waitForPopupWindow(String pageName) {
-        pageStorage().getPopup(pageName).waitForLoad();
-        TauLogger.report("Отображается всплывающее окно '%s'", pageName);
-    }
-    @Step("дождаться закрытия всплывающего окна '{pageName}'")
-    public static void waitForPopupClose(String pageName) {
-        pageStorage().getPage(pageName).waitForClose();
-        TauLogger.report("Закрыто всплывающее окно '%s'", pageName);
-        String currentPageName = testContext().getSavedPageName();
-        pageStorage().getPage(currentPageName).waitForLoad();
-        TauLogger.report("Отображается страница '%s'", currentPageName);
+        TauLogger.report("Нажата кнопка '%s'", buttonName);
     }
 
     @Step("сделать скриншот")
@@ -206,5 +185,19 @@ public class BasicStory extends BasicUtils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Step("примечание: далее работаем в контексте блока '{blockName}'")
+    public static void setBlockContext(String blockName) {
+        page().setCurrentContext(blockName);
+        TauLogger.console("Текущий контекст: Блок элементов '%s'", blockName);
+    }
+
+    public static void exitFromBlockContext(String blockName) {
+        IElement currentBlock = page().dropCurrentContext();
+        String currentContext = currentBlock == null
+                ? String.format("Страница '%s'", testContext().getCurrentPageName())
+                : String.format("Блок '%s'", currentBlock.getElementName());
+        TauLogger.report("Текущий контекст: %s", currentContext);
     }
 }

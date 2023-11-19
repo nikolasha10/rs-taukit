@@ -3,10 +3,12 @@ package rs.taukit.page.playwright;
 import com.microsoft.playwright.Page;
 import lombok.Getter;
 import rs.taukit.config.Config;
-import rs.taukit.element.ElementType;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.playwright.PwElement;
-import rs.taukit.exceptions.*;
+import rs.taukit.element.interfaces.IHasBlockElements;
+import rs.taukit.exceptions.ElementNotDescribedException;
+import rs.taukit.exceptions.PageFragmentNotFoundException;
+import rs.taukit.exceptions.PageNotClosedException;
+import rs.taukit.exceptions.PageNotLoadException;
 import rs.taukit.page.PageObject;
 import rs.taukit.storage.StorageManager;
 import rs.taukit.utils.TimeStringParser;
@@ -28,6 +30,8 @@ public class PlaywrightPageObject implements PageObject {
     private final List<String> expectedElements;
     private final Page.WaitForConditionOptions options;
     private final Page.ScreenshotOptions screenshotOptions;
+    private final Deque<IHasBlockElements> currentContext = new LinkedList<>();
+
     public PlaywrightPageObject(Page page, String pageName) {
         Map<String, ?> pageConfig = loadPageConfig(pageName);
         String pageTimeoutString = pageConfig.get("Максимальное время ожидания").toString();
@@ -36,7 +40,8 @@ public class PlaywrightPageObject implements PageObject {
         this.page = page;
         this.pageName = pageName;
         this.pageUrl = YamlParser.convert(pageConfig.get("Адрес"));
-        this.pageControlUrl = YamlParser.convert(pageConfig.get("Обязательная часть адреса"));
+        String controlUrl = YamlParser.convert(pageConfig.get("Обязательная часть адреса"));
+        this.pageControlUrl = Optional.ofNullable(controlUrl).orElse("");
         List<String> commonBlockList = YamlParser.convert(pageConfig.get("Общие блоки элементов"));
         if (commonBlockList != null) {
             this.pageElements.putAll(addCommonBlocks(commonBlockList));
@@ -78,7 +83,7 @@ public class PlaywrightPageObject implements PageObject {
         }
     }
 
-    public void waitForClose(){
+    public void waitForClose() {
         try {
             BooleanSupplier waitCondition = () -> !isUrlCorrect() || !hasPageAllExpectedElements();
             page.waitForCondition(waitCondition, options);
@@ -114,6 +119,7 @@ public class PlaywrightPageObject implements PageObject {
             return false;
         }
     }
+
     @Override
     public boolean isPageClosed() {
         try {
@@ -124,13 +130,29 @@ public class PlaywrightPageObject implements PageObject {
         }
     }
 
+    @Override
+    public IHasBlockElements getCurrentContext() {
+        return this.currentContext.peekLast();
+    }
+
+    @Override
+    public void setCurrentContext(String blockName) {
+        this.currentContext.add(getElement(blockName).castTo(IHasBlockElements.class));
+    }
+
+    @Override
+    public IHasBlockElements dropCurrentContext() {
+        this.currentContext.pollLast();
+        return this.currentContext.peekLast();
+    }
+
     private String getPageNotLoadMessage() {
         String currentUrl = page.url();
         String urlNotContainsExpected = isUrlCorrect() ? "" : String.format(
                 ". Текущий url (%s) не содержит ожидаемого текста (%s)",
                 currentUrl, pageControlUrl);
         List<String> notFoundElements = getAllNotFoundElements();
-        String elementsNotFound = notFoundElements.size() == 0 ? "" : String.format(
+        String elementsNotFound = notFoundElements.isEmpty() ? "" : String.format(
                 ". Не найдены ожидаемые элементы: %s", String.join(", ", notFoundElements));
         return String.format("Не удалось дождаться отображения страницы '%s'%s%s",
                 pageName, urlNotContainsExpected, elementsNotFound);
@@ -140,7 +162,7 @@ public class PlaywrightPageObject implements PageObject {
         String url = pageUrl.startsWith("file") ? pageUrl : Config.getSTAND().getUrl() + pageUrl;
         try {
             page.navigate(url);
-        } catch (Exception e){
+        } catch (Exception e) {
 
         }
         waitForLoad();
@@ -188,8 +210,12 @@ public class PlaywrightPageObject implements PageObject {
 
     @Override
     public IElement getElement(String elementName) {
-        return Optional.ofNullable(pageElements.get(elementName))
-                .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
+        if (getCurrentContext() == null) {
+            return Optional.ofNullable(pageElements.get(elementName))
+                    .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
+        } else {
+            return getCurrentContext().getElementByName(1, elementName);
+        }
     }
 
     @Override

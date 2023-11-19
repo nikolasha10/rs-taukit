@@ -34,7 +34,7 @@ public abstract class Element implements IElement {
         this.locator = model.get("локатор");
     }
 
-    public Element(String elementName, IElement element){
+    public Element(String elementName, IElement element) {
         this.driver = DriverManager.getInstance().getDriver();
         this.elementName = elementName;
         this.model = element.getModel();

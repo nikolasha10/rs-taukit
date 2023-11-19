@@ -15,10 +15,12 @@ import java.util.Optional;
 public enum ElementType {
     SIMPLE_ELEMENT("элемент", PwElement.class),
     TEXT_FIELD("поле", PwTextField.class),
+    SEARCH_FIELD("поиск по значению", PwSearchField.class),
     ELEMENT_LIST("список", PwList.class),
     ELEMENT_BLOCK("блок элементов", PwBlock.class),
     MENU("меню", PwMenu.class),
     TOGGLE("переключатель", PwToggle.class),
+    CHECKBOX("чекбокс", PwCheckbox.class),
     RADIO_BUTTON("радио-кнопка", PwRadioButton.class),
     DROPDOWN_LIST("выпадающий список", PwDropdownList.class),
     LINK("ссылка", PwLink.class),

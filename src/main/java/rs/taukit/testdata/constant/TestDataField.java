@@ -37,7 +37,20 @@ public enum TestDataField {
             return (T) getFieldClass(typeName).getConstructor(String.class, constructorParameters.getClass())
                     .newInstance(fieldName, constructorParameters);
         } catch (Exception e) {
-            throw new TestDataException(e, "Не удалось создать объект тестовых данных с типом '%s'", typeName);
+            throw new TestDataException(e, "Не удалось создать объект тестовых данных '%s' с типом '%s'",
+                    fieldName, typeName);
         }
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends ITestData> T getField(String typeName, String fieldName, Object constructorParameters, String dirPath) {
+        try {
+            return (T) getFieldClass(typeName).getConstructor(String.class, constructorParameters.getClass(), String.class)
+                    .newInstance(fieldName, constructorParameters, dirPath);
+        } catch (Exception e) {
+            throw new TestDataException(e, "Не удалось создать объект тестовых данных '%s' с типом '%s'",
+                    fieldName, typeName);
+        }
+    }
+
 }

@@ -9,7 +9,6 @@ import org.slf4j.MDC;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 import rs.taukit.exceptions.TestDataException;
-import rs.taukit.step.utils.BasicUtils;
 import rs.taukit.testdata.TestDataFile;
 
 import java.io.File;
@@ -52,7 +51,7 @@ public final class TauLogger {
     /**
      * Собирает содержимое файлов с логами по каждому сценарию, и выводит их в стандартный вывод
      */
-    public static void collectLogs(){
+    public static void collectLogs() {
         if (!logger.getName().equalsIgnoreCase("scenarioLog")) return;
         Logger consoleLogger = LoggerFactory.getLogger("collectLogs");
         String logPath = String.format("%s.log", MDC.get("logName"));
@@ -87,6 +86,7 @@ public final class TauLogger {
         BasicUtils.scenarioData().put("WARNING", "PASSED with ERRORS");
         attachFullScreenshots();
     }
+
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message, Runnable runnable) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
@@ -97,6 +97,7 @@ public final class TauLogger {
     public static void warn(String format, Object... args) {
         warn(String.format(format, args));
     }
+
     public static void warn(Runnable runnable, String format, Object... args) {
         warn(String.format(format, args), runnable);
     }
@@ -195,8 +196,9 @@ public final class TauLogger {
     /**
      * Задаёт значение параметра <b>logName</b> для логгера (см. файл logback.xml),
      * который определяет путь к файлу текущего лога
+     *
      * @param functionality - значение поля <b>Функционал</b> в сценарии cucumber
-     * @param scenarioName - значение поля <b>Сценарий</b>
+     * @param scenarioName  - значение поля <b>Сценарий</b>
      */
     public static void setLogPath(String functionality, String scenarioName) {
         String logPath = Config.getProperty("logger.default.logPath");
@@ -217,14 +219,15 @@ public final class TauLogger {
         return imageData;
     }
 
-    public static void attachFullScreenshots(){
+    public static void attachFullScreenshots() {
         List<byte[]> screenshotList = BasicUtils.driver().takeScreenshots();
         IntStream.range(0, screenshotList.size())
                 .forEach(index -> attachScreenshot(
                         String.format("Вкладка %d", index + 1),
                         screenshotList.get(index)));
     }
-//
+
+    //
 //    public static void attachFullScreenshot() {
 //        try {
 //            int height = Integer.parseInt(DriverManager.execute("return window.innerHeight").toString());
@@ -288,7 +291,8 @@ public final class TauLogger {
             return new byte[0];
         }
     }
-//
+
+    //
 //    @Attachment(value = "Таблица параметров", type = "text/tab-separated-values", fileExtension = ".csv")
 //    public static byte[] attachDataTable(List<Map<String, String>> parameters) {
 //        return attachData(parameters);
@@ -333,8 +337,8 @@ public final class TauLogger {
     public static void attach(String name, Object object) {
         if (object instanceof DataTable dataTable) {
             attachDataTable(name, dataTable);
-        } else if (object instanceof TestDataFile file){
-            attachFile(name,file.getFileExtension(),file.getFilePath());
+        } else if (object instanceof TestDataFile file) {
+            attachFile(name, file.getFileExtension(), file.getFilePath());
         } else {
             throw new TestDataException("Не удалось прикрепить объект '%s' к отчёту. Не распознан тип вложения.");
         }

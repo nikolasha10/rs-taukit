@@ -3,24 +3,20 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
-import rs.taukit.element.ElementType;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasTableElements;
 import rs.taukit.element.interfaces.IHasText;
-import rs.taukit.exceptions.ElementNotBuiltException;
 import rs.taukit.exceptions.TableElementNotFoundException;
 import rs.taukit.page.playwright.ElementBuilder;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
-import rs.taukit.utils.YamlParser;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static rs.taukit.step.utils.BasicUtils.scenarioData;
-import static rs.taukit.step.utils.BasicUtils.testContext;
+import static rs.taukit.utils.BasicUtils.scenarioData;
 
 public class PwTable extends PwElement implements IHasTableElements {
     protected final Locator headers;

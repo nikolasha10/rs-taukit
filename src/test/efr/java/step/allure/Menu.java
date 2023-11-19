@@ -1,13 +1,14 @@
-package step.implementer;
+package step.allure;
 
 import io.qameta.allure.Step;
 import rs.taukit.element.playwright.PwMenu;
-import rs.taukit.step.utils.BasicUtils;
+import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
 
 public class Menu extends BasicUtils {
     private final String menuName;
     private final PwMenu menu;
+
     public Menu(String menuName) {
         this.menuName = menuName;
         menu = element(menuName).castTo(PwMenu.class);

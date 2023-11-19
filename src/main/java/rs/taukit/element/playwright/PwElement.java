@@ -21,20 +21,22 @@ public class PwElement extends Element {
         this.element = locator;
     }
 
-    public PwElement(String elementName, String locator) {
-        this(elementName, new LinkedHashMap<>(Map.of("Локатор", locator)));
-    }
-
-    public PwElement(String elementName, LinkedHashMap<String, Object> elementData) {
-        super(elementName, elementData);
-        this.driver = super.driver.castTo();
-        this.element = driver.getLocator(locator);
-    }
-
     public PwElement(String elementName, ElementModel model) {
         super(elementName, model);
         this.driver = super.driver.castTo();
         this.element = driver.getLocator(locator);
+    }
+
+    public PwElement(String elementName, String locator) {
+        this(elementName, new ElementModel(Map.of("Локатор", locator)));
+    }
+
+    public PwElement(String elementName, LinkedHashMap<String, Object> elementData) {
+        this(elementName, new ElementModel(elementData));
+    }
+
+    public PwElement(String elementName, Locator locator, ElementModel model) {
+        this(elementName, locator);
     }
 
     public PwElement(String elementName, IElement element) {

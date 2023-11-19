@@ -3,8 +3,6 @@ package rs.taukit.element.interfaces;
 import rs.taukit.driver.WebDriver;
 import rs.taukit.element.ElementModel;
 
-import java.util.Map;
-
 public interface IElement {
     <T> T castTo(Class<T> elementType);
 

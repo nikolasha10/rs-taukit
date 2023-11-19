@@ -9,8 +9,8 @@ import rs.taukit.driver.WebDriver;
 import rs.taukit.element.playwright.FileDownload;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.playwright.PlaywrightPageObject;
-import rs.taukit.step.utils.BasicUtils;
 import rs.taukit.storage.StorageManager;
+import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
 
 import java.io.File;
@@ -34,11 +34,11 @@ public class PlaywrightDriver implements WebDriver {
     private final File chromeDirExternally;
     private final File chromeDirInternally;
     private final String browserExtensionPath;
+    private final long threadId;
     private BrowserContext browserContext;
     private int browserIndex;
     private int pageIndex;
     private Download download;
-    private final long threadId;
 
     public PlaywrightDriver() throws IOException {
         threadId = Thread.currentThread().threadId();
@@ -221,13 +221,19 @@ public class PlaywrightDriver implements WebDriver {
 
     @Override
     public void waitForCondition(BooleanSupplier condition) {
+        waitForCondition(condition, 30000);
+    }
+
+    @Override
+    public void waitForCondition(BooleanSupplier condition, double timeout) {
+        BrowserContext.WaitForConditionOptions setTimeout = new BrowserContext.WaitForConditionOptions().setTimeout(timeout);
         AtomicReference<Boolean> conditionIsMet = new AtomicReference<>(false);
         browserContext.waitForCondition(() -> {
             if (!conditionIsMet.get()) {
                 conditionIsMet.set(condition.getAsBoolean());
             }
             return conditionIsMet.get();
-        });
+        }, setTimeout);
     }
 
     @Override
@@ -282,6 +288,14 @@ public class PlaywrightDriver implements WebDriver {
         return DriverManager.getInstance().getDriverId(this);
     }
 
+    public void waitForTimeout(double time) {
+        try {
+            Thread.sleep((long) time);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static class WebBrowser {
         public String name;
         public BrowserContext context;
@@ -292,14 +306,6 @@ public class PlaywrightDriver implements WebDriver {
 
         public void close() {
             context.close();
-        }
-    }
-
-    public void waitForTimeout(double time){
-        try {
-            Thread.sleep((long) time);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
     }
 }

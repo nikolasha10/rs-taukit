@@ -5,38 +5,28 @@ import io.cucumber.java.ru.И;
 import rs.taukit.element.interfaces.IHasTableElements;
 import rs.taukit.element.playwright.PwList;
 import rs.taukit.element.playwright.PwTable;
-import rs.taukit.step.BasicStory;
-import rs.taukit.step.allure.AllureBasicTextFieldStep;
+import rs.taukit.step.allure.AllureBasicStep;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.PdfUtils;
 import rs.taukit.validator.PdfValidator;
 
-import static rs.taukit.step.utils.BasicUtils.*;
+import static rs.taukit.utils.BasicUtils.*;
 
-public class CucumberBasicCustomStep {
-    @И("^дождаться отображения страницы \"(.+)\"$")
-    public static void waitForPageLoad(String pageName) {
-        BasicStory.waitForPageLoad(pageName);
-    }
-
-    @И("^дождаться отображения всплывающего окна \"(.+)\"$")
-    public static void waitForPopupWindow(String pageName) {
-        BasicStory.waitForPopupWindow(pageName);
-    }
-
-    @И("^дождаться закрытия всплывающего окна \"(.+)\"$")
-    public static void waitForPopupClose(String pageName) {
-        BasicStory.waitForPopupClose(pageName);
-    }
+public class CucumberBasicStep {
 
     @И("^нажать на элемент \"(.+)\"$")
     public static void click(String elementName) {
-        BasicStory.clickElement(elementName);
+        AllureBasicStep.clickElement(elementName);
+    }
+
+    @И("^нажать на поле \"(.+)\"$")
+    public static void clickField(String fieldName) {
+        AllureBasicStep.clickElement(fieldName);
     }
 
     @И("^нажать на кнопку \"(.+)\"$")
     public static void clickButton(String buttonName) {
-        BasicStory.clickButton(buttonName);
+        AllureBasicStep.clickButton(buttonName);
     }
 
     /**
@@ -45,12 +35,12 @@ public class CucumberBasicCustomStep {
      */
     @И("^определить значения тестовых параметров$")
     public void testParameterInitFromFile() {
-        BasicStory.testParameterInit();
+        AllureBasicStep.testParameterInit();
     }
 
     @И("^открыть браузер$")
     public void openBrowser() {
-        BasicStory.openBrowser();
+        AllureBasicStep.openBrowser();
     }
 
     @И("^перейти по ссылке \"(.+)\"$")
@@ -58,25 +48,19 @@ public class CucumberBasicCustomStep {
         driver().navigate(eval(url));
     }
 
-    @И("^открыть страницу \"(.+)\"$")
-    public void openPage(String pageName) {
-        BasicStory.openPage(pageName);
-    }
-
-
     @И("^сделать скриншот$")
     public void takeScreenshot() {
-        BasicStory.takeScreenshot();
+        AllureBasicStep.takeScreenshot();
     }
 
     @И("^подождать (\\d+) (секунд|минут)(?:у|ы)?$")
     public void waitForTimeout(String timeValue, String timeUnit) {
-        BasicStory.waitForTimeout(timeValue, timeUnit);
+        AllureBasicStep.waitForTimeout(timeValue, timeUnit);
     }
 
     @И("^дождаться выполнения условий:$")
     public void expectedResultCheck(DataTable datatable) {
-        BasicStory.expectedResultCheck(eval(datatable));
+        AllureBasicStep.expectedResultCheck(eval(datatable));
     }
 
     @И("^в списке \"(.+)\" выбрать \"(.+)\"$")
@@ -103,29 +87,45 @@ public class CucumberBasicCustomStep {
     public void tableRowSaveElementValues(String rowName, DataTable dataTable) {
         ((IHasTableElements) scenarioData().get(rowName)).tableRowSaveElementValues(rowName, eval(dataTable));
     }
+
     @И("^в строке \\((.+)\\) нажать на \"(.+)\"$")
     public void tableRowElementClick(String rowName, String elementName) {
         ((IHasTableElements) scenarioData().get(rowName)).tableRowElementClick(rowName, elementName);
     }
+
     @И("^сохранить файл \"(.+)\", как \"(.+)\"$")
     public void saveDownloadedFileAs(String originalFileName, String fileName) {
         FileUtils.saveDownloadedFileAs(eval(originalFileName), eval(fileName));
     }
+
     @И("^сравнить печатную форму с эталоном$")
     public void validatePrintForm() {
-        BasicStory.validatePrintForm();
+        AllureBasicStep.validatePrintForm();
     }
+
     @И("^сформировать эталон \"(.+)\" по файлу \"(.+)\" и шаблону \"(.+)\"$")
     public void createPdfStandard(String standardName, String originFileName, String templateName, DataTable dataTable) {
         PdfUtils.createPdfStandard(eval(standardName), eval(originFileName), eval(templateName), eval(dataTable));
     }
+
     @И("^сравнить файл \"(.+)\" с эталоном \"(.+)\"$")
     public void comparePdfWithStandard(String testedFileName, String standardName) {
         PdfUtils.comparePdfFiles(eval(testedFileName), eval(standardName));
     }
+
     @И("^проверить документ \"(.+)\" на соответствие эталону$")
     public void validateDocument(String fileName, DataTable dataTable) {
         new PdfValidator(fileName).validate(eval(dataTable));
+    }
+
+    @И("^примечание: далее работаем в контексте блока \"(.+)\"$")
+    public void setBlockContext(String blockName) {
+        AllureBasicStep.setBlockContext(blockName);
+    }
+
+    @И("^примечание: выходим из контекста блока \"(.+)\"$")
+    public void closeBlockContext(String blockName) {
+        AllureBasicStep.exitFromBlockContext(blockName);
     }
 
 }

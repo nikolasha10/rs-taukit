@@ -1,12 +1,13 @@
-package step.utils;
+package utils;
 
 import rs.taukit.driver.DriverManager;
-import rs.taukit.step.BasicStory;
+import rs.taukit.step.allure.AllureBasicPageStep;
+import rs.taukit.step.allure.AllureBasicStep;
 import rs.taukit.testdata.TestData;
 import rs.taukit.utils.TauLogger;
-import step.implementer.SubScenario;
+import step.allure.SubScenario;
 
-public class Utils extends BasicStory {
+public class EfrUtils extends AllureBasicStep {
 
     public static SubScenario subScenario = SubScenario.getInstance();
 
@@ -34,10 +35,10 @@ public class Utils extends BasicStory {
             DriverManager.getInstance().getDriver().reopenBrowser();
         } else {
             TauLogger.report("Вход в приложение был выполнен ранее");
-            openPage("Поиск клиента");
+            new AllureBasicPageStep("Поиск клиента").openPage();
         }
         String str = "";
-        if (Double.parseDouble(str.split(" ")[0])>0.5);
+        if (Double.parseDouble(str.split(" ")[0]) > 0.5) ;
         return checkResult;
     }
 }

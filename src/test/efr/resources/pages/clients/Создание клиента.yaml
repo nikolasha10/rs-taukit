@@ -4,90 +4,167 @@
 Элементы:
   Полная идентификация: client-data-full-identification
   Упрощенная идентификация: client-data-simple-identification
-  Аватар:
-    Тип: файл
-    Локатор: client-avatar-download
-  Фамилия: field-group-clientData-field-name-surName
-  Имя: field-group-clientData-field-name-firstName
-  Отчество: field-group-clientData-field-name-middleName
-  Фамилия и Имя на латинице: otherInformation-field-latinName
-  Дата рождения: field-group-generalInformation-field-name-birthDate-input
-  Пол:
-    Тип: радио-кнопка
-    Локатор: //span[text()='Пол']/following::div[@class='field-value'][1]
-    Названия: //li//button/div
-    Кнопки: //parent::button
-  Добавить (гражданство): client-nationalities-link-add
-  Гражданство:
-    тип: справочник
-    локатор: //span[text()='Гражданство']/following::a[@data-id='countryPopupEdit0']/..
-    кнопка: Добавить (гражданство)
-    всплывающее окно: Выберите страну
-    поле поиска: Название
-    кнопка поиска: Показать
-  Место рождения: field-group-client-data-field-name-birthplace
-  Изменить (Место рождения. Страна): change-birth-place-okcm-code
-  Место рождения. Страна:
-    тип: справочник
-    локатор: //span[text()='Гражданство']/following::a[@data-id='countryPopupEdit0']/..
-    кнопка: Изменить (Место рождения. Страна)
-    всплывающее окно: Выберите страну
-    поле поиска: Название
-    кнопка поиска: Показать
-  Изменить (Место рождения. Субъект РФ): change-birth-place-okato-code
-  Место рождения. Субъект РФ:
-    тип: справочник
-    локатор: //span[text()='Гражданство']/following::a[@data-id='countryPopupEdit0']/..
-    кнопка: Изменить (Место рождения. Субъект РФ)
-    всплывающее окно: Субъекты РФ
-    поле поиска: Наименование
-    кнопка поиска: Показать
-  Район (Место рождения): birth-place-district
-  Населённый пункт (Место рождения): birth-place-locality
-  Документ:
+  Общие сведения:
     тип: блок элементов
-    локатор: //div[@class='document-block']
+    локатор: //div[text()='Общие сведения']/..
     элементы:
-      Тип документа:
-        тип: выпадающий список
-        локатор: //div[contains(@data-id,'docType')]
-        элементы: //div[@role='option']
-        значение: //span[@role='option' and @aria-selected='true']
-      Удалить документ: //a[contains(@data-id,'delete')]
-      Серия:
-        тип: поле
-        локатор: //input[contains(@data-id,'docSeries')]
-      Номер:
-        тип: поле
-        локатор: //input[contains(@data-id,'docNumber')]
-      Код подразделения:
-        тип: поле
-        локатор: //input[contains(@data-id,'divisionCode')]
-      Кем выдан:
-        тип: поле
-        локатор: //input[contains(@data-id,'issuedBy')]
-      Дата выдачи:
+      Аватар:
+        Тип: файл
+        Локатор: client-avatar-download
+      Фамилия: field-group-clientData-field-name-surName
+      Имя: field-group-clientData-field-name-firstName
+      Отчество: field-group-clientData-field-name-middleName
+      Фамилия и Имя на латинице: otherInformation-field-latinName
+      Дата рождения: field-group-generalInformation-field-name-birthDate-input
+      Пол:
+        Тип: радио-кнопка
+        Локатор: //span[text()='Пол']/following::div[@class='field-value'][1]
+        Названия: //li//button/div
+        Кнопки: //parent::button
+      Гражданство:
+        тип: справочник
+        локатор: //span[text()='Гражданство']/ancestor::div[@class='field undefined']
+        кнопка: client-nationalities-link-add
+        всплывающее окно: Выберите страну
+        поле поиска: Название
+        кнопка поиска: Показать
+      Резидент:
+        тип: переключатель
+        локатор: //input[@data-id='client-residence-toggle']/ancestor::label
+        включен: //input[@data-id='client-residence-toggle']/ancestor::label[@class='toggle checked']
+  Место рождения:
+    тип: блок элементов
+    локатор: //div[text()='Место рождения']/..
+    элементы:
+      Место рождения: field-group-client-data-field-name-birthplace
+      Страна:
+        тип: справочник
+        локатор: //div[text()='Место рождения']/following::span[text()='Страна'][1]/ancestor::div[@class='field undefined']
+        кнопка: change-birth-place-okcm-code
+        всплывающее окно: Выберите страну
+        поле поиска: Название
+        кнопка поиска: Показать
+      Субъект РФ:
+        тип: справочник
+        локатор: //div[text()='Место рождения']/following::span[text()='Субъект РФ'][1]/ancestor::div[@class='field undefined']
+        кнопка: change-birth-place-okato-code
+        всплывающее окно: Субъекты РФ
+        поле поиска: Наименование
+        кнопка поиска: Показать
+      Район: birth-place-district
+      Населённый пункт: birth-place-locality
+  Документы:
+    тип: блок элементов
+    локатор: //div[text()='Документы']/..
+    элементы:
+      Документ:
+        тип: блок элементов
+        локатор: //div[@class='document-block']
+        элементы:
+          Тип документа:
+            тип: выпадающий список
+            локатор: //div[contains(@data-id,'docType')]
+            элементы: //div[@role='option']
+            значение: //span[@role='option' and @aria-selected='true']
+          Удалить документ: //a[contains(@data-id,'delete')]
+          Серия:
+            тип: поле
+            локатор: //input[contains(@data-id,'docSeries')]
+          Номер:
+            тип: поле
+            локатор: //input[contains(@data-id,'docNumber')]
+          Код подразделения:
+            тип: поле
+            локатор: //input[contains(@data-id,'divisionCode')]
+          Кем выдан:
+            тип: поле
+            локатор: //input[contains(@data-id,'issuedBy')]
+          Дата выдачи:
+            тип: дата
+            локатор: //input[contains(@data-id,'issuedDate-input')]
+          Дата окончания:
+            тип: дата
+            локатор: //input[contains(@data-id,'issuedEndDate-input')]
+          Активен:
+            тип: переключатель
+            локатор: //input[contains(@data-id,'active')]/..
+            включен: //input[contains(@data-id,'active')]/ancestor::label[@class='toggle checked']
+          Основной документ:
+            тип: переключатель
+            локатор: //input[contains(@data-id,'main')]/..
+            включен: //input[contains(@data-id,'main')]/ancestor::label[@class='toggle checked']
+          Признак действительного документа:
+            тип: переключатель
+            локатор: //input[contains(@data-id,'validDocument')]/..
+            включен: //input[contains(@data-id,'validDocument')]/ancestor::label[@class='toggle checked']
+          Скан документа:
+            тип: файл
+            локатор: //input[contains(@data-id,'file-upload')]
+      Добавить документ: button-add-doc
+      Полис ОМС: oms
+      ИНН: field-group-documentsBlock-field-name-inn
+      СНИЛС: field-group-documentsBlock-field-name-snils
+      Серия водительского удостоверения: field-group-documentsBlock-field-name-licenseDriver
+      Номер водительского удостоверения: field-group-documentsBlock-field-name-licenseDriver
+      Выдано:
         тип: дата
-        локатор: //input[contains(@data-id,'issuedDate-input')]
-      Дата окончания:
-        тип: дата
-        локатор: //input[contains(@data-id,'issuedEndDate-input')]
-      Активен:
-        тип: переключатель
-        локатор: //input[contains(@data-id,'active')]/..
-        включен: //input[contains(@data-id,'active')]/ancestor::label[@class='toggle checked']
-      Основной документ:
-        тип: переключатель
-        локатор: //input[contains(@data-id,'main')]/..
-        включен: //input[contains(@data-id,'main')]/ancestor::label[@class='toggle checked']
-      Признак действительного документа:
-        тип: переключатель
-        локатор: //input[contains(@data-id,'validDocument')]/..
-        включен: //input[contains(@data-id,'validDocument')]/ancestor::label[@class='toggle checked']
-      Скан документа:
-        тип: файл
-        локатор: //input[contains(@data-id,'file-upload')]
-  Добавить документ: button-add-doc
+        локатор: licenseDriverIssuedDate-input
+  Контакты:
+    тип: блок элементов
+    локатор: //div[text()='Контакты']/..
+    элементы:
+      E-mail: field-email-value
+      E-mail отсутствует:
+        тип: чекбокс
+        локатор: //input[@data-id='field-email-empty']/..
+        установлен: //input[@data-id='field-email-empty']/parent::label[@class='checkbox-container checked']
+      Телефон:
+        тип: блок элементов
+        локатор: //span[text()='Тип телефона']/ancestor::div[@class='field undefined']/..
+        элементы:
+          Тип телефона:
+            тип: выпадающий список
+            локатор: //div[contains(@data-id,'phonetype')]
+            элементы: //div[@role='option']
+            значение: //span[@role='option' and @aria-selected='true']
+          Номер телефона: //input[contains(@data-id,'phoneNumber')]
+          Удалить: //a[contains(@data-id,'delete')]
+          Основной:
+            тип: переключатель
+            локатор: //input[contains(@data-id,'phoneMain')]
+            включен: //input[contains(@data-id,'phoneMain')]/ancestor::label[@class='toggle checked']
+  Адреса:
+    тип: блок элементов
+    локатор: //div[text()='Адреса']/..
+    элементы:
+      Адрес регистрации:
+        тип: блок элементов
+        локатор: //div[text()='Адрес регистрации']/following-sibling::div[1]
+        элементы:
+          Страна:
+            тип: справочник
+            локатор: //span[text()='Страна']/ancestor::div[@class='field undefined']
+            кнопка: //a[contains(@data-id,'change-country')]
+            всплывающее окно: Выберите страну
+            поле поиска: Название
+            кнопка поиска: Показать
+          Адрес:
+            тип: поиск по значению
+            локатор: //span[text()='Адрес']/following::div[@class='field-value'][1]
+            поле ввода: //input[@class='search-input']
+            список значений: //div[contains(@class,'search-option')]/div
+            заполнить вручную: //button[@class='search-button-fill-manually']
+          Регион:
+            тип: поиск по значению
+            локатор: //span[text()='Регион']/following::div[@class='field-value'][1]
+            поле ввода: //input[@class='search-input']
+            список значений: //div[contains(@class,'search-option')]/div
+            заполнить вручную: //button[@class='search-button-fill-manually']
+          Город: //input[contains(@data-id,'field-city')]
+          Улица: //input[contains(@data-id,'field-street')]
+          Номер дома: //input[contains(@data-id,'field-house')]
+          Индекс: //input[contains(@data-id,'field-index')]
+          Период регистрации (с): //..//input[@data-id='field-registrationAddress-reg-period-start-input']
 
 Обязательные элементы:
   - Полная идентификация

@@ -1,26 +1,29 @@
-package step.scenario;
+package step.cucumber;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ru.И;
-import step.Story;
-import step.implementer.Menu;
+import step.allure.AllureEfrStep;
+import step.allure.Menu;
 
-import static rs.taukit.step.utils.BasicUtils.eval;
+import static rs.taukit.utils.BasicUtils.eval;
 
-public class Scenario {
+public class CucumberEfrStep {
 
     @И("^войти в \"(ЕФР)\" под учетными данными пользователя \"(.+)\"$")
     public void loginIntoApplication(String appName, String employeeDescription) {
-        Story.loginIntoApplication(appName, employeeDescription);
+        AllureEfrStep.loginIntoApplication(appName, employeeDescription);
     }
+
     @И("^выполнить сценарий \"(.+)\"$")
     public void runScenario(String scenarioName) {
-        Story.runScenario(scenarioName);
+        AllureEfrStep.runScenario(scenarioName);
     }
+
     @И("^выполнить сценарий \"(.+)\" с параметрами:$")
     public void runScenario(String scenarioName, DataTable dataTable) {
-        Story.runScenario(scenarioName, eval(dataTable));
+        AllureEfrStep.runScenario(scenarioName, eval(dataTable));
     }
+
     @И("^через \"(.+)\" перейти на страницу \"(.+)\"$")
     public void selectMenuItem(String menuName, String itemName) {
         Menu menu = new Menu(menuName);

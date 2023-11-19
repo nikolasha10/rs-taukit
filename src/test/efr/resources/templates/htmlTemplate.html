@@ -1,0 +1,34 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<style type="text/css">
+		body {text-align: center;}
+		button {width: 8em; height: 4em; position: fixed;}
+		.buttonWrapper div {height: 3.5em; }
+	</style>
+</head>
+
+<body>
+	<table align=center>
+		<tr>
+			<td><div><img name="image" src=""></div></td>
+			<td>
+				<table class="buttonWrapper">
+					<tr><td><div><button name="differs">Различия</button></div></td></tr>
+					<tr><td><div><button name="current">Фактический результат</button></div></td></tr>
+					<tr><td><div><button name="expected">Ожидаемый результат</button></div></td></tr>
+				</table>
+			</td>
+		</tr>
+	</table>	
+	<script type="text/javascript" defer>
+		var images = ["${differences}","${tested}","${expected}"];
+		image.src = images[0];
+		const buttons = document.getElementsByTagName('button');
+		for (var i=0; i<buttons.length; i++){
+			const index = i;
+			buttons[i].onclick = () => { image.src = images[index]; }
+		}
+	</script>
+</body>
+</html>

@@ -1,20 +1,17 @@
-package rs.taukit.step.utils;
+package rs.taukit.utils;
 
 import io.cucumber.datatable.DataTable;
-import rs.taukit.testdata.ScenarioData;
 import rs.taukit.driver.DriverManager;
 import rs.taukit.driver.WebDriver;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.exceptions.ElementNotDescribedException;
-import rs.taukit.exceptions.TestDataException;
 import rs.taukit.page.PageObject;
+import rs.taukit.page.PageStorage;
 import rs.taukit.storage.StorageManager;
 import rs.taukit.storage.TestContext;
-import rs.taukit.page.PageStorage;
+import rs.taukit.testdata.ScenarioData;
 import rs.taukit.testdata.TestData;
-import rs.taukit.utils.TauLogger;
-import rs.taukit.utils.TextUtils;
 
 import java.util.Map;
 import java.util.Optional;
@@ -24,19 +21,22 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class BasicUtils {
-    public static DriverManager driverManager(){
+    public static DriverManager driverManager() {
         return DriverManager.getInstance();
     }
 
-    public static WebDriver driver(){
+    public static WebDriver driver() {
         return driverManager().getDriver();
     }
-    public static StorageManager storageManager(){
+
+    public static StorageManager storageManager() {
         return StorageManager.getInstance();
     }
+
     public static TestContext testContext() {
         return storageManager().getTestContext();
     }
+
     public static ScenarioData scenarioData() {
         return testContext().getScenarioData();
     }
@@ -49,10 +49,11 @@ public class BasicUtils {
         return pageStorage().getPage(testContext().getCurrentPageName());
     }
 
-    public static IElement element(String elementName){
+    public static IElement element(String elementName) {
         return Optional.ofNullable(page().getElement(elementName))
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, testContext().getCurrentPageName()));
     }
+
     public static TestData getCurrentUser() {
         return testContext().getCurrentUser();
     }
@@ -65,11 +66,11 @@ public class BasicUtils {
     }
 
     public static DataTable eval(DataTable dataTable) {
-        if (testContext().getScenarioData() == null){
+        if (testContext().getScenarioData() == null) {
             testContext().setScenarioData(new ScenarioData(testContext().getPickle()));
         }
         ScenarioData scenarioData = testContext().getScenarioData();
-        Function<String,String> eval = (template) -> {
+        Function<String, String> eval = (template) -> {
             if (template == null) return null;
             String format = "\\$\\{(.+?)} -> (.+)";
             Matcher matcher = Pattern.compile(format).matcher(template);
@@ -85,7 +86,7 @@ public class BasicUtils {
     public static void checkDataHeaders(DataTable dataTable, String expectedHeaders) {
         Map<String, String> dataRow = dataTable.asMaps().get(0);
         String dataTableHeaders = String.format("| %s |", String.join(" | ", dataRow.keySet()));
-        if (!expectedHeaders.equals(dataTableHeaders)){
+        if (!expectedHeaders.equals(dataTableHeaders)) {
             String message = String.format("Заголовки таблицы данных не соответствуют ожидаемым:%nОжидались: %s%nПереданы:  %s",
                     expectedHeaders, dataTableHeaders);
             throw new DataTableFormatMismatchException(message);

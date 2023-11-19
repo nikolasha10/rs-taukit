@@ -4,11 +4,10 @@ import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
-import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 
-import static rs.taukit.step.utils.BasicUtils.page;
+import static rs.taukit.utils.BasicUtils.page;
 
 public class PwTextField extends PwElement implements IHasEditableValue {
     public PwTextField(String elementName, String locator) {
@@ -22,6 +21,7 @@ public class PwTextField extends PwElement implements IHasEditableValue {
     public PwTextField(String elementName, ElementModel model) {
         super(elementName, model);
     }
+
     public PwTextField(String elementName, Locator locator, ElementModel model) {
         super(elementName, locator);
     }

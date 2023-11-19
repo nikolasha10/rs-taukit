@@ -7,7 +7,7 @@ import rs.taukit.element.interfaces.IHasEditableValue;
 import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
-import static rs.taukit.step.utils.BasicUtils.page;
+import static rs.taukit.utils.BasicUtils.page;
 
 public class PwDropdownList extends PwElement implements IHasEditableValue {
     protected final Locator options;
@@ -18,9 +18,11 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
         this.options = driver.getLocator(model.get("элементы"));
         this.selectedValue = driver.getLocator(model.get("значение"));
     }
+
     public PwDropdownList(String elementName, LinkedHashMap<String, Object> elementData) {
         this(elementName, new ElementModel(elementData));
     }
+
     public PwDropdownList(String elementName, Locator locator, ElementModel model) {
         super(elementName, locator);
         this.options = driver.getLocator(model.get("элементы"));

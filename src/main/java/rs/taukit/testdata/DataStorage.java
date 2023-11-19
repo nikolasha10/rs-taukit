@@ -2,12 +2,12 @@ package rs.taukit.testdata;
 
 import io.cucumber.datatable.DataTable;
 import rs.taukit.exceptions.TestDataException;
-import rs.taukit.storage.StorageManager;
 import rs.taukit.testdata.constant.TestDataField;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
 import rs.taukit.utils.YamlParser;
 
+import java.io.File;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,12 +15,14 @@ import java.util.regex.Pattern;
 public class DataStorage {
     private final Map<String, ?> dataStorage = new LinkedHashMap<>();
 
-    public DataStorage(Map<String, ?> data) {
+    public DataStorage(String featureFilePath, Map<String, ?> data) {
+        File featureFile = new File(featureFilePath);
+        String featureDirPath = featureFile.getParent();
         data.forEach((fieldName, fieldValue) -> {
             if (fieldValue instanceof Map) {
                 Map<String, ?> fieldData = YamlParser.convert(fieldValue);
                 String fieldType = YamlParser.convert(fieldData.get("тип"));
-                ITestData testData = TestDataField.getField(fieldType, fieldName, fieldValue);
+                ITestData testData = TestDataField.getField(fieldType, fieldName, fieldValue, featureDirPath);
                 this.dataStorage.put(fieldName, YamlParser.convert(testData));
             } else if (fieldValue instanceof String) {
                 String value = evalStrings(YamlParser.convert(fieldValue));
@@ -29,6 +31,10 @@ public class DataStorage {
                 this.dataStorage.put(fieldName, YamlParser.convert(fieldValue));
             }
         });
+    }
+
+    public DataStorage(Map<String, ?> data) {
+        this("", data);
     }
 
     public <T> T get(String fieldName) {
@@ -69,7 +75,7 @@ public class DataStorage {
         Matcher matcher = Pattern.compile(format).matcher(template);
         try {
             return matcher.replaceAll(matchResult -> {
-                if (get(matchResult.group(1)) instanceof ITestData iTestData){
+                if (get(matchResult.group(1)) instanceof ITestData iTestData) {
                     return iTestData.getStringValue();
                 } else {
                     return get(matchResult.group(1));
@@ -89,7 +95,7 @@ public class DataStorage {
             return matcher.replaceFirst(matchResult -> {
                 TestData workData = get(matchResult.group(1));
                 Object object = workData.getDataStorage().get(matchResult.group(2));
-                if (object instanceof ITestData testData){
+                if (object instanceof ITestData testData) {
                     return testData.getStringValue();
                 } else return object.toString();
             });

@@ -51,7 +51,7 @@ public class TestRunner {
      *
      * @param scenarioEntity - проверяемый объект
      * @param tag            - аннотация, которую должен содержать сценарий или группа сценариев
-     * @return               - true или false
+     * @return - true или false
      */
     private boolean mustBeAdded(Object scenarioEntity, String tag) {
         boolean isWrapper = scenarioEntity instanceof FeatureWrapper;
@@ -98,7 +98,7 @@ public class TestRunner {
         StorageManager.getInstance().initTestContext(pickleWrapper, functionality);
         DriverManager.getInstance().initDriver();
         System.out.println();
-        TauLogger.console("TEST STARTED: [%s] %s", functionality, scenarioName);
+        TauLogger.console("TEST STARTED: %s %s", functionality, scenarioName);
         runner.runScenario(pickle);
     }
 

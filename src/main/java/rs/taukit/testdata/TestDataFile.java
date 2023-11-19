@@ -14,6 +14,10 @@ public class TestDataFile implements ITestData {
     private final String fileExtension;
 
     public TestDataFile(String fieldName, LinkedHashMap<String, ?> data) {
+        this(fieldName, data, "");
+    }
+
+    public TestDataFile(String fieldName, LinkedHashMap<String, ?> data, String dirPath) {
         this.fieldName = fieldName;
         this.dataStorage = new DataStorage(data);
         this.filePath = this.dataStorage.get("путь");

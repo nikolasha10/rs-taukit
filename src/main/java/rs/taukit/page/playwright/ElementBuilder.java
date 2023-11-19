@@ -5,10 +5,10 @@ import rs.taukit.element.ElementModel;
 import rs.taukit.element.ElementType;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.playwright.PwElement;
+import rs.taukit.element.playwright.PwTextField;
 import rs.taukit.exceptions.ElementNotBuiltException;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ElementBuilder {
@@ -16,9 +16,9 @@ public class ElementBuilder {
     public static Map<String, IElement> buildElements(Map<String, ?> elements) {
         Map<String, IElement> result = new HashMap<>();
         elements.forEach((elementName, elementObject) -> {
-            if (elementObject instanceof String locator){
+            if (elementObject instanceof String locator) {
                 result.put(elementName, buildElement(elementName, locator));
-            } else if (elementObject instanceof Map elementData){
+            } else if (elementObject instanceof Map elementData) {
                 IElement element = buildElement(elementName, elementData);
                 result.put(elementName, element);
             }
@@ -27,7 +27,7 @@ public class ElementBuilder {
     }
 
     public static IElement buildElement(String elementName, String locator) {
-        return new PwElement(elementName, locator);
+        return new PwTextField(elementName, locator);
     }
 
     public static IElement buildElement(String elementName, PwElement element, Locator locator) {
@@ -46,6 +46,7 @@ public class ElementBuilder {
         Class<? extends IElement> elementClass = ElementType.getType(elementTypeName).getElementClass();
         return buildElement(elementName, elementClass, model);
     }
+
     public static IElement buildElement(String elementName, Class<? extends IElement> elementClass, ElementModel model) {
         try {
             return elementClass.getConstructor(String.class, ElementModel.class).newInstance(elementName, model);
@@ -53,6 +54,7 @@ public class ElementBuilder {
             throw new ElementNotBuiltException(e, elementName, elementClass.getName(), model.toString());
         }
     }
+
     public static IElement buildElement(String elementName, Class<? extends IElement> elementClass, IElement element) {
         try {
             return elementClass.getConstructor(String.class, IElement.class).newInstance(elementName, element);

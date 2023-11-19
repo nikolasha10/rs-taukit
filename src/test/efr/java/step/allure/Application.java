@@ -1,4 +1,4 @@
-package step.implementer;
+package step.allure;
 
 import rs.taukit.config.Config;
 import rs.taukit.step.allure.BasicApplication;
@@ -10,8 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static rs.taukit.step.utils.BasicUtils.scenarioData;
-import static rs.taukit.step.utils.BasicUtils.testContext;
+import static rs.taukit.utils.BasicUtils.scenarioData;
+import static rs.taukit.utils.BasicUtils.testContext;
 
 public class Application extends BasicApplication {
     String appName;
@@ -22,12 +22,10 @@ public class Application extends BasicApplication {
 
     public Application(String appName) {
         this.appName = appName;
-        LinkedHashMap<String, String> appDataParameters = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> appDataParameters = new LinkedHashMap<>();
         appDataParameters.put("тип", "тестовые данные");
         appDataParameters.put("файл", Config.getProperty("applicationsFilePath"));
-        appDataParameters.put("поиск по полю", "название");
-        appDataParameters.put("метод поиска", "значение совпадает");
-        appDataParameters.put("название", appName);
+        appDataParameters.put("поиск по полям", Map.of("название", appName));
         this.appData = new TestData(appName, appDataParameters);
         this.startPageName = appData.get("стартовая страница");
     }
@@ -36,15 +34,16 @@ public class Application extends BasicApplication {
         return currentUser != null && currentUser.equals(user);
     }
 
-    public void login(String userDescription){
+    public void login(String userDescription) {
         User user = new User(userDescription);
         Application activeApp = (Application) testContext().getApplication(appName);
         Application app = Optional.ofNullable(activeApp).orElse(new Application(appName));
-        if (!app.isUserLoggedIn(user)){
+        if (!app.isUserLoggedIn(user)) {
             app.login(user);
             testContext().putApplication(appName, app);
         }
     }
+
     public void login(User user) {
         Map<String, ?> startPageData = TestDataUtils.loadPageConfig(startPageName);
         String relativeUrl = YamlParser.convert(startPageData.get("Адрес"));
