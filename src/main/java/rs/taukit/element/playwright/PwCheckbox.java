@@ -2,11 +2,12 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.IHasCheckbox;
 import rs.taukit.element.interfaces.IHasEditableValue;
 
 import java.util.LinkedHashMap;
 
-public class PwCheckbox extends PwElement implements IHasEditableValue {
+public class PwCheckbox extends PwElement implements IHasEditableValue, IHasCheckbox {
     private final Locator checked;
 
     public PwCheckbox(String elementName, LinkedHashMap<String, Object> elementData) {
@@ -42,5 +43,15 @@ public class PwCheckbox extends PwElement implements IHasEditableValue {
         if (switchOn != isTurnedOn) {
             element.click();
         }
+    }
+
+    @Override
+    public void setCheckbox() {
+        setValue("да");
+    }
+
+    @Override
+    public void unsetCheckbox() {
+        setValue("нет");
     }
 }

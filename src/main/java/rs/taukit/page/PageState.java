@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 public enum PageState {
     IS_DISPLAYED("отображается", PageObject::isPageLoaded, "не отображается"),
-    IS_NOT_DISPLAYED("не отображается", page -> page.isPageClosed(), "отображается");
+    IS_NOT_DISPLAYED("не отображается", PageObject::isPageClosed, "отображается");
 
     private static final Map<String, PageState> BY_NAME = new HashMap<>();
 

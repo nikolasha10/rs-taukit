@@ -48,9 +48,9 @@ public class CucumberBasicStep {
         driver().navigate(eval(url));
     }
 
-    @И("^сделать скриншот$")
+    @И("^сохранить снимок экрана$")
     public void takeScreenshot() {
-        AllureBasicStep.takeScreenshot();
+        AllureBasicStep.takeScreenshot(String.format("страница '%s'", testContext().getCurrentPageName()));
     }
 
     @И("^подождать (\\d+) (секунд|минут)(?:у|ы)?$")
@@ -123,9 +123,19 @@ public class CucumberBasicStep {
         AllureBasicStep.setBlockContext(blockName);
     }
 
+    @И("^примечание: далее работаем в контексте текущей страницы$")
+    public void setCurrentPageContext() {
+        AllureBasicStep.setCurrentPageContext();
+    }
+
+    @И("^примечание: выходим из текущего контекста и работаем в контексте блока \"(.+)\"$")
+    public void closeCurrentAndSetNewContext(String blockName) {
+        AllureBasicStep.closeCurrentAndSetNewBlockContext(blockName);
+    }
+
     @И("^примечание: выходим из контекста блока \"(.+)\"$")
     public void closeBlockContext(String blockName) {
-        AllureBasicStep.exitFromBlockContext(blockName);
+        AllureBasicStep.closeCurrentContext();
     }
 
 }

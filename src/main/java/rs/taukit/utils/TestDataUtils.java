@@ -8,11 +8,16 @@ import java.util.Map;
 import java.util.Optional;
 
 public class TestDataUtils {
-    public static <T> T get(Map<String,T> data, String fieldName){
+    public static <T> T get(Map<String, T> data, String fieldName) {
         return Optional.ofNullable(data.get(fieldName))
                 .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле '%s'. Присутствуют поля: %s",
                         fieldName, data.keySet()));
     }
+
+    public static <T> T getOptional(Map<String, T> data, String fieldName) {
+        return data.getOrDefault(fieldName, null);
+    }
+
     public static Map<String, ?> loadPageConfig(String pageName) {
         try {
             String pageFilePath = Config.getPageFilePath(pageName);

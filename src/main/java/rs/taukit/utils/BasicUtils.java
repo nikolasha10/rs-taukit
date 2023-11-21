@@ -4,6 +4,7 @@ import io.cucumber.datatable.DataTable;
 import rs.taukit.driver.DriverManager;
 import rs.taukit.driver.WebDriver;
 import rs.taukit.element.interfaces.IElement;
+import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.page.PageObject;
@@ -49,7 +50,14 @@ public class BasicUtils {
         return pageStorage().getPage(testContext().getCurrentPageName());
     }
 
+    public static IHasBlockElements context() {
+        return page().getCurrentContext();
+    }
+
     public static IElement element(String elementName) {
+        if (context() != null) {
+            return context().getElementByName(1, elementName);
+        }
         return Optional.ofNullable(page().getElement(elementName))
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, testContext().getCurrentPageName()));
     }

@@ -1,6 +1,7 @@
 package rs.taukit.page;
 
 import rs.taukit.element.interfaces.IElement;
+import rs.taukit.element.interfaces.IHasBlockElements;
 
 public interface PageObject {
     String getPageUrl();
@@ -27,9 +28,15 @@ public interface PageObject {
 
     boolean isPageClosed();
 
-    IElement getCurrentContext();
+    IHasBlockElements getCurrentContext();
 
     void setCurrentContext(String blockName);
 
     IElement dropCurrentContext();
+
+    double getPageTimeout();
+
+    void setPageTimeout(String timeoutString);
+
+    void setPageTimeout(double timeout);
 }

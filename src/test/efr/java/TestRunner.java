@@ -85,8 +85,8 @@ public class TestRunner {
     /**
      * Запускает сценарии в соответствии с данными из двумерного массива, возвращаемого методом <i>getScenarioByTag</i>
      *
-     * @param pickleWrapper
-     * @param cucumberFeature
+     * @param pickleWrapper - объект-обертка для работы с сущностью cucumber-сценария.
+     * @param cucumberFeature - объект для получения описания функционала, тестируемого сценарием.
      */
     @Test(dataProvider = "getScenariosByTag")
     public void runByTag(PickleWrapper pickleWrapper, FeatureWrapper cucumberFeature) {
@@ -108,7 +108,7 @@ public class TestRunner {
         String scenarioName = testContext.getScenarioName();
         String functionality = testContext.getFunctionality();
         String testStatus = result.getStatus() == 1 ? "PASSED" : "FAILED";
-        TauLogger.console("TEST %s: [%s] %s", testStatus, functionality, scenarioName);
+        TauLogger.console("TEST %s: %s %s", testStatus, functionality, scenarioName);
         long scenarioEndTime = result.getEndMillis();
         AllureReport.editReports(scenarioName, functionality, scenarioEndTime);
         TauLogger.collectLogs();

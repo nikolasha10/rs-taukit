@@ -24,6 +24,8 @@ public enum ElementType {
     RADIO_BUTTON("радио-кнопка", PwRadioButton.class),
     DROPDOWN_LIST("выпадающий список", PwDropdownList.class),
     LINK("ссылка", PwLink.class),
+    BUTTON("кнопка", PwButton.class),
+    TEXT("текст", PwText.class),
     ELEMENT_TABLE("таблица", PwTable.class),
     FILE("файл", FileAttachment.class),
     DOWNLOAD("загрузка файла", FileDownload.class),

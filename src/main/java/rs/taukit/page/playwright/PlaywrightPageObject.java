@@ -28,14 +28,15 @@ public class PlaywrightPageObject implements PageObject {
     private final String pageControlUrl;
     private final Map<String, IElement> pageElements = new HashMap<>();
     private final List<String> expectedElements;
-    private final Page.WaitForConditionOptions options;
     private final Page.ScreenshotOptions screenshotOptions;
     private final Deque<IHasBlockElements> currentContext = new LinkedList<>();
+    private Page.WaitForConditionOptions options;
+    private double pageTimeout;
 
     public PlaywrightPageObject(Page page, String pageName) {
         Map<String, ?> pageConfig = loadPageConfig(pageName);
         String pageTimeoutString = pageConfig.get("Максимальное время ожидания").toString();
-        double pageTimeout = TimeStringParser.getTime(pageTimeoutString.equalsIgnoreCase("по умолчанию")
+        setPageTimeout(pageTimeoutString.equalsIgnoreCase("по умолчанию")
                 ? Config.getProperty("pageLoadingTimeout") : pageTimeoutString);
         this.page = page;
         this.pageName = pageName;
@@ -75,12 +76,17 @@ public class PlaywrightPageObject implements PageObject {
 
     public void waitForLoad() {
         try {
-            BooleanSupplier waitCondition = () -> isUrlCorrect() && hasPageAllExpectedElements();
-            page.waitForCondition(waitCondition, options);
-            StorageManager.getInstance().getTestContext().setCurrentPageName(pageName);
+            waitForLoadAndContinue();
         } catch (Exception e) {
             throw new PageNotLoadException(e, getPageNotLoadMessage());
         }
+    }
+
+    public void waitForLoadAndContinue() {
+        BooleanSupplier waitCondition = () -> isUrlCorrect() && hasPageAllExpectedElements();
+        this.options = new Page.WaitForConditionOptions().setTimeout(pageTimeout);
+        page.waitForCondition(waitCondition, options);
+        StorageManager.getInstance().getTestContext().setCurrentPageName(pageName);
     }
 
     public void waitForClose() {
@@ -113,7 +119,7 @@ public class PlaywrightPageObject implements PageObject {
     @Override
     public boolean isPageLoaded() {
         try {
-            waitForLoad();
+            waitForLoadAndContinue();
             return true;
         } catch (Exception e) {
             return false;
@@ -137,7 +143,11 @@ public class PlaywrightPageObject implements PageObject {
 
     @Override
     public void setCurrentContext(String blockName) {
-        this.currentContext.add(getElement(blockName).castTo(IHasBlockElements.class));
+        if (blockName == null) {
+            this.currentContext.clear();
+        } else {
+            this.currentContext.add(getElement(blockName).castTo(IHasBlockElements.class));
+        }
     }
 
     @Override
@@ -162,8 +172,8 @@ public class PlaywrightPageObject implements PageObject {
         String url = pageUrl.startsWith("file") ? pageUrl : Config.getSTAND().getUrl() + pageUrl;
         try {
             page.navigate(url);
-        } catch (Exception e) {
-
+        } catch (Exception ignored) {
+            // ignored
         }
         waitForLoad();
         StorageManager.getInstance().getTestContext().setCurrentPageName(pageName);
@@ -220,6 +230,10 @@ public class PlaywrightPageObject implements PageObject {
 
     @Override
     public IElement replaceElement(String elementName, Class<? extends IElement> elementType) {
+        IHasBlockElements context = getCurrentContext();
+        if (context != null) {
+            return context.getElementByName(1, elementName).castTo(elementType);
+        }
         IElement currentElement = Optional.ofNullable(pageElements.get(elementName))
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
         pageElements.replace(elementName, ElementBuilder.buildElement(elementName, elementType, currentElement));
@@ -236,5 +250,15 @@ public class PlaywrightPageObject implements PageObject {
             result.putAll(ElementBuilder.buildElements(blockElementsData));
         });
         return result;
+    }
+
+    @Override
+    public void setPageTimeout(String timeoutString) {
+        this.pageTimeout = TimeStringParser.getTime(timeoutString);
+    }
+
+    @Override
+    public void setPageTimeout(double timeout) {
+        this.pageTimeout = timeout;
     }
 }

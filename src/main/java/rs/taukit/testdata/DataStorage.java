@@ -62,6 +62,8 @@ public class DataStorage {
                 dataTable.add(Arrays.asList(fieldName, value));
             } else if (fieldValue instanceof Integer) {
                 dataTable.add(Arrays.asList(fieldName, YamlParser.convert(fieldValue)));
+            } else {
+                dataTable.add(Arrays.asList(fieldName, fieldValue.toString()));
             }
         });
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();

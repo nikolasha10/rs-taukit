@@ -3,8 +3,11 @@
 Название: Обратите внимание
 Элементы:
   Заголовок: //div[@class='popup-window-title' and text()='Обратите внимание']
+  Сообщение: popup-content-message-content
   Верифицировать: MessageBoxButton-Верифицировать
   Продолжить без верификации: MessageBoxButton-Продолжить без верификации
+  Да: confirmYesButton
+  Нет: confirmNoButton
 Обязательные элементы:
   - Заголовок
 Максимальное время ожидания: по умолчанию

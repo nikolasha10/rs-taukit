@@ -70,11 +70,10 @@ public class AllureBasicStep extends BasicUtils {
         TauLogger.report("Нажата кнопка '%s'", buttonName);
     }
 
-    @Step("сделать скриншот")
-    public static void takeScreenshot() {
-        TauLogger.attachScreenshot(page().takeScreenshot());
+    @Step("снимок экрана: {screenshotName}")
+    public static void takeScreenshot(String screenshotName) {
+        TauLogger.attachScreenshot(screenshotName, page().takeScreenshot());
     }
-
 
     public static void waitForTimeout(String timeValue, String timeUnit) {
         TauLogger.console("Ждём %s %s", timeValue, timeUnit);
@@ -193,11 +192,23 @@ public class AllureBasicStep extends BasicUtils {
         TauLogger.console("Текущий контекст: Блок элементов '%s'", blockName);
     }
 
-    public static void exitFromBlockContext(String blockName) {
+    public static void setCurrentPageContext() {
+        page().setCurrentContext(null);
+        TauLogger.report("Текущий контекст: Страница '%s'", testContext().getCurrentPageName());
+    }
+
+    @Step("примечание: переходим к контексту блока '{blockName}'")
+    public static void closeCurrentAndSetNewBlockContext(String blockName) {
+        closeCurrentContext();
+        page().setCurrentContext(blockName);
+        TauLogger.report("Текущий контекст: Блок элементов '%s'", blockName);
+    }
+
+    public static void closeCurrentContext() {
         IElement currentBlock = page().dropCurrentContext();
         String currentContext = currentBlock == null
                 ? String.format("Страница '%s'", testContext().getCurrentPageName())
                 : String.format("Блок '%s'", currentBlock.getElementName());
-        TauLogger.report("Текущий контекст: %s", currentContext);
+        TauLogger.report("примечание: текущий контекст - %s", currentContext);
     }
 }

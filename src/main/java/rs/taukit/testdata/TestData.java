@@ -28,6 +28,7 @@ public class TestData implements ITestData {
         this.fieldName = fieldName;
         String filePath = YamlParser.convert(parameters.get("файл"));
         Map<String, String> searchBy = YamlParser.convert(parameters.get("поиск по полям"));
+        this.searchValue = searchBy.values().stream().toList().get(0);
         File file = new File(filePath);
         if (!file.exists()) {
             filePath = dirPath + File.separator + filePath;

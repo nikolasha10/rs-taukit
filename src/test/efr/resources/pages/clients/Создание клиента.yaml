@@ -165,6 +165,25 @@
           Номер дома: //input[contains(@data-id,'field-house')]
           Индекс: //input[contains(@data-id,'field-index')]
           Период регистрации (с): //..//input[@data-id='field-registrationAddress-reg-period-start-input']
+      Адрес фактического проживания:
+        тип: блок элементов
+        локатор: //div[text()='Адрес фактического проживания']/../following-sibling::div[1]
+        элементы:
+          Совпадает с адресом регистрации:
+            тип: чекбокс
+            локатор: //preceding-sibling::div[1]//button
+            установлен: //preceding-sibling::div[1]//label[@class='radio-container checked']
+      Почтовый адрес:
+        тип: блок элементов
+        локатор: //div[text()='Почтовый адрес']/../following-sibling::div[1]
+        элементы:
+          Совпадает с адресом регистрации:
+            тип: чекбокс
+            локатор: //preceding-sibling::div[1]//button[@data-id='checkbox-mailSwitcher0']
+            установлен: //preceding-sibling::div[1]//button[@data-id='checkbox-mailSwitcher0']//label[@class='radio-container checked']
+  Кодовое слово: otherInformation-field-codeWord
+  Сохранить: button-save
+  Отмена: button-cancel
 
 Обязательные элементы:
   - Полная идентификация

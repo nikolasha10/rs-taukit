@@ -54,14 +54,21 @@ public class AllureBasicFormDataStep {
 
     private void fillFormBlockAction(String blockName, int blockNumber) {
         TauLogger.attachDataTable("Значения полей блока", dataTable);
-        IHasBlockElements blockElement = pageObject.getElement(blockName).castTo(IHasBlockElements.class);
+        String[] blocks = blockName.split(" => ");
+        IHasBlockElements currentBlock = pageObject.getElement(blocks[0]).castTo(IHasBlockElements.class);
+        if (blocks.length > 1) {
+            for (int i = 1; i < blocks.length; i++) {
+                currentBlock = currentBlock.getElementByName(1, blocks[i]).castTo(IHasBlockElements.class);
+            }
+        }
+        IHasBlockElements block = currentBlock;
         data.forEach((row) -> {
             String name = Optional.ofNullable(row.get("Название"))
                     .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Название'"));
             String value = Optional.ofNullable(row.get("Значение"))
                     .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Значение'"));
             String control = row.get("Контроль");
-            IHasEditableValue editableElement = blockElement.getElementByName(blockNumber, name).castTo(IHasEditableValue.class);
+            IHasEditableValue editableElement = block.getElementByName(blockNumber, name).castTo(IHasEditableValue.class);
             try {
                 if (control == null) {
                     editableElement.setValue(value);
@@ -73,6 +80,7 @@ public class AllureBasicFormDataStep {
                         name, blockName, blockNumber, value);
             }
         });
+        TauLogger.report("Поля блока '%s' (%d) заполнены значениями из таблицы:", blockName, blockNumber);
         System.out.println(dataTable);
     }
 
