@@ -16,6 +16,7 @@ public class StorageManager {
         long threadId = Thread.currentThread().threadId();
         TestContext testContext = storage.getOrDefault(threadId, new TestContext(pickleWrapper, functionality));
         storage.putIfAbsent(threadId, testContext);
+        testContext.update(pickleWrapper, functionality);
         return testContext;
     }
 

@@ -1,0 +1,12 @@
+Адрес:
+Обязательная часть адреса:
+Название: Карточка клиента успешно сохранена
+Элементы:
+  Заголовок: //div[@class='popup-window-title' and text()='Карточка клиента успешно сохранена']
+  Сообщение: popup-content-message-content
+  Да: //div[starts-with(@class,'popup-container')]//span[text()='Да']/..
+  Нет: //div[starts-with(@class,'popup-container')]//span[text()='Нет']/..
+
+Обязательные элементы:
+  - Заголовок
+Максимальное время ожидания: по умолчанию

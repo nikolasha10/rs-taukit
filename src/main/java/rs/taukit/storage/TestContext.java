@@ -16,9 +16,10 @@ import java.util.function.BooleanSupplier;
 
 @Getter
 public class TestContext {
-    private final Pickle pickle;
-    private final String scenarioName;
-    private final String functionality;
+    private final HashMap<String, BasicApplication> application = new HashMap<>();
+    private Pickle pickle;
+    private String scenarioName;
+    private String functionality;
     @Setter
     private ScenarioData scenarioData;
     @Setter
@@ -27,7 +28,6 @@ public class TestContext {
     private String currentPageName;
     @Setter
     private String savedPageName;
-    private final HashMap<String, BasicApplication> application = new HashMap<>();
     @Setter
     private String stepActionPageName;
     private BooleanSupplier stepAction;
@@ -39,6 +39,13 @@ public class TestContext {
         this.pickle = pickleWrapper.getPickle();
         this.scenarioName = pickle.getName();
         this.functionality = functionality;
+    }
+
+    public void update(PickleWrapper pickleWrapper, String functionality) {
+        this.pickle = pickleWrapper.getPickle();
+        this.scenarioName = pickle.getName();
+        this.functionality = functionality;
+
     }
 
     public void setStepAction(BooleanSupplier stepAction) {

@@ -42,7 +42,7 @@ public class TestData implements ITestData {
                 List<String> values = YamlParser.convert(listOfValues);
                 return values.contains(expectedValue);
             } else {
-                return dataFieldValue.toString().equalsIgnoreCase(expectedValue);
+                return dataFieldValue != null && dataFieldValue.toString().equalsIgnoreCase(expectedValue);
             }
         });
         Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля '%s'", fieldName);

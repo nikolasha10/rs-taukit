@@ -2,23 +2,28 @@
   protocol: http
   hostApplication: efrstand
   portApplication: 8888
+  dbSuite: common
 
 - Название: dor4
   protocol: http
   hostApplication: dor4
   portApplication: 8888
+  dbSuite: common
 
 - Название: dor5
   protocol: http
   hostApplication: 172.16.35.203
   portApplication: 8888
+  dbSuite: common
 
 - Название: dor6
   protocol: http
   hostApplication: 172.16.34.253
   portApplication: 8888
+  dbSuite: common
 
 - Название: home_stand
   protocol: http
   hostApplication: localhost
   portApplication: 8888
+  dbSuite: common

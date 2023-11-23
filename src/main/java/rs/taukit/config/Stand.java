@@ -11,6 +11,7 @@ public class Stand {
     private final String name;
     private final String host;
     private final String port;
+    private final String dbSuite;
 
     private final String url;
     private final Map<String, ?> standData;
@@ -22,6 +23,7 @@ public class Stand {
         host = standData.get("hostApplication").toString();
         port = standData.get("portApplication").toString();
         url = String.format("%s://%s:%s", standData.get("protocol"), host, port);
+        dbSuite = standData.get("dbSuite").toString();
     }
 
     private boolean isNameEquals(Map<String, ?> standMap) {

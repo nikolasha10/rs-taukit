@@ -92,6 +92,5 @@ public class AllureBasicFormDataStep {
     @Step("заполнить поля формы в блоке '{blockName}' ({blockNumber}) значениями:")
     public void fillFormBlock(String blockName, int blockNumber) {
         fillFormBlockAction(blockName, blockNumber);
-        TauLogger.report("Поля блока '%s' (%d) заполнены значениями из таблицы", blockName, blockNumber);
     }
 }

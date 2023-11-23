@@ -6,8 +6,12 @@
   Сообщение: popup-content-message-content
   Верифицировать: MessageBoxButton-Верифицировать
   Продолжить без верификации: MessageBoxButton-Продолжить без верификации
-  Да: confirmYesButton
-  Нет: confirmNoButton
+  Да: //div[starts-with(@class,'popup-container')]//span[text()='Да']/..
+  Нет: //div[starts-with(@class,'popup-container')]//span[text()='Нeт' or text()='Нет']/..
+  OK: //div[starts-with(@class,'popup-container')]//span[text()='OK']/..
+  ОК: //div[starts-with(@class,'popup-container')]//span[text()='OK']/..
+  Подтвердить: //div[starts-with(@class,'popup-container')]//span[text()='Подтвердить']/..
+  Отмена: //div[starts-with(@class,'popup-container')]//span[text()='Отмена']/..
 Обязательные элементы:
   - Заголовок
 Максимальное время ожидания: по умолчанию

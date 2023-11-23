@@ -18,6 +18,8 @@ public class AllureEfrStep extends AllureBasicStep {
         if (!app.isUserLoggedIn(user)) {
             app.login(user);
             testContext().putApplication(appName, app);
+        } else {
+            driver().navigate(pageStorage().getPage("Поиск клиента").getPageUrl());
         }
     }
 

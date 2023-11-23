@@ -36,7 +36,10 @@ public class AllureReport {
     }
 
     public static synchronized void editReports(String scenarioName, String functionality, long testEndTime) {
-        getFileList(scenarioName, testEndTime).forEach(file -> replaceReport(file, scenarioName, functionality));
+        TauLogger.console("%s %s %d", scenarioName, functionality, testEndTime);
+        List<File> fileList = getFileList(scenarioName, testEndTime);
+        TauLogger.console("fileListSize: %d", fileList.size());
+        fileList.forEach(file -> replaceReport(file, scenarioName, functionality));
     }
 
     @SuppressWarnings("unchecked")
@@ -62,6 +65,7 @@ public class AllureReport {
                 parentSuitName.put("value", functionality);
                 labels.add(parentSuitName);
             }
+            System.out.println(labels);
             report.replace("labels", labels);
             report.remove("parameters");
             String testStatus = report.get("status").toString();

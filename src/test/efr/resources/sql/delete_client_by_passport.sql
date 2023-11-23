@@ -1,0 +1,1 @@
+SELECT FROM drop_client_from_passport('${docSeries}', '${docNumber}');

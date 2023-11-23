@@ -339,8 +339,10 @@ public final class TauLogger {
             attachDataTable(name, dataTable);
         } else if (object instanceof TestDataFile file) {
             attachFile(name, file.getFileExtension(), file.getFilePath());
+        } else if (object instanceof String text) {
+            attachFile(name, "txt", text.getBytes());
         } else {
-            throw new TestDataException("Не удалось прикрепить объект '%s' к отчёту. Не распознан тип вложения.");
+            throw new TestDataException("Не удалось прикрепить объект '%s' к отчёту. Не распознан тип вложения.", name);
         }
     }
 }

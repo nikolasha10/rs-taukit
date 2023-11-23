@@ -40,7 +40,7 @@ public class PlaywrightPageObject implements PageObject {
                 ? Config.getProperty("pageLoadingTimeout") : pageTimeoutString);
         this.page = page;
         this.pageName = pageName;
-        this.pageUrl = YamlParser.convert(pageConfig.get("Адрес"));
+        this.pageUrl = Config.getSTAND().getUrl() + YamlParser.convert(pageConfig.get("Адрес"));
         String controlUrl = YamlParser.convert(pageConfig.get("Обязательная часть адреса"));
         this.pageControlUrl = Optional.ofNullable(controlUrl).orElse("");
         List<String> commonBlockList = YamlParser.convert(pageConfig.get("Общие блоки элементов"));

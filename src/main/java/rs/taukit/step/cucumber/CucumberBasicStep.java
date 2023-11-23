@@ -48,7 +48,7 @@ public class CucumberBasicStep {
         driver().navigate(eval(url));
     }
 
-    @И("^сохранить снимок экрана$")
+    @И("^сделать снимок страницы$")
     public void takeScreenshot() {
         AllureBasicStep.takeScreenshot(String.format("страница '%s'", testContext().getCurrentPageName()));
     }

@@ -1,5 +1,6 @@
 package rs.taukit.step.allure;
 
+import com.microsoft.playwright.TimeoutError;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.testng.Pickle;
 import io.qameta.allure.Step;
@@ -60,9 +61,17 @@ public class AllureBasicStep extends BasicUtils {
 
     @Step("нажать на кнопку '{buttonName}'")
     public static void clickButton(String buttonName) {
-        page().waitForElement(buttonName, true);
+        try {
+            page().waitForElement(buttonName, true);
+        } catch (TimeoutError ignored) {
+            TauLogger.console("Не удалось дождаться отображения кнопки '%s'", buttonName);
+        }
         testContext().setStepActionPageName(testContext().getCurrentPageName());
-        element(buttonName).click();
+        try {
+            element(buttonName).click();
+        } catch (Exception e) {
+            TauLogger.fail(e, "Не удалось нажать на кнопку '%s'", buttonName);
+        }
         testContext().setStepAction(() -> {
             element(buttonName).click();
             return true;
@@ -70,7 +79,7 @@ public class AllureBasicStep extends BasicUtils {
         TauLogger.report("Нажата кнопка '%s'", buttonName);
     }
 
-    @Step("снимок экрана: {screenshotName}")
+    @Step("снимок: {screenshotName}")
     public static void takeScreenshot(String screenshotName) {
         TauLogger.attachScreenshot(screenshotName, page().takeScreenshot());
     }

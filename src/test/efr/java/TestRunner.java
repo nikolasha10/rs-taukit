@@ -85,7 +85,7 @@ public class TestRunner {
     /**
      * Запускает сценарии в соответствии с данными из двумерного массива, возвращаемого методом <i>getScenarioByTag</i>
      *
-     * @param pickleWrapper - объект-обертка для работы с сущностью cucumber-сценария.
+     * @param pickleWrapper   - объект-обертка для работы с сущностью cucumber-сценария.
      * @param cucumberFeature - объект для получения описания функционала, тестируемого сценарием.
      */
     @Test(dataProvider = "getScenariosByTag")
