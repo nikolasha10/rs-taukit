@@ -1,13 +1,82 @@
-Адрес: /efr/credit/bpm/process/%s
-Обязательная часть адреса: /efr/credit/bpm/process/
 Название: Кредитная заявка
 Элементы:
+  Заголовок: //div[@data-id='credit-claim-panel']/label[text()='Кредитная заявка']
   Меню вкладок страницы:
-    Тип: общий блок
-    Описание: Кредитная заявка
-    Файл: src/test/efr/resources/pages/commonBlocks/Общие блоки.yaml
+    Тип: список
+    Локатор: //div[@class='tabs tab-additional']/ul[@class='tabs__labels']
+    Названия: //span[@class='tabs-name']
+    Кнопки: //parent::a
+  Параметры заявки:
+    тип: блок элементов
+    локатор: //div[@class='tabs tab-primary']
+    элементы:
+      Меню вкладок подраздела:
+        тип: список
+        локатор: //ul[@class='tabs__labels']
+        названия: //span[@class='tabs-name']
+        Кнопки: //parent::a
+      Запрошенные параметры:
+        тип: блок элементов
+        локатор: requested-params-view-tab
+        элементы:
+          Идентифицировать клиента: identification
+          Продолжить: success
+      Запрошенные параметры (редактирование):
+        тип: блок элементов
+        локатор: edit-credit-params-tab-form
+        элементы:
+          Сотрудник, осуществивший продажу:
+            тип: выпадающий список
+            локатор: select-form-field-seller
+            элементы: //div[@role='option']
+            значение: //span[@role='option' and @aria-selected='true']
+          Продолжить: success
+  Заемщик:
+    тип: блок элементов
+    локатор: //div[@class='tabs tab-progress']
+    элементы:
+      Меню вкладок подраздела:
+        тип: список
+        локатор: //ul[@class='tabs__labels']
+        названия: //span[@class='tabs-name']
+        Кнопки: //parent::a
+      Персональные данные:
+        тип: блок элементов
+        локатор: personal-data
+        элементы:
+          Образование:
+            тип: выпадающий список
+            локатор: select-form-field-education
+            элементы: //div[@role='option']
+            значение: //span[@role='option' and @aria-selected='true']
+          СНИЛС: input-form-field-snils
+          Военный билет:
+            тип: радио-кнопка
+            локатор: //span[text()='Военный билет']/following::div[@class='field-value'][1]
+            названия: //li//button/div
+            кнопки: //parent::button
+          Семейное положение:
+            тип: выпадающий список
+            локатор: select-form-field-familyStatus
+            элементы: //div[@role='option']
+            значение: //span[@role='option' and @aria-selected='true']
+          Кол-во детей до 18 лет: input-form-field-underageChildCount
+          Кол-во иных иждивенцев, за исключением детей до 18 лет: input-form-field-dependantCount
+  История:
+    тип: блок элементов
+    локатор: history-credit-view
+    элементы:
+      История:
+        тип: таблица
+        локатор: //table
+        заголовки: //th
+        строки: //th/parent::tr/following::tr
+        столбцы: //td
+
+
 Обязательные элементы:
   - Заголовок
 Общие блоки элементов:
   - Главное меню
+  - Кредитная заявка
 Максимальное время ожидания: по умолчанию

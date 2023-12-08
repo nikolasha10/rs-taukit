@@ -6,6 +6,7 @@ import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.page.playwright.ElementBuilder;
+import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,6 +29,10 @@ public class PwBlock extends PwElement implements IHasBlockElements {
         this.elements = ElementBuilder.buildElements(elementMap);
     }
 
+    public PwBlock(String elementName, IElement element) {
+        this(elementName, element.getModel());
+    }
+
     public PwBlock(String elementName, LinkedHashMap<String, Object> elementData) {
         this(elementName, new ElementModel(elementData));
     }
@@ -36,11 +41,18 @@ public class PwBlock extends PwElement implements IHasBlockElements {
     public IElement getElementByName(int blockNumber, String elementName) {
         IElement iElement = Optional.ofNullable(elements.get(elementName))
                 .orElseThrow(() -> {
-                    System.out.println(elements.keySet());
-                    return new ElementNotDescribedException(elementName, testContext().getCurrentPageName());
+                    TauLogger.console("В блоке '%s' описаны элементы: %s", this.elementName, elements.keySet());
+                    return new ElementNotDescribedException(elementName, testContext().getCurrentPageName(), this);
                 });
         PwElement pwElement = iElement.castTo(PwElement.class);
+        driver.waitForCondition(() -> element.isVisible());
         Locator blockFieldLocator = element.all().get(blockNumber - 1).locator(pwElement.getElement());
         return ElementBuilder.buildElement(elementName, pwElement, blockFieldLocator);
     }
+
+    @Override
+    public IElement getElementByName(String elementName) {
+        return getElementByName(1, elementName);
+    }
+
 }

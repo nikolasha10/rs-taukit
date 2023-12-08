@@ -6,3 +6,28 @@
     Локатор: //div[@class='tabs tab-additional']/ul[@class='tabs__labels']
     Названия: //span[@class='tabs-name']
     Кнопки: //parent::a
+  Параметры заявки:
+    тип: блок элементов
+    локатор: //div[@class='tabs tab-primary']
+    элементы:
+      Меню вкладок подраздела:
+        тип: список
+        локатор: //ul[@class='tabs__labels']
+        названия: //span[@class='tabs-name']
+        Кнопки: //parent::a
+      Запрошенные параметры:
+        тип: блок элементов
+        локатор: requested-params-view-tab
+        элементы:
+          Идентифицировать клиента: identification
+  История:
+    тип: блок элементов
+    локатор: history-credit-view
+    элементы:
+      История:
+        тип: таблица
+        локатор: //table
+        заголовки: //th
+        строки: //th/parent::tr/following::tr
+        столбцы: //td
+

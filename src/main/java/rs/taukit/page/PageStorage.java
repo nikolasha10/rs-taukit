@@ -9,6 +9,8 @@ import rs.taukit.utils.TimeStringParser;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static rs.taukit.utils.BasicUtils.driver;
+
 public class PageStorage {
     private final ThreadLocal<Map<String, PageObject>> storage = new ThreadLocal<>();
     private final ThreadLocal<Map<String, Long>> timeIndexes = new ThreadLocal<>();
@@ -18,11 +20,20 @@ public class PageStorage {
     }
 
     public PageObject getPage(String pageName) {
-        addPage(pageName, DriverManager.getInstance().getDriver().initPage(pageName));
+        PageObject pageObject = addPage(pageName);
         Map<String, Long> localTimeIndexes = Optional.ofNullable(timeIndexes.get()).orElse(new HashMap<>());
         localTimeIndexes.put(pageName, new Date().getTime());
         timeIndexes.set(localTimeIndexes);
-        return storage.get().get(pageName);
+        return pageObject;
+    }
+
+    public synchronized void removeCurrentTabPages() {
+        Map<String, PageObject> localStorage = storage.get();
+        List<String> pageNameList = localStorage.entrySet().stream()
+                .filter(entry -> entry.getValue().getCurrentTabIndex() == driver().getPageIndex())
+                .map(Map.Entry::getKey)
+                .toList();
+        pageNameList.forEach(localStorage::remove);
     }
 
     public PageObject getPopup(String pageName) {
@@ -31,11 +42,18 @@ public class PageStorage {
         return getPage(pageName);
     }
 
-    private synchronized void addPage(String pageName, PageObject page) {
+    private synchronized PageObject addPage(String pageName) {
         Map<String, PageObject> localStorage = Optional.ofNullable(storage.get()).orElse(new HashMap<>());
-        localStorage.putIfAbsent(pageName, page);
+        PageObject pageObject = localStorage.getOrDefault(pageName,
+                DriverManager.getInstance().getDriver().initPage(pageName));
+        if (pageObject.getCurrentTabIndex() != driver().getPageIndex()) {
+            localStorage.remove(pageName);
+            pageObject = DriverManager.getInstance().getDriver().initPage(pageName);
+        }
+        localStorage.putIfAbsent(pageName, pageObject);
         storage.set(localStorage);
         removeObsoletePages();
+        return localStorage.get(pageName);
     }
 
     private void removeObsoletePages() {

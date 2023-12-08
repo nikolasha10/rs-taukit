@@ -126,7 +126,6 @@ public class AllureBasicStep extends BasicUtils {
                     List<String> templatePageLineList = new ArrayList<>();
                     if (fileTemplatePage.exists()) {
                         try {
-
                             templatePageLineList.addAll(Files.readAllLines(fileTemplatePage.toPath()));
                         } catch (IOException e) {
                             throw new RuntimeException(e);
@@ -219,5 +218,18 @@ public class AllureBasicStep extends BasicUtils {
                 ? String.format("Страница '%s'", testContext().getCurrentPageName())
                 : String.format("Блок '%s'", currentBlock.getElementName());
         TauLogger.report("примечание: текущий контекст - %s", currentContext);
+    }
+
+    @Step("обновить страницу")
+    public static void reloadPage() {
+        page().reload();
+        TauLogger.report("Страница '%s' обновлена", testContext().getCurrentPageName());
+    }
+
+    @Step("закрыть текущую вкладку")
+    public static void closeCurrentTab() {
+        int tabIndex = page().getCurrentTabIndex();
+        driver().closeCurrentTab();
+        TauLogger.report("Вкладка %d закрыта", tabIndex + 1);
     }
 }

@@ -2,7 +2,6 @@ package rs.taukit.database;
 
 import rs.taukit.config.Config;
 import rs.taukit.config.DBConfig;
-import rs.taukit.utils.TauLogger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,7 +15,6 @@ public class DBDriver {
     public DBDriver(String dbName) throws SQLException {
         this.dbConfig = Config.getDBSUITE().get(dbName);
         String jdbcUrl = getJdbcUrl(dbConfig.type());
-        TauLogger.console("jdbcUrl: %s", jdbcUrl);
         DriverManager.setLoginTimeout(180);
         this.connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
     }
@@ -31,6 +29,10 @@ public class DBDriver {
     public int execute(String sql) throws SQLException {
         Statement statement = connection.createStatement();
         statement.execute(sql);
+        SQLException sqlException = statement.getWarnings();
+        if (sqlException != null) {
+            throw sqlException;
+        }
         return statement.getUpdateCount();
     }
 }

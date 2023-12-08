@@ -70,6 +70,10 @@ public class Config {
         return Boolean.getBoolean(getProperty(propertyName));
     }
 
+    public static int getIntegerProperty(String propertyName) {
+        return Integer.parseInt(getProperty(propertyName));
+    }
+
     public static String getPageFilePath(String pageName) {
         return pageMapping.get(pageName);
     }

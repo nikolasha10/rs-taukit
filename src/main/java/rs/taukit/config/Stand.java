@@ -11,9 +11,11 @@ public class Stand {
     private final String name;
     private final String host;
     private final String port;
+    private final String stubPort;
     private final String dbSuite;
 
     private final String url;
+    private final String stubUrl;
     private final Map<String, ?> standData;
 
     public Stand(String standsConfigFilePath, String standName) {
@@ -22,7 +24,9 @@ public class Stand {
         standData = standList.stream().filter(this::isNameEquals).findFirst().orElseThrow();
         host = standData.get("hostApplication").toString();
         port = standData.get("portApplication").toString();
+        stubPort = standData.get("portApplicationStub").toString();
         url = String.format("%s://%s:%s", standData.get("protocol"), host, port);
+        stubUrl = String.format("%s://%s:%s", standData.get("protocol"), host, stubPort);
         dbSuite = standData.get("dbSuite").toString();
     }
 

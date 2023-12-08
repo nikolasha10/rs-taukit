@@ -8,10 +8,12 @@ import rs.taukit.driver.DriverManager;
 import rs.taukit.driver.WebDriver;
 import rs.taukit.element.playwright.FileDownload;
 import rs.taukit.page.PageObject;
+import rs.taukit.page.PageStorage;
 import rs.taukit.page.playwright.PlaywrightPageObject;
 import rs.taukit.storage.StorageManager;
-import rs.taukit.utils.BasicUtils;
+import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
+import rs.taukit.utils.TimeStringParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -117,7 +119,9 @@ public class PlaywrightDriver implements WebDriver {
         browserList.add(new WebBrowser(browserContext));
         browserIndex = browserList.size() - 1;
         pageIndex = browserContext.pages().size() - 1;
-        getPage().setViewportSize(1280, 840);
+        getPage().setViewportSize(
+                Config.getIntegerProperty("window.width"),
+                Config.getIntegerProperty("window.height"));
         getPage().waitForTimeout(2000);
     }
 
@@ -206,6 +210,13 @@ public class PlaywrightDriver implements WebDriver {
     }
 
     @Override
+    public void closeCurrentTab() {
+        browserContext.pages().get(pageIndex).close();
+        PageStorage.getInstance().removeCurrentTabPages();
+        pageIndex = browserContext.pages().size() - 1;
+    }
+
+    @Override
     public boolean setActiveTab(int tabIndex) {
         boolean result = browserContext.pages().size() > tabIndex;
         if (result) {
@@ -260,15 +271,15 @@ public class PlaywrightDriver implements WebDriver {
         return (T) this;
     }
 
-    public void downloadByClick(FileDownload element) {
+    public void downloadByClick(FileDownload element, String fileName) {
         getPage().onDownload((df) -> {
-            String dirName = String.format("%s/%s",
-                    Config.getProperty("downloads.dir"), BasicUtils.testContext().getScenarioName());
-            File file = new File(dirName, df.suggestedFilename());
+            String dirName = FileUtils.getDownloadFilePath();
+            File file = new File(dirName, fileName);
             df.saveAs(file.toPath());
-            TauLogger.report("Загружен файл %s", df.suggestedFilename());
+            TauLogger.report("Загружен файл '%s' в папку '%s'", fileName, dirName);
         });
-        getPage().waitForDownload(new Page.WaitForDownloadOptions().setTimeout(60000), () -> {
+        double fileDownloadTimeout = TimeStringParser.getTime(Config.getProperty("file.download.timeout"));
+        getPage().waitForDownload(new Page.WaitForDownloadOptions().setTimeout(fileDownloadTimeout), () -> {
             element.getElement().click();
             TauLogger.report("Нажали на кнопку '%s'", element.getElementName());
         });

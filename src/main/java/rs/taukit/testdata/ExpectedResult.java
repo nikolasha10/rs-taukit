@@ -6,7 +6,6 @@ import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.PageState;
 import rs.taukit.records.CheckedElement;
-import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TimeStringParser;
@@ -27,6 +26,8 @@ public class ExpectedResult {
     private final double checkInterval;
     private final double checkTimeout;
     private final BooleanSupplier condition;
+
+    private Exception thrownException;
 
     public ExpectedResult(Map<String, String> data) {
         this.objectType = TestDataUtils.get(data, "Объект");
@@ -60,6 +61,7 @@ public class ExpectedResult {
                 page.setPageTimeout(checkInterval);
                 boolean result = PageState.getState(objectState).apply(pageStorage().getPage(objectName));
                 page.setPageTimeout(pageTimeout);
+                if (!result) this.thrownException = page.getThrownException();
                 return result;
             case "вкладка":
                 return driver().setActiveTab(Integer.parseInt(objectName) - 1);
@@ -73,10 +75,12 @@ public class ExpectedResult {
 
     public void waitForResult() {
         try {
-            BasicUtils.driver().waitForCondition(condition, checkInterval, checkTimeout, testContext().getStepAction());
+            driver().waitForCondition(condition, checkInterval, checkTimeout, testContext().getStepAction());
+            testContext().clearStepAction();
             TauLogger.report("%s '%s' %s", objectType, objectName, objectState);
         } catch (Exception e) {
             if (e instanceof AutoTestBrokenException) throw e;
+            if (thrownException != null) e.addSuppressed(thrownException);
             String wrongState = ElementState.getWrongState(objectState);
             TauLogger.fail(e, "Фактический результат не соответствует ожидаемому.%n" +
                             "Ожидаемый результат: %s '%s' %s%n" +

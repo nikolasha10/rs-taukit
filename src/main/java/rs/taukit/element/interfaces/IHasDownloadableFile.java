@@ -1,5 +1,5 @@
 package rs.taukit.element.interfaces;
 
-public interface IHasDownloadableFile extends IElement{
-    void click();
+public interface IHasDownloadableFile extends IElement {
+    void click(String fileName);
 }

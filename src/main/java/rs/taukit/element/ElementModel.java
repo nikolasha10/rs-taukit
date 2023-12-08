@@ -1,5 +1,6 @@
 package rs.taukit.element;
 
+import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.YamlParser;
 
@@ -17,6 +18,16 @@ public class ElementModel {
 
     public <T> T get(String option) {
         return YamlParser.convert(TestDataUtils.get(options, option));
+    }
+
+    public <T> T get(String option, boolean required) {
+        try {
+            return YamlParser.convert(TestDataUtils.get(options, option));
+        } catch (DataTableFormatMismatchException e) {
+            if (required) throw e;
+            return null;
+        }
+
     }
 
     @Override

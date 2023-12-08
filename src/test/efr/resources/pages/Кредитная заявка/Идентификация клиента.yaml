@@ -1,0 +1,29 @@
+Адрес: /efr/identification-credit-claim-page?id=%d
+Обязательная часть адреса: /efr/identification-credit-claim-page
+Название: Идентификация клиента
+Элементы:
+  Кредитные заявки:
+    тип: список
+    локатор: //ul[@class='left-menu-content']
+    названия: //li/div
+    кнопки: //li/div
+  Запрашиваемые параметры кредита:
+    тип: блок элементов
+    локатор: identification-credit-claim-form
+    элементы:
+      Кредитный продукт: //span[text()='Кредитный продукт']/following::div[@class='field-value'][1]
+  Данные клиента:
+    тип: блок элементов
+    локатор: //div[@class='fieldset-container black fieldset-container-border-none field-columns-1']
+    элементы:
+      Телефон: //span[text()='Телефон']/following::div[@class='field-value'][1]
+  Редактирование: edit-button
+  Поиск клиента: find-button
+  Отказ: refuse-button
+  Возврат: back-button
+Обязательные элементы:
+  - Кредитные заявки
+  - Запрашиваемые параметры кредита
+Общие блоки элементов:
+  - Главное меню
+Максимальное время ожидания: по умолчанию

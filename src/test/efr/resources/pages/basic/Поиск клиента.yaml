@@ -9,6 +9,11 @@
   Номер: field-name-docNumber
   Найти: search-button
   Новый клиент: create-button
+  Результаты:
+    тип: блок элементов
+    локатор: clients-list-panel
+    элементы:
+      Выбрать: //span[text()='Выбрать']
 Обязательные элементы:
   - Серия
   - Номер

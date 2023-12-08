@@ -40,6 +40,8 @@ public interface WebDriver {
 
     void openNewTab();
 
+    void closeCurrentTab();
+
     boolean setActiveTab(int tabIndex);
 
     void navigate(String url);
@@ -48,5 +50,6 @@ public interface WebDriver {
 
     void waitForTimeout(double time);
 
+    int getPageIndex();
 
 }

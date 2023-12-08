@@ -60,6 +60,10 @@ public class TestContext {
         };
     }
 
+    public void clearStepAction() {
+        this.stepAction = () -> true;
+    }
+
     public BasicApplication getApplication(String appName) {
         return application.get(appName);
     }

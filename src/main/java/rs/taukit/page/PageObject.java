@@ -8,6 +8,8 @@ public interface PageObject {
 
     void loadPage();
 
+    void reload();
+
     IElement getElement(String elementName);
 
     IElement replaceElement(String elementName, Class<? extends IElement> elementType);
@@ -39,4 +41,8 @@ public interface PageObject {
     void setPageTimeout(String timeoutString);
 
     void setPageTimeout(double timeout);
+
+    int getCurrentTabIndex();
+
+    Exception getThrownException();
 }

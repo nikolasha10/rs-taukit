@@ -16,4 +16,9 @@ public class CucumberBasicDataBaseStep {
         dataBaseStep(dataBaseName).execute(sqlFileName, eval(dataTable));
     }
 
+    @И("^в базе данных \"(.+)\" для всех значений списка \"(.+)\" выполнить sql-скрипт из файла \"(.+)\" с параметрами:$")
+    public void runSqlScriptFromFileForList(String dataBaseName, String listOfValues, String sqlFileName, DataTable dataTable) {
+        dataBaseStep(dataBaseName).execute(sqlFileName, eval(dataTable));
+    }
+
 }

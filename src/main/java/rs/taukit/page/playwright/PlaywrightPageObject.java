@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 
+import static rs.taukit.utils.BasicUtils.driver;
 import static rs.taukit.utils.TestDataUtils.loadPageConfig;
 
 @Getter
@@ -30,8 +31,10 @@ public class PlaywrightPageObject implements PageObject {
     private final List<String> expectedElements;
     private final Page.ScreenshotOptions screenshotOptions;
     private final Deque<IHasBlockElements> currentContext = new LinkedList<>();
+    private int currentTabIndex;
     private Page.WaitForConditionOptions options;
     private double pageTimeout;
+    private Exception thrownException;
 
     public PlaywrightPageObject(Page page, String pageName) {
         Map<String, ?> pageConfig = loadPageConfig(pageName);
@@ -39,8 +42,10 @@ public class PlaywrightPageObject implements PageObject {
         setPageTimeout(pageTimeoutString.equalsIgnoreCase("по умолчанию")
                 ? Config.getProperty("pageLoadingTimeout") : pageTimeoutString);
         this.page = page;
+        this.currentTabIndex = driver().getPageIndex();
         this.pageName = pageName;
-        this.pageUrl = Config.getSTAND().getUrl() + YamlParser.convert(pageConfig.get("Адрес"));
+        String pageUrl = YamlParser.convert(pageConfig.get("Адрес"));
+        this.pageUrl = Config.getSTAND().getUrl() + Optional.ofNullable(pageUrl).orElse("");
         String controlUrl = YamlParser.convert(pageConfig.get("Обязательная часть адреса"));
         this.pageControlUrl = Optional.ofNullable(controlUrl).orElse("");
         List<String> commonBlockList = YamlParser.convert(pageConfig.get("Общие блоки элементов"));
@@ -64,12 +69,18 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     private boolean hasPageAllExpectedElements() {
+        List<String> notDescribed = expectedElements.stream()
+                .filter(elementName -> pageElements.get(elementName) == null)
+                .toList();
+        if (!notDescribed.isEmpty()) {
+            throw new ElementNotDescribedException(notDescribed, pageName);
+        }
         return expectedElements.stream().allMatch(elementName -> pageElements.get(elementName).isVisible());
     }
 
     private List<String> getAllNotFoundElements() {
         return expectedElements.stream()
-                .filter(elementName -> !pageElements.get(elementName).isVisible())
+                .filter(elementName -> pageElements.get(elementName) != null && !pageElements.get(elementName).isVisible())
                 .map(elementName -> String.format("%s (%s)", elementName, pageElements.get(elementName).getLocator()))
                 .toList();
     }
@@ -101,7 +112,9 @@ public class PlaywrightPageObject implements PageObject {
 
     @Override
     public void waitForElement(String elementName, boolean isVisible) {
-        IElement element = Optional.ofNullable(pageElements.get(elementName))
+        IHasBlockElements context = getCurrentContext();
+        IElement expectedElement = context == null ? pageElements.get(elementName) : context.getElementByName(elementName);
+        IElement element = Optional.ofNullable(expectedElement)
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
         page.waitForCondition(() -> element.isVisible() == isVisible, options);
     }
@@ -122,6 +135,7 @@ public class PlaywrightPageObject implements PageObject {
             waitForLoadAndContinue();
             return true;
         } catch (Exception e) {
+            this.thrownException = e;
             return false;
         }
     }
@@ -179,11 +193,16 @@ public class PlaywrightPageObject implements PageObject {
         StorageManager.getInstance().getTestContext().setCurrentPageName(pageName);
     }
 
+    public void reload() {
+        page.reload();
+        waitForLoad();
+    }
+
     public byte[] takeScreenshot() {
         return page.screenshot((new Page.ScreenshotOptions().setFullPage(true)));
     }
 
-    @SuppressWarnings("unchecked")
+//    @SuppressWarnings("unchecked")
 //    private Map<String, IElement> buildElements(Map<String, ?> elements) {
 //        Map<String, IElement> result = new HashMap<>();
 //        elements.forEach((elementName, elementObject) -> {

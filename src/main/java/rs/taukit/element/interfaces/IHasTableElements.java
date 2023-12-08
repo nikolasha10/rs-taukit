@@ -3,13 +3,17 @@ package rs.taukit.element.interfaces;
 import io.cucumber.datatable.DataTable;
 
 public interface IHasTableElements extends IElement {
+    int findRowByConditions(DataTable dataTable);
+
     IElement getElementByConditions(String elementName, DataTable conditions);
 
     void clickOnElementByConditions(String elementName, DataTable conditions);
 
+    void clickOnElement(String elementName);
+
     void findTableRowByConditions(String rowName, DataTable dataTable);
 
-    void tableRowSaveElementValues(String rowName, DataTable dataTable);
+    DataTable tableRowSaveElementValues(DataTable dataTable);
 
     void tableRowElementClick(String rowName, String elementName);
 }

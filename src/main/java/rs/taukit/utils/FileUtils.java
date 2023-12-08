@@ -87,4 +87,11 @@ public class FileUtils {
         return result;
     }
 
+    public static String getDownloadFilePath() {
+        String childDirName = BasicUtils.testContext().getScenarioName().trim();
+        while (childDirName.endsWith(".")) {
+            childDirName = childDirName.substring(0, childDirName.length() - 1);
+        }
+        return String.format("%s/%s", Config.getProperty("downloads.dir"), childDirName);
+    }
 }

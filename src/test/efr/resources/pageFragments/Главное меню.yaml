@@ -3,6 +3,6 @@
   Главное меню:
     тип: меню
     локатор: //ul[@class='main-menu']
-    пункты меню: //ul[@class='main-menu']/li/a
+    пункты меню: //li/a
     ...: top-menu-dropdown
     выпадающий список: //div[@class='dropdown-list']/a

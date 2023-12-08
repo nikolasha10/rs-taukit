@@ -1,0 +1,27 @@
+Адрес: /efr/clients-data-service/bpm/task/%s?mainProcessKey=credit-identification-client-process
+Обязательная часть адреса: mainProcessKey=credit-identification-client-process
+Название: Прикрепление согласий Заёмщика
+Элементы:
+  Согласие на обработку персональных данных и получение кредитных отчетов из БКИ:
+    тип: блок элементов
+    локатор: //span[contains(text(),'отчетов из БКИ')]/ancestor::div[starts-with(@class,'field')][last()]
+    элементы:
+      Прикрепить файл:
+        тип: файл
+        локатор: documentsBlock-field-name-scan-privacy_policy_and_bki-file-upload
+      Файл:
+        тип: ссылка
+        локатор: //span[@class='download-filename']/span
+      Односторонняя печать:
+        тип: загрузка файла
+        локатор: link-print-privacy_policy_and_bki-
+      Двусторонняя печать:
+        тип: загрузка файла
+        локатор: link-print-privacy_policy_and_bki-twoSided
+  Продолжить: button-agreement-signed
+  Отмена: button-cancel
+Обязательные элементы:
+  - Согласие на обработку персональных данных и получение кредитных отчетов из БКИ
+Общие блоки элементов:
+  - Главное меню
+Максимальное время ожидания: по умолчанию

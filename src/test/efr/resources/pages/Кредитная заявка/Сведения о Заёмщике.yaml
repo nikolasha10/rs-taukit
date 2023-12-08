@@ -1,0 +1,11 @@
+Адрес: /efr/clients-data-service/bpm/task/%s?mainProcessKey=credit-identification-client-process
+Обязательная часть адреса: mainProcessKey=credit-identification-client-process
+Название: Сведения о Заёмщике
+Элементы:
+  Связать с кредитной заявкой: client-view-bpm-select
+  Отмена: client-view-bpm-cancel
+Обязательные элементы:
+  - Связать с кредитной заявкой
+Общие блоки элементов:
+  - Главное меню
+Максимальное время ожидания: по умолчанию

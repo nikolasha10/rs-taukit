@@ -2,21 +2,22 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
 
 import java.util.LinkedHashMap;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static rs.taukit.utils.BasicUtils.page;
 
 public class PwDropdownList extends PwElement implements IHasEditableValue {
-    protected final Locator options;
-    protected final Locator selectedValue;
+    protected Locator options;
+    protected Locator selectedValue;
 
     public PwDropdownList(String elementName, ElementModel model) {
         super(elementName, model);
-        this.options = driver.getLocator(model.get("элементы"));
-        this.selectedValue = driver.getLocator(model.get("значение"));
+        initFields(model);
     }
 
     public PwDropdownList(String elementName, LinkedHashMap<String, Object> elementData) {
@@ -25,6 +26,14 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
 
     public PwDropdownList(String elementName, Locator locator, ElementModel model) {
         super(elementName, locator);
+        initFields(model);
+    }
+
+    public PwDropdownList(String elementName, IElement element) {
+        this(elementName, element.getModel());
+    }
+
+    private void initFields(ElementModel model) {
         this.options = driver.getLocator(model.get("элементы"));
         this.selectedValue = driver.getLocator(model.get("значение"));
     }
@@ -32,7 +41,8 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
     @Override
     public void setValue(String value) {
         element.click();
-        element.locator(options).filter(new Locator.FilterOptions().setHasText(Pattern.compile(value))).click();
+        Locator optionsLocator = Optional.ofNullable(element.locator(options)).orElseThrow();
+        optionsLocator.filter(new Locator.FilterOptions().setHasText(Pattern.compile(value))).click();
     }
 
     @Override
