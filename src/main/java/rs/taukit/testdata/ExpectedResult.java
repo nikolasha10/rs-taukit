@@ -1,12 +1,11 @@
 package rs.taukit.testdata;
 
+import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementState;
-import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.PageState;
 import rs.taukit.records.CheckedElement;
-import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TimeStringParser;
 
@@ -17,26 +16,24 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import static rs.taukit.utils.BasicUtils.*;
-
+@Getter
 public class ExpectedResult {
     private final String objectType;
     private final String objectName;
     private final String objectState;
     private final String expectedValue;
-    private final double checkInterval;
     private final double checkTimeout;
     private final BooleanSupplier condition;
-
     private Exception thrownException;
+    private boolean conditionMet;
 
     public ExpectedResult(Map<String, String> data) {
         this.objectType = TestDataUtils.get(data, "Объект");
         this.objectName = TestDataUtils.get(data, "Название");
         this.objectState = TestDataUtils.get(data, "Состояние");
         this.expectedValue = TestDataUtils.getOptional(data, "Значение");
-        String checkInterval = Optional.ofNullable(data.get("Интервал")).orElse(Config.getProperty("element.check.interval"));
-        this.checkInterval = TimeStringParser.getTime(checkInterval);
         String checkTimeout = Optional.ofNullable(data.get("Ожидание")).orElse(Config.getProperty("element.check.timeout"));
+        if (checkTimeout.isEmpty()) checkTimeout = Config.getProperty("element.check.timeout");
         this.checkTimeout = TimeStringParser.getTime(checkTimeout);
         this.condition = () -> checkCondition(objectType.toLowerCase());
     }
@@ -46,9 +43,7 @@ public class ExpectedResult {
         this.objectName = data.get(1);
         this.objectState = data.get(2);
         this.expectedValue = null;
-        String checkInterval = data.size() > 3 ? data.get(3) : Config.getProperty("element.check.interval");
-        this.checkInterval = TimeStringParser.getTime(checkInterval);
-        String checkTimeout = data.size() > 4 ? data.get(4) : Config.getProperty("element.check.timeout");
+        String checkTimeout = data.size() > 3 ? data.get(3) : Config.getProperty("element.check.timeout");
         this.checkTimeout = TimeStringParser.getTime(checkTimeout);
         this.condition = () -> checkCondition(objectType.toLowerCase());
     }
@@ -58,7 +53,7 @@ public class ExpectedResult {
             case "страница", "всплывающее окно":
                 PageObject page = pageStorage().getPage(objectName);
                 double pageTimeout = page.getPageTimeout();
-                page.setPageTimeout(checkInterval);
+                page.setPageTimeout(checkTimeout);
                 boolean result = PageState.getState(objectState).apply(pageStorage().getPage(objectName));
                 page.setPageTimeout(pageTimeout);
                 if (!result) this.thrownException = page.getThrownException();
@@ -68,24 +63,21 @@ public class ExpectedResult {
             case "файл":
                 String dirName = String.format("%s/%s", Config.getProperty("downloads.dir"), testContext().getScenarioName());
                 return new File(dirName, objectName).exists();
+            case "параметр":
+                return scenarioData().get(objectName).toString().contains(expectedValue);
             default:
                 return ElementState.getState(objectState).apply(new CheckedElement(element(objectName), objectType, expectedValue));
         }
     }
 
-    public void waitForResult() {
+    public ExpectedResult waitForResult() {
         try {
-            driver().waitForCondition(condition, checkInterval, checkTimeout, testContext().getStepAction());
-            testContext().clearStepAction();
-            TauLogger.report("%s '%s' %s", objectType, objectName, objectState);
-        } catch (Exception e) {
-            if (e instanceof AutoTestBrokenException) throw e;
-            if (thrownException != null) e.addSuppressed(thrownException);
-            String wrongState = ElementState.getWrongState(objectState);
-            TauLogger.fail(e, "Фактический результат не соответствует ожидаемому.%n" +
-                            "Ожидаемый результат: %s '%s' %s%n" +
-                            "Фактический результат: %s '%s' %s",
-                    objectType, objectName, objectState, objectType, objectName, wrongState);
+            driver().waitForCondition(condition, checkTimeout);
+            this.conditionMet = true;
+        } catch (Exception e){
+            this.thrownException = e;
+            conditionMet = false;
         }
+        return this;
     }
 }

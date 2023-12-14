@@ -27,6 +27,11 @@ public class CucumberBasicTableStep {
         element(tableName).castTo(PwTable.class).saveAndClickOnElementByConditions(elementName, eval(conditions));
     }
 
+    @И("^в таблице \"(.+)\" дождаться появления строки, соответствующей условиям:$")
+    public void waitForTableConditions(String tableName, DataTable dataTable) {
+        tableStep(tableName).waitForTableConditions(eval(dataTable));
+    }
+
     @И("^в таблице \"(.+)\" найти строку \\((.+)\\), соответствующую условиям:$")
     public void findTableRowByConditions(String tableName, String rowName, DataTable dataTable) {
         element(tableName).castTo(IHasTableElements.class).findTableRowByConditions(rowName, eval(dataTable));

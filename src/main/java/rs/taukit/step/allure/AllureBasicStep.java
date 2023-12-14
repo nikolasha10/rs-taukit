@@ -1,6 +1,5 @@
 package rs.taukit.step.allure;
 
-import com.microsoft.playwright.TimeoutError;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.testng.Pickle;
 import io.qameta.allure.Step;
@@ -8,8 +7,11 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.common.PDStream;
+import rs.taukit.config.Config;
 import rs.taukit.driver.WebDriver;
 import rs.taukit.element.interfaces.IElement;
+import rs.taukit.element.playwright.PwList;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.utils.BasicUtils;
@@ -23,6 +25,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 import java.util.stream.IntStream;
 
 /**
@@ -36,6 +39,7 @@ public class AllureBasicStep extends BasicUtils {
         ScenarioData scenarioData = new ScenarioData(pickle);
         scenarioData.getAttachments().forEach(TauLogger::attach);
         testContext().setScenarioData(scenarioData);
+        scenarioData.put("Адрес стенда", Config.getSTAND().getUrl());
     }
 
     @Step("открыть браузер")
@@ -47,36 +51,15 @@ public class AllureBasicStep extends BasicUtils {
         TauLogger.report("Открыт браузер '%s'", driver().getBrowserType());
     }
 
-    @Step("нажать на элемент '{elementName}'")
-    public static void clickElement(String elementName) {
-        element(elementName).click();
-        TauLogger.report("Нажали на элемент '%s'", elementName);
-    }
-
-    @Step("нажать на поле '{fieldName}'")
-    public static void clickTextField(String fieldName) {
-        element(fieldName).click();
-        TauLogger.report("Нажали на поле '%s'", fieldName);
-    }
-
-    @Step("нажать на кнопку '{buttonName}'")
-    public static void clickButton(String buttonName) {
+    @Step("нажать на {elementType} '{elementName}'")
+    public static void clickElement(String elementType, String elementName) {
         try {
-            page().waitForElement(buttonName, true);
-        } catch (TimeoutError ignored) {
-            TauLogger.console("Не удалось дождаться отображения кнопки '%s'", buttonName);
-        }
-        testContext().setStepActionPageName(testContext().getCurrentPageName());
-        try {
-            element(buttonName).click();
+            element(elementName).click();
         } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось нажать на кнопку '%s'", buttonName);
+            TauLogger.fail(e, "Не удалось нажать на кнопку '%s'", elementName);
         }
-        testContext().setStepAction(() -> {
-            element(buttonName).click();
-            return true;
-        });
-        TauLogger.report("Нажата кнопка '%s'", buttonName);
+        testContext().saveStepAction(() -> element(elementName).click());
+        TauLogger.report("Нажали на %s '%s'", elementType, elementName);
     }
 
     @Step("снимок: {screenshotName}")
@@ -87,13 +70,41 @@ public class AllureBasicStep extends BasicUtils {
     public static void waitForTimeout(String timeValue, String timeUnit) {
         TauLogger.console("Ждём %s %s", timeValue, timeUnit);
         driver().waitForTimeout(TimeStringParser.getTime(timeValue + " " + timeUnit));
-//        page().waitForTimeout(TimeStringParser.getTime(timeValue + " " + timeUnit));
     }
 
     @Step("дождаться выполнения условий:")
-    public static void expectedResultCheck(DataTable dataTable) {
+    public static void waitForConditions(DataTable dataTable) {
         TauLogger.attachDataTable("Ожидаемый результат", dataTable);
-        dataTable.asMaps().forEach(data -> new ExpectedResult(data).waitForResult());
+        TauLogger.console("Ожидается выполнение условий");
+        System.out.println(dataTable);
+        BooleanSupplier conditions = () -> dataTable.asMaps().stream()
+                .map(data -> new ExpectedResult(data).waitForResult())
+                .allMatch(ExpectedResult::isConditionMet);
+        double elementCheckInterval = Config.getTimeProperty("element.check.interval");
+        double elementCheckTimeout = Config.getTimeProperty("element.check.timeout");
+        try {
+            driver().waitForCondition(conditions, elementCheckInterval, elementCheckTimeout, testContext().getStepActions());
+        } catch (Exception e) {
+            if (e instanceof AutoTestBrokenException) throw e;
+            ExpectedResult firstUnexpectedResult = dataTable.asMaps().stream()
+                    .map(data -> new ExpectedResult(data).waitForResult()).findFirst().orElse(null);
+            if (firstUnexpectedResult != null) {
+                if (firstUnexpectedResult.getThrownException() != null) {
+                    e.addSuppressed(firstUnexpectedResult.getThrownException());
+                }
+                String objectType = firstUnexpectedResult.getObjectType();
+                String objectName = firstUnexpectedResult.getObjectName();
+                String objectState = firstUnexpectedResult.getObjectState();
+                String expectedValue = firstUnexpectedResult.getExpectedValue() == null
+                        ? ""
+                        : String.format(" '%s'", firstUnexpectedResult.getExpectedValue());
+                TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s '%s' %s %s",
+                        objectType, objectName, objectState, expectedValue);
+            }
+        }
+        TauLogger.report("Условия выполнены");
+        testContext().clearStepActions();
+        testContext().stopToSaveActions();
     }
 
     @Step("сравнить файл \"(.+)\" с эталоном \"(.+)\"")
@@ -202,6 +213,7 @@ public class AllureBasicStep extends BasicUtils {
 
     public static void setCurrentPageContext() {
         page().setCurrentContext(null);
+        testContext().saveStepAction(() -> page().setCurrentContext(null));
         TauLogger.report("Текущий контекст: Страница '%s'", testContext().getCurrentPageName());
     }
 
@@ -223,6 +235,7 @@ public class AllureBasicStep extends BasicUtils {
     @Step("обновить страницу")
     public static void reloadPage() {
         page().reload();
+        testContext().saveStepAction(() -> page().reload());
         TauLogger.report("Страница '%s' обновлена", testContext().getCurrentPageName());
     }
 
@@ -230,6 +243,26 @@ public class AllureBasicStep extends BasicUtils {
     public static void closeCurrentTab() {
         int tabIndex = page().getCurrentTabIndex();
         driver().closeCurrentTab();
+        testContext().saveStepAction(() -> driver().closeCurrentTab());
         TauLogger.report("Вкладка %d закрыта", tabIndex + 1);
+    }
+
+    @Step("дождаться отображения {elementType} '{elementName}'")
+    public static void waitForElement(String elementType, String elementName) {
+        try {
+            page().waitForElement(elementName, true);
+            testContext().saveStepAction(() -> page().waitForElement(elementName, true));
+            TauLogger.report("Дождались отображения %s '%s'", elementType, elementName);
+        } catch (Exception e) {
+            TauLogger.fail("Не удалось дождаться отображения %s '%s'", elementType, elementName);
+        }
+    }
+
+    @Step("в списке '{listName}' выбрать '{listValue}'")
+    public static void listValueClick(String listName, String listValue) {
+        PwList pwList = element(listName).castTo(PwList.class);
+        pwList.setValue(eval(listValue));
+        testContext().saveStepAction(() -> pwList.setValue(eval(listValue)));
+        TauLogger.report("в списке '%s' выбран '%s'", listName, listValue);
     }
 }

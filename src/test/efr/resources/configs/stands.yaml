@@ -26,6 +26,13 @@
   portApplicationStub: 7001
   dbSuite: common
 
+- Название: vlg-206
+  protocol: http
+  hostApplication: 172.16.35.205
+  portApplication: 8888
+  portApplicationStub: 7001
+  dbSuite: common
+
 - Название: dor2
   protocol: http
   hostApplication: dor2

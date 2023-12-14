@@ -2,7 +2,6 @@ package rs.taukit.step.cucumber;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ru.И;
-import rs.taukit.element.playwright.PwList;
 import rs.taukit.step.allure.AllureBasicStep;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.PdfUtils;
@@ -12,19 +11,9 @@ import static rs.taukit.utils.BasicUtils.*;
 
 public class CucumberBasicStep {
 
-    @И("^нажать на элемент \"(.+)\"$")
-    public static void click(String elementName) {
-        AllureBasicStep.clickElement(elementName);
-    }
-
-    @И("^нажать на поле \"(.+)\"$")
-    public static void clickField(String fieldName) {
-        AllureBasicStep.clickElement(fieldName);
-    }
-
-    @И("^нажать на кнопку \"(.+)\"$")
-    public static void clickButton(String buttonName) {
-        AllureBasicStep.clickButton(buttonName);
+    @И("^нажать на (элемент|поле|кнопку) \"(.+)\"$")
+    public static void click(String elementType, String elementName) {
+        AllureBasicStep.clickElement(elementType, elementName);
     }
 
     /**
@@ -68,12 +57,17 @@ public class CucumberBasicStep {
 
     @И("^дождаться выполнения условий:$")
     public void expectedResultCheck(DataTable datatable) {
-        AllureBasicStep.expectedResultCheck(eval(datatable));
+        AllureBasicStep.waitForConditions(eval(datatable));
+    }
+
+    @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы|блока) \"(.+)\"$")
+    public void waitForElement(String elementType, String elementName) {
+        AllureBasicStep.waitForElement(elementType, elementName);
     }
 
     @И("^в списке \"(.+)\" выбрать \"(.+)\"$")
     public void listValueClick(String listName, String listValue) {
-        element(listName).castTo(PwList.class).setValue(eval(listValue));
+        AllureBasicStep.listValueClick(listName, listValue);
     }
 
     @И("^сохранить файл \"(.+)\", как \"(.+)\"$")

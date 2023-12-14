@@ -1,5 +1,6 @@
 package rs.taukit.driver;
 
+import com.microsoft.playwright.APIRequestContext;
 import rs.taukit.page.PageObject;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public interface WebDriver {
 
     void waitForCondition(BooleanSupplier condition, double searchValueTimeout);
 
-    void waitForCondition(BooleanSupplier condition, double interval, double timeout, BooleanSupplier previousStep);
+    void waitForCondition(BooleanSupplier condition, double interval, double timeout, List<Runnable> previousStep);
 
     <T> T castTo();
 
@@ -52,4 +53,5 @@ public interface WebDriver {
 
     int getPageIndex();
 
+    APIRequestContext getApiRequestContext();
 }

@@ -22,7 +22,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
@@ -248,8 +247,7 @@ public class PlaywrightDriver implements WebDriver {
     }
 
     @Override
-    public void waitForCondition(BooleanSupplier condition, double interval, double timeout, BooleanSupplier previousStep) {
-        AtomicBoolean isActual = new AtomicBoolean(true);
+    public void waitForCondition(BooleanSupplier condition, double interval, double timeout, List<Runnable> previousStepList) {
         BrowserContext.WaitForConditionOptions setTimeout = new BrowserContext.WaitForConditionOptions().setTimeout(timeout);
         browserContext.waitForCondition(() -> {
             try {
@@ -257,16 +255,16 @@ public class PlaywrightDriver implements WebDriver {
                 browserContext.waitForCondition(condition, setInterval);
                 return true;
             } catch (TimeoutError e) {
-                if (isActual.get()) {
-                    isActual.set(previousStep != null && previousStep.getAsBoolean());
-                }
+                previousStepList.forEach(Runnable::run);
                 return false;
+            } catch (AssertionError ae) {
+                return condition.getAsBoolean();
             }
-
         }, setTimeout);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T castTo() {
         return (T) this;
     }
@@ -305,6 +303,11 @@ public class PlaywrightDriver implements WebDriver {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public APIRequestContext getApiRequestContext() {
+        return browserContext.request();
     }
 
     private static class WebBrowser {

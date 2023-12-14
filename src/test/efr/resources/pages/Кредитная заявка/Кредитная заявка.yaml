@@ -62,6 +62,79 @@
             значение: //span[@role='option' and @aria-selected='true']
           Кол-во детей до 18 лет: input-form-field-underageChildCount
           Кол-во иных иждивенцев, за исключением детей до 18 лет: input-form-field-dependantCount
+      Работа:
+        тип: блок элементов
+        локатор: job-data
+        элементы:
+          Информация о трудоустройстве:
+            тип: выпадающий список
+            локатор: select-form-field-employment
+            элементы: //div[@role='option']
+            значение: //span[@role='option' and @aria-selected='true']
+          Наличие трудовой книжки:
+            тип: радио-кнопка
+            локатор: //span[text()='Наличие трудовой книжки']/following::div[@class='field-value'][1]
+            названия: //li//button/div
+            кнопки: //parent::button
+          Платёжеспособность:
+            тип: радио-кнопка
+            локатор: //span[text()='Платёжеспособность']/following::div[@class='field-value'][1]
+            названия: //li//button/div
+            кнопки: //parent::button
+          Общий стаж за последние 5 лет:
+            тип: блок элементов
+            локатор: //span[text()='Общий стаж за последние 5 лет']/following::div[@class='field-value'][1]
+            элементы:
+              лет: input-form-field-fiveYearsExperience-years
+              мес.: input-form-field-fiveYearsExperience-months
+      Доходы и расходы:
+        тип: блок элементов
+        локатор: incomes-expenses-data
+        элементы:
+          Доходы:
+            тип: блок элементов
+            локатор: //div[text()='Доходы']/following::div[@class='fieldset-content'][1]
+            элементы:
+              Способ подтверждения дохода по основному месту работы:
+                тип: выпадающий список
+                локатор: confirm-docmainIncomeConfirmDocument
+                элементы: //div[@role='option']
+                значение: //span[@role='option' and @aria-selected='true']
+              Основная зарплата: //span[text()='Основная зарплата']/following::input[1]
+              Способ подтверждения дополнительного дохода:
+                тип: выпадающий список
+                локатор: confirm-docadditionalIncomeConfirmDocument
+                элементы: //div[@role='option']
+                значение: //span[@role='option' and @aria-selected='true']
+              Доход по совместительству: //span[text()='Доход по совместительству']/following::input[1]
+              Способ подтверждения пенсионных доходов:
+                тип: выпадающий список
+                локатор: confirm-docpensionIncomeConfirmDocument
+                элементы: //div[@role='option']
+                значение: //span[@role='option' and @aria-selected='true']
+              Пенсия: input-form-field-pension
+              Способ подтверждения иных доходов:
+                тип: выпадающий список
+                локатор: confirm-docotherIncomeConfirmDocument
+                элементы: //div[@role='option']
+                значение: //span[@role='option' and @aria-selected='true']
+              Иные доходы: input-form-field-otherIncome
+          Расходы:
+            тип: блок элементов
+            локатор: //div[text()='Расходы']/following::div[@class='fieldset-content'][1]
+            элементы:
+              Обязательные выплаты: input-form-field-requiredPayments
+              Алименты: input-form-field-alimony
+      Иная информация:
+        тип: блок элементов
+        локатор: other-info
+        элементы:
+          Отношение к воинской службе:
+            тип: выпадающий список
+            локатор: select-form-field-militaryServiceRelation
+            элементы: //div[@role='option']
+            значение: //span[@role='option' and @aria-selected='true']
+          Продолжить: continue
   История:
     тип: блок элементов
     локатор: history-credit-view

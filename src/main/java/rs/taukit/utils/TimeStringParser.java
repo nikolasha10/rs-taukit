@@ -3,6 +3,7 @@ package rs.taukit.utils;
 public class TimeStringParser {
 
     public static double getTime(String timeString) {
+        if (timeString.isEmpty()) return 0;
         String[] chunks = timeString.split(" ");
         double value = Double.parseDouble(chunks[0]);
         int multiplier = 1000;

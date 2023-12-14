@@ -35,6 +35,11 @@ public class CucumberBasicBlockElementStep {
         blockElement(blockName).setCheckbox(fieldName);
     }
 
+    @И("^в блоке \"(.+)\" в списке \"(.+)\" выбрать \"(.+)\"$")
+    public void listValueClick(String blockName, String listName, String itemName) {
+        blockElement(blockName).listValueClick(listName, itemName);
+    }
+
     @И("^в блоке \"(.+)\" нажать на \"(.+)\" и скачать файл \"(.+)\"$")
     public void downloadFile(String blockName, String fileName, String buttonName) {
         blockElement(blockName).downloadFile(eval(fileName), buttonName);

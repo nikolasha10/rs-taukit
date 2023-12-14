@@ -8,9 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public class TextUtils {
+    private static final DataTableTypeRegistry registry = new DataTableTypeRegistry(Locale.ENGLISH);
+    public static final DataTable.TableConverter tableConverter = new DataTableTypeRegistryTableConverter(registry);
+
     public static List<List<String>> correctDatatable(DataTable dataTable) {
         List<List<String>> data = dataTable.asLists();
         List<List<String>> corrected = new ArrayList<>();
@@ -33,7 +39,9 @@ public class TextUtils {
         return corrected;
     }
 
-    private static final DataTableTypeRegistry registry = new DataTableTypeRegistry(Locale.ENGLISH);
-    public static final DataTable.TableConverter tableConverter = new DataTableTypeRegistryTableConverter(registry);
-
+    public static String findByRegExp(String responseBody, String regExp) {
+        Matcher matcher = Pattern.compile(regExp).matcher(responseBody);
+        MatchResult matchResult = matcher.results().findFirst().orElse(null);
+        return matchResult == null ? "<значение не найдено>" : matchResult.group(1);
+    }
 }

@@ -20,6 +20,7 @@ public class AllureBasicBlockElementStep extends BasicUtils {
             element = element.getElementByName(1, elements[i]).castTo(IHasBlockElements.class);
         }
         this.blockElements = element;
+        driver().waitForCondition(this.blockElements::isVisible);
     }
 
     @Step("в блоке '{this.blockName}' заполнить поле '{fieldName}' значением '{value}'")
@@ -41,7 +42,9 @@ public class AllureBasicBlockElementStep extends BasicUtils {
 
     @Step("в блоке '{this.blockName}' нажать на {elementType} '{fieldName}'")
     public void clickOnField(String elementType, String fieldName) {
-        blockElements.getElementByName(fieldName).castTo(IElement.class).click();
+        IElement iElement = blockElements.getElementByName(fieldName).castTo(IElement.class);
+        driver().waitForCondition(iElement::isVisible);
+        iElement.click();
         TauLogger.report("Нажали на %s '%s' в блоке '%s'", elementType, fieldName, blockName);
     }
 
@@ -49,6 +52,12 @@ public class AllureBasicBlockElementStep extends BasicUtils {
     public void setCheckbox(String fieldName) {
         blockElements.getElementByName(fieldName).castTo(IHasCheckbox.class).setCheckbox();
         TauLogger.report("Установлен чекбокс '%s' в блоке '%s'", fieldName, blockName);
+    }
+
+    @Step("в блоке '{this.blockName}' в списке '{listName}' выбрать '{itemName}'")
+    public void listValueClick(String listName, String itemName) {
+        blockElements.getElementByName(listName).castTo(IHasEditableValue.class).setValue(itemName);
+        TauLogger.report("В блоке '%s' в списке '%s' выбрано значение '%s'", blockName, listName, itemName);
     }
 
     @Step("в блоке '{this.blockName}' нажать на '{buttonName}' и скачать файл '{fileName}'")
@@ -63,5 +72,6 @@ public class AllureBasicBlockElementStep extends BasicUtils {
         TauLogger.report("Нажата кнопка '%s'", buttonName);
         TauLogger.report("Выбран файл '%s' из папки '%s'", fileName, dirPath);
     }
+
 
 }

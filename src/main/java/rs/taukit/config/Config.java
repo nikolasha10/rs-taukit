@@ -4,6 +4,7 @@ import lombok.Getter;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
+import rs.taukit.utils.TimeStringParser;
 import rs.taukit.utils.YamlParser;
 
 import java.io.File;
@@ -72,6 +73,9 @@ public class Config {
 
     public static int getIntegerProperty(String propertyName) {
         return Integer.parseInt(getProperty(propertyName));
+    }
+    public static double getTimeProperty(String propertyName) {
+        return TimeStringParser.getTime(getProperty(propertyName));
     }
 
     public static String getPageFilePath(String pageName) {

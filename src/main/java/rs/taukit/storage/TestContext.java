@@ -5,14 +5,13 @@ import io.cucumber.testng.PickleWrapper;
 import io.cucumber.testng.TestNGCucumberRunner;
 import lombok.Getter;
 import lombok.Setter;
-import rs.taukit.page.PageObject;
-import rs.taukit.page.PageStorage;
 import rs.taukit.step.allure.BasicApplication;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.testdata.TestData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.function.BooleanSupplier;
+import java.util.List;
 
 @Getter
 public class TestContext {
@@ -30,9 +29,10 @@ public class TestContext {
     private String savedPageName;
     @Setter
     private String stepActionPageName;
-    private BooleanSupplier stepAction;
+    private final List<Runnable> stepActions = new ArrayList<>();
     @Setter
     private TestNGCucumberRunner runner;
+    private boolean saveActions = false;
 
 
     public TestContext(PickleWrapper pickleWrapper, String functionality) {
@@ -48,20 +48,14 @@ public class TestContext {
 
     }
 
-    public void setStepAction(BooleanSupplier stepAction) {
-        this.stepAction = () -> {
-            PageObject pageObject = PageStorage.getInstance().getPage(stepActionPageName);
-            try {
-                pageObject.waitForLoad();
-                return stepAction.getAsBoolean();
-            } catch (Exception e) {
-                return false;
-            }
-        };
+    public void saveStepAction(Runnable stepAction) {
+        if (saveActions) {
+            this.stepActions.add(stepAction);
+        }
     }
 
-    public void clearStepAction() {
-        this.stepAction = () -> true;
+    public void clearStepActions() {
+        this.stepActions.clear();
     }
 
     public BasicApplication getApplication(String appName) {
@@ -70,5 +64,12 @@ public class TestContext {
 
     public void putApplication(String appName, BasicApplication app) {
         application.putIfAbsent(appName, app);
+    }
+
+    public void startToSaveActions() {
+        this.saveActions = true;
+    }
+    public void stopToSaveActions() {
+        this.saveActions = false;
     }
 }

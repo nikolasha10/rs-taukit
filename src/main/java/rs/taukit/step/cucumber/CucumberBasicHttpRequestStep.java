@@ -7,12 +7,21 @@ import rs.taukit.step.allure.AllureBasicHttpRequestStep;
 import static rs.taukit.utils.BasicUtils.eval;
 
 public class CucumberBasicHttpRequestStep {
-    private AllureBasicHttpRequestStep httpRequestStep(String name, DataTable dataTable) {
-        return new AllureBasicHttpRequestStep(name, eval(dataTable));
+    private AllureBasicHttpRequestStep httpRequestStep(String name) {
+        return new AllureBasicHttpRequestStep(name);
     }
 
     @И("^отправить POST-запрос \"(.+)\" с параметрами:$")
     public void sendPostRequest(String name, DataTable dataTable) {
-        httpRequestStep(name, eval(dataTable)).sendPost();
+        httpRequestStep(name).sendPost(eval(dataTable));
+    }
+    @И("^отправить GET-запрос \"(.+)\" с параметрами:$")
+    public void sendGetRequest(String name, DataTable dataTable) {
+        httpRequestStep(name).sendGet(eval(dataTable));
+    }
+
+    @И("^разобрать ответ запроса \"(.+)\", сохранив значения в параметрах:$")
+    public void parseResponseResult(String name, DataTable dataTable) {
+        httpRequestStep(name).parseResponse(eval(dataTable));
     }
 }

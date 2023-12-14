@@ -23,6 +23,7 @@ public class AllureBasicPageStep extends BasicUtils {
     @Step("дождаться отображения страницы '{this.pageName}'")
     public void waitForPageLoad() {
         page.waitForLoad();
+        testContext().saveStepAction(page::waitForLoad);
         TauLogger.report("Отображается страница '%s'", pageName);
     }
 
