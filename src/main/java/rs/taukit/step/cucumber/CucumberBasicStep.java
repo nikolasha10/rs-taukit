@@ -60,7 +60,7 @@ public class CucumberBasicStep {
         AllureBasicStep.waitForConditions(eval(datatable));
     }
 
-    @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы|блока) \"(.+)\"$")
+    @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы) \"(.+)\"$")
     public void waitForElement(String elementType, String elementName) {
         AllureBasicStep.waitForElement(elementType, elementName);
     }

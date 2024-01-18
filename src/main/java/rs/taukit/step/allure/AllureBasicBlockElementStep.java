@@ -74,4 +74,15 @@ public class AllureBasicBlockElementStep extends BasicUtils {
     }
 
 
+    @Step("дождаться отображения блока '{this.blockName}'")
+    public void waitForDisplayed() {
+        try {
+            driver().waitForCondition(blockElements::isVisible);
+            TauLogger.report("Блок '%s' отображается", blockName);
+        } catch (Exception e){
+            TauLogger.fail(e, "Не удалось дождаться блока '%s' на странице '%s'",
+                    blockName, testContext().getCurrentPageName());
+        }
+
+    }
 }

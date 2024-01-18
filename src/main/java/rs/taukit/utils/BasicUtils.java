@@ -54,6 +54,11 @@ public class BasicUtils {
         return page().getCurrentContext();
     }
 
+    /**
+     * Возвращает элемент страницы по его названию
+     * @param elementName - название элемента
+     * @return экземпляр класса, имплементирующего интерфейс IElement
+     */
     public static IElement element(String elementName) {
         if (context() != null) {
             return context().getElementByName(1, elementName);
@@ -69,10 +74,19 @@ public class BasicUtils {
     public static String eval(String template) {
         ScenarioData scenarioData = testContext().getScenarioData();
         if (scenarioData == null) return template;
-        String evalResult = scenarioData.evalObjects(template);
+        String evalResult = scenarioData.evalObjectField(template);
         return scenarioData.evalStrings(evalResult);
     }
+    public static <T> T evalObject(String template) {
+        ScenarioData scenarioData = testContext().getScenarioData();
+        return scenarioData.evalObject(template);
+    }
 
+    /**
+     * Вычисляет значение параметров теста, переданных в таблице данных dataTable
+     * @param dataTable - таблица данных
+     * @return таблица данных с вычисленными значениями параметров
+     */
     public static DataTable eval(DataTable dataTable) {
         if (testContext().getScenarioData() == null) {
             testContext().setScenarioData(new ScenarioData(testContext().getPickle()));
@@ -82,7 +96,7 @@ public class BasicUtils {
             if (template == null) return null;
             String format = "\\$\\{(.+?)} -> (.+)";
             Matcher matcher = Pattern.compile(format).matcher(template);
-            return matcher.matches() ? scenarioData.evalObjects(template) : scenarioData.evalStrings(template);
+            return matcher.matches() ? scenarioData.evalObjectField(template) : scenarioData.evalStrings(template);
         };
         return DataTable.create(dataTable.asLists().stream()
                 .map(dataRow -> dataRow.stream()

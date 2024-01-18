@@ -10,7 +10,7 @@ public class CucumberBasicDropdownListStep {
         return new AllureBasicDropdownListStep(fieldName);
     }
 
-    @И("^в списке \"(.+)\" выбрать значение \"(.+)\"$")
+    @И("^в выпадающем списке \"(.+)\" выбрать \"(.+)\"$")
     public void selectValue(String fieldName, String value) {
         dropdownList(fieldName).selectValue(eval(value));
     }

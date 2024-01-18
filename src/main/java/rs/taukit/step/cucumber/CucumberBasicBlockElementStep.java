@@ -50,4 +50,9 @@ public class CucumberBasicBlockElementStep {
         blockElement(blockName).attachFile(eval(fileName), buttonName);
     }
 
+    @И("^дождаться отображения блока \"(.+)\"$")
+    public void waitForElement(String blockElementName) {
+        blockElement(blockElementName).waitForDisplayed();
+    }
+
 }

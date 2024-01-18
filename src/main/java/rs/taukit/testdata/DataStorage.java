@@ -90,7 +90,7 @@ public class DataStorage {
 
     }
 
-    public String evalObjects(String template) {
+    public String evalObjectField(String template) {
         String format = "\\$\\{(.+?)} -> (.+)";
         Matcher matcher = Pattern.compile(format).matcher(template);
         try {
@@ -101,6 +101,21 @@ public class DataStorage {
                     return testData.getStringValue();
                 } else return object.toString();
             });
+        } catch (Exception e) {
+            String message = String.format("Не удалось вычислить значение параметра '%s'", template);
+            throw new TestDataException(e, message);
+        }
+    }
+
+    public <T> T evalObject(String template) {
+        String format = "\\$\\{(.+?)} -> (.+)";
+        Matcher matcher = Pattern.compile(format).matcher(template);
+        try {
+            if (!matcher.matches()) {
+                throw new TestDataException("Ключ '%s' не соответствует формату '%s'", template, format);
+            }
+            TestData workData = get(matcher.group(1));
+            return workData.getDataStorage().get(matcher.group(2));
         } catch (Exception e) {
             String message = String.format("Не удалось вычислить значение параметра '%s'", template);
             throw new TestDataException(e, message);

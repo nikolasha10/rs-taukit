@@ -29,6 +29,7 @@ public class AllureBasicPageStep extends BasicUtils {
 
     @Step("дождаться отображения всплывающего окна '{this.pageName}'")
     public void waitForPopupWindow() {
+        testContext().setSavedPageName(testContext().getCurrentPageName());
         page.waitForLoad();
         TauLogger.report("Отображается всплывающее окно '%s'", pageName);
     }

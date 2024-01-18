@@ -118,6 +118,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
 
     @Step("разобрать ответ запроса '{this.name}', сохранив значения в параметрах:")
     public void parseResponse(DataTable dataTable) {
+        TauLogger.attachDataTable("Параметры поиска результатов", dataTable);
         String responseParameterName = String.format("Результат запроса '%s'", name);
         List<List<String>> parsedValues = new ArrayList<>();
         Runnable runnable = getRunnable(dataTable, parsedValues, responseParameterName);

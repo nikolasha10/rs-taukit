@@ -63,8 +63,12 @@ public class ScenarioData {
         return dataStorage.get(fieldName);
     }
 
-    public String evalObjects(String template) {
-        return dataStorage.evalObjects(template);
+    public String evalObjectField(String template) {
+        return dataStorage.evalObjectField(template);
+    }
+
+    public <T> T evalObject(String template) {
+        return dataStorage.evalObject(template);
     }
 
     public String evalStrings(String template) {

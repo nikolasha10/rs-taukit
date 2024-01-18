@@ -87,7 +87,8 @@ public class AllureBasicStep extends BasicUtils {
         } catch (Exception e) {
             if (e instanceof AutoTestBrokenException) throw e;
             ExpectedResult firstUnexpectedResult = dataTable.asMaps().stream()
-                    .map(data -> new ExpectedResult(data).waitForResult()).findFirst().orElse(null);
+                    .map(data -> new ExpectedResult(data).waitForResult()).filter(result -> !result.isConditionMet())
+                    .findFirst().orElse(null);
             if (firstUnexpectedResult != null) {
                 if (firstUnexpectedResult.getThrownException() != null) {
                     e.addSuppressed(firstUnexpectedResult.getThrownException());
@@ -254,7 +255,8 @@ public class AllureBasicStep extends BasicUtils {
             testContext().saveStepAction(() -> page().waitForElement(elementName, true));
             TauLogger.report("Дождались отображения %s '%s'", elementType, elementName);
         } catch (Exception e) {
-            TauLogger.fail("Не удалось дождаться отображения %s '%s'", elementType, elementName);
+            TauLogger.fail(e, "Не удалось дождаться отображения %s '%s' на странице '%s'",
+                    elementType, elementName, testContext().getCurrentPageName());
         }
     }
 

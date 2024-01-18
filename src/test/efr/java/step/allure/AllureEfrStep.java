@@ -23,12 +23,11 @@ public class AllureEfrStep extends AllureBasicStep {
         }
     }
 
-    @Step("{scenarioName}")
+    @Step("выполнить сценарий \"{scenarioName}\"")
     public static void runScenario(String scenarioName) {
         EfrUtils.runScenario(scenarioName);
     }
-
-    @Step("{scenarioName}")
+    @Step("выполнить сценарий \"{scenarioName}\"")
     public static void runScenario(String scenarioName, DataTable dataTable) {
         TauLogger.attachDataTable("Параметры сценария", dataTable);
         dataTable.asMaps().forEach(data -> {
