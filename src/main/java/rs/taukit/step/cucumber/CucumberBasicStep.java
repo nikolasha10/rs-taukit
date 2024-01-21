@@ -57,7 +57,12 @@ public class CucumberBasicStep {
 
     @И("^дождаться выполнения условий:$")
     public void expectedResultCheck(DataTable datatable) {
-        AllureBasicStep.waitForConditions(eval(datatable));
+        AllureBasicStep.waitForConditionsNoName(eval(datatable));
+    }
+
+    @И("^дождаться выполнения условий \"(.+)\":$")
+    public void expectedResultCheck(String conditionsName, DataTable datatable) {
+        AllureBasicStep.waitForConditions(conditionsName, eval(datatable));
     }
 
     @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы) \"(.+)\"$")

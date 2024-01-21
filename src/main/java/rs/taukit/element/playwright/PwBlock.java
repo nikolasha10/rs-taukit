@@ -45,7 +45,13 @@ public class PwBlock extends PwElement implements IHasBlockElements {
                     return new ElementNotDescribedException(elementName, testContext().getCurrentPageName(), this);
                 });
         PwElement pwElement = iElement.castTo(PwElement.class);
-        driver.waitForCondition(() -> element.isVisible());
+        try {
+            driver.waitForCondition(() -> element.isVisible());
+        } catch (Exception e){
+            TauLogger.fail(e, "Не удалось дождаться блока '%s' на странице '%s'",
+                    this.elementName, testContext().getCurrentPageName());
+        }
+
         Locator blockFieldLocator = element.all().get(blockNumber - 1).locator(pwElement.getElement());
         return ElementBuilder.buildElement(elementName, pwElement, blockFieldLocator);
     }

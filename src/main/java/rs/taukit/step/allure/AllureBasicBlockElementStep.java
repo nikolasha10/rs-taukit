@@ -14,7 +14,7 @@ public class AllureBasicBlockElementStep extends BasicUtils {
     public AllureBasicBlockElementStep(String blockElementName) {
         this.blockName = blockElementName;
         Class<IElement> elementType = ElementType.getType("блок элементов").getElementClass();
-        String[] elements = blockElementName.split(" => ");
+        String[] elements = blockElementName.split(" -> ");
         IHasBlockElements element = page().replaceElement(elements[0], elementType).castTo(IHasBlockElements.class);
         for (int i = 1; i < elements.length; i++) {
             element = element.getElementByName(1, elements[i]).castTo(IHasBlockElements.class);
@@ -79,7 +79,7 @@ public class AllureBasicBlockElementStep extends BasicUtils {
         try {
             driver().waitForCondition(blockElements::isVisible);
             TauLogger.report("Блок '%s' отображается", blockName);
-        } catch (Exception e){
+        } catch (Exception e) {
             TauLogger.fail(e, "Не удалось дождаться блока '%s' на странице '%s'",
                     blockName, testContext().getCurrentPageName());
         }

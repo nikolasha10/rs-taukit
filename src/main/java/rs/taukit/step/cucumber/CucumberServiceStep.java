@@ -11,4 +11,9 @@ public class CucumberServiceStep {
         testContext().startToSaveActions();
     }
 
+    @И("^служебный шаг: повторять действия до выполнения условий \"(.+)\"$")
+    public void repeatActionsUntilSatisfyConditions(String conditionsName) {
+        testContext().startToSaveActions();
+    }
+
 }

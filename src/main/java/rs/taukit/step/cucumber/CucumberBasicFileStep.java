@@ -4,14 +4,18 @@ import io.cucumber.java.ru.И;
 import rs.taukit.step.allure.AllureBasicFileStep;
 import rs.taukit.testdata.TestDataFile;
 import rs.taukit.utils.FileUtils;
+import rs.taukit.utils.YamlParser;
 
-import static rs.taukit.utils.BasicUtils.eval;
-import static rs.taukit.utils.BasicUtils.evalObject;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static rs.taukit.utils.BasicUtils.*;
 
 public class CucumberBasicFileStep {
     private AllureBasicFileStep fileStep(String fileDir, String fileName) {
         return new AllureBasicFileStep(fileDir, fileName);
     }
+
     private AllureBasicFileStep fileStep(TestDataFile testDataFile) {
         return new AllureBasicFileStep(testDataFile);
     }
@@ -30,7 +34,17 @@ public class CucumberBasicFileStep {
 
     @И("^нажать на \"(.+)\" и выбрать файл \"(.+)\"$")
     public void attachFile(String buttonName, String parameterName) {
-        TestDataFile testDataFile = evalObject(parameterName);
+        TestDataFile testDataFile;
+        String format = "\\$\\{(.+?)} -> (.+)";
+        Matcher matcher = Pattern.compile(format).matcher(parameterName);
+        Matcher parameterValueMatcher = Pattern.compile(format).matcher(eval(parameterName));
+        if (matcher.matches()) {
+            testDataFile = evalObject(parameterName);
+        } else if (parameterValueMatcher.matches()) {
+            testDataFile = evalObject(eval(parameterName));
+        } else {
+            testDataFile = YamlParser.convert(scenarioData().get(eval(parameterName)));
+        }
         fileStep(testDataFile).attachFile(buttonName);
     }
 

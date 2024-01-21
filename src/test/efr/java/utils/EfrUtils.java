@@ -15,6 +15,10 @@ public class EfrUtils extends AllureBasicStep {
         subScenario.runScenario(scenarioName);
     }
 
+    public static void runScenario(String functionality, String scenarioName) {
+        subScenario.runScenario(functionality, scenarioName);
+    }
+
     public static boolean isNobodyLoggedIn() {
         return getCurrentUser() == null;
     }

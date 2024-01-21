@@ -13,16 +13,21 @@ import java.util.function.Function;
 
 import static rs.taukit.utils.BasicUtils.page;
 
+/**
+ * Перечисление, описывающее возможные состояния проверяемых объектов и методы проверки этих состояний
+ */
 public enum ElementState {
     IS_VISIBLE("отображается", checked -> checked.element().isVisible(), "не отображается"),
     IS_NOT_VISIBLE("не отображается", checked -> !checked.element().isVisible(), "отображается"),
     IS_DOWNLOADED("загружен", checked -> !checked.element().isVisible(), "не загружен"),
     IS_OPENED("открыта", checked -> checked.element().castTo(PwBrowserTab.class).isOpened(), "не открыта"),
-    CONTENT_TEXT("содержит", checked -> page()
-            .replaceElement(checked.element().getElementName(), checked.elementType())
-            .castTo(IHasText.class)
-            .getText()
-            .equals(checked.expectedValue()), "не содержит ожидаемый текст");
+    CONTENT_TEXT("содержит", checked -> {
+        IHasText hasText = page()
+                .replaceElement(checked.element().getElementName(), checked.elementType())
+                .castTo(IHasText.class);
+        String elementText = hasText.getText();
+        return elementText.equals(checked.expectedValue());
+    }, "не содержит ожидаемый текст");
 
     private static final Map<String, ElementState> BY_NAME = new HashMap<>();
 
@@ -40,6 +45,12 @@ public enum ElementState {
         this.wrongState = wrongState;
     }
 
+    /**
+     * Возвращает функцию, принимающую на вход объект Record с параметрами проверяемого элемент, и возвращающую логическое значение
+     *
+     * @param stateName - название состояния элемента, определяющее метод его проверки
+     * @return true, если состояние соответствует ожидаемому, иначе false
+     */
     public static Function<CheckedElement, Boolean> getState(String stateName) {
         return BY_NAME.get(stateName).checkState;
     }

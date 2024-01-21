@@ -16,12 +16,12 @@ public class CucumberEfrStep {
 
     @И("^выполнить сценарий \"(.+)\"$")
     public void runScenario(String scenarioName) {
-        AllureEfrStep.runScenario(scenarioName);
+        AllureEfrStep.runScenarioWrap(scenarioName);
     }
 
     @И("^выполнить сценарий \"(.+)\" с параметрами:$")
     public void runScenario(String scenarioName, DataTable dataTable) {
-        AllureEfrStep.runScenario(scenarioName, eval(dataTable));
+        AllureEfrStep.runScenarioWrap(scenarioName, eval(dataTable));
     }
 
     @И("^через \"(.+)\" перейти на страницу \"(.+)\"$")

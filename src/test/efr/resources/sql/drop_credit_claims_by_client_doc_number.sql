@@ -2,6 +2,7 @@ do $$
 DECLARE
     docNumber text := '${номер паспорта}';
 BEGIN
+    DELETE FROM credit.refinancing_credit_bank_decision_items WHERE parameter_id IN (select id FROM credit.members where document_number = docNumber);
     DELETE FROM credit.income_records where income_document_id in (SELECT id FROM credit.member_income_documents WHERE member_id in (select id FROM credit.members where document_number = docNumber));
     DELETE FROM credit.contacts WHERE member_id in (select id FROM credit.members where document_number = docNumber);
     DELETE FROM credit.jobs WHERE member_id in (select id FROM credit.members where document_number = docNumber);
@@ -29,6 +30,7 @@ BEGIN
     DELETE FROM credit.etl_fct_application_dop WHERE credit_claim_id in (select credit_claim_id FROM credit.members where document_number = docNumber);
     DELETE FROM credit.credit_claims WHERE id in (select credit_claim_id FROM credit.members where document_number = docNumber);
     DELETE FROM credit.preliminary_credit_parameters WHERE credit_claim_id in (select credit_claim_id FROM credit.members where document_number = docNumber);
-    DELETE FROM credit.members WHERE credit_claim_id in (select credit_claim_id FROM credit.members where document_number = docNumber);
+    DELETE FROM credit.send_to_kkr_queue WHERE record_key in (select id FROM credit.members where document_number = docNumber);
+    DELETE FROM credit.members WHERE document_number = docNumber;
 END;
 $$

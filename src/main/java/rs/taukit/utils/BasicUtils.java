@@ -13,6 +13,7 @@ import rs.taukit.storage.StorageManager;
 import rs.taukit.storage.TestContext;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.testdata.TestData;
+import rs.taukit.testdata.TestDataFile;
 
 import java.util.Map;
 import java.util.Optional;
@@ -56,6 +57,7 @@ public class BasicUtils {
 
     /**
      * Возвращает элемент страницы по его названию
+     *
      * @param elementName - название элемента
      * @return экземпляр класса, имплементирующего интерфейс IElement
      */
@@ -77,6 +79,7 @@ public class BasicUtils {
         String evalResult = scenarioData.evalObjectField(template);
         return scenarioData.evalStrings(evalResult);
     }
+
     public static <T> T evalObject(String template) {
         ScenarioData scenarioData = testContext().getScenarioData();
         return scenarioData.evalObject(template);
@@ -84,6 +87,7 @@ public class BasicUtils {
 
     /**
      * Вычисляет значение параметров теста, переданных в таблице данных dataTable
+     *
      * @param dataTable - таблица данных
      * @return таблица данных с вычисленными значениями параметров
      */
@@ -96,7 +100,15 @@ public class BasicUtils {
             if (template == null) return null;
             String format = "\\$\\{(.+?)} -> (.+)";
             Matcher matcher = Pattern.compile(format).matcher(template);
-            return matcher.matches() ? scenarioData.evalObjectField(template) : scenarioData.evalStrings(template);
+            if (matcher.matches()) {
+                if (scenarioData.evalObject(template) instanceof TestDataFile) {
+                    return template;
+                } else {
+                    return scenarioData.evalObjectField(template);
+                }
+            } else {
+                return scenarioData.evalStrings(template);
+            }
         };
         return DataTable.create(dataTable.asLists().stream()
                 .map(dataRow -> dataRow.stream()

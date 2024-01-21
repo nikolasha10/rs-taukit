@@ -41,6 +41,10 @@ public class DataStorage {
         return YamlParser.convert(TestDataUtils.get(dataStorage, fieldName));
     }
 
+    public <T> T getOptional(String fieldName) {
+        return YamlParser.convert(TestDataUtils.getOptional(dataStorage, fieldName));
+    }
+
     public void put(String key, Object value) {
         dataStorage.put(key, YamlParser.convert(value));
     }
@@ -76,6 +80,9 @@ public class DataStorage {
         String format = "\\$\\{(.+?)}";
         Matcher matcher = Pattern.compile(format).matcher(template);
         try {
+            if (matcher.matches() && get(matcher.group(1)).toString().startsWith("$")) {
+                return get(matcher.group(1)).toString();
+            }
             return matcher.replaceAll(matchResult -> {
                 if (get(matchResult.group(1)) instanceof ITestData iTestData) {
                     return iTestData.getStringValue();
@@ -121,5 +128,4 @@ public class DataStorage {
             throw new TestDataException(e, message);
         }
     }
-
 }

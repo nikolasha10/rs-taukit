@@ -72,7 +72,15 @@ public class AllureBasicStep extends BasicUtils {
         driver().waitForTimeout(TimeStringParser.getTime(timeValue + " " + timeUnit));
     }
 
+    @Step("дождаться выполнения условий \"{conditionsName}\":")
+    public static void waitForConditions(String conditionsName, DataTable dataTable) {
+        waitForConditions(dataTable);
+    }
     @Step("дождаться выполнения условий:")
+    public static void waitForConditionsNoName(DataTable dataTable) {
+        waitForConditions(dataTable);
+    }
+
     public static void waitForConditions(DataTable dataTable) {
         TauLogger.attachDataTable("Ожидаемый результат", dataTable);
         TauLogger.console("Ожидается выполнение условий");
@@ -206,31 +214,33 @@ public class AllureBasicStep extends BasicUtils {
         }
     }
 
-    @Step("примечание: далее работаем в контексте блока '{blockName}'")
+    @Step("[примечание] текущий контекст: блок элементов '{blockName}'")
     public static void setBlockContext(String blockName) {
         page().setCurrentContext(blockName);
-        TauLogger.console("Текущий контекст: Блок элементов '%s'", blockName);
+        testContext().setCurrentContextName("блок элементов '%s'", blockName);
+        TauLogger.console("[примечание] текущий контекст: %s", testContext().getCurrentContextName());
     }
 
     public static void setCurrentPageContext() {
         page().setCurrentContext(null);
         testContext().saveStepAction(() -> page().setCurrentContext(null));
-        TauLogger.report("Текущий контекст: Страница '%s'", testContext().getCurrentPageName());
+        testContext().setCurrentContextName("страница '%s'", testContext().getCurrentPageName());
+        TauLogger.report("[примечание] текущий контекст: страница '%s'", testContext().getCurrentPageName());
     }
 
-    @Step("примечание: переходим к контексту блока '{blockName}'")
+    @Step("[примечание] переходим к контексту блока '{blockName}'")
     public static void closeCurrentAndSetNewBlockContext(String blockName) {
         closeCurrentContext();
         page().setCurrentContext(blockName);
-        TauLogger.report("Текущий контекст: Блок элементов '%s'", blockName);
     }
 
     public static void closeCurrentContext() {
         IElement currentBlock = page().dropCurrentContext();
         String currentContext = currentBlock == null
-                ? String.format("Страница '%s'", testContext().getCurrentPageName())
-                : String.format("Блок '%s'", currentBlock.getElementName());
-        TauLogger.report("примечание: текущий контекст - %s", currentContext);
+                ? String.format("страница '%s'", testContext().getCurrentPageName())
+                : String.format("блок элементов '%s'", currentBlock.getElementName());
+        testContext().setCurrentContextName(currentContext);
+        TauLogger.report("* текущий контекст: %s", currentContext);
     }
 
     @Step("обновить страницу")

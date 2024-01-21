@@ -16,6 +16,7 @@ import java.util.List;
 @Getter
 public class TestContext {
     private final HashMap<String, BasicApplication> application = new HashMap<>();
+    private final List<Runnable> stepActions = new ArrayList<>();
     private Pickle pickle;
     private String scenarioName;
     private String functionality;
@@ -25,11 +26,11 @@ public class TestContext {
     private TestData currentUser;
     @Setter
     private String currentPageName;
+    private String currentContextName;
     @Setter
     private String savedPageName;
     @Setter
     private String stepActionPageName;
-    private final List<Runnable> stepActions = new ArrayList<>();
     @Setter
     private TestNGCucumberRunner runner;
     private boolean saveActions = false;
@@ -69,7 +70,12 @@ public class TestContext {
     public void startToSaveActions() {
         this.saveActions = true;
     }
+
     public void stopToSaveActions() {
         this.saveActions = false;
+    }
+
+    public void setCurrentContextName(String format, Object... args) {
+        currentContextName = String.format(format, args);
     }
 }

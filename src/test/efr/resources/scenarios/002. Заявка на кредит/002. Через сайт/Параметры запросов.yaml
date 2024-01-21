@@ -29,3 +29,10 @@
   BKIConsentPeriod: "1"
   ConsentUserType: "1"
   StockCode: "017"
+
+- запрос: efr_SaveApplication
+  ApplicationDate:
+    тип: дата
+    формат: yyyy-MM-dd
+    формула: сегодня
+

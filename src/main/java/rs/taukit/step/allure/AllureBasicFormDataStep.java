@@ -54,7 +54,7 @@ public class AllureBasicFormDataStep {
 
     private void fillFormBlockAction(String blockName, int blockNumber) {
         TauLogger.attachDataTable("Значения полей блока", dataTable);
-        String[] blocks = blockName.split(" => ");
+        String[] blocks = blockName.split(" -> ");
         IHasBlockElements currentBlock = pageObject.getElement(blocks[0]).castTo(IHasBlockElements.class);
         driver.waitForCondition(currentBlock::isVisible);
         if (blocks.length > 1) {
@@ -82,7 +82,7 @@ public class AllureBasicFormDataStep {
                         name, blockName, blockNumber, value);
             }
         });
-        if (blockNumber == 1){
+        if (blockNumber == 1) {
             TauLogger.report("Поля блока '%s' заполнены значениями из таблицы:", blockName);
         } else {
             TauLogger.report("Поля блока '%s' (%d) заполнены значениями из таблицы:", blockName, blockNumber);

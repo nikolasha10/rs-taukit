@@ -63,6 +63,10 @@ public class ScenarioData {
         return dataStorage.get(fieldName);
     }
 
+    public <T> T getOptional(String fieldName) {
+        return dataStorage.getOptional(fieldName);
+    }
+
     public String evalObjectField(String template) {
         return dataStorage.evalObjectField(template);
     }

@@ -2,6 +2,7 @@ package rs.taukit.step.allure;
 
 import com.microsoft.playwright.APIRequestContext;
 import com.microsoft.playwright.APIResponse;
+import com.microsoft.playwright.options.RequestOptions;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.config.Config;
@@ -9,14 +10,14 @@ import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.exceptions.HttpRequestNotSentException;
 import rs.taukit.utils.*;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -27,44 +28,68 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         this.name = name;
     }
 
+    private static Runnable getRunnable(DataTable dataTable, List<List<String>> parsedValues, String responseParameterName) {
+        Runnable runnable = () -> {
+            String responseBody = scenarioData().get(responseParameterName);
+            parsedValues.clear();
+            parsedValues.add(Arrays.asList("Параметр", "Значение"));
+            dataTable.asMaps().forEach(data -> {
+                String parameterName = TestDataUtils.get(data, "Параметр");
+                String regExp = TestDataUtils.get(data, "Регулярное выражение");
+                scenarioData().put(parameterName, TextUtils.findByRegExp(responseBody, regExp));
+                parsedValues.add(Arrays.asList(parameterName, scenarioData().get(parameterName)));
+            });
+        };
+        runnable.run();
+        return runnable;
+    }
+
     @Step("отправить POST-запрос '{this.name}' с параметрами")
     public void sendPost(DataTable dataTable) {
         scenarioData().put(dataTable);
+        Map<String, String> requestParametersMap = dataTable.asMaps().stream()
+                .collect(Collectors.toMap(row -> row.get("Параметр"), row -> row.get("Значение")));
+
+        String requestUrl = requestParametersMap.getOrDefault("url", createPostUrl().toString());
+        String jsonFileName = requestParametersMap.getOrDefault("jsonFileName", name);
         List<List<String>> parameters = new ArrayList<>(dataTable.asLists());
-        parameters.add(1, Arrays.asList("url", createPostUrl().toString()));
+        parameters.add(1, Arrays.asList("requestURL", requestUrl));
+        String fullPath = Config.getProperty("json.files.dir") + jsonFileName + ".json";
+        parameters.add(2, Arrays.asList("jsonFileName", jsonFileName + ".json"));
         DataTable modified = DataTable.create(parameters, TextUtils.tableConverter);
         TauLogger.attachDataTable("Параметры запроса", modified);
-        String fullPath = Config.getProperty("json.files.dir") + name + ".json";
         String content = eval(FileUtils.readFile(fullPath));
         TauLogger.attach("Тело запроса", content);
-        try {
-            HttpURLConnection connection = (HttpURLConnection) createPostUrl().openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setUseCaches(false);
-            connection.setConnectTimeout(180000);
-            connection.setReadTimeout(180000);
-            connection.connect();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
-            writer.write(content);
-            writer.flush();
-            writer.close();
-            int responseCode = connection.getResponseCode();
-            String responseMessage = connection.getResponseMessage();
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    responseCode == HttpURLConnection.HTTP_OK
-                            ? connection.getInputStream()
-                            : connection.getErrorStream()));
-            String response = br.lines().collect(Collectors.joining());
-            TauLogger.report("Отправлен POST-запрос '%s'. Статус: %d (%s).", name, responseCode, responseMessage);
+
+        AtomicReference<APIResponse> apiResponse = new AtomicReference<>();
+        Runnable runnable = () -> {
+            APIRequestContext apiRequestContext = driver().getApiRequestContext();
+            APIResponse response = apiRequestContext.post(
+                    requestUrl,
+                    RequestOptions.create()
+                            .setHeader("Content-Type", "application/json; charset=utf-8")
+                            .setHeader("Accept", "application/json")
+                            .setData(content));
+            apiResponse.set(response);
             String parameterName = String.format("Результат запроса '%s'", name);
-            scenarioData().put(parameterName, response);
-            TauLogger.attach("Тело ответа", response);
+            scenarioData().put(parameterName, apiResponse.get().text());
+        };
+        try {
+            runnable.run();
+            testContext().saveStepAction(runnable);
+            if (apiResponse.get().ok()) {
+                TauLogger.report("Отправлен POST-запрос '%s'. Статус: %d (%s)",
+                        name, apiResponse.get().status(), apiResponse.get().statusText());
+                TauLogger.attach("Тело ответа", apiResponse.get().text());
+            } else {
+                throw new RuntimeException(String.format(
+                        "Не удалось отправить POST-запрос '%s'. Сервер вернул статус %d (%s)",
+                        name, apiResponse.get().status(), apiResponse.get().statusText()));
+            }
         } catch (Exception e) {
             throw new HttpRequestNotSentException(e, name, "POST");
         }
+
     }
 
     @Step("отправить GET-запрос '{this.name}' с параметрами:")
@@ -85,7 +110,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         try {
             runnable.run();
             testContext().saveStepAction(runnable);
-            if (apiResponse.get().ok()){
+            if (apiResponse.get().ok()) {
                 TauLogger.report("Отправлен GET-запрос '%s'. Статус: %d (%s)",
                         name, apiResponse.get().status(), apiResponse.get().statusText());
                 TauLogger.attach("Тело ответа", apiResponse.get().text());
@@ -108,7 +133,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         return createURL(urlString);
     }
 
-    public URL createURL(String urlString){
+    public URL createURL(String urlString) {
         try {
             return new URI(urlString).toURL();
         } catch (MalformedURLException | URISyntaxException e) {
@@ -127,22 +152,6 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         TauLogger.attachDataTable("Полученные значения", parsedValuesTable);
         TauLogger.console("Получены значения:");
         System.out.println(parsedValuesTable);
-    }
-
-    private static Runnable getRunnable(DataTable dataTable, List<List<String>> parsedValues, String responseParameterName) {
-        Runnable runnable = () -> {
-            String responseBody = scenarioData().get(responseParameterName);
-            parsedValues.clear();
-            parsedValues.add(Arrays.asList("Параметр", "Значение"));
-            dataTable.asMaps().forEach(data -> {
-                String parameterName = TestDataUtils.get(data, "Параметр");
-                String regExp = TestDataUtils.get(data, "Регулярное выражение");
-                scenarioData().put(parameterName, TextUtils.findByRegExp(responseBody, regExp));
-                parsedValues.add(Arrays.asList(parameterName, scenarioData().get(parameterName)));
-            });
-        };
-        runnable.run();
-        return runnable;
     }
 
 

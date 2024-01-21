@@ -1,6 +1,7 @@
 Название: Кредитная заявка
 Элементы:
   Заголовок: //div[@data-id='credit-claim-panel']/label[text()='Кредитная заявка']
+  Статус: //span[text()='Статус']/following::div[@class='field-value'][1]
   Меню вкладок страницы:
     Тип: список
     Локатор: //div[@class='tabs tab-additional']/ul[@class='tabs__labels']
@@ -30,6 +31,28 @@
             локатор: select-form-field-seller
             элементы: //div[@role='option']
             значение: //span[@role='option' and @aria-selected='true']
+          Личное страхование Заемщика:
+            тип: переключатель
+            локатор: //input[@data-id='toggle-form-field-insuranceParams']/ancestor::label
+            включен: //input[@data-id='toggle-form-field-insuranceParams']/ancestor::label[@class='toggle checked']
+          Страховая программа:
+            тип: выпадающий список
+            локатор: select-form-field-insuranceProgram
+            элементы: //div[@role='option']
+            значение: //span[@role='option' and @aria-selected='true']
+          Вариант страхования:
+            тип: радио-кнопка
+            локатор: //span[text()='Вариант страхования']/following::div[@class='field-value'][1]
+            названия: //li//button/div
+            кнопки: //parent::button
+          Страховая плата: input-form-field-insuranceAmount
+          За счет кредитных средств:
+            тип: чекбокс
+            локатор: //input[@data-id='input-form-field-dateFrom']/..
+            установлен: //input[@data-id='input-form-field-dateFrom']/parent::label[@class='checkbox-container checked']
+          Вознаграждения Банку: input-form-field-bankReward
+          Страховая премия страховой организации: input-form-field-insurancePremium
+          Комментарий сотрудника фронт-офиса: text-area-form-field-employeeComment
           Продолжить: success
   Заемщик:
     тип: блок элементов
@@ -55,6 +78,11 @@
             локатор: //span[text()='Военный билет']/following::div[@class='field-value'][1]
             названия: //li//button/div
             кнопки: //parent::button
+          Тип жилья:
+            тип: выпадающий список
+            локатор: select-form-field-housingType
+            элементы: //div[@role='option']
+            значение: //span[@role='option' and @aria-selected='true']
           Семейное положение:
             тип: выпадающий список
             локатор: select-form-field-familyStatus
@@ -149,6 +177,12 @@
     тип: блок элементов
     локатор: credit-document-id
     элементы:
+      Документы:
+        тип: таблица
+        локатор: //table
+        заголовки: //th
+        строки: //th/parent::tr/following::tr
+        столбцы: //td
       Добавить: add-doc-id
       Печать анкеты заявления (односторонняя):
         тип: загрузка файла

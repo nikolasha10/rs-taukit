@@ -16,6 +16,11 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import static rs.taukit.utils.BasicUtils.*;
+
+/**
+ * Класс, описывающий ожидаемый результат проверки объекта тестирования.
+ * Предоставляет методы для получения и ожидания результата проверки.
+ */
 @Getter
 public class ExpectedResult {
     private final String objectType;
@@ -27,6 +32,12 @@ public class ExpectedResult {
     private Exception thrownException;
     private boolean conditionMet;
 
+    /**
+     * Конструктор, формирующий объект, описывающий ожидаемый результат проверки объекта тестирования,
+     * в соответствии с параметрами, переданными в словаре data.
+     *
+     * @param data - словарь параметров проверки объекта тестирования.
+     */
     public ExpectedResult(Map<String, String> data) {
         this.objectType = TestDataUtils.get(data, "Объект");
         this.objectName = TestDataUtils.get(data, "Название");
@@ -38,6 +49,13 @@ public class ExpectedResult {
         this.condition = () -> checkCondition(objectType.toLowerCase());
     }
 
+    /**
+     * Конструктор, формирующий объект, описывающий ожидаемый результат проверки объекта тестирования,
+     * в соответствии с параметрами, переданными в списке data.
+     *
+     * @param data - список параметров проверки объекта тестирования.
+     */
+
     public ExpectedResult(List<String> data) {
         this.objectType = data.get(0);
         this.objectName = data.get(1);
@@ -48,6 +66,12 @@ public class ExpectedResult {
         this.condition = () -> checkCondition(objectType.toLowerCase());
     }
 
+    /**
+     * Метод, проверяющий, выполняются ли заданные условия для проверяемого объекта
+     *
+     * @param objectType - тип объекта, определяющий алгоритм проверки
+     * @return true или false
+     */
     private boolean checkCondition(String objectType) {
         switch (objectType) {
             case "страница", "всплывающее окно":
@@ -70,11 +94,17 @@ public class ExpectedResult {
         }
     }
 
+    /**
+     * Метод, ожидающий выполнение условий в течение заданного времени.
+     * В результате выполнения определяет значения полей conditionMet и throwException
+     *
+     * @return Объект, описывающий ожидаемый и полученный результат проверки.
+     */
     public ExpectedResult waitForResult() {
         try {
             driver().waitForCondition(condition, checkTimeout);
             this.conditionMet = true;
-        } catch (Exception e){
+        } catch (Exception e) {
             this.thrownException = e;
             conditionMet = false;
         }
