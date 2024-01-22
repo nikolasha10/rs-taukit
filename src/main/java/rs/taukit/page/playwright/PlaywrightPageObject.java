@@ -202,61 +202,46 @@ public class PlaywrightPageObject implements PageObject {
         return page.screenshot((new Page.ScreenshotOptions().setFullPage(true)));
     }
 
-//    @SuppressWarnings("unchecked")
-//    private Map<String, IElement> buildElements(Map<String, ?> elements) {
-//        Map<String, IElement> result = new HashMap<>();
-//        elements.forEach((elementName, elementObject) -> {
-//            if (elementObject instanceof String locator){
-//                result.put(elementName, buildElement(elementName, locator));
-//            } else if (elementObject instanceof Map elementData){
-//                IElement element = buildElement(elementName, elementData);
-//                result.put(elementName, element);
-//            }
-//        });
-//        return result;
-//    }
-//
-//    private IElement buildElement(String elementName, String locator) {
-//        return new PwElement(elementName, locator);
-//    }
-//
-//    private IElement buildElement(String elementName, Map<String, Object> elementDataInitial) {
-//        Map<String, Object> elementData = new LinkedHashMap<>();
-//        elementDataInitial.forEach((key, value) -> elementData.put(key.toLowerCase(), value));
-//        String elementTypeName = elementData.get("тип").toString();
-//        Class<? extends IElement> elementClass = ElementType.getType(elementTypeName).getElementClass();
-//        return buildElement(elementName, elementClass, elementData);
-//    }
-//    private IElement buildElement(String elementName, Class<? extends IElement> elementClass, Map<String, String> elementData) {
-//        try {
-//            return elementClass.getConstructor(String.class, elementData.getClass())
-//                    .newInstance(elementName, elementData);
-//        } catch (Exception e) {
-//            throw new ElementNotBuiltException(e, elementName, elementClass.getName(), elementData.toString());
-//        }
-//
-//    }
-
     @Override
     public IElement getElement(String elementName) {
-        if (getCurrentContext() == null) {
-            return Optional.ofNullable(pageElements.get(elementName))
-                    .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
+        return Optional.ofNullable(findElement(getCurrentContext(), elementName))
+                .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
+    }
+
+    private IElement findElement(IHasBlockElements context, String elementName) {
+        List<IElement> elementList;
+        if (context == null) {
+            if (pageElements.containsKey(elementName)) {
+                return pageElements.get(elementName);
+            }
+            elementList = pageElements.values().stream().toList();
         } else {
-            return getCurrentContext().getElementByName(1, elementName);
+            if (context.containsElement(elementName)) {
+                return context.getElementByName(elementName);
+            }
+            elementList = context.getElementList();
         }
+        List<IHasBlockElements> blockElementsList = elementList.stream()
+                .filter(element -> element.getModel().getType().equalsIgnoreCase("блок элементов"))
+                .map(element -> element.castTo(IHasBlockElements.class))
+                .toList();
+        for (IHasBlockElements blockElement : blockElementsList) {
+            IElement foundElement = findElement(blockElement, elementName);
+            if (foundElement != null) return foundElement;
+        }
+        return null;
     }
 
     @Override
     public IElement replaceElement(String elementName, Class<? extends IElement> elementType) {
-        IHasBlockElements context = getCurrentContext();
-        if (context != null) {
-            return context.getElementByName(1, elementName).castTo(elementType);
-        }
-        IElement currentElement = Optional.ofNullable(pageElements.get(elementName))
+        IElement currentElement = Optional.ofNullable(findElement(getCurrentContext(), elementName))
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
-        pageElements.replace(elementName, ElementBuilder.buildElement(elementName, elementType, currentElement));
-        return pageElements.get(elementName);
+        if (getCurrentContext() == null && pageElements.containsKey(elementName)) {
+            pageElements.replace(elementName, ElementBuilder.buildElement(elementName, elementType, currentElement));
+            return pageElements.get(elementName);
+        } else {
+            return currentElement.castTo(elementType);
+        }
     }
 
     public Map<String, IElement> addCommonBlocks(List<String> blockNameList) {

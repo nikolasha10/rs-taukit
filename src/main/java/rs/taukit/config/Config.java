@@ -55,7 +55,9 @@ public class Config {
 
     private static Map<String, String> buildPageMapping(String pagesDirPath) {
         Set<File> pageFileList = FileUtils.getDirFileList(pagesDirPath);
-        return pageFileList.stream().collect(Collectors.toMap(file -> {
+        return pageFileList.stream()
+                .filter(file -> !file.getName().endsWith(".md"))
+                .collect(Collectors.toMap(file -> {
             Map<String, ?> pageData = YamlParser.parse(file.getAbsolutePath());
             return pageData.get("Название").toString();
         }, File::getAbsolutePath));

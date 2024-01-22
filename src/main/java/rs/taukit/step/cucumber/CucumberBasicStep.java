@@ -50,6 +50,11 @@ public class CucumberBasicStep {
         AllureBasicStep.takeScreenshot(String.format("страница '%s'", testContext().getCurrentPageName()));
     }
 
+    @И("^сделать снимок страницы и сохранить, как \"(.+)\"$")
+    public void takeScreenshot(String screenshotName) {
+        AllureBasicStep.takeScreenshot(screenshotName);
+    }
+
     @И("^подождать (\\d+) (секунд|минут|секунду|минуту|секунды|минуты)$")
     public void waitForTimeout(String timeValue, String timeUnit) {
         AllureBasicStep.waitForTimeout(timeValue, timeUnit);
@@ -117,7 +122,7 @@ public class CucumberBasicStep {
 
     @И("^примечание: выходим из контекста блока \"(.+)\"$")
     public void closeBlockContext(String blockName) {
-        AllureBasicStep.closeCurrentContext();
+        AllureBasicStep.closeCurrentContext(true);
     }
 
 }

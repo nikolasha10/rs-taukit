@@ -6,6 +6,7 @@ import rs.taukit.utils.YamlParser;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ElementModel {
@@ -19,6 +20,9 @@ public class ElementModel {
     public <T> T get(String option) {
         return YamlParser.convert(TestDataUtils.get(options, option));
     }
+    public <T> T getOrDefault(String option, T defaultValue) {
+        return YamlParser.convert(Optional.ofNullable(TestDataUtils.getOptional(options, option)).orElse(defaultValue));
+    }
 
     public <T> T get(String option, boolean required) {
         try {
@@ -28,6 +32,9 @@ public class ElementModel {
             return null;
         }
 
+    }
+    public String getType(){
+        return options.containsKey("тип") ? get("тип") : "";
     }
 
     @Override

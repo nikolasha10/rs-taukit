@@ -9,6 +9,7 @@ import rs.taukit.page.playwright.ElementBuilder;
 import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,6 +39,11 @@ public class PwBlock extends PwElement implements IHasBlockElements {
     }
 
     @Override
+    public List<IElement> getElementList() {
+        return elements.values().stream().toList();
+    }
+
+    @Override
     public IElement getElementByName(int blockNumber, String elementName) {
         IElement iElement = Optional.ofNullable(elements.get(elementName))
                 .orElseThrow(() -> {
@@ -59,6 +65,11 @@ public class PwBlock extends PwElement implements IHasBlockElements {
     @Override
     public IElement getElementByName(String elementName) {
         return getElementByName(1, elementName);
+    }
+
+    @Override
+    public boolean containsElement(String elementName) {
+        return elements.containsKey(elementName);
     }
 
 }

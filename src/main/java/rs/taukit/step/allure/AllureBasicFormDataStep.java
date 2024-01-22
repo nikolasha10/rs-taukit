@@ -35,13 +35,19 @@ public class AllureBasicFormDataStep {
         data.forEach((row) -> {
             String type = Optional.ofNullable(row.get("Тип"))
                     .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Тип'"));
+            String blockName = row.get("Блок");
+            IHasBlockElements block = blockName == null
+                    ? null
+                    : pageObject.getElement(blockName).castTo(IHasBlockElements.class);
             String name = Optional.ofNullable(row.get("Название"))
                     .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Название'"));
             String value = Optional.ofNullable(row.get("Значение"))
                     .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Значение'"));
             String control = row.getOrDefault("Контроль", "");
             Class<IElement> elementType = ElementType.getType(type).getElementClass();
-            IHasEditableValue element = pageObject.replaceElement(name, elementType).castTo(IHasEditableValue.class);
+            IHasEditableValue element = block == null 
+                    ? pageObject.replaceElement(name, elementType).castTo(IHasEditableValue.class)
+                    : block.getElementByName(name).castTo(IHasEditableValue.class);
             if (control.isEmpty()) {
                 element.setValue(value);
             } else {

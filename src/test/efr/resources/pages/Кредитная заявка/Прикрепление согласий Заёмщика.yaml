@@ -1,5 +1,3 @@
-Адрес: /efr/clients-data-service/bpm/task/%s?mainProcessKey=credit-identification-client-process
-Обязательная часть адреса: mainProcessKey=credit-identification-client-process
 Название: Прикрепление согласий Заёмщика
 Элементы:
   Согласие на обработку персональных данных и получение кредитных отчетов из БКИ:

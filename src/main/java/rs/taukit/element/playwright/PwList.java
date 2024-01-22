@@ -17,14 +17,14 @@ public class PwList extends PwElement implements IHasEditableValue {
 
     public PwList(String elementName, Locator locator, ElementModel model) {
         super(elementName, locator);
-        this.labels = driver.getLocator(model.get("названия"));
-        this.buttons = driver.getLocator(model.get("кнопки"));
+        this.labels = driver.getLocator(model.getOrDefault("названия", "//li//button/div"));
+        this.buttons = driver.getLocator(model.getOrDefault("кнопки", "//parent::button"));
     }
 
     public PwList(String elementName, ElementModel model) {
         super(elementName, model);
-        this.labels = driver.getLocator(model.get("названия"));
-        this.buttons = driver.getLocator(model.get("кнопки"));
+        this.labels = driver.getLocator(model.getOrDefault("названия", "//li//button/div"));
+        this.buttons = driver.getLocator(model.getOrDefault("кнопки", "//parent::button"));
     }
 
     public PwList(String elementName, IElement element) {

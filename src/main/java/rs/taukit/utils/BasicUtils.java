@@ -62,9 +62,6 @@ public class BasicUtils {
      * @return экземпляр класса, имплементирующего интерфейс IElement
      */
     public static IElement element(String elementName) {
-        if (context() != null) {
-            return context().getElementByName(1, elementName);
-        }
         return Optional.ofNullable(page().getElement(elementName))
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, testContext().getCurrentPageName()));
     }
