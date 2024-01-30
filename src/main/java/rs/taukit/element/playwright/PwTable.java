@@ -48,9 +48,9 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     private void initFields(ElementModel model) {
-        this.headers = driver.getLocator(model.get("заголовки"));
-        this.rows = driver.getLocator(model.get("строки"));
-        this.cells = driver.getLocator(model.get("столбцы"));
+        this.headers = getPwLocator(model.get("заголовки"));
+        this.rows = getPwLocator(model.get("строки"));
+        this.cells = getPwLocator(model.get("столбцы"));
         Map<String, Object> tableElementsMap = model.get("элементы", false);
         this.elements = tableElementsMap == null
                 ? new HashMap<>()
@@ -176,7 +176,7 @@ public class PwTable extends PwElement implements IHasTableElements {
         if (!elements.containsKey(elementName)) {
             throw new ElementNotDescribedException(elementName, testContext().getCurrentPageName());
         }
-        element.locator(elements.get(elementName).getLocator()).click();
+        activeRow.locator(elements.get(elementName).getLocator()).click();
     }
 
     @Step("в таблице '{this.elementName}' нажать на '{elementName}', сохранив его значение, согласно условиям")

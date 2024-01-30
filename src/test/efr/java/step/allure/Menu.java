@@ -18,7 +18,7 @@ public class Menu extends BasicUtils {
     public void selectMenuItem(String pageName) {
         menu.selectMenuItem(pageName);
         TauLogger.report("В меню '%s' выбран пункт '%s'", menuName, pageName);
-        pageStorage().getPage(pageName).waitForLoad();
+        driver().getCurrentBrowser().getPage(pageName).waitForLoad();
         TauLogger.report("Отображается страница '%s'", pageName);
     }
 }

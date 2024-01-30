@@ -2,7 +2,7 @@ package rs.taukit.utils;
 
 import io.cucumber.datatable.DataTable;
 import rs.taukit.driver.DriverManager;
-import rs.taukit.driver.WebDriver;
+import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.exceptions.DataTableFormatMismatchException;
@@ -27,7 +27,7 @@ public class BasicUtils {
         return DriverManager.getInstance();
     }
 
-    public static WebDriver driver() {
+    public static IWebDriver driver() {
         return driverManager().getDriver();
     }
 
@@ -48,7 +48,7 @@ public class BasicUtils {
     }
 
     public static PageObject page() {
-        return pageStorage().getPage(testContext().getCurrentPageName());
+        return driver().getCurrentBrowser().getPage(testContext().getCurrentPageName());
     }
 
     public static IHasBlockElements context() {

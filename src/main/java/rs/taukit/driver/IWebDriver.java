@@ -1,12 +1,9 @@
 package rs.taukit.driver;
 
-import com.microsoft.playwright.APIRequestContext;
-import rs.taukit.page.PageObject;
-
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
-public interface WebDriver {
+public interface IWebDriver {
     void openBrowser();
 
     void openBrowser(boolean viewPdf);
@@ -15,19 +12,15 @@ public interface WebDriver {
 
     void switchBrowser(int browserIndex);
 
-    void switchBrowser(String browserName);
-
     boolean isBrowserOpen();
 
     String getBrowserType();
 
+    int getCurrentBrowserIndex();
+
     void closeDriver();
 
     void closeBrowser();
-
-    PageObject initPage(String pageName);
-
-    String getCurrentPageUrl();
 
     void waitForCondition(BooleanSupplier condition);
 
@@ -37,21 +30,9 @@ public interface WebDriver {
 
     <T> T castTo();
 
-    List<byte[]> takeScreenshots();
-
-    void openNewTab();
-
-    void closeCurrentTab();
-
-    boolean setActiveTab(int tabIndex);
-
-    void navigate(String url);
-
     long getDriverId();
 
     void waitForTimeout(double time);
 
-    int getPageIndex();
-
-    APIRequestContext getApiRequestContext();
+    IWebBrowser getCurrentBrowser();
 }

@@ -3,7 +3,7 @@ package rs.taukit.step.allure;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.driver.DriverManager;
-import rs.taukit.driver.WebDriver;
+import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.ElementType;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasBlockElements;
@@ -20,7 +20,7 @@ public class AllureBasicFormDataStep {
     private final PageObject pageObject;
     private final DataTable dataTable;
     private final List<Map<String, String>> data;
-    private final WebDriver driver;
+    private final IWebDriver driver;
 
     public AllureBasicFormDataStep(DataTable dataTable, PageObject pageObject) {
         this.dataTable = dataTable;

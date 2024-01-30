@@ -34,18 +34,17 @@ public class PwMenu extends PwElement implements IHasMenu {
     }
 
     private void initFields(ElementModel model) {
-        this.items = driver.getLocator(model.get("пункты меню"));
+        this.items = getPwLocator(model.get("пункты меню"));
         String menuExpandButtonLocator = model.get("...", false);
         if (menuExpandButtonLocator != null) {
-            this.expand = driver.getLocator(menuExpandButtonLocator);
-            this.dropdownListItems = driver.getLocator(model.get("выпадающий список"));
+            this.expand = getPwLocator(menuExpandButtonLocator);
+            this.dropdownListItems = getPwLocator(model.get("выпадающий список"));
         }
     }
 
 
     @Override
     public void selectMenuItem(String itemName) {
-//        testContext().setStepActionPageName(testContext().getCurrentPageName());
         Locator item = element.locator(items).filter(new Locator.FilterOptions().setHasText(itemName));
         int itemCount = item.count();
         int dropdownItemCount = 0;

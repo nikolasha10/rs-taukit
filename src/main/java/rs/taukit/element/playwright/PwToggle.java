@@ -11,16 +11,16 @@ public class PwToggle extends PwElement implements IHasEditableValue {
 
     public PwToggle(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
-        this.turnedOn = getDriver().getLocator(model.get("включен"));
+        this.turnedOn = getPwLocator(model.get("включен"));
     }
 
     public PwToggle(String elementName, ElementModel model) {
         super(elementName, model);
-        this.turnedOn = getDriver().getLocator(model.get("включен"));
+        this.turnedOn = getPwLocator(model.get("включен"));
     }
     public PwToggle(String elementName, Locator locator, ElementModel model) {
         super(elementName, locator);
-        this.turnedOn = getDriver().getLocator(model.get("включен"));
+        this.turnedOn = getPwLocator(model.get("включен"));
     }
 
     @Override

@@ -1,13 +1,11 @@
 package rs.taukit.step.allure;
 
-import com.microsoft.playwright.APIRequestContext;
-import com.microsoft.playwright.APIResponse;
-import com.microsoft.playwright.options.RequestOptions;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.exceptions.HttpRequestNotSentException;
+import rs.taukit.records.ApiResponse;
 import rs.taukit.utils.*;
 
 import java.net.MalformedURLException;
@@ -18,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class AllureBasicHttpRequestStep extends BasicUtils {
@@ -60,31 +57,18 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         TauLogger.attachDataTable("Параметры запроса", modified);
         String content = eval(FileUtils.readFile(fullPath));
         TauLogger.attach("Тело запроса", content);
-
-        AtomicReference<APIResponse> apiResponse = new AtomicReference<>();
-        Runnable runnable = () -> {
-            APIRequestContext apiRequestContext = driver().getApiRequestContext();
-            APIResponse response = apiRequestContext.post(
-                    requestUrl,
-                    RequestOptions.create()
-                            .setHeader("Content-Type", "application/json; charset=utf-8")
-                            .setHeader("Accept", "application/json")
-                            .setData(content));
-            apiResponse.set(response);
-            String parameterName = String.format("Результат запроса '%s'", name);
-            scenarioData().put(parameterName, apiResponse.get().text());
-        };
         try {
-            runnable.run();
-            testContext().saveStepAction(runnable);
-            if (apiResponse.get().ok()) {
+            ApiResponse response = driver().getCurrentBrowser().sendPost(requestUrl, content);
+            String parameterName = String.format("Результат запроса '%s'", name);
+            scenarioData().put(parameterName, response.text());
+            if (response.ok()) {
                 TauLogger.report("Отправлен POST-запрос '%s'. Статус: %d (%s)",
-                        name, apiResponse.get().status(), apiResponse.get().statusText());
-                TauLogger.attach("Тело ответа", apiResponse.get().text());
+                        name, response.status(), response.statusText());
+                TauLogger.attach("Тело ответа", response.text());
             } else {
                 throw new RuntimeException(String.format(
                         "Не удалось отправить POST-запрос '%s'. Сервер вернул статус %d (%s)",
-                        name, apiResponse.get().status(), apiResponse.get().statusText()));
+                        name, response.status(), response.statusText()));
             }
         } catch (Exception e) {
             throw new HttpRequestNotSentException(e, name, "POST");
@@ -100,24 +84,18 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
                 .findFirst()
                 .orElseThrow(() -> new DataTableFormatMismatchException("Не найден обязательный параметр 'url'"))
                 .get("Значение");
-        AtomicReference<APIResponse> apiResponse = new AtomicReference<>();
-        Runnable runnable = () -> {
-            APIRequestContext apiRequestContext = driver().getApiRequestContext();
-            apiResponse.set(apiRequestContext.get(urlString));
-            String parameterName = String.format("Результат запроса '%s'", name);
-            scenarioData().put(parameterName, apiResponse.get().text());
-        };
         try {
-            runnable.run();
-            testContext().saveStepAction(runnable);
-            if (apiResponse.get().ok()) {
+            ApiResponse response = driver().getCurrentBrowser().sendGet(urlString);
+            String parameterName = String.format("Результат запроса '%s'", name);
+            scenarioData().put(parameterName, response.text());
+            if (response.ok()) {
                 TauLogger.report("Отправлен GET-запрос '%s'. Статус: %d (%s)",
-                        name, apiResponse.get().status(), apiResponse.get().statusText());
-                TauLogger.attach("Тело ответа", apiResponse.get().text());
+                        name, response.status(), response.statusText());
+                TauLogger.attach("Тело ответа", response.text());
             } else {
                 throw new RuntimeException(String.format(
                         "Не удалось отправить GET-запрос '%s'. Сервер вернул статус %d (%s)",
-                        name, apiResponse.get().status(), apiResponse.get().statusText()));
+                        name, response.status(), response.statusText()));
             }
         } catch (Exception e) {
             throw new HttpRequestNotSentException(e, name, "GET");

@@ -17,14 +17,14 @@ public class PwList extends PwElement implements IHasEditableValue {
 
     public PwList(String elementName, Locator locator, ElementModel model) {
         super(elementName, locator);
-        this.labels = driver.getLocator(model.getOrDefault("названия", "//li//button/div"));
-        this.buttons = driver.getLocator(model.getOrDefault("кнопки", "//parent::button"));
+        this.labels = getPwLocator(model.getOrDefault("названия", "//li//button/div"));
+        this.buttons = getPwLocator(model.getOrDefault("кнопки", "//parent::button"));
     }
 
     public PwList(String elementName, ElementModel model) {
         super(elementName, model);
-        this.labels = driver.getLocator(model.getOrDefault("названия", "//li//button/div"));
-        this.buttons = driver.getLocator(model.getOrDefault("кнопки", "//parent::button"));
+        this.labels = getPwLocator(model.getOrDefault("названия", "//li//button/div"));
+        this.buttons = getPwLocator(model.getOrDefault("кнопки", "//parent::button"));
     }
 
     public PwList(String elementName, IElement element) {
@@ -32,10 +32,7 @@ public class PwList extends PwElement implements IHasEditableValue {
     }
 
     protected void setValueAction(String value) {
-        element.locator(labels)
-                .filter(new Locator.FilterOptions().setHasText(value))
-                .filter(new Locator.FilterOptions().setHas(buttons))
-                .click();
+        element.locator(labels).filter(new Locator.FilterOptions().setHasText(value)).filter(new Locator.FilterOptions().setHas(buttons)).click();
     }
 
     @Override
@@ -51,11 +48,6 @@ public class PwList extends PwElement implements IHasEditableValue {
     @Override
     public String getText() {
         return null;
-    }
-
-    @Override
-    public boolean isVisible() {
-        return element.isVisible();
     }
 
     @Override

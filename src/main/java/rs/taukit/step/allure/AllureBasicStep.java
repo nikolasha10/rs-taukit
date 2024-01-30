@@ -8,7 +8,6 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import rs.taukit.config.Config;
-import rs.taukit.driver.WebDriver;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.playwright.PwList;
 import rs.taukit.exceptions.AutoTestBrokenException;
@@ -42,15 +41,6 @@ public class AllureBasicStep extends BasicUtils {
         scenarioData.put("Адрес стенда", Config.getSTAND().getUrl());
     }
 
-    @Step("открыть браузер")
-    public static void openBrowser() {
-        WebDriver driver = driver();
-        if (!driver.isBrowserOpen()) {
-            driver.openBrowser();
-        }
-        TauLogger.report("Открыт браузер '%s'", driver().getBrowserType());
-    }
-
     @Step("нажать на {elementType} '{elementName}'")
     public static void clickElement(String elementType, String elementName) {
         try {
@@ -76,6 +66,7 @@ public class AllureBasicStep extends BasicUtils {
     public static void waitForConditions(String conditionsName, DataTable dataTable) {
         waitForConditions(dataTable);
     }
+
     @Step("дождаться выполнения условий:")
     public static void waitForConditionsNoName(DataTable dataTable) {
         waitForConditions(dataTable);
@@ -95,7 +86,8 @@ public class AllureBasicStep extends BasicUtils {
         } catch (Exception e) {
             if (e instanceof AutoTestBrokenException) throw e;
             ExpectedResult firstUnexpectedResult = dataTable.asMaps().stream()
-                    .map(data -> new ExpectedResult(data).waitForResult()).filter(result -> !result.isConditionMet())
+                    .map(data -> new ExpectedResult(data).waitForResult())
+                    .filter(result -> !result.isConditionMet())
                     .findFirst().orElse(null);
             if (firstUnexpectedResult != null) {
                 if (firstUnexpectedResult.getThrownException() != null) {
@@ -243,21 +235,6 @@ public class AllureBasicStep extends BasicUtils {
         if (haveToReport) {
             TauLogger.report("* текущий контекст: %s", currentContext);
         }
-    }
-
-    @Step("обновить страницу")
-    public static void reloadPage() {
-        page().reload();
-        testContext().saveStepAction(() -> page().reload());
-        TauLogger.report("Страница '%s' обновлена", testContext().getCurrentPageName());
-    }
-
-    @Step("закрыть текущую вкладку")
-    public static void closeCurrentTab() {
-        int tabIndex = page().getCurrentTabIndex();
-        driver().closeCurrentTab();
-        testContext().saveStepAction(() -> driver().closeCurrentTab());
-        TauLogger.report("Вкладка %d закрыта", tabIndex + 1);
     }
 
     @Step("дождаться отображения {elementType} '{elementName}'")

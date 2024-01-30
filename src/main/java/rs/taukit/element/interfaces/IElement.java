@@ -1,6 +1,6 @@
 package rs.taukit.element.interfaces;
 
-import rs.taukit.driver.WebDriver;
+import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.ElementModel;
 
 public interface IElement {
@@ -12,7 +12,7 @@ public interface IElement {
 
     void click();
 
-    WebDriver getDriver();
+    IWebDriver getDriver();
 
     String getText();
 

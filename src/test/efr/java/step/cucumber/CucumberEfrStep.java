@@ -24,6 +24,11 @@ public class CucumberEfrStep {
         AllureEfrStep.runScenarioWrap(scenarioName, eval(dataTable));
     }
 
+    @И("^выполнять сценарий \"(.+)\" до выполнения условий:$")
+    public void runScenarioUntil(String scenarioName, DataTable dataTable) {
+        AllureEfrStep.runScenarioUntilWrap(scenarioName, eval(dataTable));
+    }
+
     @И("^через \"(.+)\" перейти на страницу \"(.+)\"$")
     public void selectMenuItem(String menuName, String itemName) {
         Menu menu = new Menu(menuName);

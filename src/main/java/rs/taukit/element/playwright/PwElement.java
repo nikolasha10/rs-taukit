@@ -1,6 +1,7 @@
 package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 import lombok.Getter;
 import rs.taukit.driver.playwright.PlaywrightDriver;
 import rs.taukit.element.Element;
@@ -24,7 +25,7 @@ public class PwElement extends Element {
     public PwElement(String elementName, ElementModel model) {
         super(elementName, model);
         this.driver = super.driver.castTo();
-        this.element = driver.getLocator(locator);
+        this.element = getPwLocator(locator);
     }
 
     public PwElement(String elementName, String locator) {
@@ -42,7 +43,12 @@ public class PwElement extends Element {
     public PwElement(String elementName, IElement element) {
         super(elementName, element);
         this.driver = super.driver.castTo();
-        this.element = driver.getLocator(locator);
+        this.element = getPwLocator(locator);
+    }
+
+    protected Locator getPwLocator(String selector) {
+        Page page = driver.getCurrentBrowser().getActivePwPage();
+        return selector.contains("/") ? page.locator(selector) : page.getByTestId(selector);
     }
 
     public void setValue(String value) {

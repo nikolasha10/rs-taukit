@@ -13,3 +13,8 @@
   пароль: 1
   описание:
     - MANAGER_OPERATOR_8300_MANAGE_OPTIONS
+
+- логин: controller@rf.rshbank.ru
+  пароль: 1
+  описание:
+    - Контролёр

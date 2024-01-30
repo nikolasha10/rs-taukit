@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static rs.taukit.utils.BasicUtils.driver;
+
 /**
  * Класс отвечающий за вывод сообщений в лог и allure-отчеты
  */
@@ -220,7 +222,7 @@ public final class TauLogger {
     }
 
     public static void attachFullScreenshots() {
-        List<byte[]> screenshotList = BasicUtils.driver().takeScreenshots();
+        List<byte[]> screenshotList = driver().getCurrentBrowser().takeScreenshots();
         IntStream.range(0, screenshotList.size())
                 .forEach(index -> attachScreenshot(
                         String.format("Вкладка %d", index + 1),
@@ -335,14 +337,12 @@ public final class TauLogger {
     }
 
     public static void attach(String name, Object object) {
-        if (object instanceof DataTable dataTable) {
-            attachDataTable(name, dataTable);
-        } else if (object instanceof TestDataFile file) {
-            attachFile(name, file.getFileExtension(), file.getFilePath());
-        } else if (object instanceof String text) {
-            attachFile(name, "txt", text.getBytes());
-        } else {
-            throw new TestDataException("Не удалось прикрепить объект '%s' к отчёту. Не распознан тип вложения.", name);
+        switch (object) {
+            case DataTable dataTable -> attachDataTable(name, dataTable);
+            case TestDataFile file -> attachFile(name, file.getFileExtension(), file.getFilePath());
+            case String text -> attachFile(name, "txt", text.getBytes());
+            case null, default ->
+                    throw new TestDataException("Не удалось прикрепить объект '%s' к отчёту. Не распознан тип вложения.", name);
         }
     }
 }

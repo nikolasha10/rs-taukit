@@ -30,7 +30,7 @@ public class FileDownload extends PwElement implements IHasDownloadableFile {
     @Override
     public void click(String fileName) {
         try {
-            driver.downloadByClick(this, fileName);
+            driver.getCurrentBrowser().downloadByClick(this, fileName);
             String dirName = FileUtils.getDownloadFilePath();
             File file = new File(dirName, fileName);
             TauLogger.attachFile(fileName, "pdf", file.getAbsolutePath());

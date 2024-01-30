@@ -13,6 +13,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import rs.taukit.driver.playwright.PlaywrightDriver;
+import rs.taukit.page.playwright.PlaywrightPageObject;
 import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.comparison.ImageDiff;
 import ru.yandex.qatools.ashot.comparison.ImageDiffer;
@@ -71,7 +72,8 @@ public class PdfUtils {
                 testContext().getScenarioName(), standardFileName);
         PlaywrightDriver driver = driver().castTo();
         driver.openBrowser(true);
-        Page pageTested = driver.getPage();
+        PlaywrightPageObject pageObject = (PlaywrightPageObject) driver.getCurrentBrowser().getCurrentPage();
+        Page pageTested = pageObject.getPage();
         page().waitForTimeout(2000);
         String originalPdfUrl = new File(testedFilePath).toURI().toString();
         pageTested.navigate(originalPdfUrl);
@@ -85,9 +87,9 @@ public class PdfUtils {
         Locator pageNumberOriginal = pageTested.locator("//input[@id='pageNumber']");
         int pageCountOriginal = Integer.parseInt(pageNumberOriginal.getAttribute("Max"));
 
-        driver.openNewTab();
+        driver.getCurrentBrowser().openNewTab();
         String standardPdfUrl = new File(standardFilePath).toURI().toString();
-        Page pageStandard = driver.getPage();
+        Page pageStandard = driver.getCurrentBrowser().getCurrentPage().getPage();
         pageStandard.navigate(standardPdfUrl);
         pageStandard.waitForCondition(() -> pageStandard.locator("//div[@class='page' and @data-loaded='true'][1]").isVisible(),
                 new Page.WaitForConditionOptions().setTimeout(60000));

@@ -7,7 +7,8 @@ import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.PdfUtils;
 import rs.taukit.validator.PdfValidator;
 
-import static rs.taukit.utils.BasicUtils.*;
+import static rs.taukit.utils.BasicUtils.eval;
+import static rs.taukit.utils.BasicUtils.testContext;
 
 public class CucumberBasicStep {
 
@@ -23,26 +24,6 @@ public class CucumberBasicStep {
     @И("^определить значения тестовых параметров$")
     public void testParameterInitFromFile() {
         AllureBasicStep.testParameterInit();
-    }
-
-    @И("^открыть браузер$")
-    public void openBrowser() {
-        AllureBasicStep.openBrowser();
-    }
-
-    @И("^перейти по ссылке \"(.+)\"$")
-    public void openUrl(String url) {
-        driver().navigate(eval(url));
-    }
-
-    @И("^обновить страницу$")
-    public void reloadPage() {
-        AllureBasicStep.reloadPage();
-    }
-
-    @И("^закрыть текущую вкладку$")
-    public void closeCurrentTab() {
-        AllureBasicStep.closeCurrentTab();
     }
 
     @И("^сделать снимок страницы$")

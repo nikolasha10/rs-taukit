@@ -1,5 +1,6 @@
 package rs.taukit.page.playwright;
 
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import lombok.Getter;
 import rs.taukit.config.Config;
@@ -18,7 +19,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 
-import static rs.taukit.utils.BasicUtils.driver;
 import static rs.taukit.utils.TestDataUtils.loadPageConfig;
 
 @Getter
@@ -31,7 +31,6 @@ public class PlaywrightPageObject implements PageObject {
     private final List<String> expectedElements;
     private final Page.ScreenshotOptions screenshotOptions;
     private final Deque<IHasBlockElements> currentContext = new LinkedList<>();
-    private int currentTabIndex;
     private Page.WaitForConditionOptions options;
     private double pageTimeout;
     private Exception thrownException;
@@ -42,7 +41,6 @@ public class PlaywrightPageObject implements PageObject {
         setPageTimeout(pageTimeoutString.equalsIgnoreCase("по умолчанию")
                 ? Config.getProperty("pageLoadingTimeout") : pageTimeoutString);
         this.page = page;
-        this.currentTabIndex = driver().getPageIndex();
         this.pageName = pageName;
         String pageUrl = YamlParser.convert(pageConfig.get("Адрес"));
         this.pageUrl = Config.getSTAND().getUrl() + Optional.ofNullable(pageUrl).orElse("");
@@ -264,5 +262,23 @@ public class PlaywrightPageObject implements PageObject {
     @Override
     public void setPageTimeout(double timeout) {
         this.pageTimeout = timeout;
+    }
+
+    @Override
+    public void close() {
+        page.close();
+    }
+
+    @Override
+    public void setActive() {
+        page.bringToFront();
+    }
+
+    public Locator locator(String selector) {
+        return page.locator(selector);
+    }
+
+    public Locator getByTestId(String testId) {
+        return page.getByTestId(testId);
     }
 }

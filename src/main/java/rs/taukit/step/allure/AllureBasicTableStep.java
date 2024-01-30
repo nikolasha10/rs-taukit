@@ -25,7 +25,7 @@ public class AllureBasicTableStep extends BasicUtils {
         this.tableElement = page().replaceElement(tableName, elementType).castTo(IHasTableElements.class);
         try {
             driver().waitForCondition(tableElement::isVisible);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new TableElementNotFoundException(e, "Не удалось дождаться отображения таблицы '%s'", tableName);
         }
 
@@ -67,8 +67,9 @@ public class AllureBasicTableStep extends BasicUtils {
 
     @Step("в найденной строке нажать на '{elementName}'")
     public void clickOnElement(String elementName) {
-        tableElement.clickOnElement(elementName);
-        testContext().saveStepAction(() -> tableElement.clickOnElement(elementName));
+        Runnable runnable = () -> tableElement.clickOnElement(elementName);
+        runnable.run();
+        testContext().saveStepAction(runnable);
         TauLogger.report("Нажали на элемент '%s' в таблице '%s'", elementName, tableName);
     }
 
@@ -81,7 +82,7 @@ public class AllureBasicTableStep extends BasicUtils {
             try {
                 tableElement.findRowByConditions(dataTable);
                 return true;
-            } catch (Exception e){
+            } catch (Exception e) {
                 return false;
             }
         };

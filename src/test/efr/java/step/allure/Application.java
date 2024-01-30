@@ -50,7 +50,7 @@ public class Application extends BasicApplication {
         String url = Config.getSTAND().getUrl() + relativeUrl;
         scenarioData().put("Адрес стартовой страницы", url);
         scenarioData().put("Пользователь", user.getUserData());
-        subScenario.runScenario(appData.get("сценарий входа"));
+        subScenario.runScenario(null, appData.get("сценарий входа"));
         currentUser = user;
     }
 }

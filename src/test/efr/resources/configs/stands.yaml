@@ -12,9 +12,9 @@
   portApplicationStub: 7001
   dbSuite: common
 
-- Название: dor5
+- Название: vlg-205
   protocol: http
-  hostApplication: 172.16.35.203
+  hostApplication: 172.16.35.218
   portApplication: 8888
   portApplicationStub: 7001
   dbSuite: common

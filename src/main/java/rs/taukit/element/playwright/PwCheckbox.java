@@ -16,12 +16,12 @@ public class PwCheckbox extends PwElement implements IHasEditableValue, IHasChec
 
     public PwCheckbox(String elementName, ElementModel model) {
         super(elementName, model);
-        this.checked = getDriver().getLocator(model.get("установлен"));
+        this.checked = getPwLocator(model.get("установлен"));
     }
 
     public PwCheckbox(String elementName, Locator locator, ElementModel model) {
         super(elementName, locator);
-        this.checked = getDriver().getLocator(model.get("установлен"));
+        this.checked = getPwLocator(model.get("установлен"));
     }
 
     @Override

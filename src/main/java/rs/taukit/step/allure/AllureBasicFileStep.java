@@ -51,4 +51,6 @@ public class AllureBasicFileStep extends BasicUtils {
         TauLogger.report("Нажата кнопка '%s'", buttonName);
         TauLogger.report("Выбран файл '%s'", fileName);
     }
+
+
 }

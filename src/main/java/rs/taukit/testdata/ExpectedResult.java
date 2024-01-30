@@ -75,15 +75,15 @@ public class ExpectedResult {
     private boolean checkCondition(String objectType) {
         switch (objectType) {
             case "страница", "всплывающее окно":
-                PageObject page = pageStorage().getPage(objectName);
+                PageObject page = driver().getCurrentBrowser().getPage(objectName);
                 double pageTimeout = page.getPageTimeout();
                 page.setPageTimeout(checkTimeout);
-                boolean result = PageState.getState(objectState).apply(pageStorage().getPage(objectName));
+                boolean result = PageState.getState(objectState).apply(driver().getCurrentBrowser().getPage(objectName));
                 page.setPageTimeout(pageTimeout);
                 if (!result) this.thrownException = page.getThrownException();
                 return result;
             case "вкладка":
-                return driver().setActiveTab(Integer.parseInt(objectName) - 1);
+                return driver().getCurrentBrowser().setActiveTab(Integer.parseInt(objectName) - 1);
             case "файл":
                 String dirName = String.format("%s/%s", Config.getProperty("downloads.dir"), testContext().getScenarioName());
                 return new File(dirName, objectName).exists();

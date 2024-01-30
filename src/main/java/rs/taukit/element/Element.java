@@ -2,7 +2,7 @@ package rs.taukit.element;
 
 import lombok.Getter;
 import rs.taukit.driver.DriverManager;
-import rs.taukit.driver.WebDriver;
+import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.IElement;
 
 import java.util.LinkedHashMap;
@@ -13,7 +13,7 @@ import java.util.Map;
 public abstract class Element implements IElement {
     protected final String elementName;
     protected final String locator;
-    protected final WebDriver driver;
+    protected final IWebDriver driver;
     protected final ElementModel model;
 
     public Element(String elementName, String locator) {

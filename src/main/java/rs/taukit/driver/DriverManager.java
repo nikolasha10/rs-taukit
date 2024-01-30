@@ -1,14 +1,13 @@
 package rs.taukit.driver;
 
 import rs.taukit.driver.playwright.PlaywrightDriver;
-import rs.taukit.utils.TauLogger;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DriverManager {
-    private final Map<Long, WebDriver> currentDriverContainer = new HashMap<>();
+    private final Map<Long, IWebDriver> currentDriverContainer = new HashMap<>();
 
     private DriverManager() {
     }
@@ -17,21 +16,21 @@ public class DriverManager {
         return DriverManagerHolder.INSTANCE;
     }
 
-    public WebDriver initDriver() {
+    public IWebDriver initDriver() {
         long threadId = Thread.currentThread().threadId();
         PlaywrightDriver playwrightDriver;
         try {
             playwrightDriver = new PlaywrightDriver();
-        } catch (IOException exception){
+        } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
 
-        WebDriver driver = currentDriverContainer.getOrDefault(threadId, playwrightDriver);
+        IWebDriver driver = currentDriverContainer.getOrDefault(threadId, playwrightDriver);
         currentDriverContainer.putIfAbsent(threadId, driver);
         return driver;
     }
 
-    public WebDriver getDriver() {
+    public IWebDriver getDriver() {
         return currentDriverContainer.get(Thread.currentThread().threadId());
     }
 
@@ -39,7 +38,7 @@ public class DriverManager {
         currentDriverContainer.forEach((key, value) -> value.closeDriver());
     }
 
-    public long getDriverId(WebDriver driver) {
+    public long getDriverId(IWebDriver driver) {
         return currentDriverContainer.entrySet().stream().filter(entry -> entry.getValue().equals(driver))
                 .findFirst().orElseThrow().getKey();
     }

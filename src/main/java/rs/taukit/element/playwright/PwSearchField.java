@@ -27,16 +27,16 @@ public class PwSearchField extends PwElement implements IHasEditableValue {
 
     public PwSearchField(String elementName, ElementModel model) {
         super(elementName, model);
-        this.textField = driver.getLocator(model.get("поле ввода"));
-        this.values = driver.getLocator(model.get("список значений"));
-        this.fillManuallyButton = driver.getLocator(model.get("заполнить вручную"));
+        this.textField = getPwLocator(model.get("поле ввода"));
+        this.values = getPwLocator(model.get("список значений"));
+        this.fillManuallyButton = getPwLocator(model.get("заполнить вручную"));
     }
 
     public PwSearchField(String elementName, Locator locator, ElementModel model) {
         super(elementName, locator);
-        this.textField = driver.getLocator(model.get("поле ввода"));
-        this.values = driver.getLocator(model.get("список значений"));
-        this.fillManuallyButton = driver.getLocator(model.get("заполнить вручную"));
+        this.textField = getPwLocator(model.get("поле ввода"));
+        this.values = getPwLocator(model.get("список значений"));
+        this.fillManuallyButton = getPwLocator(model.get("заполнить вручную"));
     }
 
     public PwSearchField(String elementName, IElement element) {

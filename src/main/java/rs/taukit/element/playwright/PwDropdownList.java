@@ -34,8 +34,8 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
     }
 
     private void initFields(ElementModel model) {
-        this.options = driver.getLocator(model.get("элементы"));
-        this.selectedValue = driver.getLocator(model.get("значение"));
+        this.options = getPwLocator(model.get("элементы"));
+        this.selectedValue = getPwLocator(model.get("значение"));
     }
 
     @Override
@@ -57,11 +57,6 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
     @Override
     public String getText() {
         return element.locator(selectedValue).innerText();
-    }
-
-    @Override
-    public boolean isVisible() {
-        return element.isVisible();
     }
 
     @Override

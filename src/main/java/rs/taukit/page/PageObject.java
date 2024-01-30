@@ -6,6 +6,8 @@ import rs.taukit.element.interfaces.IHasBlockElements;
 public interface PageObject {
     String getPageUrl();
 
+    String getPageName();
+
     void loadPage();
 
     void reload();
@@ -42,7 +44,10 @@ public interface PageObject {
 
     void setPageTimeout(double timeout);
 
-    int getCurrentTabIndex();
-
     Exception getThrownException();
+
+    void close();
+
+    void setActive();
+
 }

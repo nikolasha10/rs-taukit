@@ -11,7 +11,7 @@ public class AllureBasicPageStep extends BasicUtils {
 
     public AllureBasicPageStep(String pageName) {
         this.pageName = pageName;
-        this.page = pageStorage().getPage(pageName);
+        this.page = driver().getCurrentBrowser().getPage(pageName);
     }
 
     @Step("открыть страницу '{this.pageName}'")
@@ -39,7 +39,7 @@ public class AllureBasicPageStep extends BasicUtils {
         page.waitForClose();
         TauLogger.report("Закрыто всплывающее окно '%s'", pageName);
         String currentPageName = testContext().getSavedPageName();
-        pageStorage().getPage(currentPageName).waitForLoad();
+        driver().getCurrentBrowser().getPage(currentPageName).waitForLoad();
         TauLogger.report("Отображается страница '%s'", currentPageName);
     }
 

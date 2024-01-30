@@ -11,10 +11,6 @@ public class EfrUtils extends AllureBasicStep {
 
     public static SubScenario subScenario = SubScenario.getInstance();
 
-    public static void runScenario(String scenarioName) {
-        subScenario.runScenario(scenarioName);
-    }
-
     public static void runScenario(String functionality, String scenarioName) {
         subScenario.runScenario(functionality, scenarioName);
     }
