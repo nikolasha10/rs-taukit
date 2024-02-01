@@ -25,6 +25,11 @@ public class CucumberBasicBrowserStep {
         browserStep().continueWithBrowser();
     }
 
+    @И("^продолжить работу в браузере № (\\d+)$")
+    public void continueWithBrowserNumber(int browserNumber) {
+        browserStep().continueWithBrowserNumber(browserNumber);
+    }
+
     @И("^перейти по ссылке \"(.+)\"$")
     public void openUrl(String url) {
         browserStep().navigate(eval(url));

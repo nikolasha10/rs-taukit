@@ -1,6 +1,9 @@
 package rs.taukit.driver.playwright;
 
-import com.microsoft.playwright.*;
+import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.TimeoutError;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.driver.DriverManager;
@@ -139,6 +142,6 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public PwBrowser getCurrentBrowser() {
-        return currentBrowserIndex < browserList.size() ? browserList.get(currentBrowserIndex) : null;
+        return browserList.get(currentBrowserIndex);
     }
 }

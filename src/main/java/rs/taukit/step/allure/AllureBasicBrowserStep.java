@@ -14,7 +14,7 @@ public class AllureBasicBrowserStep extends BasicUtils {
 
     public AllureBasicBrowserStep() {
         this.driver = driver();
-        this.browser = this.driver.getCurrentBrowser();
+        this.browser = this.driver.isBrowserOpen() ? this.driver.getCurrentBrowser() : null;
     }
 
     @Step("открыть браузер")
@@ -46,7 +46,7 @@ public class AllureBasicBrowserStep extends BasicUtils {
         TauLogger.report("[примечание] открыта вкладка %d", browser.getActiveTabIndex() + 1);
         TauLogger.report("[примечание] открыта страница: %s", page().getPageName());
         IHasBlockElements currentContext = page().getCurrentContext();
-        if (currentContext != null){
+        if (currentContext != null) {
             TauLogger.report("[примечание] текущий контекст: %s %s", currentContext.getModel().getType(), currentContext.getElementName());
         }
     }
@@ -65,7 +65,7 @@ public class AllureBasicBrowserStep extends BasicUtils {
         IHasBlockElements currentContext = currentPage.getCurrentContext();
         String contextType;
         String contextName;
-        if (currentContext == null){
+        if (currentContext == null) {
             contextType = "страница";
             contextName = currentPage.getPageName();
         } else {
@@ -100,6 +100,19 @@ public class AllureBasicBrowserStep extends BasicUtils {
             browser.navigate(url);
         } catch (Exception e) {
             TauLogger.fail(e, "Не удалось перейти по ссылке \"%s\"", url);
+        }
+    }
+
+    @Step("продолжить работу в браузере № {browserNumber}")
+    public void continueWithBrowserNumber(int browserNumber) {
+        driver.switchBrowser(browserNumber - 1);
+        TauLogger.report("Активен браузер %d", browserNumber);
+        TauLogger.report("[примечание] открыта вкладка %d", browser().getActiveTabIndex() + 1);
+        TauLogger.report("[примечание] отображается страница: %s", browser().getCurrentPage().getPageName());
+        IHasBlockElements currentContext = browser().getCurrentPage().getCurrentContext();
+        if (currentContext != null) {
+            TauLogger.report("[примечание] текущий контекст: %s '%s'",
+                    currentContext.getModel().getType(), currentContext.getElementName());
         }
     }
 }

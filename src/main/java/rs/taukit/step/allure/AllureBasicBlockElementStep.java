@@ -20,7 +20,11 @@ public class AllureBasicBlockElementStep extends BasicUtils {
             element = element.getElementByName(1, elements[i]).castTo(IHasBlockElements.class);
         }
         this.blockElements = element;
-        driver().waitForCondition(this.blockElements::isVisible);
+        try {
+            driver().waitForCondition(this.blockElements::isVisible);
+        } catch (Exception ignored) {
+            // ignored
+        }
     }
 
     @Step("в блоке '{this.blockName}' заполнить поле '{fieldName}' значением '{value}'")

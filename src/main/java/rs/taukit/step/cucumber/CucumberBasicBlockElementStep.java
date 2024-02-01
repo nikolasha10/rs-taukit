@@ -52,7 +52,7 @@ public class CucumberBasicBlockElementStep {
 
     @И("^дождаться отображения блока \"(.+)\"$")
     public void waitForElement(String blockElementName) {
-        blockElement(blockElementName).waitForDisplayed();
+        blockElement(eval(blockElementName)).waitForDisplayed();
     }
 
 }

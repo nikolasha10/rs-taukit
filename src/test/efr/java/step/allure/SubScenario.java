@@ -11,7 +11,7 @@ import rs.taukit.utils.TauLogger;
 import java.util.Arrays;
 import java.util.function.Predicate;
 
-import static rs.taukit.utils.BasicUtils.page;
+import static rs.taukit.utils.BasicUtils.*;
 
 @CucumberOptions(
         features = "src/test/efr/resources/scenarioFragments",
@@ -34,7 +34,7 @@ public class SubScenario {
 
     public void runScenario(String functionality, String scenarioName) {
         TauLogger.console("*-> выполняется сценарий: %s", scenarioName);
-        if (page() != null) {
+        if (driver().isBrowserOpen() && browser().isPageOpen()) {
             TauLogger.report("[примечание] открыта страница: %s", page().getPageName());
             IHasBlockElements currentContext = page().getCurrentContext();
             if (currentContext != null) {

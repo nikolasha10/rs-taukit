@@ -125,8 +125,13 @@ public abstract class PwBrowser implements IWebBrowser {
     }
 
     @Override
+    public boolean isPageOpen() {
+        return activeTabIndex < pages.size();
+    }
+
+    @Override
     public PlaywrightPageObject getCurrentPage() {
-        return activeTabIndex >= pages.size() ? null : pages.get(activeTabIndex);
+        return pages.get(activeTabIndex);
     }
 
     @Override

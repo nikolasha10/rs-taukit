@@ -1,0 +1,5 @@
+{
+  "senderSystem": "BISQUIT",
+  "senderBranch": "6300",
+  "payloadData" : "<?xml version=\"1.0\" encoding=\"utf-8\"?><AnswerChangeCreditStatusReq xmlns=\"http://www.rshb.ru/csm/pro/efr/answer_change_credit_status_efr/201904/req\"><ClientId><ObjectId>0000234</ObjectId><SystemId>BISQUIT</SystemId><SystemNodeId>0000</SystemNodeId></ClientId><ContractId><ObjectId>0000</ObjectId><SystemId>BISQUIT</SystemId><SystemNodeId>0000</SystemNodeId></ContractId><RequestNumber><ObjectId>${Номер заявки}</ObjectId><SystemId>BISQUIT</SystemId><SystemNodeId>0000</SystemNodeId></RequestNumber><ContractStatus TransformationMarker=\"true\"><RecordCode>ВЫД</RecordCode><RecordTitle/><Note/><SystemId>BISQUIT</SystemId><SystemNodeId>0000</SystemNodeId><Desc/><DictionaryCode/></ContractStatus><ErrorList><Error><ErrorCode>0</ErrorCode><ErrorDesc/></Error></ErrorList></AnswerChangeCreditStatusReq>"
+}

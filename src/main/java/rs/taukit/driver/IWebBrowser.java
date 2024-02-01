@@ -11,6 +11,8 @@ public interface IWebBrowser {
 
     PageObject getPage(String pageName);
 
+    boolean isPageOpen();
+
     PageObject getCurrentPage();
 
     void close();

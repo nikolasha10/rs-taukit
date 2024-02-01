@@ -101,7 +101,7 @@ public class CucumberBasicStep {
 
     @И("^примечание: далее работаем в контексте блока \"(.+)\"$")
     public void setBlockContext(String blockName) {
-        AllureBasicStep.setBlockContext(blockName);
+        AllureBasicStep.setBlockContext(eval(blockName));
     }
 
     @И("^примечание: далее работаем в контексте текущей страницы$")

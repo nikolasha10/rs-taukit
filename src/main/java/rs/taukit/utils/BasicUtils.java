@@ -2,6 +2,7 @@ package rs.taukit.utils;
 
 import io.cucumber.datatable.DataTable;
 import rs.taukit.driver.DriverManager;
+import rs.taukit.driver.IWebBrowser;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasBlockElements;
@@ -31,6 +32,10 @@ public class BasicUtils {
         return driverManager().getDriver();
     }
 
+    public static IWebBrowser browser() {
+        return driver().getCurrentBrowser();
+    }
+
     public static StorageManager storageManager() {
         return StorageManager.getInstance();
     }
@@ -48,7 +53,7 @@ public class BasicUtils {
     }
 
     public static PageObject page() {
-        return driver().getCurrentBrowser() == null ? null : driver().getCurrentBrowser().getCurrentPage();
+        return driver().getCurrentBrowser().getCurrentPage();
     }
 
     public static IHasBlockElements context() {
