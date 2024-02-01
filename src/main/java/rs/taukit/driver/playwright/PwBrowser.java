@@ -23,6 +23,7 @@ public abstract class PwBrowser implements IWebBrowser {
     protected Browser browser;
     protected BrowserContext context;
     protected int activeTabIndex;
+    private String userLogin;
 
     protected PwBrowser(BrowserType browserType, int index, boolean openPdf) {
         this.browser = launch(browserType);
@@ -70,6 +71,19 @@ public abstract class PwBrowser implements IWebBrowser {
             activeTabIndex--;
         }
         setActiveTab(activeTabIndex);
+    }
+
+    @Override
+    public void closeTab(int tabIndex) {
+        if (tabIndex == activeTabIndex){
+            closeCurrentTab();
+        } else {
+            pages.remove(tabIndex);
+            context.pages().get(tabIndex).close();
+            if (tabIndex < activeTabIndex){
+                activeTabIndex--;
+            }
+        }
     }
 
     @Override
@@ -155,7 +169,23 @@ public abstract class PwBrowser implements IWebBrowser {
         });
     }
 
+    @Override
+    public void setUserLogin(String userLogin) {
+        this.userLogin = userLogin;
+    }
+
+    @Override
+    public void closeOtherPages(int activePageIndex) {
+        PlaywrightPageObject activePage = pages.get(activePageIndex);
+        while (context.pages().size() > 1){
+            closeTab(0);
+        }
+        pages.set(0, activePage);
+    }
+
     public Page getActivePwPage() {
         return getPage();
     }
+
+
 }

@@ -29,7 +29,9 @@ public class AllureEfrStep extends AllureBasicStep {
             app.login(user);
             testContext().putApplication(appName, app);
         } else {
-            driver().getCurrentBrowser().navigate(driver().getCurrentBrowser().getPage("Поиск клиента").getPageUrl());
+            TauLogger.console("driver().getCurrentBrowserIndex(): %d", driver().getCurrentBrowserIndex());
+            TauLogger.console("browser().getActiveTabIndex(): %d", browser().getActiveTabIndex());
+            browser().navigate(driver().getCurrentBrowser().getPage("Поиск клиента").getPageUrl());
         }
     }
 

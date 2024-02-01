@@ -34,4 +34,12 @@ public interface IWebBrowser {
     ApiResponse sendGet(String requestUrl);
 
     void downloadByClick(FileDownload element, String fileName);
+
+    void closeTab(int tabIndex);
+
+    String getUserLogin();
+
+    void setUserLogin(String userLogin);
+
+    void closeOtherPages(int activePageIndex);
 }

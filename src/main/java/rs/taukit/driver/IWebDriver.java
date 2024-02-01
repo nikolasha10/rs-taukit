@@ -35,4 +35,6 @@ public interface IWebDriver {
     void waitForTimeout(double time);
 
     IWebBrowser getCurrentBrowser();
+
+    void closeOtherBrowsers(int activeBrowserIndex);
 }

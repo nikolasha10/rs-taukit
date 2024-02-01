@@ -115,4 +115,9 @@ public class AllureBasicBrowserStep extends BasicUtils {
                     currentContext.getModel().getType(), currentContext.getElementName());
         }
     }
+
+    public void closeTab(int tabNumber) {
+        browser.closeTab(tabNumber - 1);
+        TauLogger.report("Закрыта вкладка %d", tabNumber);
+    }
 }

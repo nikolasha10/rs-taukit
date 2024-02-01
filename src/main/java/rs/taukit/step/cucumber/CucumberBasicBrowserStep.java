@@ -49,6 +49,10 @@ public class CucumberBasicBrowserStep {
     public void closeCurrentTab() {
         browserStep().closeCurrentTab();
     }
+    @И("^закрыть вкладку (\\d+)$")
+    public void closeTab(int tabNumber) {
+        browserStep().closeTab(tabNumber);
+    }
 
 
 }

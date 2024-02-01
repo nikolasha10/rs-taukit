@@ -10,14 +10,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static rs.taukit.utils.BasicUtils.scenarioData;
-import static rs.taukit.utils.BasicUtils.testContext;
+import static rs.taukit.utils.BasicUtils.*;
 
 public class Application extends BasicApplication {
     String appName;
     TestData appData;
     String startPageName;
-    User currentUser;
     SubScenario subScenario = SubScenario.getInstance();
 
     public Application(String appName) {
@@ -31,7 +29,9 @@ public class Application extends BasicApplication {
     }
 
     public boolean isUserLoggedIn(User user) {
-        return currentUser != null && currentUser.equals(user);
+        return driver().isBrowserOpen()
+                && browser().getUserLogin() != null
+                && user.getLogin().equals(browser().getUserLogin());
     }
 
     public void login(String userDescription) {
@@ -51,6 +51,6 @@ public class Application extends BasicApplication {
         scenarioData().put("Адрес стартовой страницы", url);
         scenarioData().put("Пользователь", user.getUserData());
         subScenario.runScenario(null, appData.get("сценарий входа"));
-        currentUser = user;
+        browser().setUserLogin(user.getLogin());
     }
 }

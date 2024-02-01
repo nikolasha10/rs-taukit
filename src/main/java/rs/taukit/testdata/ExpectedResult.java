@@ -75,6 +75,10 @@ public class ExpectedResult {
     private boolean checkCondition(String objectType) {
         switch (objectType) {
             case "страница", "всплывающее окно":
+                String currentPageName = page().getPageName();
+                if (!currentPageName.equals(objectName)) {
+                    testContext().setSavedPageName(currentPageName);
+                }
                 PageObject page = driver().getCurrentBrowser().getPage(objectName);
                 double pageTimeout = page.getPageTimeout();
                 page.setPageTimeout(checkTimeout);

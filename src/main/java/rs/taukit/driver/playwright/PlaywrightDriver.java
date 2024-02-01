@@ -144,4 +144,15 @@ public class PlaywrightDriver implements IWebDriver {
     public PwBrowser getCurrentBrowser() {
         return browserList.get(currentBrowserIndex);
     }
+
+    @Override
+    public void closeOtherBrowsers(int activeBrowserIndex) {
+        PwBrowser activeBrowser = browserList.get(activeBrowserIndex);
+        for (int i = 0; i < browserList.size(); i++) {
+            if (i != activeBrowserIndex) browserList.get(i).close();
+        }
+        browserList.clear();
+        browserList.add(activeBrowser);
+        switchBrowser(0);
+    }
 }

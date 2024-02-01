@@ -20,7 +20,6 @@
         тип: блок элементов
         локатор: requested-params-view-tab
         элементы:
-          Идентифицировать клиента: identification
           Продолжить: success
           Ожидание клиента: revert
           Задать параметры выдачи: success
@@ -93,6 +92,7 @@
         локатор: toggle-form-field-creditPaymentOrder
         включен: //input[@data-id='toggle-form-field-creditPaymentOrder']/ancestor::label[@class='toggle checked']
       Далее: next
+      Оформить: confirm
       Отмена: revert
   Страхование:
     тип: блок элементов
@@ -320,6 +320,7 @@
       Продолжить: next
       Отказ: refuse
       Вернуть: cancel
+  Идентифицировать клиента: identification
 Обязательные элементы:
   - Заголовок
 Общие блоки элементов:

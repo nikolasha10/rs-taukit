@@ -17,6 +17,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static rs.taukit.utils.BasicUtils.browser;
+import static rs.taukit.utils.BasicUtils.driver;
+
 /**
  * Класс-конфигуратор запуска тестов
  * Аннотация @CucumberOptions должна содержать параметр features,
@@ -109,6 +112,8 @@ public class TestRunner {
         String functionality = testContext.getFunctionality();
         String testStatus = result.getStatus() == 1 ? "PASSED" : "FAILED";
         TauLogger.console("TEST %s: %s %s", testStatus, functionality, scenarioName);
+        driver().closeOtherBrowsers(0);
+        browser().closeOtherPages(0);
         long scenarioEndTime = result.getEndMillis();
         AllureReport.editReports(scenarioName, functionality, scenarioEndTime);
         TauLogger.collectLogs();
