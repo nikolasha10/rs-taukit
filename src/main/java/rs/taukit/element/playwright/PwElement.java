@@ -7,9 +7,12 @@ import rs.taukit.driver.playwright.PlaywrightDriver;
 import rs.taukit.element.Element;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
+import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static rs.taukit.utils.TextUtils.hexToRGB;
 
 @Getter
 public class PwElement extends Element {
@@ -62,6 +65,11 @@ public class PwElement extends Element {
     }
 
     @Override
+    public boolean isEnabled() {
+        return element.isEnabled();
+    }
+
+    @Override
     public void click() {
         element.click();
     }
@@ -69,5 +77,17 @@ public class PwElement extends Element {
     @Override
     public String getText() {
         return element.innerText();
+    }
+
+    @Override
+    public String getBgColor() {
+        String jsExpression = "(element) => window.getComputedStyle(element).getPropertyValue('background-color')";
+        return element.evaluate(jsExpression).toString();
+    }
+
+    @Override
+    public boolean hasBgColor(String colorRGB) {
+        TauLogger.console("getBgColor(): %s, hexToRGB(colorRGB): %s", getBgColor(), hexToRGB(colorRGB));
+        return getBgColor().equalsIgnoreCase(hexToRGB(colorRGB));
     }
 }

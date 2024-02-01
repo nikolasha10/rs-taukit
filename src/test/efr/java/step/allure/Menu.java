@@ -17,8 +17,8 @@ public class Menu extends BasicUtils {
     @Step("Через '{this.menuName}' перейти на страницу '{pageName}'")
     public void selectMenuItem(String pageName) {
         menu.selectMenuItem(pageName);
-        TauLogger.report("В меню '%s' выбран пункт '%s'", menuName, pageName);
+        TauLogger.report("В меню \"%s\" выбран пункт \"%s\"", menuName, pageName);
         driver().getCurrentBrowser().getPage(pageName).waitForLoad();
-        TauLogger.report("Отображается страница '%s'", pageName);
+        TauLogger.report("Отображается страница \"%s\"", pageName);
     }
 }

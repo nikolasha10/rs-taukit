@@ -9,16 +9,16 @@ import java.util.List;
  */
 public class ElementNotDescribedException extends RuntimeException {
     public ElementNotDescribedException(String elementName, String pageName) {
-        super(String.format("Элемент '%s' не описан в yaml-файле страницы '%s'", elementName, pageName));
+        super(String.format("Элемент \"%s\" не описан в yaml-файле страницы \"%s\"", elementName, pageName));
     }
 
     public ElementNotDescribedException(List<String> elementList, String pageName) {
-        super(String.format("Элементы '%s' не описаны в yaml-файле страницы '%s'",
+        super(String.format("Элементы \"%s\" не описаны в yaml-файле страницы \"%s\"",
                 String.join(", ", elementList), pageName));
     }
 
     public ElementNotDescribedException(String elementName, String pageName, IHasBlockElements blockElements) {
-        super(String.format("Элемент '%s' не описан в yaml-файле страницы '%s' в блоке '%s'",
+        super(String.format("Элемент \"%s\" не описан в yaml-файле страницы \"%s\" в блоке \"%s\"",
                 elementName, pageName, blockElements.getElementName()));
     }
 

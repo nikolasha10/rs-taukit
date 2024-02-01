@@ -28,7 +28,7 @@ public class CucumberBasicStep {
 
     @И("^сделать снимок страницы$")
     public void takeScreenshot() {
-        AllureBasicStep.takeScreenshot(String.format("страница '%s'", testContext().getCurrentPageName()));
+        AllureBasicStep.takeScreenshot(String.format("страница \"%s\"", testContext().getCurrentPageName()));
     }
 
     @И("^сделать снимок страницы и сохранить, как \"(.+)\"$")
@@ -46,6 +46,19 @@ public class CucumberBasicStep {
         AllureBasicStep.waitForConditionsNoName(eval(datatable));
     }
 
+    /**
+     * Ожидает выполнение условий, перечисленных в таблице datatable
+     *
+     * @param conditionsName название блока условий, на которое ссылается служебный шаг повторения действий
+     * @param datatable      таблица условий. Формат:<br>
+     *                       <nobr>| Объект | Название | Состояние | Значение | Ожидание |</nobr>
+     *                       <br><br>Объект:
+     *                       <ul>
+     *                           <li>вкладка</li>
+     *                           <li>страница</li>
+     *                           <li>[любой тип элемента]</li>
+     *                       </ul>
+     */
     @И("^дождаться выполнения условий \"(.+)\":$")
     public void expectedResultCheck(String conditionsName, DataTable datatable) {
         AllureBasicStep.waitForConditions(conditionsName, eval(datatable));

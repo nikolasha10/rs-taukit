@@ -1,7 +1,7 @@
 package rs.taukit.exceptions;
 
 /**
- * Сценарий '%s' не найден".
+ * Сценарий \"%s\" не найден".
  */
 public class ScenarioNotFoundException extends RuntimeException {
 
@@ -11,9 +11,9 @@ public class ScenarioNotFoundException extends RuntimeException {
      * @param scenarioName название сценария
      */
     public ScenarioNotFoundException(Throwable cause, String scenarioName) {
-        super(String.format("Сценарий '%s' не найден", scenarioName), cause);
+        super(String.format("Сценарий \"%s\" не найден", scenarioName), cause);
     }
     public ScenarioNotFoundException(String scenarioName) {
-        super(String.format("Сценарий '%s' не найден", scenarioName));
+        super(String.format("Сценарий \"%s\" не найден", scenarioName));
     }
 }

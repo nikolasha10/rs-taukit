@@ -62,12 +62,12 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             String parameterName = String.format("Результат запроса '%s'", name);
             scenarioData().put(parameterName, response.text());
             if (response.ok()) {
-                TauLogger.report("Отправлен POST-запрос '%s'. Статус: %d (%s)",
+                TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d (%s)",
                         name, response.status(), response.statusText());
                 TauLogger.attach("Тело ответа", response.text());
             } else {
                 throw new RuntimeException(String.format(
-                        "Не удалось отправить POST-запрос '%s'. Сервер вернул статус %d (%s)",
+                        "Не удалось отправить POST-запрос \"%s\". Сервер вернул статус %d (%s)",
                         name, response.status(), response.statusText()));
             }
         } catch (Exception e) {
@@ -89,12 +89,12 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             String parameterName = String.format("Результат запроса '%s'", name);
             scenarioData().put(parameterName, response.text());
             if (response.ok()) {
-                TauLogger.report("Отправлен GET-запрос '%s'. Статус: %d (%s)",
+                TauLogger.report("Отправлен GET-запрос \"%s\". Статус: %d (%s)",
                         name, response.status(), response.statusText());
                 TauLogger.attach("Тело ответа", response.text());
             } else {
                 throw new RuntimeException(String.format(
-                        "Не удалось отправить GET-запрос '%s'. Сервер вернул статус %d (%s)",
+                        "Не удалось отправить GET-запрос \"%s\". Сервер вернул статус %d (%s)",
                         name, response.status(), response.statusText()));
             }
         } catch (Exception e) {

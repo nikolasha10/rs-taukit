@@ -21,8 +21,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.stream.IntStream;
@@ -46,10 +45,10 @@ public class AllureBasicStep extends BasicUtils {
         try {
             element(elementName).click();
         } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось нажать на кнопку '%s'", elementName);
+            TauLogger.fail(e, "Не удалось нажать на кнопку \"%s\"", elementName);
         }
         testContext().saveStepAction(() -> element(elementName).click());
-        TauLogger.report("Нажали на %s '%s'", elementType, elementName);
+        TauLogger.report("Нажали на %s \"%s\"", elementType, elementName);
     }
 
     @Step("снимок: {screenshotName}")
@@ -98,8 +97,8 @@ public class AllureBasicStep extends BasicUtils {
                 String objectState = firstUnexpectedResult.getObjectState();
                 String expectedValue = firstUnexpectedResult.getExpectedValue() == null
                         ? ""
-                        : String.format(" '%s'", firstUnexpectedResult.getExpectedValue());
-                TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s '%s' %s %s",
+                        : String.format(" \"%s\"", firstUnexpectedResult.getExpectedValue());
+                TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s \"%s\" %s %s",
                         objectType, objectName, objectState, expectedValue);
             }
         }
@@ -209,15 +208,15 @@ public class AllureBasicStep extends BasicUtils {
     @Step("[примечание] текущий контекст: блок '{blockName}'")
     public static void setBlockContext(String blockName) {
         page().setCurrentContext(blockName);
-        testContext().setCurrentContextName("блок '%s'", blockName);
+        testContext().setCurrentContextName("блок \"%s\"", blockName);
         TauLogger.console("[примечание] текущий контекст: %s", testContext().getCurrentContextName());
     }
 
     public static void setCurrentPageContext() {
         page().setCurrentContext(null);
         testContext().saveStepAction(() -> page().setCurrentContext(null));
-        testContext().setCurrentContextName("страница '%s'", testContext().getCurrentPageName());
-        TauLogger.report("[примечание] текущий контекст: страница '%s'", testContext().getCurrentPageName());
+        testContext().setCurrentContextName("страница \"%s\"", testContext().getCurrentPageName());
+        TauLogger.report("[примечание] текущий контекст: страница \"%s\"", testContext().getCurrentPageName());
     }
 
     @Step("[примечание] текущий контекст: блок '{blockName}'")
@@ -229,8 +228,8 @@ public class AllureBasicStep extends BasicUtils {
     public static void closeCurrentContext(boolean haveToReport) {
         IElement currentBlock = page().dropCurrentContext();
         String currentContext = currentBlock == null
-                ? String.format("страница '%s'", testContext().getCurrentPageName())
-                : String.format("блок '%s'", currentBlock.getElementName());
+                ? String.format("страница \"%s\"", testContext().getCurrentPageName())
+                : String.format("блок \"%s\"", currentBlock.getElementName());
         testContext().setCurrentContextName(currentContext);
         if (haveToReport) {
             TauLogger.report("* текущий контекст: %s", currentContext);
@@ -242,9 +241,9 @@ public class AllureBasicStep extends BasicUtils {
         try {
             page().waitForElement(elementName, true);
             testContext().saveStepAction(() -> page().waitForElement(elementName, true));
-            TauLogger.report("Дождались отображения %s '%s'", elementType, elementName);
+            TauLogger.report("Дождались отображения %s \"%s\"", elementType, elementName);
         } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось дождаться отображения %s '%s' на странице '%s'",
+            TauLogger.fail(e, "Не удалось дождаться отображения %s \"%s\" на странице \"%s\"",
                     elementType, elementName, testContext().getCurrentPageName());
         }
     }
@@ -254,6 +253,6 @@ public class AllureBasicStep extends BasicUtils {
         PwList pwList = element(listName).castTo(PwList.class);
         pwList.setValue(eval(listValue));
         testContext().saveStepAction(() -> pwList.setValue(eval(listValue)));
-        TauLogger.report("в списке '%s' выбран '%s'", listName, listValue);
+        TauLogger.report("в списке \"%s\" выбран \"%s\"", listName, listValue);
     }
 }

@@ -19,6 +19,10 @@ import static rs.taukit.utils.BasicUtils.page;
 public enum ElementState {
     IS_VISIBLE("отображается", checked -> checked.element().isVisible(), "не отображается"),
     IS_NOT_VISIBLE("не отображается", checked -> !checked.element().isVisible(), "отображается"),
+    IS_SHE_ENABLED("активна", checked -> checked.element().isEnabled(), "не активна"),
+    IS_HE_ENABLED("активен", checked -> checked.element().isEnabled(), "не активен"),
+    IS_IT_ENABLED("активно", checked -> checked.element().isEnabled(), "не активно"),
+    HAS_COLOR("имеет цвет", checked -> checked.element().hasBgColor(checked.expectedValue().toString()), "имеет другой цвет"),
     IS_DOWNLOADED("загружен", checked -> !checked.element().isVisible(), "не загружен"),
     IS_OPENED("открыта", checked -> checked.element().castTo(PwBrowserTab.class).isOpened(), "не открыта"),
     CONTENT_TEXT("содержит", checked -> {

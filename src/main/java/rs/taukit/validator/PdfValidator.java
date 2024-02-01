@@ -163,7 +163,7 @@ public class PdfValidator {
             double xEnd = xStart + width.get();
             return String.format("%.2f %s", xEnd, matcher.group(4));
         } else {
-            throw new RuntimeException(String.format("Формат строки '%s' не соответствует требованиям", line));
+            throw new RuntimeException(String.format("Формат строки \"%s\" не соответствует требованиям", line));
         }
     }
 

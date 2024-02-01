@@ -15,7 +15,6 @@ import rs.taukit.utils.TimeStringParser;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
@@ -70,12 +69,15 @@ public abstract class PwBrowser implements IWebBrowser {
         if (activeTabIndex == context.pages().size()) {
             activeTabIndex--;
         }
+        setActiveTab(activeTabIndex);
     }
 
     @Override
     public boolean setActiveTab(int tabIndex) {
-        context.pages().get(tabIndex).bringToFront();
-        activeTabIndex = tabIndex;
+        if (tabIndex < context.pages().size()) {
+            context.pages().get(tabIndex).bringToFront();
+            activeTabIndex = tabIndex;
+        }
         return context.pages().size() - 1 == tabIndex;
     }
 
@@ -109,15 +111,13 @@ public abstract class PwBrowser implements IWebBrowser {
 
     @Override
     public PlaywrightPageObject getPage(String pageName) {
-        if (pages.size() <= activeTabIndex) {
-            pages.add(null);
+        if (activeTabIndex == pages.size()) {
+            pages.add(initPage(pageName));
+        } else if (!getCurrentPage().getPageName().equals(pageName)) {
+            pages.remove(activeTabIndex);
+            pages.add(activeTabIndex, initPage(pageName));
         }
-        PlaywrightPageObject pageObject = Optional.ofNullable(pages.get(activeTabIndex)).orElse(initPage(pageName));
-        if (!pageObject.getPageName().equals(pageName)) {
-            pageObject = initPage(pageName);
-        }
-        pages.set(activeTabIndex, pageObject);
-        return pageObject;
+        return getCurrentPage();
     }
 
     public BrowserContext getBrowserContext() {
@@ -126,7 +126,7 @@ public abstract class PwBrowser implements IWebBrowser {
 
     @Override
     public PlaywrightPageObject getCurrentPage() {
-        return pages.get(activeTabIndex);
+        return activeTabIndex >= pages.size() ? null : pages.get(activeTabIndex);
     }
 
     @Override
@@ -141,12 +141,12 @@ public abstract class PwBrowser implements IWebBrowser {
             String dirName = FileUtils.getDownloadFilePath();
             File file = new File(dirName, fileName);
             pwDownload.saveAs(file.toPath());
-            TauLogger.report("Загружен файл '%s' в папку '%s'", fileName, dirName);
+            TauLogger.report("Загружен файл \"%s\" в папку \"%s\"", fileName, dirName);
         });
         double fileDownloadTimeout = TimeStringParser.getTime(Config.getProperty("file.download.timeout"));
         getPage().waitForDownload(new Page.WaitForDownloadOptions().setTimeout(fileDownloadTimeout), () -> {
             element.getElement().click();
-            TauLogger.report("Нажали на кнопку '%s'", element.getElementName());
+            TauLogger.report("Нажали на кнопку \"%s\"", element.getElementName());
         });
     }
 

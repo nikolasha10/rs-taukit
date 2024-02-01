@@ -40,16 +40,16 @@ public class AllureBasicFileStep extends BasicUtils {
     public void attachDownloadedFile(String buttonName, String fileName) {
         String dirPath = FileUtils.getDownloadFilePath();
         element(buttonName).castTo(IHasAttachment.class).attach(dirPath, fileName);
-        TauLogger.report("Нажата кнопка '%s'", buttonName);
-        TauLogger.report("Выбран файл '%s' из папки '%s'", fileName, dirPath);
+        TauLogger.report("Нажата кнопка \"%s\"", buttonName);
+        TauLogger.report("Выбран файл \"%s\" из папки \"%s\"", fileName, dirPath);
     }
 
     @Step("нажать на '{buttonName}' и выбрать файл '{this.fileName}' из папки '{this.fileDir}'")
     public void attachFile(String buttonName) {
         TauLogger.attachFile(fileName, fileExtension, filePath);
         element(buttonName).castTo(IHasAttachment.class).attach(filePath);
-        TauLogger.report("Нажата кнопка '%s'", buttonName);
-        TauLogger.report("Выбран файл '%s'", fileName);
+        TauLogger.report("Нажата кнопка \"%s\"", buttonName);
+        TauLogger.report("Выбран файл \"%s\"", fileName);
     }
 
 

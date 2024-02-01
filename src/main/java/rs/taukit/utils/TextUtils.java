@@ -44,4 +44,9 @@ public class TextUtils {
         MatchResult matchResult = matcher.results().findFirst().orElse(null);
         return matchResult == null ? "<значение не найдено>" : matchResult.group(1);
     }
+
+    public static String hexToRGB(String hex) {
+        int i = Integer.decode(hex);
+        return String.format("rgb(%d, %d, %d)", (i >> 16) & 0xFF, (i >> 8) & 0xFF, i & 0xFF);
+    }
 }

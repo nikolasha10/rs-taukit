@@ -103,7 +103,7 @@ public class PlaywrightPageObject implements PageObject {
             BooleanSupplier waitCondition = () -> !isUrlCorrect() || !hasPageAllExpectedElements();
             page.waitForCondition(waitCondition, options);
         } catch (Exception e) {
-            throw new PageNotClosedException(e, String.format("Не удалось дождаться закрытия страницы '%s'", pageName));
+            throw new PageNotClosedException(e, String.format("Не удалось дождаться закрытия страницы \"%s\"", pageName));
         }
 
     }
@@ -176,7 +176,7 @@ public class PlaywrightPageObject implements PageObject {
         List<String> notFoundElements = getAllNotFoundElements();
         String elementsNotFound = notFoundElements.isEmpty() ? "" : String.format(
                 ". Не найдены ожидаемые элементы: %s", String.join(", ", notFoundElements));
-        return String.format("Не удалось дождаться отображения страницы '%s'%s%s",
+        return String.format("Не удалось дождаться отображения страницы \"%s\"%s%s",
                 pageName, urlNotContainsExpected, elementsNotFound);
     }
 

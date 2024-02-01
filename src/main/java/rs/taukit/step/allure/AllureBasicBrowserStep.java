@@ -3,6 +3,8 @@ package rs.taukit.step.allure;
 import io.qameta.allure.Step;
 import rs.taukit.driver.IWebBrowser;
 import rs.taukit.driver.IWebDriver;
+import rs.taukit.element.interfaces.IHasBlockElements;
+import rs.taukit.page.PageObject;
 import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
 
@@ -20,39 +22,76 @@ public class AllureBasicBrowserStep extends BasicUtils {
         if (!driver.isBrowserOpen()) {
             driver.openBrowser();
         }
-        TauLogger.report("Открыт браузер '%s'", driver.getBrowserType());
+        TauLogger.report("Открыт браузер \"%s\"", driver.getBrowserType());
     }
+
     @Step("открыть ещё один браузер")
     public void openAnotherOneBrowser() {
         driver.openBrowser();
-        TauLogger.report("Открыт браузер '%s'", driver.getBrowserType());
+        TauLogger.report("Открыт браузер \"%s\"", driver.getBrowserType());
     }
 
     @Step("обновить страницу")
     public void reloadPage() {
         page().reload();
         testContext().saveStepAction(() -> page().reload());
-        TauLogger.report("Страница '%s' обновлена", testContext().getCurrentPageName());
+        TauLogger.report("Страница \"%s\" обновлена", testContext().getCurrentPageName());
     }
 
     @Step("закрыть текущую вкладку")
     public void closeCurrentTab() {
         int tabIndex = browser.getActiveTabIndex();
         browser.closeCurrentTab();
-        TauLogger.report("Вкладка %d закрыта", tabIndex + 1);
+        TauLogger.report("Закрыта вкладка %d", tabIndex + 1);
+        TauLogger.report("[примечание] открыта вкладка %d", browser.getActiveTabIndex() + 1);
+        TauLogger.report("[примечание] открыта страница: %s", page().getPageName());
+        IHasBlockElements currentContext = page().getCurrentContext();
+        if (currentContext != null){
+            TauLogger.report("[примечание] текущий контекст: %s %s", currentContext.getModel().getType(), currentContext.getElementName());
+        }
     }
 
 
     public void continueWithBrowser() {
-        continueWithBrowser(driver.getCurrentBrowserIndex() - 1);
+        continueWithBrowser(driver.getCurrentBrowserIndex());
     }
+
     @Step("продолжить работу в открытом ранее браузере ({browserIndex})")
     public void continueWithBrowser(int browserIndex) {
-        driver.switchBrowser(driver.getCurrentBrowserIndex() - 1);
+        driver.switchBrowser(browserIndex - 1);
         browser = driver.getCurrentBrowser();
-        TauLogger.report("[примечание] Активен браузер: %d", browserIndex + 1);
-        TauLogger.report("[примечание] Открыта вкладка: %d", browser.getActiveTabIndex() + 1);
-        TauLogger.report("[примечание] Открыта страница: %s", browser.getCurrentPage().getPageName());
+        browser.setActiveTab(browser.getActiveTabIndex());
+        PageObject currentPage = browser.getCurrentPage();
+        IHasBlockElements currentContext = currentPage.getCurrentContext();
+        String contextType;
+        String contextName;
+        if (currentContext == null){
+            contextType = "страница";
+            contextName = currentPage.getPageName();
+        } else {
+            contextType = currentContext.getModel().getType();
+            contextName = currentContext.getElementName();
+        }
+        testContext().setCurrentContextName("%s \"%s\"", contextType, contextName);
+        TauLogger.report("Активен браузер: %d", driver.getCurrentBrowserIndex() + 1);
+        TauLogger.report("[примечание] открыта вкладка: %d", browser.getActiveTabIndex() + 1);
+        TauLogger.report("[примечание] открыта страница: %s", currentPage.getPageName());
+        TauLogger.report("[примечание] текущий контекст: %s \"%s\"", contextType, contextName);
+    }
+
+    @Step("дождаться отображения страницы \"{pageName}\" в новой вкладке")
+    public void waitForPageLoadNewTab(String pageName) {
+        IWebBrowser browser = driver().getCurrentBrowser();
+        int activeTabIndex = browser.getActiveTabIndex();
+        try {
+            driver().waitForCondition(() -> browser.setActiveTab(activeTabIndex + 1));
+        } catch (Exception e) {
+            TauLogger.fail(e, "Не удалось дождаться открытия новой вкладки браузера");
+        }
+        TauLogger.report("Открыта вкладка %d", browser.getActiveTabIndex() + 1);
+        browser.getPage(pageName).waitForLoad();
+        TauLogger.report("Отображается страница \"%s\"", pageName);
+
     }
 
     @Step("перейти по ссылке {url}")
@@ -60,8 +99,7 @@ public class AllureBasicBrowserStep extends BasicUtils {
         try {
             browser.navigate(url);
         } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось перейти по ссылке '%s'", url);
+            TauLogger.fail(e, "Не удалось перейти по ссылке \"%s\"", url);
         }
     }
-
 }

@@ -42,7 +42,7 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
     public void setValue(String value) {
         element.click();
         Locator optionsLocator = Optional.ofNullable(element.locator(options)).orElseThrow();
-        optionsLocator.filter(new Locator.FilterOptions().setHasText(Pattern.compile(value))).click();
+        optionsLocator.filter(new Locator.FilterOptions().setHasText(Pattern.compile(value))).first().click();
     }
 
     @Override

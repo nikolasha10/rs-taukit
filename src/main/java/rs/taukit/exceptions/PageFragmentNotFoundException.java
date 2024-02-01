@@ -12,7 +12,7 @@ public class PageFragmentNotFoundException extends AutoTestBrokenException {
      * @param name название общего блока
      */
     public PageFragmentNotFoundException(String name) {
-        super("Общий блок элементов с названием '%s' не найден. Список общих блоков: %s",
+        super("Общий блок элементов с названием \"%s\" не найден. Список общих блоков: %s",
                 name, Config.getFragmentMapping());
     }
 
@@ -22,6 +22,6 @@ public class PageFragmentNotFoundException extends AutoTestBrokenException {
      * @param cause исключение
      */
     public PageFragmentNotFoundException(Throwable cause, String name) {
-        super(cause, "Не удалось найти или обработать файл страницы '%s'", name);
+        super(cause, "Не удалось найти или обработать файл страницы \"%s\"", name);
     }
 }

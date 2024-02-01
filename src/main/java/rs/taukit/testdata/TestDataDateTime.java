@@ -48,7 +48,7 @@ public class TestDataDateTime implements ITestData {
         String format = String.format("%s(?:\s%s\s%s\s%s)?", basicDateTimeFormat, modifierFormat, amountFormat, unitFormat);
         Matcher matcher = Pattern.compile(format).matcher(formula);
         if (!matcher.matches()) {
-            throw new TestDataException("Неправильный формат формулы для расчета значения поля '%s'", fieldName);
+            throw new TestDataException("Неправильный формат формулы для расчета значения поля \"%s\"", fieldName);
         }
         this.calendar = new GregorianCalendar();
         String dateParseFormat = "";
@@ -65,7 +65,7 @@ public class TestDataDateTime implements ITestData {
             try {
                 calendar.setTime(df.parse(basicDateExpr));
             } catch (ParseException e) {
-                throw new TestDataException(e, "Не удалось вычислить значение поля '%s' по формуле '%s'", fieldName, formula);
+                throw new TestDataException(e, "Не удалось вычислить значение поля \"%s\" по формуле \"%s\"", fieldName, formula);
             }
         }
         String modifier = matcher.group(2);

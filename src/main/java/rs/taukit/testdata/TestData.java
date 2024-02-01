@@ -45,7 +45,7 @@ public class TestData implements ITestData {
                 return dataFieldValue != null && dataFieldValue.toString().equalsIgnoreCase(expectedValue);
             }
         });
-        Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля '%s'", fieldName);
+        Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля \"%s\"", fieldName);
         dataStorage = new DataStorage(filePath, dataList.stream().filter(condition).findFirst().orElseThrow(exception));
 
     }

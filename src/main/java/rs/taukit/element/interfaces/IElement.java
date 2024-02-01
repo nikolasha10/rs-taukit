@@ -19,4 +19,10 @@ public interface IElement {
     String getElementName();
 
     ElementModel getModel();
+
+    boolean isEnabled();
+
+    String getBgColor();
+
+    boolean hasBgColor(String colorRGB);
 }

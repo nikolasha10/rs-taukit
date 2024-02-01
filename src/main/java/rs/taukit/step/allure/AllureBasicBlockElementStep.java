@@ -26,13 +26,13 @@ public class AllureBasicBlockElementStep extends BasicUtils {
     @Step("в блоке '{this.blockName}' заполнить поле '{fieldName}' значением '{value}'")
     public void setValue(String fieldName, String value) {
         blockElements.getElementByName(fieldName).castTo(IHasEditableValue.class).setValue(value);
-        TauLogger.report("Поле '%s' в блоке '%s' заполнено значением '%s'", fieldName, blockName, blockElements.getText());
+        TauLogger.report("Поле \"%s\" в блоке \"%s\" заполнено значением \"%s\"", fieldName, blockName, blockElements.getText());
     }
 
     @Step("в блоке '{this.blockName}' заполнить поле '{fieldName}' значением '{value}'")
     public void setValue(String fieldName, String value, String controlValue) {
         blockElements.getElementByName(fieldName).castTo(IHasEditableValue.class).setValue(value, controlValue);
-        TauLogger.report("Поле '%s' в блоке '%s' заполнено значением '%s'", fieldName, blockName, blockElements.getText());
+        TauLogger.report("Поле \"%s\" в блоке \"%s\" заполнено значением \"%s\"", fieldName, blockName, blockElements.getText());
     }
 
     @Step("сохранить значения поля '{fieldName}' в блоке '{this.blockName}', как '{parameterName}'")
@@ -42,22 +42,26 @@ public class AllureBasicBlockElementStep extends BasicUtils {
 
     @Step("в блоке '{this.blockName}' нажать на {elementType} '{fieldName}'")
     public void clickOnField(String elementType, String fieldName) {
-        IElement iElement = blockElements.getElementByName(fieldName).castTo(IElement.class);
-        driver().waitForCondition(iElement::isVisible);
-        iElement.click();
-        TauLogger.report("Нажали на %s '%s' в блоке '%s'", elementType, fieldName, blockName);
+        Runnable runnable = () -> {
+            IElement iElement = blockElements.getElementByName(fieldName).castTo(IElement.class);
+            driver().waitForCondition(iElement::isVisible);
+            iElement.click();
+            TauLogger.report("Нажали на %s \"%s\" в блоке \"%s\"", elementType, fieldName, blockName);
+        };
+        testContext().saveStepAction(runnable);
+        runnable.run();
     }
 
     @Step("в блоке '{this.blockName}' установить чекбокс '{fieldName}'")
     public void setCheckbox(String fieldName) {
         blockElements.getElementByName(fieldName).castTo(IHasCheckbox.class).setCheckbox();
-        TauLogger.report("Установлен чекбокс '%s' в блоке '%s'", fieldName, blockName);
+        TauLogger.report("Установлен чекбокс \"%s\" в блоке \"%s\"", fieldName, blockName);
     }
 
     @Step("в блоке '{this.blockName}' в списке '{listName}' выбрать '{itemName}'")
     public void listValueClick(String listName, String itemName) {
         blockElements.getElementByName(listName).castTo(IHasEditableValue.class).setValue(itemName);
-        TauLogger.report("В блоке '%s' в списке '%s' выбрано значение '%s'", blockName, listName, itemName);
+        TauLogger.report("В блоке \"%s\" в списке \"%s\" выбрано значение \"%s\"", blockName, listName, itemName);
     }
 
     @Step("в блоке '{this.blockName}' нажать на '{buttonName}' и скачать файл '{fileName}'")
@@ -69,8 +73,8 @@ public class AllureBasicBlockElementStep extends BasicUtils {
     public void attachFile(String buttonName, String fileName) {
         String dirPath = FileUtils.getDownloadFilePath();
         blockElements.getElementByName(buttonName).castTo(IHasAttachment.class).attach(dirPath, fileName);
-        TauLogger.report("Нажата кнопка '%s'", buttonName);
-        TauLogger.report("Выбран файл '%s' из папки '%s'", fileName, dirPath);
+        TauLogger.report("Нажата кнопка \"%s\"", buttonName);
+        TauLogger.report("Выбран файл \"%s\" из папки \"%s\"", fileName, dirPath);
     }
 
 
@@ -78,9 +82,9 @@ public class AllureBasicBlockElementStep extends BasicUtils {
     public void waitForDisplayed() {
         try {
             driver().waitForCondition(blockElements::isVisible);
-            TauLogger.report("Блок '%s' отображается", blockName);
+            TauLogger.report("Блок \"%s\" отображается", blockName);
         } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось дождаться блока '%s' на странице '%s'",
+            TauLogger.fail(e, "Не удалось дождаться блока \"%s\" на странице \"%s\"",
                     blockName, testContext().getCurrentPageName());
         }
 

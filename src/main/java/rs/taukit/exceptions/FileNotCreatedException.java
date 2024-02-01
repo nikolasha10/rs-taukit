@@ -6,7 +6,7 @@ package rs.taukit.exceptions;
 public class FileNotCreatedException extends RuntimeException {
 
     public FileNotCreatedException(Throwable cause, String filePath) {
-        super(String.format("Файл '%s' не был создан", filePath), cause);
+        super(String.format("Файл \"%s\" не был создан", filePath), cause);
     }
 
 }

@@ -107,7 +107,7 @@ public class PwTable extends PwElement implements IHasTableElements {
                     .locator(elementLocator);
             return ElementBuilder.buildElement(elementName, expectedElement, foundElement);
         } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось найти элемент '%s' в таблице '%s'", elementName, this.elementName);
+            TauLogger.fail(e, "Не удалось найти элемент \"%s\" в таблице \"%s\"", elementName, this.elementName);
             return null;
         }
     }
@@ -168,7 +168,7 @@ public class PwTable extends PwElement implements IHasTableElements {
             }
             foundElement.click();
         } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось нажать на элемент '%s' в таблице '%s'", elementName, this.elementName);
+            TauLogger.fail(e, "Не удалось нажать на элемент \"%s\" в таблице \"%s\"", elementName, this.elementName);
         }
     }
 
@@ -182,6 +182,6 @@ public class PwTable extends PwElement implements IHasTableElements {
     @Step("в таблице '{this.elementName}' нажать на '{elementName}', сохранив его значение, согласно условиям")
     public void saveAndClickOnElementByConditions(String elementName, DataTable conditions) {
         clickOnElementByConditions(elementName, conditions, true, null);
-        TauLogger.report("Текст '%s' сохранён, как '%s'", scenarioData().get(elementName), elementName);
+        TauLogger.report("Текст \"%s\" сохранён, как \"%s\"", scenarioData().get(elementName), elementName);
     }
 }

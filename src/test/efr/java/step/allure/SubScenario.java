@@ -4,13 +4,14 @@ import io.cucumber.testng.CucumberOptions;
 import io.cucumber.testng.Pickle;
 import io.cucumber.testng.PickleWrapper;
 import io.cucumber.testng.TestNGCucumberRunner;
+import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.exceptions.ScenarioNotFoundException;
 import rs.taukit.utils.TauLogger;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
 
-import static rs.taukit.utils.BasicUtils.testContext;
+import static rs.taukit.utils.BasicUtils.page;
 
 @CucumberOptions(
         features = "src/test/efr/resources/scenarioFragments",
@@ -32,17 +33,17 @@ public class SubScenario {
     }
 
     public void runScenario(String functionality, String scenarioName) {
-        TauLogger.console("*** выполняется сценарий: %s", scenarioName);
-        String currentPageName = testContext().getCurrentPageName();
-        String currentContextName = testContext().getCurrentContextName();
-        if (currentPageName != null) {
-            TauLogger.report("[примечание] открыта страница: %s", testContext().getCurrentPageName());
-        }
-        if (currentContextName != null) {
-            TauLogger.report("[примечание] текущий контекст: %s", testContext().getCurrentContextName());
+        TauLogger.console("*-> выполняется сценарий: %s", scenarioName);
+        if (page() != null) {
+            TauLogger.report("[примечание] открыта страница: %s", page().getPageName());
+            IHasBlockElements currentContext = page().getCurrentContext();
+            if (currentContext != null) {
+                TauLogger.report("[примечание] текущий контекст: %s \"%s\"",
+                        currentContext.getModel().getType(), currentContext.getElementName());
+            }
         }
         new TestNGCucumberRunner(this.getClass()).runScenario(getScenarioByName(functionality, scenarioName));
-        TauLogger.console("*** сценарий выполнен: %s", scenarioName);
+        TauLogger.console("<-* сценарий выполнен: %s", scenarioName);
     }
 
     private Predicate<Object[]> hasExpectedName(String functionality, String scenarioName) {

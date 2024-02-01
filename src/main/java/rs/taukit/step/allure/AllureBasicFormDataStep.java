@@ -84,14 +84,14 @@ public class AllureBasicFormDataStep {
                     editableElement.setValue(value, control);
                 }
             } catch (Exception e) {
-                TauLogger.fail(e, "Не удалось заполнить поле '%s' в блоке '%s' (%d) значением '%s'",
+                TauLogger.fail(e, "Не удалось заполнить поле \"%s\" в блоке \"%s\" (%d) значением \"%s\"",
                         name, blockName, blockNumber, value);
             }
         });
         if (blockNumber == 1) {
-            TauLogger.report("Поля блока '%s' заполнены значениями из таблицы:", blockName);
+            TauLogger.report("Поля блока \"%s\" заполнены значениями из таблицы:", blockName);
         } else {
-            TauLogger.report("Поля блока '%s' (%d) заполнены значениями из таблицы:", blockName, blockNumber);
+            TauLogger.report("Поля блока \"%s\" (%d) заполнены значениями из таблицы:", blockName, blockNumber);
         }
         System.out.println(dataTable);
     }

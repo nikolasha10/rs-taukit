@@ -1,7 +1,7 @@
 package rs.taukit.exceptions;
 
 /**
- * Пользователь с описанием '%s' не найден в файле Пользователи.yaml".
+ * Пользователь с описанием \"%s\" не найден в файле Пользователи.yaml".
  */
 public class UserNotFoundException extends RuntimeException {
 
@@ -11,6 +11,6 @@ public class UserNotFoundException extends RuntimeException {
      * @param description описание пользователя в файле Пользователи.yaml
      */
     public UserNotFoundException(Throwable cause, String description) {
-        super(String.format("Пользователь с описанием '%s' не найден", description), cause);
+        super(String.format("Пользователь с описанием \"%s\" не найден", description), cause);
     }
 }

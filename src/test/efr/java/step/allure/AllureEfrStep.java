@@ -112,8 +112,8 @@ public class AllureEfrStep extends AllureBasicStep {
                     String objectState = firstUnexpectedResult.getObjectState();
                     String expectedValue = firstUnexpectedResult.getExpectedValue() == null
                             ? ""
-                            : String.format(" '%s'", firstUnexpectedResult.getExpectedValue());
-                    TauLogger.report("Не удалось дождаться выполнения условия: %s '%s' %s %s",
+                            : String.format(" \"%s\"", firstUnexpectedResult.getExpectedValue());
+                    TauLogger.report("Не удалось дождаться выполнения условия: %s \"%s\" %s %s",
                             objectType, objectName, objectState, expectedValue);
                     return false;
                 }

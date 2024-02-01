@@ -33,7 +33,7 @@ public class AllureBasicDataBaseStep extends BasicUtils {
         try {
             int rowCount = dbDriver.execute(sqlScript);
             String rowsUpdated = rowCount >= 0 ? " Обновлено строк: " + rowCount : "";
-            TauLogger.report("В базе данных '%s' выполнен sql-скрипт из файла '%s'.%s",
+            TauLogger.report("В базе данных \"%s\" выполнен sql-скрипт из файла \"%s\".%s",
                     dataBaseName, sqlFileName, rowsUpdated);
             System.out.println("Параметры sql-скрипта:");
             System.out.println(dataTable);

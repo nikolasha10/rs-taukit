@@ -22,6 +22,9 @@
         элементы:
           Идентифицировать клиента: identification
           Продолжить: success
+          Ожидание клиента: revert
+          Задать параметры выдачи: success
+          Отказ: refuse
       Запрошенные параметры (редактирование):
         тип: блок элементов
         локатор: edit-credit-params-tab-form
@@ -60,6 +63,39 @@
         элементы:
           Создать КОД: success
           Отказ: refuse
+          Подтвердить: //span[text()='Подтвердить']/..
+          Вернуть: revert
+  Параметры выдачи:
+    тип: блок элементов
+    локатор: issuance-params
+    элементы:
+      Сумма кредита: input-form-field-amount
+      День платежа:
+        тип: выпадающий список
+        локатор: select-form-field-payDay
+        элементы: //div[@role='option']
+        значение: //span[@role='option' and @aria-selected='true']
+      Форма расчетов:
+        тип: выпадающий список
+        локатор: select-form-field-payForm
+        элементы: //div[@role='option']
+        значение: //span[@role='option' and @aria-selected='true']
+      Счет:
+        тип: выпадающий список
+        локатор: account
+        элементы: //div[@role='option']
+        значение: //span[@role='option' and @aria-selected='true']
+      Создание поручений на перечисление ДС в счет погашения кредитных обязательств:
+        тип: переключатель
+        локатор: toggle-form-field-creditPaymentOrder
+        включен: //input[@data-id='toggle-form-field-creditPaymentOrder']/ancestor::label[@class='toggle checked']
+      Далее: next
+      Отмена: revert
+  Страхование:
+    тип: блок элементов
+    локатор: Insurance-tab
+    элементы:
+      Оформить: confirm
   Заемщик:
     тип: блок элементов
     локатор: //div[@class='tabs tab-progress']
@@ -185,8 +221,22 @@
         локатор: print-
       Печать анкеты заявления (двусторонняя):
         тип: загрузка файла
-        локатор:  print-twoSided
+        локатор: print-twoSided
       Продолжить: success
+  Верификация:
+    тип: блок элементов
+    локатор: bio-verification-form
+    элементы:
+      Данные заемщика:
+        тип: таблица
+        локатор: //table
+        заголовки: //th
+        строки: //th/parent::tr/following::tr
+        столбцы: //td
+        элементы:
+          Верифицировать: //a[span[text()='Верифицировать']]
+      Продолжить: next
+      Отказ: refuse
   Визуальная оценка:
     тип: блок элементов
     локатор: visual-assessment-credit-tab-form

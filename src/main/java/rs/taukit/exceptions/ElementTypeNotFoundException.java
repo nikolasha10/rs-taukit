@@ -6,7 +6,7 @@ package rs.taukit.exceptions;
 public class ElementTypeNotFoundException extends RuntimeException {
 
     public ElementTypeNotFoundException(String typeName) {
-        super(String.format("Тип элемента '%s' не найден", typeName));
+        super(String.format("Тип элемента \"%s\" не найден", typeName));
     }
 
 }

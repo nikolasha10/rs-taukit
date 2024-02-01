@@ -12,6 +12,6 @@ public class HttpRequestNotSentException extends RuntimeException {
      * @param name  описание пользователя в файле Пользователи.yaml
      */
     public HttpRequestNotSentException(Throwable cause, String name, String type) {
-        super(String.format("Не удалось отправить %s-запрос '%s'", type, name), cause);
+        super(String.format("Не удалось отправить %s-запрос \"%s\"", type, name), cause);
     }
 }

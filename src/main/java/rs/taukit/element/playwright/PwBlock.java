@@ -47,14 +47,14 @@ public class PwBlock extends PwElement implements IHasBlockElements {
     public IElement getElementByName(int blockNumber, String elementName) {
         IElement iElement = Optional.ofNullable(elements.get(elementName))
                 .orElseThrow(() -> {
-                    TauLogger.console("В блоке '%s' описаны элементы: %s", this.elementName, elements.keySet());
+                    TauLogger.console("В блоке \"%s\" описаны элементы: %s", this.elementName, elements.keySet());
                     return new ElementNotDescribedException(elementName, testContext().getCurrentPageName(), this);
                 });
         PwElement pwElement = iElement.castTo(PwElement.class);
         try {
             driver.waitForCondition(() -> element.isVisible());
-        } catch (Exception e){
-            TauLogger.fail(e, "Не удалось дождаться блока '%s' на странице '%s'",
+        } catch (Exception e) {
+            TauLogger.fail(e, "Не удалось дождаться блока \"%s\" на странице \"%s\"",
                     this.elementName, testContext().getCurrentPageName());
         }
 

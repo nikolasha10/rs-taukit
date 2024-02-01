@@ -35,9 +35,15 @@ public class CucumberBasicBrowserStep {
         browserStep().reloadPage();
     }
 
+    @И("^дождаться отображения страницы \"(.+)\" в новой вкладке$")
+    public void waitForPageLoadNewTab(String pageName) {
+        browserStep().waitForPageLoadNewTab(pageName);
+    }
+
     @И("^закрыть текущую вкладку$")
     public void closeCurrentTab() {
         browserStep().closeCurrentTab();
     }
+
 
 }

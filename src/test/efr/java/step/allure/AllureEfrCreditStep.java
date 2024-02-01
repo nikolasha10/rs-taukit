@@ -43,10 +43,10 @@ public class AllureEfrCreditStep extends AllureBasicStep {
         };
         try {
             driver().waitForCondition(actions);
-            TauLogger.report("На вкладке 'История' отобразилось действие '%s'", actionName);
+            TauLogger.report("На вкладке 'История' отобразилось действие \"%s\"", actionName);
         } catch (Exception e) {
             if (exception.get() != null) e.addSuppressed(exception.get());
-            TauLogger.fail(e, "Не удалось дождаться отображения действия '%s' на вкладке 'История'", actionName);
+            TauLogger.fail(e, "Не удалось дождаться отображения действия \"%s\" на вкладке 'История'", actionName);
         }
     }
 }

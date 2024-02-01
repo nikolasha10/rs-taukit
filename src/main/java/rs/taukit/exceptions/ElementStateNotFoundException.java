@@ -7,7 +7,7 @@ import java.util.function.Supplier;
  */
 public class ElementStateNotFoundException extends RuntimeException {
     public ElementStateNotFoundException(String elementState) {
-        super(String.format("Отсутствует описание для состояния '%s'", elementState));
+        super(String.format("Отсутствует описание для состояния \"%s\"", elementState));
     }
 
     public static Supplier<RuntimeException> get(String stateName){

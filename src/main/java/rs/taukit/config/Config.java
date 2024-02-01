@@ -48,7 +48,7 @@ public class Config {
             if (required) {
                 throw new ConfigFileNotFoundException(e, filePath);
             } else {
-                TauLogger.console("Не удалось найти или обработать файл '%s'", filePath);
+                TauLogger.console("Не удалось найти или обработать файл \"%s\"", filePath);
             }
         }
     }
@@ -58,9 +58,9 @@ public class Config {
         return pageFileList.stream()
                 .filter(file -> !file.getName().endsWith(".md"))
                 .collect(Collectors.toMap(file -> {
-            Map<String, ?> pageData = YamlParser.parse(file.getAbsolutePath());
-            return pageData.get("Название").toString();
-        }, File::getAbsolutePath));
+                    Map<String, ?> pageData = YamlParser.parse(file.getAbsolutePath());
+                    return pageData.get("Название").toString();
+                }, File::getAbsolutePath));
     }
 
     public static String getProperty(String propertyName) {
@@ -76,6 +76,7 @@ public class Config {
     public static int getIntegerProperty(String propertyName) {
         return Integer.parseInt(getProperty(propertyName));
     }
+
     public static double getTimeProperty(String propertyName) {
         return TimeStringParser.getTime(getProperty(propertyName));
     }

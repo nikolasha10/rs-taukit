@@ -21,9 +21,9 @@ public class AllureBasicDropdownListStep extends BasicUtils {
     public void selectValue(String value) {
         try {
             dropdownList.setValue(value);
-            TauLogger.report("В выпадающем списке '%s' выбрано значение '%s'", fieldName, value);
+            TauLogger.report("В выпадающем списке \"%s\" выбрано значение \"%s\"", fieldName, value);
         } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось выбрать значение '%s' в выпадающем списке '%s'", value, fieldName);
+            TauLogger.fail(e, "Не удалось выбрать значение \"%s\" в выпадающем списке \"%s\"", value, fieldName);
         }
     }
 }

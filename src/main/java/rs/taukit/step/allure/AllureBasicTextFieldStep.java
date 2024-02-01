@@ -20,13 +20,13 @@ public class AllureBasicTextFieldStep extends BasicUtils {
     @Step("заполнить поле '{this.fieldName}' значением '{value}'")
     public void setValue(String value) {
         textField.setValue(value);
-        TauLogger.report("Поле '%s' заполнено значением '%s'", fieldName, textField.getText());
+        TauLogger.report("Поле \"%s\" заполнено значением \"%s\"", fieldName, textField.getText());
     }
 
     @Step("заполнить поле '{this.fieldName}' значением '{value}'")
     public void setValue(String value, String controlValue) {
         textField.setValue(value, controlValue);
-        TauLogger.report("Поле '%s' заполнено значением '%s'", fieldName, textField.getText());
+        TauLogger.report("Поле \"%s\" заполнено значением \"%s\"", fieldName, textField.getText());
     }
 
     @Step("сохранить значения поля '{this.fieldName}', как '{parameterName}'")

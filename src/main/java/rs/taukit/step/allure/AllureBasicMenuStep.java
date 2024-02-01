@@ -20,6 +20,6 @@ public class AllureBasicMenuStep extends BasicUtils {
     @Step("в меню '{this.menuName}' выбрать '{itemName}'")
     public void selectItem(String itemName) {
         menu.selectMenuItem(itemName);
-        TauLogger.report("В меню '%s' выбран пункт '%s'", menuName, itemName);
+        TauLogger.report("В меню \"%s\" выбран пункт \"%s\"", menuName, itemName);
     }
 }

@@ -20,6 +20,6 @@ public class AllureBasicCheckboxStep extends BasicUtils {
     @Step("установить чекбокс '{this.fieldName}'")
     public void setValue() {
         checkbox.setValue("да");
-        TauLogger.report("Установлен чекбокс '%s'", fieldName);
+        TauLogger.report("Установлен чекбокс \"%s\"", fieldName);
     }
 }

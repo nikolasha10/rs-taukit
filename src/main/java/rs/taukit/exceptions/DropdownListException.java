@@ -34,17 +34,17 @@ public class DropdownListException extends RuntimeException {
 
     public static Supplier<RuntimeException> row(String rowName, String tableName) {
         return () -> new RuntimeException(String.format(
-                "Не удалось найти строку (%s) в таблице '%s'", rowName, tableName));
+                "Не удалось найти строку (%s) в таблице \"%s\"", rowName, tableName));
     }
 
     public static Supplier<RuntimeException> row(String tableName) {
         return () -> new RuntimeException(String.format(
-                "Не удалось найти строку в таблице '%s', соответствующую заданным условиям", tableName));
+                "Не удалось найти строку в таблице \"%s\", соответствующую заданным условиям", tableName));
 
     }
 
     public static Supplier<RuntimeException> header(String tableName, String headerName, List<String> headerList) {
         return () -> new RuntimeException(String.format(
-                "В таблице '%s' нет столбца с именем '%s'. Имеются столбцы: %s", tableName, headerName, headerList));
+                "В таблице \"%s\" нет столбца с именем \"%s\". Имеются столбцы: %s", tableName, headerName, headerList));
     }
 }

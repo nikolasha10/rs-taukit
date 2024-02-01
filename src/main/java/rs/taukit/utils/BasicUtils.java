@@ -48,7 +48,7 @@ public class BasicUtils {
     }
 
     public static PageObject page() {
-        return driver().getCurrentBrowser().getPage(testContext().getCurrentPageName());
+        return driver().getCurrentBrowser() == null ? null : driver().getCurrentBrowser().getCurrentPage();
     }
 
     public static IHasBlockElements context() {

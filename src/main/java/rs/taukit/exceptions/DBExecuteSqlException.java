@@ -12,7 +12,7 @@ public class DBExecuteSqlException extends RuntimeException {
      * @param sqlFileName название sql-файла
      */
     public DBExecuteSqlException(String dbName, String sqlFileName) {
-        super(String.format("Не удалось выполнить sql-скрипт из файлй '%s' в базе данных '%s'", sqlFileName, dbName));
+        super(String.format("Не удалось выполнить sql-скрипт из файла \"%s\" в базе данных \"%s\"", sqlFileName, dbName));
     }
 
     /**
@@ -23,6 +23,6 @@ public class DBExecuteSqlException extends RuntimeException {
      * @param sqlFileName название sql-файла
      */
     public DBExecuteSqlException(Throwable cause, String dbName, String sqlFileName) {
-        super(String.format("Не удалось выполнить sql-скрипт из файлй '%s' в базе данных '%s'", sqlFileName, dbName), cause);
+        super(String.format("Не удалось выполнить sql-скрипт из файла \"%s\" в базе данных \"%s\"", sqlFileName, dbName), cause);
     }
 }

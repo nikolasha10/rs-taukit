@@ -57,7 +57,7 @@ public class PwMenu extends PwElement implements IHasMenu {
             }
             if (dropdownItemCount == 0) {
                 dropdownItemList.addAll(element.locator(dropdownListItems).allTextContents());
-                TauLogger.fail("Не удалось выбрать '%s' в меню '%s'. Доступны значения: %s",
+                TauLogger.fail("Не удалось выбрать \"%s\" в меню \"%s\". Доступны значения: %s",
                         itemName, elementName, dropdownItemList);
             }
             element.locator(dropdownListItems)
@@ -90,9 +90,9 @@ public class PwMenu extends PwElement implements IHasMenu {
     public void setValue(String value) {
         try {
             setValueAction(value);
-            TauLogger.report("В списке '%s' выбрано значение '%s'", elementName, value);
+            TauLogger.report("В списке \"%s\" выбрано значение \"%s\"", elementName, value);
         } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось выбрать значение '%s' в списке '%s'", value, elementName);
+            TauLogger.fail(e, "Не удалось выбрать значение \"%s\" в списке \"%s\"", value, elementName);
         }
     }
 
