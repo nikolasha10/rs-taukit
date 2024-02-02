@@ -40,6 +40,13 @@
   portApplicationStub: 7001
   dbSuite: common
 
+- Название: workstation
+  protocol: http
+  hostApplication: 172.16.34.76
+  portApplication: 8888
+  portApplicationStub: 7001
+  dbSuite: common
+
 - Название: home_stand
   protocol: http
   hostApplication: localhost

@@ -2,7 +2,6 @@ package rs.taukit.storage;
 
 import io.cucumber.testng.Pickle;
 import io.cucumber.testng.PickleWrapper;
-import io.cucumber.testng.TestNGCucumberRunner;
 import lombok.Getter;
 import lombok.Setter;
 import rs.taukit.step.allure.BasicApplication;
@@ -31,8 +30,6 @@ public class TestContext {
     private String savedPageName;
     @Setter
     private String stepActionPageName;
-    @Setter
-    private TestNGCucumberRunner runner;
     private boolean saveActions = false;
 
 

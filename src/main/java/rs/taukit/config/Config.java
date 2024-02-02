@@ -30,6 +30,8 @@ public class Config {
     private static Map<String, String> pageMapping;
     @Getter
     private static Map<String, String> fragmentMapping;
+    @Getter
+    private static Dependencies dependencies;
 
     public static void init(String configDirPath) {
         setConfig(CONFIG_PROPERTIES, configDirPath + "/taukit.properties", true);
@@ -38,6 +40,7 @@ public class Config {
         DBSUITE = new DBSuite(configDirPath + "/databases.yaml", STAND.getDbSuite());
         pageMapping = buildPageMapping(getProperty("pagesDirPath"));
         fragmentMapping = buildPageMapping(getProperty("pageFragmentsDirPath"));
+        dependencies = new Dependencies(configDirPath + "/dependencies.yaml");
     }
 
     private static void setConfig(Properties properties, String filePath, boolean required) {

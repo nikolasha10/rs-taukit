@@ -1,4 +1,5 @@
 import io.cucumber.testng.*;
+import listeners.SimpleInvokedMethodListener;
 import listeners.SuiteListener;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
@@ -6,6 +7,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import rs.taukit.config.Config;
+import rs.taukit.config.Dependencies;
 import rs.taukit.driver.DriverManager;
 import rs.taukit.storage.StorageManager;
 import rs.taukit.storage.TestContext;
@@ -28,7 +30,7 @@ import static rs.taukit.utils.BasicUtils.driver;
 @CucumberOptions(
         features = "src/test/efr/resources/scenarios"
 )
-@Listeners({SuiteListener.class})
+@Listeners({SuiteListener.class, SimpleInvokedMethodListener.class})
 public class TestRunner {
     private final TestNGCucumberRunner runner = new TestNGCucumberRunner(this.getClass());
 
@@ -38,13 +40,31 @@ public class TestRunner {
      **/
     @DataProvider(parallel = true)
     public Object[][] getScenariosByTag() {
-        String annotations = Config.getProperty("scenario.tags").trim();
-        String[] tagList = annotations.split(",\\s*");
+        Dependencies dependencies = Config.getDependencies();
         List<List<Object>> scenarioList = new ArrayList<>();
-        Arrays.stream(tagList).forEach(tag -> scenarioList.addAll(getGroupsWithTag(tag)));
-        Object[][] scenariosToRun = new Object[scenarioList.size()][];
-        for (int i = 0; i < scenarioList.size(); i++) {
-            scenariosToRun[i] = scenarioList.get(i).toArray();
+        Object[][] scenariosToRun = new Object[0][];
+        if (!dependencies.isWaiting()) {
+            String annotations = Config.getProperty("scenario.tags").trim();
+            String[] tagList = annotations.split(",\\s*");
+            List<List<Object>> allFoundScenarios = new ArrayList<>();
+            Arrays.stream(tagList).forEach(tag -> allFoundScenarios.addAll(getGroupsWithTag(tag)));
+            allFoundScenarios.forEach(scenarioEntity -> {
+                if (dependencies.haveDependency(scenarioEntity)) {
+                    dependencies.addWaitingScenario(scenarioEntity);
+                } else {
+                    scenarioList.add(scenarioEntity);
+                }
+            });
+            scenariosToRun = new Object[scenarioList.size()][];
+            for (int i = 0; i < scenarioList.size(); i++) {
+                scenariosToRun[i] = scenarioList.get(i).toArray();
+            }
+        } else {
+            List<Object> firstIndependent = dependencies.getFirstIndependent();
+            if (firstIndependent != null){
+                scenariosToRun = new Object[1][];
+                scenariosToRun[0] = firstIndependent.toArray(new Object[0]);
+            }
         }
         return scenariosToRun;
     }
@@ -71,7 +91,8 @@ public class TestRunner {
     private List<List<Object>> getGroupsWithTag(String tag) {
         return Arrays.stream(runner.provideScenarios())
                 .map(scenarioGroup -> getScenariosWithTag(scenarioGroup, tag))
-                .filter(group -> group.size() > 1).collect(Collectors.toList());
+                .filter(group -> group.size() > 1)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -82,7 +103,9 @@ public class TestRunner {
      * @return - Список объектов, содержащих данные о группе сценариев и самих сценариях, соответствующих тэгу
      */
     private List<Object> getScenariosWithTag(Object[] scenarioList, String tag) {
-        return Arrays.stream(scenarioList).filter(scenario -> mustBeAdded(scenario, tag)).collect(Collectors.toList());
+        return Arrays.stream(scenarioList)
+                .filter(scenario -> mustBeAdded(scenario, tag))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -111,6 +134,7 @@ public class TestRunner {
         String scenarioName = testContext.getScenarioName();
         String functionality = testContext.getFunctionality();
         String testStatus = result.getStatus() == 1 ? "PASSED" : "FAILED";
+        Config.getDependencies().changeDependencyStatus(functionality, scenarioName, result.getStatus());
         TauLogger.console("TEST %s: %s %s", testStatus, functionality, scenarioName);
         driver().closeOtherBrowsers(0);
         browser().closeOtherPages(0);

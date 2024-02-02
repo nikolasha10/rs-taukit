@@ -7,18 +7,33 @@ import org.testng.xml.XmlSuite;
 import rs.taukit.config.Config;
 import rs.taukit.driver.DriverManager;
 
+import java.util.Map;
+
 public class SuiteListener implements ISuiteListener {
     @Override
     public void onStart(ISuite suite) {
-        Config.init("src/test/efr/resources/configs");
         XmlSuite xmlSuite = suite.getXmlSuite();
-        int threadCount = Integer.parseInt(Config.getProperty("threadCount"));
-        xmlSuite.setDataProviderThreadCount(threadCount);
+        Map<String, String> parameters = xmlSuite.getAllParameters();
+        if (parameters.isEmpty() || !parameters.containsKey("started")) {
+            Config.init("src/test/efr/resources/configs");
+            int threadCount = Integer.parseInt(Config.getProperty("threadCount"));
+            xmlSuite.setDataProviderThreadCount(threadCount);
+            parameters.put("started", "true");
+            xmlSuite.setParameters(parameters);
+        }
     }
 
     @Override
     public void onFinish(ISuite suite) {
+//        if (StorageManager.getInstance().haveMilestonePassed("test", "test")){
+//            DriverManager.getInstance().closeDrivers();
+//            MDC.remove("logName");
+//        } else {
+//            StorageManager.getInstance().setMilestone("test", "test", "test");
+//            suite.run();
+//        }
         DriverManager.getInstance().closeDrivers();
         MDC.remove("logName");
     }
+
 }
