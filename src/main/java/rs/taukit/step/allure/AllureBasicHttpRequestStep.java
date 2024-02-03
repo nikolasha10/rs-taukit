@@ -125,7 +125,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         String responseParameterName = String.format("Результат запроса '%s'", name);
         List<List<String>> parsedValues = new ArrayList<>();
         Runnable runnable = getRunnable(dataTable, parsedValues, responseParameterName);
-        testContext().saveStepAction(runnable);
+        scenarioStorage().saveStepAction(runnable);
         DataTable parsedValuesTable = DataTable.create(parsedValues, TextUtils.tableConverter);
         TauLogger.attachDataTable("Полученные значения", parsedValuesTable);
         TauLogger.console("Получены значения:");

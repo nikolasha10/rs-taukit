@@ -3,7 +3,7 @@ package rs.taukit.testdata;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.testng.Pickle;
 import lombok.Getter;
-import rs.taukit.utils.TauLogger;
+import rs.taukit.config.Config;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.YamlParser;
 
@@ -21,6 +21,7 @@ public class ScenarioData {
         this.featurePath = pickle.getUri().getPath();
         this.scenarioName = pickle.getName();
         this.dataStorage = new DataStorage(featurePath, getScenarioData(getFeatureData(featurePath)));
+        put("Адрес стенда", Config.getSTAND().getUrl());
     }
 
     private List<Map<String, ?>> getFeatureData(String featurePath) {
@@ -29,13 +30,9 @@ public class ScenarioData {
     }
 
     private Map<String, ?> getScenarioData(List<Map<String, ?>> featureData) {
-        Map<String, ?> scenarioData = featureData.stream()
+        return featureData.stream()
                 .filter(data -> data.get("Сценарий").toString().equalsIgnoreCase(scenarioName))
                 .findFirst().orElse(new LinkedHashMap<>());
-        if (scenarioData.isEmpty()) {
-            TauLogger.console("Тестовые данные для текущего сценария отсутствуют");
-        }
-        return scenarioData;
     }
 
     public LinkedHashMap<String, Object> getAttachments() {

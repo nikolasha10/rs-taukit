@@ -11,7 +11,6 @@ import rs.taukit.exceptions.PageFragmentNotFoundException;
 import rs.taukit.exceptions.PageNotClosedException;
 import rs.taukit.exceptions.PageNotLoadException;
 import rs.taukit.page.PageObject;
-import rs.taukit.storage.StorageManager;
 import rs.taukit.utils.TimeStringParser;
 import rs.taukit.utils.YamlParser;
 
@@ -19,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 
+import static rs.taukit.utils.BasicUtils.scenarioStorage;
 import static rs.taukit.utils.TestDataUtils.loadPageConfig;
 
 @Getter
@@ -95,7 +95,7 @@ public class PlaywrightPageObject implements PageObject {
         BooleanSupplier waitCondition = () -> isUrlCorrect() && hasPageAllExpectedElements();
         this.options = new Page.WaitForConditionOptions().setTimeout(pageTimeout);
         page.waitForCondition(waitCondition, options);
-        StorageManager.getInstance().getTestContext().setCurrentPageName(pageName);
+        scenarioStorage().setCurrentPageName(pageName);
     }
 
     public void waitForClose() {
@@ -188,7 +188,7 @@ public class PlaywrightPageObject implements PageObject {
             // ignored
         }
         waitForLoad();
-        StorageManager.getInstance().getTestContext().setCurrentPageName(pageName);
+        scenarioStorage().setCurrentPageName(pageName);
     }
 
     public void reload() {

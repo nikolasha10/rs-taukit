@@ -63,7 +63,7 @@ public class PwMenu extends PwElement implements IHasMenu {
             element.locator(dropdownListItems)
                     .filter(new Locator.FilterOptions().setHasText(itemName))
                     .click();
-//            testContext().setStepAction(() -> {
+//            scenarioStorage().setStepAction(() -> {
 //                element.locator(dropdownListItems)
 //                        .filter(new Locator.FilterOptions().setHasText(itemName))
 //                        .click();
@@ -71,7 +71,7 @@ public class PwMenu extends PwElement implements IHasMenu {
 //            });
         } else {
             item.click();
-//            testContext().setStepAction(() -> {
+//            scenarioStorage().setStepAction(() -> {
 //                item.click();
 //                return true;
 //            });

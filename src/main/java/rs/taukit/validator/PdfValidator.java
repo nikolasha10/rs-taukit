@@ -56,7 +56,7 @@ public class PdfValidator {
 
     private String getFilePath(String fileName) {
         String downloadDirPath = Config.getProperty("downloads.dir");
-        String scenarioName = testContext().getScenarioName();
+        String scenarioName = scenario().getName();
         return String.format("%s/%s/%s", downloadDirPath, scenarioName, fileName);
     }
 

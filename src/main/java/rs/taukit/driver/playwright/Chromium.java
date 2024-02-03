@@ -82,6 +82,4 @@ public class Chromium extends PwBrowser {
                                         Config.getIntegerProperty("window.height"))
                                 .setHeadless(Config.getBooleanProperty("browser.headless")));
     }
-
-
 }

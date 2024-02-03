@@ -31,6 +31,8 @@ public class TestContext {
     @Setter
     private String stepActionPageName;
     private boolean saveActions = false;
+    @Setter
+    private long freeSince;
 
 
     public TestContext(PickleWrapper pickleWrapper, String functionality) {

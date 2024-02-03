@@ -22,14 +22,18 @@ public class AllureBasicPageStep extends BasicUtils {
 
     @Step("дождаться отображения страницы '{this.pageName}'")
     public void waitForPageLoad() {
-        page.waitForLoad();
-        testContext().saveStepAction(page::waitForLoad);
+        try {
+            page.waitForLoad();
+        } catch (Exception e) {
+            TauLogger.fail(e, "Не удалось дождаться отображения страницы \"%s\"", page.getPageName());
+        }
+        scenarioStorage().saveStepAction(page::waitForLoad);
         TauLogger.report("Отображается страница \"%s\"", pageName);
     }
 
     @Step("дождаться отображения всплывающего окна '{this.pageName}'")
     public void waitForPopupWindow() {
-        testContext().setSavedPageName(testContext().getCurrentPageName());
+        scenarioStorage().setSavedPageName(scenarioStorage().getCurrentPageName());
         page.waitForLoad();
         TauLogger.report("Отображается всплывающее окно \"%s\"", pageName);
     }
@@ -38,7 +42,7 @@ public class AllureBasicPageStep extends BasicUtils {
     public void waitForPopupClose() {
         page.waitForClose();
         TauLogger.report("Закрыто всплывающее окно \"%s\"", pageName);
-        String currentPageName = testContext().getSavedPageName();
+        String currentPageName = scenarioStorage().getSavedPageName();
         driver().getCurrentBrowser().getPage(currentPageName).waitForLoad();
         TauLogger.report("Отображается страница \"%s\"", currentPageName);
     }

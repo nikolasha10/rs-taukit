@@ -52,7 +52,7 @@ public class AllureBasicBlockElementStep extends BasicUtils {
             iElement.click();
             TauLogger.report("Нажали на %s \"%s\" в блоке \"%s\"", elementType, fieldName, blockName);
         };
-        testContext().saveStepAction(runnable);
+        scenarioStorage().saveStepAction(runnable);
         runnable.run();
     }
 
@@ -89,7 +89,7 @@ public class AllureBasicBlockElementStep extends BasicUtils {
             TauLogger.report("Блок \"%s\" отображается", blockName);
         } catch (Exception e) {
             TauLogger.fail(e, "Не удалось дождаться блока \"%s\" на странице \"%s\"",
-                    blockName, testContext().getCurrentPageName());
+                    blockName, scenarioStorage().getCurrentPageName());
         }
 
     }

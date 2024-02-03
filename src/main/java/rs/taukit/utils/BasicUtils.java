@@ -10,8 +10,9 @@ import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.PageStorage;
-import rs.taukit.storage.StorageManager;
-import rs.taukit.storage.TestContext;
+import rs.taukit.scenario.CucumberScenario;
+import rs.taukit.storage.ScenarioStorage;
+import rs.taukit.storage.Storage;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.testdata.TestData;
 import rs.taukit.testdata.TestDataFile;
@@ -24,28 +25,30 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class BasicUtils {
+    public static Storage storage = Storage.getInstance();
+
+    public static CucumberScenario scenario() {
+        return storage.getScenario();
+    }
+
+    public static ScenarioStorage scenarioStorage() {
+        return scenario().getScenarioStorage();
+    }
+
     public static DriverManager driverManager() {
-        return DriverManager.getInstance();
+        return scenarioStorage().getDriverManager();
     }
 
     public static IWebDriver driver() {
-        return driverManager().getDriver();
+        return driverManager().getCurrentDriver();
     }
 
     public static IWebBrowser browser() {
         return driver().getCurrentBrowser();
     }
 
-    public static StorageManager storageManager() {
-        return StorageManager.getInstance();
-    }
-
-    public static TestContext testContext() {
-        return storageManager().getTestContext();
-    }
-
     public static ScenarioData scenarioData() {
-        return testContext().getScenarioData();
+        return scenarioStorage().getScenarioData();
     }
 
     public static PageStorage pageStorage() {
@@ -68,22 +71,22 @@ public class BasicUtils {
      */
     public static IElement element(String elementName) {
         return Optional.ofNullable(page().getElement(elementName))
-                .orElseThrow(() -> new ElementNotDescribedException(elementName, testContext().getCurrentPageName()));
+                .orElseThrow(() -> new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName()));
     }
 
     public static TestData getCurrentUser() {
-        return testContext().getCurrentUser();
+        return scenarioStorage().getCurrentUser();
     }
 
     public static String eval(String template) {
-        ScenarioData scenarioData = testContext().getScenarioData();
+        ScenarioData scenarioData = scenarioStorage().getScenarioData();
         if (scenarioData == null) return template;
         String evalResult = scenarioData.evalObjectField(template);
         return scenarioData.evalStrings(evalResult);
     }
 
     public static <T> T evalObject(String template) {
-        ScenarioData scenarioData = testContext().getScenarioData();
+        ScenarioData scenarioData = scenarioStorage().getScenarioData();
         return scenarioData.evalObject(template);
     }
 
@@ -94,10 +97,10 @@ public class BasicUtils {
      * @return таблица данных с вычисленными значениями параметров
      */
     public static DataTable eval(DataTable dataTable) {
-        if (testContext().getScenarioData() == null) {
-            testContext().setScenarioData(new ScenarioData(testContext().getPickle()));
+        if (scenarioStorage().getScenarioData() == null) {
+            scenarioStorage().setScenarioData(new ScenarioData(scenarioStorage().getPickle()));
         }
-        ScenarioData scenarioData = testContext().getScenarioData();
+        ScenarioData scenarioData = scenarioStorage().getScenarioData();
         Function<String, String> eval = (template) -> {
             if (template == null) return null;
             String format = "\\$\\{(.+?)} -> (.+)";

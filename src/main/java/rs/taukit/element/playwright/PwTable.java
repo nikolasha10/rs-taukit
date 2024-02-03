@@ -20,7 +20,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static rs.taukit.utils.BasicUtils.scenarioData;
-import static rs.taukit.utils.BasicUtils.testContext;
+import static rs.taukit.utils.BasicUtils.scenarioStorage;
 
 public class PwTable extends PwElement implements IHasTableElements {
     protected Locator headers;
@@ -174,7 +174,7 @@ public class PwTable extends PwElement implements IHasTableElements {
 
     public void clickOnElement(String elementName) {
         if (!elements.containsKey(elementName)) {
-            throw new ElementNotDescribedException(elementName, testContext().getCurrentPageName());
+            throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName());
         }
         activeRow.locator(elements.get(elementName).getLocator()).click();
     }

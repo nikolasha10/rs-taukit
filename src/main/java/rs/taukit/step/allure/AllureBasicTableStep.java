@@ -51,7 +51,7 @@ public class AllureBasicTableStep extends BasicUtils {
         TauLogger.attach("Условия поиска строки", dataTable);
         try {
             int rowIndex = tableElement.findRowByConditions(dataTable);
-            testContext().saveStepAction(() -> tableElement.findRowByConditions(dataTable));
+            scenarioStorage().saveStepAction(() -> tableElement.findRowByConditions(dataTable));
             TauLogger.report("Найдена строка %d", rowIndex + 1);
         } catch (Exception e) {
             TauLogger.fail(e, "В таблице \"%s\" не удалось найти строку, соответствующую заданным условиям", tableName);
@@ -69,7 +69,7 @@ public class AllureBasicTableStep extends BasicUtils {
     public void clickOnElement(String elementName) {
         Runnable runnable = () -> tableElement.clickOnElement(elementName);
         runnable.run();
-        testContext().saveStepAction(runnable);
+        scenarioStorage().saveStepAction(runnable);
         TauLogger.report("Нажали на элемент \"%s\" в таблице \"%s\"", elementName, tableName);
     }
 
@@ -92,10 +92,10 @@ public class AllureBasicTableStep extends BasicUtils {
                 ? Config.getTimeProperty("element.check.timeout")
                 : TimeStringParser.getTime(timeout);
         try {
-            driver().waitForCondition(conditions, elementCheckInterval, elementCheckTimeout, testContext().getStepActions());
+            driver().waitForCondition(conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage().getStepActions());
             TauLogger.report("Условия выполнены");
-            testContext().clearStepActions();
-            testContext().stopToSaveActions();
+            scenarioStorage().clearStepActions();
+            scenarioStorage().stopToSaveActions();
         } catch (Exception e) {
             if (e instanceof AutoTestBrokenException) throw e;
             TauLogger.fail(e, "В таблице \"%s\" не удалось дождаться строки, соответствующей заданным условиям",

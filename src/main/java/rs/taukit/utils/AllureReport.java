@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
 @SuppressWarnings("unchecked")
 @Getter
 public class AllureReport {
-    private static List<String> errorList = new ArrayList<>();
+    private static final List<String> errorList = new ArrayList<>();
 
     private static List<File> getFileList(String scenarioName, long testEndTime) {
         File directory = new File(Config.getProperty("allure-results.path"));
@@ -100,6 +100,9 @@ public class AllureReport {
                 errorList.add(s.get("name").toString()
                         .replace("Некритическая ошибка:", ""));
                 resultStatus.set(0);
+            }
+            if (!s.containsKey("status")) {
+                s.put("status", "unknown");
             }
             if (s.get("status").equals("failed")) {
                 json.replace("status", "failed");

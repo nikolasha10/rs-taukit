@@ -8,7 +8,7 @@ import rs.taukit.utils.PdfUtils;
 import rs.taukit.validator.PdfValidator;
 
 import static rs.taukit.utils.BasicUtils.eval;
-import static rs.taukit.utils.BasicUtils.testContext;
+import static rs.taukit.utils.BasicUtils.scenarioStorage;
 
 public class CucumberBasicStep {
 
@@ -28,7 +28,7 @@ public class CucumberBasicStep {
 
     @И("^сделать снимок страницы$")
     public void takeScreenshot() {
-        AllureBasicStep.takeScreenshot(String.format("страница \"%s\"", testContext().getCurrentPageName()));
+        AllureBasicStep.takeScreenshot(String.format("страница \"%s\"", scenarioStorage().getCurrentPageName()));
     }
 
     @И("^сделать снимок страницы и сохранить, как \"(.+)\"$")

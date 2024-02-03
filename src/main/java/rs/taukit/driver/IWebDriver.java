@@ -30,8 +30,6 @@ public interface IWebDriver {
 
     <T> T castTo();
 
-    long getDriverId();
-
     void waitForTimeout(double time);
 
     IWebBrowser getCurrentBrowser();

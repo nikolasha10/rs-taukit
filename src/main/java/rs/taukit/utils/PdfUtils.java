@@ -36,7 +36,7 @@ import static rs.taukit.utils.BasicUtils.*;
 public class PdfUtils {
     public static void createPdfStandard(String standardFileName, String originFileName, String templateName, DataTable dataTable) {
         File template = new File("target/templates", templateName);
-        String templateContent = null;
+        String templateContent;
         try {
             templateContent = Files.readString(template.toPath());
         } catch (IOException e) {
@@ -58,21 +58,21 @@ public class PdfUtils {
             throw new RuntimeException(e);
         }
         String originFilePath = String.format("target/downloads/%s/%s",
-                testContext().getScenarioName(), originFileName);
+                scenario().getName(), originFileName);
         String editedFilePath = String.format("target/downloads/%s/%s",
-                testContext().getScenarioName(), standardFileName);
+                scenario().getName(), standardFileName);
         PdfUtils.replacePdfContent(originFilePath, editedFilePath, evaluatingContent);
     }
 
     @Step("сравнить файл '{testedFileName}' с эталоном")
     public static void comparePdfFiles(String testedFileName, String standardFileName) {
         String testedFilePath = String.format("target/downloads/%s/%s",
-                testContext().getScenarioName(), testedFileName);
+                scenario().getName(), testedFileName);
         String standardFilePath = String.format("target/downloads/%s/%s",
-                testContext().getScenarioName(), standardFileName);
+                scenario().getName(), standardFileName);
         PlaywrightDriver driver = driver().castTo();
         driver.openBrowser(true);
-        PlaywrightPageObject pageObject = (PlaywrightPageObject) driver.getCurrentBrowser().getCurrentPage();
+        PlaywrightPageObject pageObject = driver.getCurrentBrowser().getCurrentPage();
         Page pageTested = pageObject.getPage();
         page().waitForTimeout(2000);
         String originalPdfUrl = new File(testedFilePath).toURI().toString();
@@ -184,9 +184,7 @@ public class PdfUtils {
 
                     File htmlTemplate = new File("src/test/efr/resources/templates/htmlTemplate.html");
                     String attachment = eval(Files.readString(htmlTemplate.toPath()));
-                    TauLogger.warn(() -> {
-                        TauLogger.attachFile("Различия", ".html", attachment.getBytes());
-                    }, "страница %d отличается от ожидаемой", i);
+                    TauLogger.warn(() -> TauLogger.attachFile("Различия", ".html", attachment.getBytes()), "страница %d отличается от ожидаемой", i);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

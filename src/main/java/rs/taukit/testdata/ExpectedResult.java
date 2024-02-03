@@ -77,19 +77,22 @@ public class ExpectedResult {
             case "страница", "всплывающее окно":
                 String currentPageName = page().getPageName();
                 if (!currentPageName.equals(objectName)) {
-                    testContext().setSavedPageName(currentPageName);
+                    scenarioStorage().setSavedPageName(currentPageName);
                 }
-                PageObject page = driver().getCurrentBrowser().getPage(objectName);
+                PageObject page = browser().getPage(objectName);
                 double pageTimeout = page.getPageTimeout();
                 page.setPageTimeout(checkTimeout);
                 boolean result = PageState.getState(objectState).apply(driver().getCurrentBrowser().getPage(objectName));
                 page.setPageTimeout(pageTimeout);
-                if (!result) this.thrownException = page.getThrownException();
+                if (!result) {
+                    this.thrownException = page.getThrownException();
+                    browser().getPage(scenarioStorage().getSavedPageName());
+                }
                 return result;
             case "вкладка":
                 return driver().getCurrentBrowser().setActiveTab(Integer.parseInt(objectName) - 1);
             case "файл":
-                String dirName = String.format("%s/%s", Config.getProperty("downloads.dir"), testContext().getScenarioName());
+                String dirName = String.format("%s/%s", Config.getProperty("downloads.dir"), scenario().getName());
                 return new File(dirName, objectName).exists();
             case "параметр":
                 return scenarioData().get(objectName).toString().contains(expectedValue);

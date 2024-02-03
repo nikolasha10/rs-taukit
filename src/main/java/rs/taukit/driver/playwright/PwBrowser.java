@@ -46,13 +46,19 @@ public abstract class PwBrowser implements IWebBrowser {
     public List<byte[]> takeScreenshots() {
         return context.pages().stream()
                 .map(tab -> {
-                    try {
-                        tab.bringToFront();
-                        return tab.screenshot((new Page.ScreenshotOptions().setFullPage(true)));
-                    } catch (Exception e) {
-                        TauLogger.warn("Не удалось сделать снимок текущей вкладки браузера", e);
-                        return new byte[0];
+                    Exception exception = null;
+                    for (int i = 0; i < 3; i++) {
+                        try {
+                            if (i > 0) tab.reload();
+                            tab.waitForLoadState();
+                            tab.bringToFront();
+                            return tab.screenshot((new Page.ScreenshotOptions().setFullPage(true)));
+                        } catch (Exception e) {
+                            exception = e;
+                        }
                     }
+                    TauLogger.warnWOSS("Не удалось сделать снимок текущей вкладки браузера", exception);
+                    return new byte[0];
                 }).collect(Collectors.toList());
     }
 
@@ -75,12 +81,12 @@ public abstract class PwBrowser implements IWebBrowser {
 
     @Override
     public void closeTab(int tabIndex) {
-        if (tabIndex == activeTabIndex){
+        if (tabIndex == activeTabIndex) {
             closeCurrentTab();
         } else {
             pages.remove(tabIndex);
             context.pages().get(tabIndex).close();
-            if (tabIndex < activeTabIndex){
+            if (tabIndex < activeTabIndex) {
                 activeTabIndex--;
             }
         }
@@ -177,10 +183,12 @@ public abstract class PwBrowser implements IWebBrowser {
     @Override
     public void closeOtherPages(int activePageIndex) {
         PlaywrightPageObject activePage = pages.get(activePageIndex);
-        while (context.pages().size() > 1){
+        while (context.pages().size() > 1) {
             closeTab(0);
         }
         pages.set(0, activePage);
+        setActiveTab(0);
+        TauLogger.console("Все вкладки кроме 1-й закрыты");
     }
 
     public Page getActivePwPage() {

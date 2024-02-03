@@ -1,9 +1,7 @@
 package rs.taukit.page;
 
-import rs.taukit.storage.StorageManager;
-import rs.taukit.storage.TestContext;
-
 import static rs.taukit.utils.BasicUtils.driver;
+import static rs.taukit.utils.BasicUtils.scenarioStorage;
 
 public class PageStorage {
 
@@ -16,8 +14,7 @@ public class PageStorage {
     }
 
     public PageObject getPopup(String pageName) {
-        TestContext testContext = StorageManager.getInstance().getTestContext();
-        testContext.setSavedPageName(testContext.getCurrentPageName());
+        scenarioStorage().setSavedPageName(scenarioStorage().getCurrentPageName());
         return getPage(pageName);
     }
 

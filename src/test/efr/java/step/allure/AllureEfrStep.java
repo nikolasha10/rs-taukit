@@ -22,16 +22,20 @@ public class AllureEfrStep extends AllureBasicStep {
 
     @Step("войти в '{appName}' под учётными данными пользователя '{userDescription}'")
     public static void loginIntoApplication(String appName, String userDescription) {
+        scenarioStorage().getDriverManager().getDriver(Config.getProperty("web.driver.name"));
         User user = new User(userDescription);
-        Application activeApp = (Application) testContext().getApplication(appName);
+        Application activeApp = (Application) scenarioStorage().getApplication(appName);
         Application app = Optional.ofNullable(activeApp).orElse(new Application(appName));
         if (!app.isUserLoggedIn(user)) {
             app.login(user);
-            testContext().putApplication(appName, app);
+            scenarioStorage().putApplication(appName, app);
         } else {
-            TauLogger.console("driver().getCurrentBrowserIndex(): %d", driver().getCurrentBrowserIndex());
-            TauLogger.console("browser().getActiveTabIndex(): %d", browser().getActiveTabIndex());
-            browser().navigate(driver().getCurrentBrowser().getPage("Поиск клиента").getPageUrl());
+            String pageUrl = browser().getPage("Поиск клиента").getPageUrl();
+            try {
+                browser().navigate(pageUrl);
+            } catch (Exception e) {
+                TauLogger.fail(e, "Не удалось открыть страницу 'Поиск клиента' по ссылке '%s'", pageUrl);
+            }
         }
     }
 

@@ -19,6 +19,7 @@ public class AllureBasicBrowserStep extends BasicUtils {
 
     @Step("открыть браузер")
     public void openBrowser() {
+        TauLogger.console("driver.getCurrentBrowserIndex(): %d", driver.getCurrentBrowserIndex());
         if (!driver.isBrowserOpen()) {
             driver.openBrowser();
         }
@@ -34,8 +35,8 @@ public class AllureBasicBrowserStep extends BasicUtils {
     @Step("обновить страницу")
     public void reloadPage() {
         page().reload();
-        testContext().saveStepAction(() -> page().reload());
-        TauLogger.report("Страница \"%s\" обновлена", testContext().getCurrentPageName());
+        scenarioStorage().saveStepAction(() -> page().reload());
+        TauLogger.report("Страница \"%s\" обновлена", scenarioStorage().getCurrentPageName());
     }
 
     @Step("закрыть текущую вкладку")
@@ -72,7 +73,7 @@ public class AllureBasicBrowserStep extends BasicUtils {
             contextType = currentContext.getModel().getType();
             contextName = currentContext.getElementName();
         }
-        testContext().setCurrentContextName("%s \"%s\"", contextType, contextName);
+        scenarioStorage().setCurrentContextName("%s \"%s\"", contextType, contextName);
         TauLogger.report("Активен браузер: %d", driver.getCurrentBrowserIndex() + 1);
         TauLogger.report("[примечание] открыта вкладка: %d", browser.getActiveTabIndex() + 1);
         TauLogger.report("[примечание] открыта страница: %s", currentPage.getPageName());

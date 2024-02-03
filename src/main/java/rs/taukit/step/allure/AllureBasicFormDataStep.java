@@ -2,7 +2,6 @@ package rs.taukit.step.allure;
 
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
-import rs.taukit.driver.DriverManager;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.ElementType;
 import rs.taukit.element.interfaces.IElement;
@@ -16,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static rs.taukit.utils.BasicUtils.driver;
+
 public class AllureBasicFormDataStep {
     private final PageObject pageObject;
     private final DataTable dataTable;
@@ -26,7 +27,7 @@ public class AllureBasicFormDataStep {
         this.dataTable = dataTable;
         this.data = dataTable.asMaps();
         this.pageObject = pageObject;
-        this.driver = DriverManager.getInstance().getDriver();
+        this.driver = driver();
     }
 
     @Step("заполнить поля формы значениями:")
@@ -45,7 +46,7 @@ public class AllureBasicFormDataStep {
                     .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Значение'"));
             String control = row.getOrDefault("Контроль", "");
             Class<IElement> elementType = ElementType.getType(type).getElementClass();
-            IHasEditableValue element = block == null 
+            IHasEditableValue element = block == null
                     ? pageObject.replaceElement(name, elementType).castTo(IHasEditableValue.class)
                     : block.getElementByName(name).castTo(IHasEditableValue.class);
             if (control.isEmpty()) {

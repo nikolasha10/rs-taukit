@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static rs.taukit.utils.BasicUtils.testContext;
+import static rs.taukit.utils.BasicUtils.scenarioStorage;
 
 public class PwBlock extends PwElement implements IHasBlockElements {
     protected final Map<String, IElement> elements;
@@ -48,14 +48,14 @@ public class PwBlock extends PwElement implements IHasBlockElements {
         IElement iElement = Optional.ofNullable(elements.get(elementName))
                 .orElseThrow(() -> {
                     TauLogger.console("В блоке \"%s\" описаны элементы: %s", this.elementName, elements.keySet());
-                    return new ElementNotDescribedException(elementName, testContext().getCurrentPageName(), this);
+                    return new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName(), this);
                 });
         PwElement pwElement = iElement.castTo(PwElement.class);
         try {
             driver.waitForCondition(() -> element.isVisible());
         } catch (Exception e) {
             TauLogger.fail(e, "Не удалось дождаться блока \"%s\" на странице \"%s\"",
-                    this.elementName, testContext().getCurrentPageName());
+                    this.elementName, scenarioStorage().getCurrentPageName());
         }
 
         Locator blockFieldLocator = element.all().get(blockNumber - 1).locator(pwElement.getElement());

@@ -27,7 +27,7 @@ public class AllureBasicDataBaseStep extends BasicUtils {
     @Step("в базе данных '{this.dataBaseName}' выполнить sql-скрипт из файла '{sqlFileName}'")
     public void execute(String sqlFileName, DataTable dataTable) {
         TauLogger.attachDataTable("Параметры sql-скрипта", dataTable);
-        testContext().getScenarioData().put(dataTable);
+        scenarioStorage().getScenarioData().put(dataTable);
         String sqlScript = eval(FileUtils.readFile(Config.getProperty("sql.files.dir") + sqlFileName));
         TauLogger.attach("sql-скрипт", sqlScript);
         try {

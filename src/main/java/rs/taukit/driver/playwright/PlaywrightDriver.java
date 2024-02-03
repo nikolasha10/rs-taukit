@@ -6,15 +6,16 @@ import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.TimeoutError;
 import lombok.Getter;
 import rs.taukit.config.Config;
-import rs.taukit.driver.DriverManager;
 import rs.taukit.driver.IWebDriver;
-import rs.taukit.storage.StorageManager;
+import rs.taukit.utils.TauLogger;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
+
+import static rs.taukit.utils.BasicUtils.scenarioStorage;
 
 @Getter
 public class PlaywrightDriver implements IWebDriver {
@@ -78,7 +79,7 @@ public class PlaywrightDriver implements IWebDriver {
     @Override
     public void closeBrowser() {
         browserList.get(currentBrowserIndex).close();
-        StorageManager.getInstance().getTestContext().setCurrentUser(null);
+        scenarioStorage().setCurrentUser(null);
         browserList.remove(currentBrowserIndex);
     }
 
@@ -128,10 +129,6 @@ public class PlaywrightDriver implements IWebDriver {
         return (T) this;
     }
 
-    public long getDriverId() {
-        return DriverManager.getInstance().getDriverId(this);
-    }
-
     public void waitForTimeout(double time) {
         try {
             Thread.sleep((long) time);
@@ -148,12 +145,17 @@ public class PlaywrightDriver implements IWebDriver {
     @Override
     public void closeOtherBrowsers(int activeBrowserIndex) {
         if (browserList.isEmpty()) return;
-        PwBrowser activeBrowser = browserList.get(activeBrowserIndex);
-        for (int i = 0; i < browserList.size(); i++) {
-            if (i != activeBrowserIndex) browserList.get(i).close();
+        int i = 0;
+        while (browserList.size() > 1 && i < browserList.size()) {
+            if (i == activeBrowserIndex) {
+                i++;
+            } else {
+                TauLogger.console("Закрываем браузер %d", i);
+                browserList.get(i).close();
+                browserList.remove(i);
+            }
+            currentBrowserIndex = activeBrowserIndex;
         }
-        browserList.clear();
-        browserList.add(activeBrowser);
-        switchBrowser(0);
+        TauLogger.console("Все браузеры кроме 1-го закрыты");
     }
 }

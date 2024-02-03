@@ -11,8 +11,7 @@ import rs.taukit.page.playwright.ElementBuilder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static rs.taukit.utils.BasicUtils.page;
-import static rs.taukit.utils.BasicUtils.pageStorage;
+import static rs.taukit.utils.BasicUtils.*;
 
 @Getter
 public class PwDictionary extends PwElement implements IHasEditableValue {
@@ -63,6 +62,8 @@ public class PwDictionary extends PwElement implements IHasEditableValue {
         new PwTextField(searchFieldName, popup.getElement(searchFieldName)).setValue(value);
         popup.getElement(searchButtonName).click();
         popup.getElement("Значения справочника").castTo(PwList.class).setValue(value);
+        popup.waitForClose();
+        browser().getPage(initialPage.getPageName());
         initialPage.waitForLoad();
     }
 

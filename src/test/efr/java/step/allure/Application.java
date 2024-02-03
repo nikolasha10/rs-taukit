@@ -36,11 +36,11 @@ public class Application extends BasicApplication {
 
     public void login(String userDescription) {
         User user = new User(userDescription);
-        Application activeApp = (Application) testContext().getApplication(appName);
+        Application activeApp = (Application) scenarioStorage().getApplication(appName);
         Application app = Optional.ofNullable(activeApp).orElse(new Application(appName));
         if (!app.isUserLoggedIn(user)) {
             app.login(user);
-            testContext().putApplication(appName, app);
+            scenarioStorage().putApplication(appName, app);
         }
     }
 

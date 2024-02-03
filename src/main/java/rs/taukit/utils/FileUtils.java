@@ -13,18 +13,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static rs.taukit.utils.BasicUtils.testContext;
+import static rs.taukit.utils.BasicUtils.scenario;
 
 public class FileUtils {
     @Step("переименовать файл '{fileName}' в '{newFileName}'")
     public static void saveDownloadedFileAs(String fileName, String newFileName) {
         String originalFilePath = String.format("%s/%s/%s",
                 Config.getProperty("downloads.dir"),
-                testContext().getScenarioName(),
+                scenario().getName(),
                 fileName);
         String filePath = String.format("%s/%s/%s",
                 Config.getProperty("downloads.dir"),
-                testContext().getScenarioName(),
+                scenario().getName(),
                 newFileName);
         File file = new File(originalFilePath);
         File destinationFile = new File(filePath);
@@ -88,7 +88,7 @@ public class FileUtils {
     }
 
     public static String getDownloadFilePath() {
-        String childDirName = BasicUtils.testContext().getScenarioName().trim();
+        String childDirName = scenario().getName();
         while (childDirName.endsWith(".")) {
             childDirName = childDirName.substring(0, childDirName.length() - 1);
         }

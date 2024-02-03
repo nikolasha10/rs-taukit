@@ -5,7 +5,6 @@ import org.testng.ISuite;
 import org.testng.ISuiteListener;
 import org.testng.xml.XmlSuite;
 import rs.taukit.config.Config;
-import rs.taukit.driver.DriverManager;
 
 import java.util.Map;
 
@@ -25,14 +24,7 @@ public class SuiteListener implements ISuiteListener {
 
     @Override
     public void onFinish(ISuite suite) {
-//        if (StorageManager.getInstance().haveMilestonePassed("test", "test")){
-//            DriverManager.getInstance().closeDrivers();
-//            MDC.remove("logName");
-//        } else {
-//            StorageManager.getInstance().setMilestone("test", "test", "test");
-//            suite.run();
-//        }
-        DriverManager.getInstance().closeDrivers();
+//        storage.getScenarioList().forEach(scenario -> scenario.getScenarioStorage().getDriverManager().close());
         MDC.remove("logName");
     }
 

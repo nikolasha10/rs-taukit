@@ -1,7 +1,6 @@
 package rs.taukit.step.allure;
 
 import io.cucumber.datatable.DataTable;
-import io.cucumber.testng.Pickle;
 import io.qameta.allure.Step;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -12,7 +11,6 @@ import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.playwright.PwList;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.testdata.ExpectedResult;
-import rs.taukit.testdata.ScenarioData;
 import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
@@ -21,7 +19,8 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 import java.util.stream.IntStream;
@@ -33,11 +32,7 @@ import java.util.stream.IntStream;
 public class AllureBasicStep extends BasicUtils {
     @Step("определить значения тестовых параметров")
     public static void testParameterInit() {
-        Pickle pickle = testContext().getPickle();
-        ScenarioData scenarioData = new ScenarioData(pickle);
-        scenarioData.getAttachments().forEach(TauLogger::attach);
-        testContext().setScenarioData(scenarioData);
-        scenarioData.put("Адрес стенда", Config.getSTAND().getUrl());
+        scenarioStorage().getScenarioData().getAttachments().forEach(TauLogger::attach);
     }
 
     @Step("нажать на {elementType} '{elementName}'")
@@ -47,7 +42,7 @@ public class AllureBasicStep extends BasicUtils {
         } catch (Exception e) {
             TauLogger.fail(e, "Не удалось нажать на кнопку \"%s\"", elementName);
         }
-        testContext().saveStepAction(() -> element(elementName).click());
+        scenarioStorage().saveStepAction(() -> element(elementName).click());
         TauLogger.report("Нажали на %s \"%s\"", elementType, elementName);
     }
 
@@ -81,7 +76,7 @@ public class AllureBasicStep extends BasicUtils {
         double elementCheckInterval = Config.getTimeProperty("element.check.interval");
         double elementCheckTimeout = Config.getTimeProperty("element.check.timeout");
         try {
-            driver().waitForCondition(conditions, elementCheckInterval, elementCheckTimeout, testContext().getStepActions());
+            driver().waitForCondition(conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage().getStepActions());
         } catch (Exception e) {
             if (e instanceof AutoTestBrokenException) throw e;
             ExpectedResult firstUnexpectedResult = dataTable.asMaps().stream()
@@ -103,8 +98,8 @@ public class AllureBasicStep extends BasicUtils {
             }
         }
         TauLogger.report("Условия выполнены");
-        testContext().clearStepActions();
-        testContext().stopToSaveActions();
+        scenarioStorage().clearStepActions();
+        scenarioStorage().stopToSaveActions();
     }
 
     @Step("сравнить файл \"(.+)\" с эталоном \"(.+)\"")
@@ -208,15 +203,15 @@ public class AllureBasicStep extends BasicUtils {
     @Step("[примечание] текущий контекст: блок '{blockName}'")
     public static void setBlockContext(String blockName) {
         page().setCurrentContext(blockName);
-        testContext().setCurrentContextName("блок \"%s\"", blockName);
-        TauLogger.console("[примечание] текущий контекст: %s", testContext().getCurrentContextName());
+        scenarioStorage().setCurrentContextName("блок \"%s\"", blockName);
+        TauLogger.console("[примечание] текущий контекст: %s", scenarioStorage().getCurrentContextName());
     }
 
     public static void setCurrentPageContext() {
         page().setCurrentContext(null);
-        testContext().saveStepAction(() -> page().setCurrentContext(null));
-        testContext().setCurrentContextName("страница \"%s\"", testContext().getCurrentPageName());
-        TauLogger.report("[примечание] текущий контекст: страница \"%s\"", testContext().getCurrentPageName());
+        scenarioStorage().saveStepAction(() -> page().setCurrentContext(null));
+        scenarioStorage().setCurrentContextName("страница \"%s\"", scenarioStorage().getCurrentPageName());
+        TauLogger.report("[примечание] текущий контекст: страница \"%s\"", scenarioStorage().getCurrentPageName());
     }
 
     @Step("[примечание] текущий контекст: блок '{blockName}'")
@@ -228,9 +223,9 @@ public class AllureBasicStep extends BasicUtils {
     public static void closeCurrentContext(boolean haveToReport) {
         IElement currentBlock = page().dropCurrentContext();
         String currentContext = currentBlock == null
-                ? String.format("страница \"%s\"", testContext().getCurrentPageName())
+                ? String.format("страница \"%s\"", scenarioStorage().getCurrentPageName())
                 : String.format("блок \"%s\"", currentBlock.getElementName());
-        testContext().setCurrentContextName(currentContext);
+        scenarioStorage().setCurrentContextName(currentContext);
         if (haveToReport) {
             TauLogger.report("* текущий контекст: %s", currentContext);
         }
@@ -240,11 +235,11 @@ public class AllureBasicStep extends BasicUtils {
     public static void waitForElement(String elementType, String elementName) {
         try {
             page().waitForElement(elementName, true);
-            testContext().saveStepAction(() -> page().waitForElement(elementName, true));
+            scenarioStorage().saveStepAction(() -> page().waitForElement(elementName, true));
             TauLogger.report("Дождались отображения %s \"%s\"", elementType, elementName);
         } catch (Exception e) {
             TauLogger.fail(e, "Не удалось дождаться отображения %s \"%s\" на странице \"%s\"",
-                    elementType, elementName, testContext().getCurrentPageName());
+                    elementType, elementName, scenarioStorage().getCurrentPageName());
         }
     }
 
@@ -252,7 +247,7 @@ public class AllureBasicStep extends BasicUtils {
     public static void listValueClick(String listName, String listValue) {
         PwList pwList = element(listName).castTo(PwList.class);
         pwList.setValue(eval(listValue));
-        testContext().saveStepAction(() -> pwList.setValue(eval(listValue)));
+        scenarioStorage().saveStepAction(() -> pwList.setValue(eval(listValue)));
         TauLogger.report("в списке \"%s\" выбран \"%s\"", listName, listValue);
     }
 }
