@@ -17,7 +17,7 @@
   основной документ: нет
   скан документа:
     тип: файл
-    путь: src/test/efr/resources/files/Паспорт.jpg
+    путь: src/test/resources/files/Паспорт.jpg
 
 - подраздел: Контакты
   e-mail: ivan@autotest.ru

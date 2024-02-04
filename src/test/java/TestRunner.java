@@ -24,7 +24,7 @@ import static rs.taukit.utils.BasicUtils.storage;
  * значение которого задаёт путь к сценариям текущего проекта.
  */
 @CucumberOptions(
-        features = "src/test/efr/resources/scenarios"
+        features = "src/test/resources/scenarios"
 )
 @Listeners({SuiteListener.class, SimpleInvokedMethodListener.class})
 public class TestRunner {

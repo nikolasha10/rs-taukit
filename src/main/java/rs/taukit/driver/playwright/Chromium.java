@@ -24,14 +24,13 @@ public class Chromium extends PwBrowser {
 
     @Override
     protected Browser launch(BrowserType browserType) {
-        String browserExtensionPath = new File("browserExtensions/chromium").getAbsolutePath();
+        String browserExtensionPath = new File(Config.getProperty("browser.extensions") + "/chromium").getAbsolutePath();
         List<String> args = Arrays.asList(
                 "--load-extension=" + browserExtensionPath,
                 "--disable-extensions-except=" + browserExtensionPath,
                 "--embedded-extension-options=true");
         return browserType.launch(new BrowserType.LaunchOptions().setArgs(args)
                 .setHeadless(Config.getBooleanProperty("browser.headless")));
-
     }
 
     @Override

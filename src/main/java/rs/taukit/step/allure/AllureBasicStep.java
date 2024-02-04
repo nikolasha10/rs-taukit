@@ -106,13 +106,13 @@ public class AllureBasicStep extends BasicUtils {
     public static void validatePrintForm() {
         String printFormName = "Анкета-заявление на предоставление кредита (односторонняя)";
         try {
-            Files.createDirectories(new File(String.format("src/test/efr/resources/templates/%s", printFormName)).toPath());
+            Files.createDirectories(new File(String.format("src/test/resources/templates/%s", printFormName)).toPath());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         File file = new File(String.format("target/downloads/01.02 Отладка сравнения печатных форм/%s.pdf", printFormName));
         File fileResult = new File(String.format("target/downloads/01.02 Отладка сравнения печатных форм/%s после преобразования.pdf", printFormName));
-        File fileTemplate = new File(String.format("src/test/efr/resources/templates/%s.txt", printFormName));
+        File fileTemplate = new File(String.format("src/test/resources/templates/%s.txt", printFormName));
         List<String> templateLineList = new ArrayList<>();
         AtomicInteger index = new AtomicInteger(0);
         if (fileTemplate.exists()) {
@@ -128,7 +128,7 @@ public class AllureBasicStep extends BasicUtils {
                 PDPage page = tree.get(pageIndex);
                 List<PDStream> pdStreamList = new ArrayList<>();
                 page.getContentStreams().forEachRemaining(pdStream -> {
-                    File fileTemplatePage = new File(String.format("src/test/efr/resources/templates/%s/page_%d.txt", printFormName, pageIndex + 1));
+                    File fileTemplatePage = new File(String.format("src/test/resources/templates/%s/page_%d.txt", printFormName, pageIndex + 1));
                     List<String> templatePageLineList = new ArrayList<>();
                     if (fileTemplatePage.exists()) {
                         try {

@@ -186,7 +186,7 @@
                         -Dfile.encoding=UTF-8
                     </argLine>
                     <suiteXmlFiles>
-                        <suiteXmlFile>src/test/efr/resources/${suite.XmlFile}</suiteXmlFile>
+                        <suiteXmlFile>src/test/resources/${suite.XmlFile}</suiteXmlFile>
                     </suiteXmlFiles>
                 </configuration>
                 <dependencies>

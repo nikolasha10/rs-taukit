@@ -19,7 +19,6 @@ public class AllureBasicBrowserStep extends BasicUtils {
 
     @Step("открыть браузер")
     public void openBrowser() {
-        TauLogger.console("driver.getCurrentBrowserIndex(): %d", driver.getCurrentBrowserIndex());
         if (!driver.isBrowserOpen()) {
             driver.openBrowser();
         }

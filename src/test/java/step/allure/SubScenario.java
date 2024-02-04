@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 import static rs.taukit.utils.BasicUtils.*;
 
 @CucumberOptions(
-        features = "src/test/efr/resources/scenarioFragments",
+        features = "src/test/resources/scenarioFragments",
         glue = {"rs.taukit.step", "step"}
 )
 public class SubScenario {

@@ -17,7 +17,6 @@ public class SimpleInvokedMethodListener implements IInvokedMethodListener {
         }
         int startedCount = storage.getScenarioList().stream().filter(CucumberScenario::isStarted).toList().size();
         int maxThreadCount = context.getSuite().getXmlSuite().getDataProviderThreadCount();
-        TauLogger.console("maxThreadCount: %d, startedCount: %d", maxThreadCount, startedCount);
         if (startedCount < maxThreadCount && !storage.getScenarioList().isEmpty()) {
             context.getSuite().run();
         }

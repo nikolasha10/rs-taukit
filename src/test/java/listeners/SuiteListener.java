@@ -14,7 +14,7 @@ public class SuiteListener implements ISuiteListener {
         XmlSuite xmlSuite = suite.getXmlSuite();
         Map<String, String> parameters = xmlSuite.getAllParameters();
         if (parameters.isEmpty() || !parameters.containsKey("started")) {
-            Config.init("src/test/efr/resources/configs");
+            Config.init("src/test/resources/configs");
             int threadCount = Integer.parseInt(Config.getProperty("threadCount"));
             xmlSuite.setDataProviderThreadCount(threadCount);
             parameters.put("started", "true");

@@ -5,7 +5,7 @@
   Меню вкладок:
     Тип: общий блок
     Описание: Меню вкладок страницы 'Клиенты'
-    Файл: src/test/efr/resources/pages/commonBlocks/Общие блоки.yaml
+    Файл: src/test/resources/pages/commonBlocks/Общие блоки.yaml
   Текущий пункт меню: //a[@class='active' and @data-id='client-view']
   ИНН: //span[text()='ИНН']/following::div[@class='field-value'][1]
 Обязательные элементы:
