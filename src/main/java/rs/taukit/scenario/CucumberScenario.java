@@ -73,9 +73,7 @@ public class CucumberScenario {
         Config.getDependencies().changeStatus(tagList, testStatus.toLowerCase());
         TauLogger.console("TEST %s: %s %s", testStatus, functionality, name);
         AllureReport.editReports(name, functionality, endMillis);
-        TauLogger.console("Отчеты Allure отредактированы");
         TauLogger.collectLogs();
-        TauLogger.console("Логи собраны");
     }
 
     public boolean hasEqualName(PickleWrapper pickleWrapper, FeatureWrapper featureWrapper) {

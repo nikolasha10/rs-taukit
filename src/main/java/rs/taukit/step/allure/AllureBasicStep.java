@@ -68,8 +68,7 @@ public class AllureBasicStep extends BasicUtils {
 
     public static void waitForConditions(DataTable dataTable) {
         TauLogger.attachDataTable("Ожидаемый результат", dataTable);
-        TauLogger.console("Ожидается выполнение условий");
-        System.out.println(dataTable);
+        TauLogger.console("Ожидается выполнение условий", dataTable);
         BooleanSupplier conditions = () -> dataTable.asMaps().stream()
                 .map(data -> new ExpectedResult(data).waitForResult())
                 .allMatch(ExpectedResult::isConditionMet);

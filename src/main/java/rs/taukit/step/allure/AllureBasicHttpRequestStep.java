@@ -128,8 +128,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         scenarioStorage().saveStepAction(runnable);
         DataTable parsedValuesTable = DataTable.create(parsedValues, TextUtils.tableConverter);
         TauLogger.attachDataTable("Полученные значения", parsedValuesTable);
-        TauLogger.console("Получены значения:");
-        System.out.println(parsedValuesTable);
+        TauLogger.console("Получены значения:", parsedValuesTable);
     }
 
 

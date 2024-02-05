@@ -62,7 +62,7 @@ public class AllureBasicTableStep extends BasicUtils {
     public void saveTableRowElementValue(DataTable dataTable) {
         DataTable resultTable = tableElement.tableRowSaveElementValues(dataTable);
         TauLogger.attachDataTable("Значения элементов", resultTable);
-        System.out.println(resultTable);
+        TauLogger.console("Сохранены значения элементов", resultTable);
     }
 
     @Step("в найденной строке нажать на '{elementName}'")
@@ -76,8 +76,7 @@ public class AllureBasicTableStep extends BasicUtils {
     @Step("в таблице '{this.tableName}' дождаться строки, соответствующей условиям")
     public void waitForTableConditions(DataTable dataTable) {
         TauLogger.attachDataTable("Условия поиска строки", dataTable);
-        TauLogger.console("В таблице \"%s\" ожидается появление строки, соответствующей условиям:", tableName);
-        System.out.println(dataTable);
+        TauLogger.console("В таблице \"%s\" ожидается появление строки, соответствующей условиям:", tableName, dataTable);
         BooleanSupplier conditions = () -> {
             try {
                 tableElement.findRowByConditions(dataTable);

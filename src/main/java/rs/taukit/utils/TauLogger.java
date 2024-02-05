@@ -14,6 +14,7 @@ import rs.taukit.testdata.TestDataFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -28,25 +29,42 @@ public final class TauLogger {
 
     @Step("{0}")
     public static void report(String message) {
-        logger.info(message.replaceAll("\n", "↵"));
+        logger.info(message);
+    }
+    @Step("{0}")
+    public static void report(String message, DataTable dataTable) {
+        logger.info(String.format("%s%n%s", message, dataTable));
     }
 
     public static void report(String format, Object... args) {
-        String message = String.format(format, args);
-        report(message);
+        String message;
+        if (Arrays.stream(args).toList().getLast() instanceof DataTable dataTable){
+            message = String.format(format, Arrays.stream(args).toList().subList(0, args.length - 1).toArray());
+            report(message, dataTable);
+        } else {
+            message = String.format(format, args);
+            report(message);
+        }
     }
 
     /**
      * Выводит информационное сообщение только в лог, но не в Allure отчет
      *
-     * @param message
+     * @param message сообщение выводимое в лог
      */
     public static void console(String message) {
         logger.info(message);
     }
 
     public static void console(String format, Object... args) {
-        String message = String.format(format, args);
+        String message;
+        if (Arrays.stream(args).toList().getLast() instanceof DataTable dataTable){
+            String realFormat = format + "%n%s";
+            args[args.length-1] = String.valueOf(dataTable);
+            message = String.format(realFormat, args);
+        } else {
+            message = String.format(format, args);
+        }
         console(message);
     }
 

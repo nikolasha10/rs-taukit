@@ -35,8 +35,7 @@ public class AllureBasicDataBaseStep extends BasicUtils {
             String rowsUpdated = rowCount >= 0 ? " Обновлено строк: " + rowCount : "";
             TauLogger.report("В базе данных \"%s\" выполнен sql-скрипт из файла \"%s\".%s",
                     dataBaseName, sqlFileName, rowsUpdated);
-            System.out.println("Параметры sql-скрипта:");
-            System.out.println(dataTable);
+            TauLogger.console("Параметры sql-скрипта:", dataTable);
         } catch (SQLException e) {
             throw new DBExecuteSqlException(e, dataBaseName, sqlFileName);
         }

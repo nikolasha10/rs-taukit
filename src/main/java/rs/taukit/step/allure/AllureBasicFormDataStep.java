@@ -55,8 +55,7 @@ public class AllureBasicFormDataStep {
                 element.setValue(value, control);
             }
         });
-        TauLogger.report("Поля формы заполнены значениями из таблицы");
-        System.out.println(dataTable);
+        TauLogger.report("Поля формы заполнены значениями из таблицы", dataTable);
     }
 
     private void fillFormBlockAction(String blockName, int blockNumber) {
@@ -90,11 +89,10 @@ public class AllureBasicFormDataStep {
             }
         });
         if (blockNumber == 1) {
-            TauLogger.report("Поля блока \"%s\" заполнены значениями из таблицы:", blockName);
+            TauLogger.report("Поля блока \"%s\" заполнены значениями из таблицы:", blockName, dataTable);
         } else {
-            TauLogger.report("Поля блока \"%s\" (%d) заполнены значениями из таблицы:", blockName, blockNumber);
+            TauLogger.report("Поля блока \"%s\" (%d) заполнены значениями из таблицы:", blockName, blockNumber, dataTable);
         }
-        System.out.println(dataTable);
     }
 
     @Step("заполнить поля формы в блоке '{blockName}' значениями:")

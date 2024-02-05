@@ -47,11 +47,12 @@ public class Config {
         try {
             InputStream configInputStream = new FileInputStream(filePath);
             properties.load(configInputStream);
+            if (!required){
+                TauLogger.console("[примечание] установлены значения параметров из файла \"%s\"", filePath);
+            }
         } catch (IOException e) {
             if (required) {
                 throw new ConfigFileNotFoundException(e, filePath);
-            } else {
-                TauLogger.console("Не удалось найти или обработать файл \"%s\"", filePath);
             }
         }
     }
