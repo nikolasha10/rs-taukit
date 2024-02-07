@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static rs.taukit.utils.BasicUtils.driver;
+
 @Getter
 public abstract class PwBrowser implements IWebBrowser {
     protected final List<PlaywrightPageObject> pages = new ArrayList<>();
@@ -103,7 +105,14 @@ public abstract class PwBrowser implements IWebBrowser {
 
     @Override
     public void navigate(String url) {
-        getPage().navigate(url);
+        driver().waitForCondition(() -> {
+            try {
+                getPage().navigate(url);
+                return true;
+            } catch (Exception e){
+                return false;
+            }
+        });
     }
 
     @Override

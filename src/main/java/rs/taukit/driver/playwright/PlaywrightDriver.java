@@ -8,6 +8,7 @@ import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.utils.TauLogger;
+import rs.taukit.utils.TimeStringParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,7 +92,8 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public void waitForCondition(BooleanSupplier condition) {
-        waitForCondition(condition, 30000);
+        double timeout = TimeStringParser.getTime(Config.getProperty("element.check.timeout"));
+        waitForCondition(condition, timeout);
     }
 
     @Override
