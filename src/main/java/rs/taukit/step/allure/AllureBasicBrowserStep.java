@@ -82,13 +82,13 @@ public class AllureBasicBrowserStep extends BasicUtils {
     @Step("дождаться отображения страницы \"{pageName}\" в новой вкладке")
     public void waitForPageLoadNewTab(String pageName) {
         IWebBrowser browser = driver().getCurrentBrowser();
-        int activeTabIndex = browser.getActiveTabIndex();
+        int activeTabIndex = browser.getActiveTabIndex() + 1;
         try {
-            driver().waitForCondition(() -> browser.setActiveTab(activeTabIndex + 1));
+            driver().waitForCondition(() -> browser.setActiveTab(activeTabIndex));
         } catch (Exception e) {
             TauLogger.fail(e, "Не удалось дождаться открытия новой вкладки браузера");
         }
-        TauLogger.report("Открыта вкладка %d", browser.getActiveTabIndex() + 1);
+        TauLogger.report("Открыта вкладка %d", browser.getActiveTabIndex());
         browser.getPage(pageName).waitForLoad();
         TauLogger.report("Отображается страница \"%s\"", pageName);
 
