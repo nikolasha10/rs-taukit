@@ -74,7 +74,7 @@ public class Config {
     }
 
     public static Boolean getBooleanProperty(String propertyName) {
-        return Boolean.getBoolean(getProperty(propertyName));
+        return Boolean.parseBoolean(getProperty(propertyName));
     }
 
     public static int getIntegerProperty(String propertyName) {
