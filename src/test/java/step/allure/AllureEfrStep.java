@@ -145,4 +145,21 @@ public class AllureEfrStep extends AllureBasicStep {
         EfrUtils.runScenario(null, scenarioName);
     }
 
+    @Step("сформировать новую заявку по операции \"{operationName}\"")
+    public static void createNewApplication(String operationName) {
+        scenarioStorage().setSavedPageName(scenarioStorage().getCurrentPageName());
+        driver().getCurrentBrowser().getPage("Модальное окно");
+        try {
+            page().waitForLoadAndContinue(Config.getTimeProperty("element.check.interval"));
+            if (page().getElement("Заголовок").getText().equals(operationName)) {
+                TauLogger.report("отображается всплывающее окно '%s'", operationName);
+                AllureBasicStep.clickElement("кнопку", "Сформировать новую заявку");
+                page().waitForClose();
+                TauLogger.report("закрыто всплывающее окно '%s'", operationName);
+            }
+        } catch (Exception e) {
+//            TauLogger.warn(e, e.getMessage());
+            TauLogger.report("Незавершенные заявки по данной операции отсутствуют");
+        }
+    }
 }

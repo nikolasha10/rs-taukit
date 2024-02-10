@@ -31,6 +31,8 @@ public class TestRunner {
     private final TestNGCucumberRunner runner = new TestNGCucumberRunner(this.getClass());
 
     /**
+     * DataProvider - при запуске тестов автоматически формирует данные для запуска метода runByTag.
+     *
      * @return двумерный массив объектов, содержащий данные для запуска сценариев,
      * * отмеченных тегами, переданными в параметре запуска <i>scenario.tags</i>
      */
@@ -75,9 +77,7 @@ public class TestRunner {
      */
     @Test(dataProvider = "getScenariosByTags")
     public void runByTag(PickleWrapper pickleWrapper, FeatureWrapper cucumberFeature) {
-        storage.putScenario(storage.getScenario(pickleWrapper, cucumberFeature));
-        storage.getScenario().onStart();
-        runner.runScenario(pickleWrapper.getPickle());
+        storage.putScenario(storage.getScenario(pickleWrapper, cucumberFeature)).onStart(runner);
     }
 
     @AfterMethod()

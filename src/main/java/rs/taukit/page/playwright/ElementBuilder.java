@@ -26,8 +26,15 @@ public class ElementBuilder {
         return result;
     }
 
-    public static IElement buildElement(String elementName, String locator) {
-        return new PwTextField(elementName, locator);
+    /**
+     * Метод, создающий объект простого элемента
+     *
+     * @param elementName название элемента
+     * @param selector    селектор элемента (xpath или data-id)
+     * @return объект класса, наследующего IElement
+     */
+    public static IElement buildElement(String elementName, String selector) {
+        return new PwTextField(elementName, selector);
     }
 
     public static IElement buildElement(String elementName, PwElement element, Locator locator) {

@@ -13,9 +13,9 @@ import static rs.taukit.utils.BasicUtils.driver;
 @SuppressWarnings("unchecked")
 public abstract class Element implements IElement {
     protected final String elementName;
-    protected final String locator;
     protected final IWebDriver driver = driver();
-    protected final ElementModel model;
+    protected String locator;
+    protected ElementModel model;
 
     public Element(String elementName, String locator) {
         this(elementName, new LinkedHashMap<>(Map.of("Локатор", locator)));

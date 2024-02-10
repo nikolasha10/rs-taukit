@@ -11,6 +11,10 @@ public class CucumberBasicDataBaseStep {
         return new AllureBasicDataBaseStep(dataBaseName);
     }
 
+    @И("^в базе данных \"(.+)\" выполнить sql-скрипт из файла \"(.+)\"$")
+    public void runSqlScriptFromFile(String dataBaseName, String sqlFileName) {
+        dataBaseStep(dataBaseName).execute(sqlFileName);
+    }
     @И("^в базе данных \"(.+)\" выполнить sql-скрипт из файла \"(.+)\" с параметрами:$")
     public void runSqlScriptFromFile(String dataBaseName, String sqlFileName, DataTable dataTable) {
         dataBaseStep(dataBaseName).execute(sqlFileName, eval(dataTable));

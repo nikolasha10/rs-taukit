@@ -20,6 +20,7 @@ public class ElementModel {
     public <T> T get(String option) {
         return YamlParser.convert(TestDataUtils.get(options, option));
     }
+
     public <T> T getOrDefault(String option, T defaultValue) {
         return YamlParser.convert(Optional.ofNullable(TestDataUtils.getOptional(options, option)).orElse(defaultValue));
     }
@@ -31,9 +32,9 @@ public class ElementModel {
             if (required) throw e;
             return null;
         }
-
     }
-    public String getType(){
+
+    public String getType() {
         return options.containsKey("тип") ? get("тип") : "";
     }
 

@@ -34,4 +34,9 @@ public class CucumberEfrStep {
         Menu menu = new Menu(menuName);
         menu.selectMenuItem(itemName);
     }
+
+    @И("^сформировать новую заявку по операции \"(.+)\"$")
+    public void createNewApplication(String operationName){
+        AllureEfrStep.createNewApplication(operationName);
+    }
 }

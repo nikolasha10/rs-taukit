@@ -18,6 +18,8 @@ public interface PageObject {
 
     void waitForLoad();
 
+    void waitForLoadAndContinue(double timeout);
+
     void waitForClose();
 
     byte[] takeScreenshot();
@@ -35,6 +37,8 @@ public interface PageObject {
     IHasBlockElements getCurrentContext();
 
     void setCurrentContext(String blockName);
+
+    void replaceCurrentContext(IHasBlockElements blockElements);
 
     IElement dropCurrentContext();
 

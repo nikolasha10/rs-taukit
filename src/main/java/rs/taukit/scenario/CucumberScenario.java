@@ -2,6 +2,7 @@ package rs.taukit.scenario;
 
 import io.cucumber.testng.FeatureWrapper;
 import io.cucumber.testng.PickleWrapper;
+import io.cucumber.testng.TestNGCucumberRunner;
 import lombok.Getter;
 import lombok.Setter;
 import rs.taukit.config.Config;
@@ -43,7 +44,7 @@ public class CucumberScenario {
 
     public boolean isWaitingForDependency() {
         return !dependencyMap.isEmpty() && dependencyMap.entrySet().stream()
-                .allMatch(entry -> Config.getDependencies().checkStatus(entry.getValue(), entry.getKey()));
+                .anyMatch(entry -> Config.getDependencies().checkStatus(entry.getValue(), entry.getKey()));
     }
 
     public boolean isReadyForStart() {
@@ -59,11 +60,12 @@ public class CucumberScenario {
         return functionalityName.substring(1, functionalityName.length() - 1);
     }
 
-    public void onStart() {
+    public void onStart(TestNGCucumberRunner runner) {
         TauLogger.setLogPath(functionality, name);
         started = true;
         System.out.println();
         TauLogger.console("TEST STARTED: %s %s", featureWrapper, name);
+        runner.runScenario(getPickleWrapper().getPickle());
     }
 
     public void onFinish(int statusCode, long endMillis) {

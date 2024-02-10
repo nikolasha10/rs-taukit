@@ -31,6 +31,7 @@ public final class TauLogger {
     public static void report(String message) {
         logger.info(message);
     }
+
     @Step("{0}")
     public static void report(String message, DataTable dataTable) {
         logger.info(String.format("%s%n%s", message, dataTable));
@@ -38,7 +39,7 @@ public final class TauLogger {
 
     public static void report(String format, Object... args) {
         String message;
-        if (Arrays.stream(args).toList().getLast() instanceof DataTable dataTable){
+        if (Arrays.stream(args).toList().getLast() instanceof DataTable dataTable) {
             message = String.format(format, Arrays.stream(args).toList().subList(0, args.length - 1).toArray());
             report(message, dataTable);
         } else {
@@ -58,9 +59,9 @@ public final class TauLogger {
 
     public static void console(String format, Object... args) {
         String message;
-        if (Arrays.stream(args).toList().getLast() instanceof DataTable dataTable){
+        if (Arrays.stream(args).toList().getLast() instanceof DataTable dataTable) {
             String realFormat = format + "%n%s";
-            args[args.length-1] = String.valueOf(dataTable);
+            args[args.length - 1] = String.valueOf(dataTable);
             message = String.format(realFormat, args);
         } else {
             message = String.format(format, args);
@@ -74,7 +75,7 @@ public final class TauLogger {
     public static void collectLogs() {
         if (!logger.getName().equalsIgnoreCase("scenarioLog")) return;
         Logger consoleLogger = LoggerFactory.getLogger("collectLogs");
-        String logPath = String.format("%s.log", MDC.get("logName"));
+        String logPath = String.format("%s.log", MDC.get("logName").replaceAll("\"", "_"));
         File file = new File(logPath);
         try {
             consoleLogger.info(Files.readString(file.toPath()));
@@ -222,7 +223,7 @@ public final class TauLogger {
      */
     public static void setLogPath(String functionality, String scenarioName) {
         String logPath = Config.getProperty("logger.default.logPath");
-        String logName = String.format("%s/%s/%s", logPath, functionality, scenarioName);
+        String logName = String.format("%s/%s/%s", logPath, functionality, scenarioName.replaceAll("\"", "_"));
         MDC.put("logName", logName);
     }
 

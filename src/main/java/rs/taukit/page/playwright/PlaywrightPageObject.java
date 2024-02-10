@@ -11,6 +11,7 @@ import rs.taukit.exceptions.PageFragmentNotFoundException;
 import rs.taukit.exceptions.PageNotClosedException;
 import rs.taukit.exceptions.PageNotLoadException;
 import rs.taukit.page.PageObject;
+import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TimeStringParser;
 import rs.taukit.utils.YamlParser;
 
@@ -92,6 +93,10 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     public void waitForLoadAndContinue() {
+        waitForLoadAndContinue(pageTimeout);
+    }
+
+    public void waitForLoadAndContinue(double pageTimeout) {
         BooleanSupplier waitCondition = () -> isUrlCorrect() && hasPageAllExpectedElements();
         this.options = new Page.WaitForConditionOptions().setTimeout(pageTimeout);
         page.waitForCondition(waitCondition, options);
@@ -163,6 +168,12 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     @Override
+    public void replaceCurrentContext(IHasBlockElements blockElements) {
+        dropCurrentContext();
+        this.currentContext.add(blockElements);
+    }
+
+    @Override
     public IHasBlockElements dropCurrentContext() {
         this.currentContext.pollLast();
         return this.currentContext.peekLast();
@@ -202,6 +213,11 @@ public class PlaywrightPageObject implements PageObject {
 
     @Override
     public IElement getElement(String elementName) {
+        try {
+            BasicUtils.driver().waitForCondition(() -> findElement(getCurrentContext(), elementName) != null);
+        } catch (Exception ignored) {
+            // ignored
+        }
         return Optional.ofNullable(findElement(getCurrentContext(), elementName))
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
     }
@@ -224,7 +240,14 @@ public class PlaywrightPageObject implements PageObject {
                 .map(element -> element.castTo(IHasBlockElements.class))
                 .toList();
         for (IHasBlockElements blockElement : blockElementsList) {
-            IElement foundElement = findElement(blockElement, elementName);
+            IHasBlockElements newContext = blockElement;
+            if (context != null) {
+                if (context.getElementByName(blockElement.getElementName()) == null) {
+                    return null;
+                }
+                newContext = context.getElementByName(blockElement.getElementName()).castTo(IHasBlockElements.class);
+            }
+            IElement foundElement = findElement(newContext, elementName);
             if (foundElement != null) return foundElement;
         }
         return null;
@@ -232,6 +255,11 @@ public class PlaywrightPageObject implements PageObject {
 
     @Override
     public IElement replaceElement(String elementName, Class<? extends IElement> elementType) {
+        try {
+            BasicUtils.driver().waitForCondition(() -> findElement(getCurrentContext(), elementName) != null);
+        } catch (Exception ignored) {
+            // ignored
+        }
         IElement currentElement = Optional.ofNullable(findElement(getCurrentContext(), elementName))
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
         if (getCurrentContext() == null && pageElements.containsKey(elementName)) {

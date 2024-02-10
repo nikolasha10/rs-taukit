@@ -7,6 +7,8 @@ import rs.taukit.config.Config;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.YamlParser;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,8 @@ public class ScenarioData {
 
     private List<Map<String, ?>> getFeatureData(String featurePath) {
         String featureDataPath = featurePath.replace("feature", "yaml");
-        return YamlParser.parse(featureDataPath);
+        File featureDataFile = new File(featureDataPath);
+        return featureDataFile.exists() ? YamlParser.parse(featureDataPath) : new ArrayList<>();
     }
 
     private Map<String, ?> getScenarioData(List<Map<String, ?>> featureData) {

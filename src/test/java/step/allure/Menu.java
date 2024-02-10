@@ -5,6 +5,9 @@ import rs.taukit.element.playwright.PwMenu;
 import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
 
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
+
 public class Menu extends BasicUtils {
     private final String menuName;
     private final PwMenu menu;
@@ -16,9 +19,26 @@ public class Menu extends BasicUtils {
 
     @Step("Через '{this.menuName}' перейти на страницу '{pageName}'")
     public void selectMenuItem(String pageName) {
-        menu.selectMenuItem(pageName);
-        TauLogger.report("В меню \"%s\" выбран пункт \"%s\"", menuName, pageName);
-        driver().getCurrentBrowser().getPage(pageName).waitForLoad();
-        TauLogger.report("Отображается страница \"%s\"", pageName);
+        AtomicReference<Exception> exceptionAtomicReference = new AtomicReference<>();
+        BooleanSupplier supplier = () -> {
+            try {
+                menu.selectMenuItem(pageName);
+                return true;
+            } catch (Exception e){
+                exceptionAtomicReference.set(e);
+                return false;
+            }
+        };
+        try {
+            driver().waitForCondition(supplier);
+            TauLogger.report("В меню \"%s\" выбран пункт \"%s\"", menuName, pageName);
+            driver().getCurrentBrowser().getPage(pageName).waitForLoad();
+            TauLogger.report("Отображается страница \"%s\"", pageName);
+        } catch (Exception e){
+            if (exceptionAtomicReference.get() != null){
+                e.addSuppressed(exceptionAtomicReference.get());
+            }
+            TauLogger.fail(e,"Не удалось выбрать пункт '%s' в меню '%s'", pageName, menuName);
+        }
     }
 }

@@ -31,8 +31,8 @@ public class PwElement extends Element {
         this.element = getPwLocator(locator);
     }
 
-    public PwElement(String elementName, String locator) {
-        this(elementName, new ElementModel(Map.of("Локатор", locator)));
+    public PwElement(String elementName, String selector) {
+        this(elementName, new ElementModel(Map.of("локатор", selector)));
     }
 
     public PwElement(String elementName, LinkedHashMap<String, Object> elementData) {

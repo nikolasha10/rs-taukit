@@ -25,6 +25,20 @@ public class AllureBasicDataBaseStep extends BasicUtils {
     }
 
     @Step("в базе данных '{this.dataBaseName}' выполнить sql-скрипт из файла '{sqlFileName}'")
+    public void execute(String sqlFileName) {
+        String sqlScript = eval(FileUtils.readFile(Config.getProperty("sql.files.dir") + sqlFileName));
+        TauLogger.attach("sql-скрипт", sqlScript);
+        try {
+            int rowCount = dbDriver.execute(sqlScript);
+            String rowsUpdated = rowCount >= 0 ? " Обновлено строк: " + rowCount : "";
+            TauLogger.report("В базе данных \"%s\" выполнен sql-скрипт из файла \"%s\".%s",
+                    dataBaseName, sqlFileName, rowsUpdated);
+        } catch (SQLException e) {
+            throw new DBExecuteSqlException(e, dataBaseName, sqlFileName);
+        }
+    }
+
+    @Step("в базе данных '{this.dataBaseName}' выполнить sql-скрипт из файла '{sqlFileName}'")
     public void execute(String sqlFileName, DataTable dataTable) {
         TauLogger.attachDataTable("Параметры sql-скрипта", dataTable);
         scenarioStorage().getScenarioData().put(dataTable);

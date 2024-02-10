@@ -10,8 +10,8 @@ import java.util.LinkedHashMap;
 import static rs.taukit.utils.BasicUtils.page;
 
 public class PwTextField extends PwElement implements IHasEditableValue {
-    public PwTextField(String elementName, String locator) {
-        super(elementName, locator);
+    public PwTextField(String elementName, String selector) {
+        super(elementName, selector);
     }
 
     public PwTextField(String elementName, LinkedHashMap<String, Object> elementData) {

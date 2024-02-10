@@ -63,10 +63,10 @@
         тип: блок элементов
         локатор: //a[@class='active' and @data-id='bank-decision-credit-tab']/following::div[@class='tab-content']
         элементы:
-          Создать КОД: success
           Отказ: refuse
           Подтвердить: //span[text()='Подтвердить']/..
           Вернуть: revert
+      Создать КОД: success
   Параметры выдачи:
     тип: блок элементов
     локатор: issuance-params
@@ -207,7 +207,9 @@
             локатор: select-form-field-militaryServiceRelation
             элементы: //div[@role='option']
             значение: //span[@role='option' and @aria-selected='true']
-          Продолжить: continue
+      Продолжить: continue
+      Сохранить: save
+      Отказ: refuse
   Документы:
     тип: блок элементов
     локатор: credit-document-id
@@ -325,5 +327,4 @@
   - Заголовок
 Общие блоки элементов:
   - Главное меню
-  - Кредитная заявка
 Максимальное время ожидания: по умолчанию

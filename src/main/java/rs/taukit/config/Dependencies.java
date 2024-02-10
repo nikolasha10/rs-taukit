@@ -1,14 +1,10 @@
 package rs.taukit.config;
 
-import rs.taukit.scenario.CucumberScenario;
-import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.YamlParser;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static rs.taukit.utils.BasicUtils.storage;
 
 public class Dependencies {
     private final Map<String, List<Map<String, String>>> oneToMany;
@@ -34,8 +30,7 @@ public class Dependencies {
     }
 
     /**
-     *
-     * @param expected ожидаемый статус сценария, от которого зависит проверяемый
+     * @param expected  ожидаемый статус сценария, от которого зависит проверяемый
      * @param statusKey - тег этого сценария. По нему будет получен статус
      * @return true - если зависимость не выполнена, false - если выполнена или ждать её выполнения не требуется,
      * например, потому что этот сценарий не был включен в текущий testRun и статус зависимости = any
@@ -43,10 +38,8 @@ public class Dependencies {
 
     public boolean checkStatus(String expected, String statusKey) {
         String current = statusMap.get(statusKey);
-        boolean willDependencyRun = storage.getScenarioList().stream()
-                .anyMatch(scenario -> scenario.getTagList().contains("@" + statusKey));
         boolean anyStatusExpected = expected.equals("any");
-        return (willDependencyRun || !anyStatusExpected) //
+        return Config.getBooleanProperty("trackDependencies")
                 && (current == null || (!current.equals(expected) && !anyStatusExpected));
     }
 

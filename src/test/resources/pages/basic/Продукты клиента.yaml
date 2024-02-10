@@ -4,6 +4,34 @@
 Элементы:
   ФИО клиента: //div[@title='ФИО']
   Активная вкладка: //div[@class='clients-tab']//li[@class='active-tab']//span[text()='Продукты']
+  Карты:
+    тип: блок элементов
+    локатор: collapseCards
+    элементы:
+      Карточный счет:
+        тип: блок элементов
+        локатор: //div[@class='card-account-wrapper card-account-title-main']/..
+        элементы:
+          Заголовок:
+            тип: блок элементов
+            локатор: //div[@class='card-account-wrapper card-account-title-main']
+            элементы:
+              Номер счета:
+                тип: ссылка
+                локатор: //div[@class='card-account-link']//a//span
+          Карта:
+            тип: блок элементов
+            локатор: //div[@class='product-template-type card-distance']
+            элементы:
+              Номер карты:
+                тип: текст
+                локатор: //div[@class='product-text-main-row']//span[@class='product-text'][1]
+              Операции:
+                тип: меню
+                локатор: //div[@class='product-template-actions-item']
+                пункты меню: //li/a
+                ...: first-dropdown
+                выпадающий список: //div[@class='dropdown-list']/a
 Обязательные элементы:
   - Активная вкладка
 Общие блоки элементов:

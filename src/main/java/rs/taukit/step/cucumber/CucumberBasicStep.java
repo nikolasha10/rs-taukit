@@ -71,7 +71,7 @@ public class CucumberBasicStep {
 
     @И("^в списке \"(.+)\" выбрать \"(.+)\"$")
     public void listValueClick(String listName, String listValue) {
-        AllureBasicStep.listValueClick(listName, listValue);
+        AllureBasicStep.listValueClick(listName, eval(listValue));
     }
 
     @И("^сохранить файл \"(.+)\", как \"(.+)\"$")

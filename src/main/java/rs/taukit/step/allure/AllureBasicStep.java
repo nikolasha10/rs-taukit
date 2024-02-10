@@ -217,6 +217,7 @@ public class AllureBasicStep extends BasicUtils {
     public static void closeCurrentAndSetNewBlockContext(String blockName) {
         closeCurrentContext(false);
         page().setCurrentContext(blockName);
+        TauLogger.console("[примечание] текущий контекст: блок элементов \"%s\"", blockName);
     }
 
     public static void closeCurrentContext(boolean haveToReport) {

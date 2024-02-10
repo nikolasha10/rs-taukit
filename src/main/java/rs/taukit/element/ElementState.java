@@ -30,8 +30,15 @@ public enum ElementState {
                 .replaceElement(checked.element().getElementName(), checked.elementType())
                 .castTo(IHasText.class);
         String elementText = hasText.getText();
-        return elementText.equals(checked.expectedValue());
-    }, "не содержит ожидаемый текст");
+        return elementText.contains(checked.expectedValue().toString());
+    }, "не содержит ожидаемый текст"),
+    NOT_CONTENT_TEXT("не содержит", checked -> {
+        IHasText hasText = page()
+                .replaceElement(checked.element().getElementName(), checked.elementType())
+                .castTo(IHasText.class);
+        String elementText = hasText.getText();
+        return !elementText.contains(checked.expectedValue().toString());
+    }, "содержит текст, отсутствие которого ожидалось");
 
     private static final Map<String, ElementState> BY_NAME = new HashMap<>();
 

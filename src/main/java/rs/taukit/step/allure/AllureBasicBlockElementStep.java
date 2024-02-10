@@ -1,11 +1,17 @@
 package rs.taukit.step.allure;
 
+import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.element.ElementType;
 import rs.taukit.element.interfaces.*;
+import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 
 public class AllureBasicBlockElementStep extends BasicUtils {
     private final String blockName;
@@ -14,10 +20,10 @@ public class AllureBasicBlockElementStep extends BasicUtils {
     public AllureBasicBlockElementStep(String blockElementName) {
         this.blockName = blockElementName;
         Class<IElement> elementType = ElementType.getType("блок элементов").getElementClass();
-        String[] elements = blockElementName.split(" -> ");
-        IHasBlockElements element = page().replaceElement(elements[0], elementType).castTo(IHasBlockElements.class);
-        for (int i = 1; i < elements.length; i++) {
-            element = element.getElementByName(1, elements[i]).castTo(IHasBlockElements.class);
+        String[] blockHierarchy = blockElementName.split(" -> ");
+        IHasBlockElements element = page().replaceElement(blockHierarchy[0], elementType).castTo(IHasBlockElements.class);
+        for (int i = 1; i < blockHierarchy.length; i++) {
+            element = element.getElementByName(1, blockHierarchy[i]).castTo(IHasBlockElements.class);
         }
         this.blockElements = element;
         try {
@@ -92,5 +98,35 @@ public class AllureBasicBlockElementStep extends BasicUtils {
                     blockName, scenarioStorage().getCurrentPageName());
         }
 
+    }
+
+    @Step("найти блок '{this.blockName}', соответствующий условиям:")
+    public void findByCondition(DataTable dataTable) {
+        TauLogger.attachDataTable("Условия поиска блока", dataTable);
+        page().setCurrentContext(blockName);
+        AtomicInteger counter = new AtomicInteger(0);
+        AtomicReference<IHasBlockElements> foundElement = new AtomicReference<>();
+        AtomicReference<ExpectedResult> result = new AtomicReference<>();
+        BooleanSupplier isFound = () -> {
+            foundElement.set(blockElements.getStream().filter(element -> {
+                page().replaceCurrentContext(element);
+                element.setCurrentIndex(counter.getAndAdd(1));
+                return dataTable.asMaps().stream()
+                        .map(data -> new ExpectedResult(data).waitForResult())
+                        .peek(result::set)
+                        .allMatch(ExpectedResult::isConditionMet);
+            }).findFirst().orElse(null));
+            return foundElement.get() != null;
+        };
+        try {
+            driver().waitForCondition(isFound);
+            TauLogger.report("[примечание] текущий контекст: блок элементов '%s' (%d)",
+                    blockName, foundElement.get().getCurrentIndex() + 1);
+        } catch (Exception e) {
+            if (result.get().getThrownException() != null) {
+                e.addSuppressed(result.get().getThrownException());
+            }
+            TauLogger.fail(e, "Не удалось найти блок '%s', соответствующий заданным условиям", blockName);
+        }
     }
 }

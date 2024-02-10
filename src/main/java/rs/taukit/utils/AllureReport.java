@@ -28,7 +28,7 @@ public class AllureReport {
                 .filter(file -> {
                     try {
                         String fileContent = Files.readString(file.toPath());
-                        return fileContent.contains(scenarioName);
+                        return fileContent.contains(scenarioName.replaceAll("\"", "\\\\\""));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
