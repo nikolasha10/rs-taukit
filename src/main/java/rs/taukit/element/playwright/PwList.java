@@ -2,6 +2,7 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import io.cucumber.datatable.DataTable;
+import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.ElementState;
 import rs.taukit.element.interfaces.IElement;
@@ -48,7 +49,8 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
     @Override
     public void setValue(String value) {
         try {
-            driver.waitForCondition(() -> getValues().stream().anyMatch(itemValue -> itemValue.contains(value)), 1000);
+            driver.waitForCondition(() -> getValues().stream().anyMatch(itemValue -> itemValue.contains(value)),
+                    Config.getTimeProperty("element.check.interval"));
         } catch (Exception e) {
             throw valueNotFoundException(value).get();
         }
@@ -79,7 +81,7 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
     }
 
     public List<String> getValues() {
-        return getItemList().stream().map(PwElement::getText).collect(Collectors.toList());
+        return getItemList().stream().filter(PwElement::isVisible).map(PwElement::getText).collect(Collectors.toList());
     }
 
     public PwElement get(int itemIndex) {
