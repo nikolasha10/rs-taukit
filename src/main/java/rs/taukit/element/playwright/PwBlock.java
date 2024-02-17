@@ -45,7 +45,7 @@ public class PwBlock extends PwElement implements IHasBlockElements {
     }
 
     @Override
-    public IElement getElementByName(int blockNumber, String elementName) {
+    public IElement getElementByName(String elementName) {
         try {
             driver.waitForCondition(this::isVisible);
         } catch (Exception e) {
@@ -56,11 +56,6 @@ public class PwBlock extends PwElement implements IHasBlockElements {
             throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName(), this);
         }
         return descendants.get(elementName);
-    }
-
-    @Override
-    public IElement getElementByName(String elementName) {
-        return isVisible() ? getElementByName(1, elementName) : null;
     }
 
     @Override

@@ -77,7 +77,7 @@ public class AllureBasicFormDataStep {
             String name = TestDataUtils.get(row, "Название");
             String value = TestDataUtils.get(row, "Значение");
             String control = TestDataUtils.getOptional(row, "Контроль");
-            IHasEditableValue editableElement = block.getElementByName(blockNumber, name).castTo(IHasEditableValue.class);
+            IHasEditableValue editableElement = block.getElementByName(name).castTo(IHasEditableValue.class);
             try {
                 if (control == null) {
                     editableElement.setValue(value);

@@ -82,6 +82,6 @@ public class TestRunner {
 
     @AfterMethod()
     public void afterMethod(ITestResult result) {
-        storage.getScenario().onFinish(result.getStatus(), result.getEndMillis());
+        storage.getScenario().onFinish(result.getStatus(), result.getStartMillis());
     }
 }

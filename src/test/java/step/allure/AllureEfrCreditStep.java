@@ -27,7 +27,7 @@ public class AllureEfrCreditStep extends AllureBasicStep {
             });
             try {
                 PwBlock historyBlock = element("История").castTo(PwBlock.class);
-                PwTable historyTable = historyBlock.getElementByName(1, "История").castTo(PwTable.class);
+                PwTable historyTable = historyBlock.getElementByName("История").castTo(PwTable.class);
                 driver().waitForCondition(historyTable::isVisible);
                 List<List<String>> checkDataList = Arrays.asList(
                         Arrays.asList("Столбец", "Значение"),
