@@ -4,8 +4,10 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import lombok.Getter;
 import rs.taukit.config.Config;
+import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasBlockElements;
+import rs.taukit.element.playwright.PwBlock;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.PageFragmentNotFoundException;
 import rs.taukit.exceptions.PageNotClosedException;
@@ -28,10 +30,11 @@ public class PlaywrightPageObject implements PageObject {
     private final String pageName;
     private final String pageUrl;
     private final String pageControlUrl;
-    private final Map<String, IElement> pageElements = new HashMap<>();
+    private final PwBlock container;
     private final List<String> expectedElements;
     private final Page.ScreenshotOptions screenshotOptions;
     private final Deque<IHasBlockElements> currentContext = new LinkedList<>();
+    private PlaywrightPageObject popup;
     private Page.WaitForConditionOptions options;
     private double pageTimeout;
     private Exception thrownException;
@@ -47,14 +50,19 @@ public class PlaywrightPageObject implements PageObject {
         this.pageUrl = Config.getSTAND().getUrl() + Optional.ofNullable(pageUrl).orElse("");
         String controlUrl = YamlParser.convert(pageConfig.get("Обязательная часть адреса"));
         this.pageControlUrl = Optional.ofNullable(controlUrl).orElse("");
+        Map<String, Map<String, Object>> elementList = YamlParser.convert(pageConfig.get("Элементы"));
+        if (elementList == null) {
+            elementList = new HashMap<>();
+        }
         List<String> commonBlockList = YamlParser.convert(pageConfig.get("Общие блоки элементов"));
-        if (commonBlockList != null) {
-            this.pageElements.putAll(addCommonBlocks(commonBlockList));
-        }
-        Map<String, ?> elementList = YamlParser.convert(pageConfig.get("Элементы"));
-        if (elementList != null) {
-            this.pageElements.putAll(ElementBuilder.buildElements(elementList));
-        }
+        elementList.putAll(addCommonBlocks(commonBlockList));
+        Map<String, Object> bodyStructure = Map.of(
+                "тип", "контейнер",
+                "xpath", "//body",
+                "элементы", elementList);
+        ElementModel bodyModel = new ElementModel(bodyStructure);
+        this.container = ElementBuilder.buildElement(pageName, PwBlock.class, bodyModel).castTo(PwBlock.class);
+        this.currentContext.add(this.container);
         List<String> expectedElements = YamlParser.convert(pageConfig.get("Обязательные элементы"));
         this.expectedElements = Optional.ofNullable(expectedElements).orElse(new ArrayList<>());
         this.options = new Page.WaitForConditionOptions().setTimeout(pageTimeout);
@@ -69,18 +77,18 @@ public class PlaywrightPageObject implements PageObject {
 
     private boolean hasPageAllExpectedElements() {
         List<String> notDescribed = expectedElements.stream()
-                .filter(elementName -> pageElements.get(elementName) == null)
+                .filter(elementName -> container.getElementByName(elementName) == null)
                 .toList();
         if (!notDescribed.isEmpty()) {
             throw new ElementNotDescribedException(notDescribed, pageName);
         }
-        return expectedElements.stream().allMatch(elementName -> pageElements.get(elementName).isVisible());
+        return expectedElements.stream().allMatch(elementName -> container.getElementByName(elementName).isVisible());
     }
 
     private List<String> getAllNotFoundElements() {
         return expectedElements.stream()
-                .filter(elementName -> pageElements.get(elementName) != null && !pageElements.get(elementName).isVisible())
-                .map(elementName -> String.format("%s (%s)", elementName, pageElements.get(elementName).getLocator()))
+                .filter(elementName -> container.getElementByName(elementName) != null && !container.getElementByName(elementName).isVisible())
+                .map(elementName -> String.format("%s (%s)", elementName, container.getElementByName(elementName).getSelector()))
                 .toList();
     }
 
@@ -116,15 +124,23 @@ public class PlaywrightPageObject implements PageObject {
     @Override
     public void waitForElement(String elementName, boolean isVisible) {
         IHasBlockElements context = getCurrentContext();
-        IElement expectedElement = context == null ? pageElements.get(elementName) : context.getElementByName(elementName);
+        IElement expectedElement = context.getElementByName(elementName);
         IElement element = Optional.ofNullable(expectedElement)
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
         page.waitForCondition(() -> element.isVisible() == isVisible, options);
     }
 
     @Override
-    public void waitForPopup(Runnable runnable) {
-        page.waitForPopup(runnable);
+    public void waitForPopup(String pageName) {
+        this.popup = new PlaywrightPageObject(page, pageName);
+        popup.waitForLoad();
+        this.currentContext.add(popup.getCurrentContext());
+    }
+
+    @Override
+    public void waitForPopupClose(String pageName) {
+        popup.waitForClose();
+        dropCurrentContext();
     }
 
     @Override
@@ -159,12 +175,27 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     @Override
-    public void setCurrentContext(String blockName) {
-        if (blockName == null) {
-            this.currentContext.clear();
-        } else {
-            this.currentContext.add(getElement(blockName).castTo(IHasBlockElements.class));
+    public void setCurrentContext(Object blockElement) {
+
+        switch (blockElement) {
+            case null -> {
+                currentContext.clear();
+                currentContext.add(container);
+            }
+            case String blockName -> {
+                try {
+                    this.currentContext.add(getElement(blockName).castTo(IHasBlockElements.class));
+                } catch (Exception e) {
+                    String message = String.format("Не удалось установить элемент '%s' (%s) в качестве текущего контекста",
+                            blockName, getElement(blockName).getModel().getType());
+                    throw new RuntimeException(message, e);
+                }
+            }
+            case IHasBlockElements iHasBlockElements -> this.currentContext.add(iHasBlockElements);
+            default -> {
+            }
         }
+
     }
 
     @Override
@@ -212,74 +243,47 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     @Override
-    public IElement getElement(String elementName) {
+    @SuppressWarnings("unchecked")
+    public <T extends IElement> T getElement(String elementName) {
         try {
             BasicUtils.driver().waitForCondition(() -> findElement(getCurrentContext(), elementName) != null);
         } catch (Exception ignored) {
             // ignored
         }
-        return Optional.ofNullable(findElement(getCurrentContext(), elementName))
-                .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
+        return (T) Optional.ofNullable(findElement(getCurrentContext(), elementName))
+                .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName, getCurrentContext()));
     }
 
     private IElement findElement(IHasBlockElements context, String elementName) {
         List<IElement> elementList;
-        if (context == null) {
-            if (pageElements.containsKey(elementName)) {
-                return pageElements.get(elementName);
-            }
-            elementList = pageElements.values().stream().toList();
-        } else {
-            if (context.containsElement(elementName)) {
-                return context.getElementByName(elementName);
-            }
-            elementList = context.getElementList();
+        if (context.containsElement(elementName)) {
+            return context.getElementByName(elementName);
         }
+        elementList = context.getElementList();
         List<IHasBlockElements> blockElementsList = elementList.stream()
                 .filter(element -> element.getModel().getType().equalsIgnoreCase("блок элементов"))
                 .map(element -> element.castTo(IHasBlockElements.class))
                 .toList();
         for (IHasBlockElements blockElement : blockElementsList) {
-            IHasBlockElements newContext = blockElement;
-            if (context != null) {
-                if (context.getElementByName(blockElement.getElementName()) == null) {
-                    return null;
-                }
-                newContext = context.getElementByName(blockElement.getElementName()).castTo(IHasBlockElements.class);
+            if (context.containsElement(blockElement.getElementName())) {
+                return null;
             }
+            IHasBlockElements newContext = context.getElementByName(blockElement.getElementName()).castTo(IHasBlockElements.class);
             IElement foundElement = findElement(newContext, elementName);
             if (foundElement != null) return foundElement;
         }
         return null;
     }
 
-    @Override
-    public IElement replaceElement(String elementName, Class<? extends IElement> elementType) {
-        try {
-            BasicUtils.driver().waitForCondition(() -> findElement(getCurrentContext(), elementName) != null);
-        } catch (Exception ignored) {
-            // ignored
-        }
-        IElement currentElement = Optional.ofNullable(findElement(getCurrentContext(), elementName))
-                .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
-        if (getCurrentContext() == null && pageElements.containsKey(elementName)) {
-            pageElements.replace(elementName, ElementBuilder.buildElement(elementName, elementType, currentElement));
-            return pageElements.get(elementName);
-        } else {
-            return currentElement.castTo(elementType);
-        }
-    }
-
-    public Map<String, IElement> addCommonBlocks(List<String> blockNameList) {
-        Map<String, IElement> result = new HashMap<>();
-        blockNameList.forEach(blockName -> {
+    public Map<String, Map<String, Object>> addCommonBlocks(List<String> blockNameList) {
+        Map<String, Map<String, Object>> blockElementsData = new HashMap<>();
+        Optional.ofNullable(blockNameList).orElse(new ArrayList<>()).forEach(blockName -> {
             String filePath = Optional.ofNullable(Config.getFragmentFilePath(blockName))
                     .orElseThrow(() -> new PageFragmentNotFoundException(blockName));
             Map<String, ?> blockData = YamlParser.parse(filePath);
-            Map<String, ?> blockElementsData = YamlParser.convert(blockData.get("Элементы"));
-            result.putAll(ElementBuilder.buildElements(blockElementsData));
+            blockElementsData.putAll(YamlParser.convert(blockData.get("Элементы")));
         });
-        return result;
+        return blockElementsData;
     }
 
     @Override

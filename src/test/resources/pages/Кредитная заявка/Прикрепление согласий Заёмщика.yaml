@@ -1,23 +1,27 @@
 Название: Прикрепление согласий Заёмщика
 Элементы:
   Согласие на обработку персональных данных и получение кредитных отчетов из БКИ:
-    тип: блок элементов
-    локатор: //span[contains(text(),'отчетов из БКИ')]/ancestor::div[starts-with(@class,'field')][last()]
+    тип: контейнер
+    xpath: //span[contains(text(),'отчетов из БКИ')]/ancestor::div[starts-with(@class,'field')][last()]
     элементы:
       Прикрепить файл:
         тип: файл
-        локатор: documentsBlock-field-name-scan-privacy_policy_and_bki-file-upload
+        test-id: documentsBlock-field-name-scan-privacy_policy_and_bki-file-upload
       Файл:
         тип: ссылка
-        локатор: //span[@class='download-filename']/span
+        xpath: //span[@class='download-filename']/span
       Односторонняя печать:
         тип: загрузка файла
-        локатор: link-print-privacy_policy_and_bki-
+        test-id: link-print-privacy_policy_and_bki-
       Двусторонняя печать:
         тип: загрузка файла
-        локатор: link-print-privacy_policy_and_bki-twoSided
-  Продолжить: button-agreement-signed
-  Отмена: button-cancel
+        test-id: link-print-privacy_policy_and_bki-twoSided
+  Продолжить:
+    тип: кнопка
+    test-id: button-agreement-signed
+  Отмена:
+    тип: кнопка
+    test-id: button-cancel
 Обязательные элементы:
   - Согласие на обработку персональных данных и получение кредитных отчетов из БКИ
 Общие блоки элементов:

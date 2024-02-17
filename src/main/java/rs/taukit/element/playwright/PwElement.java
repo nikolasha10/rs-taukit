@@ -7,87 +7,114 @@ import rs.taukit.driver.playwright.PlaywrightDriver;
 import rs.taukit.element.Element;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.utils.TauLogger;
+import rs.taukit.exceptions.ElementNotBuiltException;
+import rs.taukit.page.playwright.ElementBuilder;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static rs.taukit.utils.BasicUtils.driver;
 import static rs.taukit.utils.TextUtils.hexToRGB;
 
 @Getter
 public class PwElement extends Element {
-    protected final PlaywrightDriver driver;
-    protected Locator element;
+    protected Locator elementPwLocator;
+    protected PlaywrightDriver driver = driver().castTo();
 
     public PwElement(String elementName, Locator locator) {
         super(elementName, "");
-        this.driver = super.driver.castTo();
-        this.element = locator;
+        this.elementPwLocator = locator;
+        buildDescendants();
     }
 
     public PwElement(String elementName, ElementModel model) {
         super(elementName, model);
-        this.driver = super.driver.castTo();
-        this.element = getPwLocator(locator);
+        this.elementPwLocator = getPwLocator(searchMethodName, selector);
+        buildDescendants();
     }
 
     public PwElement(String elementName, String selector) {
         this(elementName, new ElementModel(Map.of("локатор", selector)));
+        buildDescendants();
     }
 
     public PwElement(String elementName, LinkedHashMap<String, Object> elementData) {
         this(elementName, new ElementModel(elementData));
+        buildDescendants();
     }
 
     public PwElement(String elementName, Locator locator, ElementModel model) {
-        this(elementName, locator);
+        super(elementName, model);
+        this.elementPwLocator = locator;
+        buildDescendants();
     }
 
-    public PwElement(String elementName, IElement element) {
-        super(elementName, element);
-        this.driver = super.driver.castTo();
-        this.element = getPwLocator(locator);
+    public PwElement(String elementName, IElement elementPwLocator) {
+        super(elementName, elementPwLocator);
+        this.elementPwLocator = getPwLocator(searchMethodName, selector);
+        buildDescendants();
     }
 
-    protected Locator getPwLocator(String selector) {
-        Page page = driver.getCurrentBrowser().getActivePwPage();
-        return selector.contains("/") ? page.locator(selector) : page.getByTestId(selector);
+    protected Locator getPwLocator(String searchMethodName, String selector) {
+        PlaywrightDriver playwrightDriver = driver().castTo();
+        Page page = playwrightDriver.getCurrentBrowser().getActivePwPage();
+        return switch (searchMethodName) {
+            case "test-id" -> page.getByTestId(selector);
+            case "xpath" -> page.locator(selector);
+            default -> throw ElementNotBuiltException.searchMethodNotFound(elementName, model).get();
+        };
+    }
+
+    private void buildDescendants() {
+        this.descendants = this.descendants.entrySet().stream().map(entry -> {
+            String name = entry.getKey();
+            PwElement pwElement = entry.getValue().castTo(PwElement.class);
+            Locator pwLocator = elementPwLocator.locator(pwElement.elementPwLocator);
+            return ElementBuilder.buildElement(name, pwElement, pwLocator);
+        }).collect(Collectors.toMap(IElement::getElementName, element -> element));
     }
 
     public void setValue(String value) {
-        element.fill(value);
-        element.blur();
+        elementPwLocator.fill(value);
+        elementPwLocator.blur();
     }
 
     @Override
     public boolean isVisible() {
-        return element.isVisible();
+        return elementPwLocator.count() < 2
+                ? elementPwLocator.isVisible()
+                : elementPwLocator.all().stream().anyMatch(Locator::isVisible);
     }
 
     @Override
     public boolean isEnabled() {
-        return element.isEnabled();
+        return elementPwLocator.isEnabled();
     }
 
     @Override
     public void click() {
-        element.click();
+        elementPwLocator.click();
     }
 
     @Override
     public String getText() {
-        return element.innerText();
+        return elementPwLocator.innerText();
     }
 
     @Override
     public String getBgColor() {
         String jsExpression = "(element) => window.getComputedStyle(element).getPropertyValue('background-color')";
-        return element.evaluate(jsExpression).toString();
+        return elementPwLocator.evaluate(jsExpression).toString();
     }
 
     @Override
     public boolean hasBgColor(String colorRGB) {
-        TauLogger.console("getBgColor(): %s, hexToRGB(colorRGB): %s", getBgColor(), hexToRGB(colorRGB));
         return getBgColor().equalsIgnoreCase(hexToRGB(colorRGB));
+    }
+
+    @Override
+    public boolean hasText(String value) {
+        return getText().equals(value);
     }
 }

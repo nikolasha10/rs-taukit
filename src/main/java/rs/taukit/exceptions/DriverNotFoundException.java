@@ -3,7 +3,7 @@ package rs.taukit.exceptions;
 /**
  * Драйвер не найден".
  */
-public class DriverNotFoundException extends RuntimeException {
+public class DriverNotFoundException extends AutoTestBrokenException {
 
     /**
      * Конструктор.

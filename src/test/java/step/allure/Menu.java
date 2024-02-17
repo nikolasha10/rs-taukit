@@ -1,6 +1,7 @@
 package step.allure;
 
 import io.qameta.allure.Step;
+import rs.taukit.config.Config;
 import rs.taukit.element.playwright.PwMenu;
 import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
@@ -14,10 +15,10 @@ public class Menu extends BasicUtils {
 
     public Menu(String menuName) {
         this.menuName = menuName;
-        menu = element(menuName).castTo(PwMenu.class);
+        menu = element(menuName);
     }
 
-    @Step("Через '{this.menuName}' перейти на страницу '{pageName}'")
+    @Step("через '{this.menuName}' перейти на страницу '{pageName}'")
     public void selectMenuItem(String pageName) {
         AtomicReference<Exception> exceptionAtomicReference = new AtomicReference<>();
         BooleanSupplier supplier = () -> {
@@ -30,7 +31,9 @@ public class Menu extends BasicUtils {
             }
         };
         try {
+            browser().setDefaultTimeout(Config.getTimeProperty("element.check.interval"));
             driver().waitForCondition(supplier);
+            browser().setDefaultTimeout(Config.getTimeProperty("defaultTimeout"));
             TauLogger.report("В меню \"%s\" выбран пункт \"%s\"", menuName, pageName);
             driver().getCurrentBrowser().getPage(pageName).waitForLoad();
             TauLogger.report("Отображается страница \"%s\"", pageName);

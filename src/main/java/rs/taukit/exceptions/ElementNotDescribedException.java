@@ -1,13 +1,16 @@
 package rs.taukit.exceptions;
 
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasBlockElements;
+import rs.taukit.element.interfaces.IHasTableElements;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Исключение "Элемент не описан в yaml-файле страницы".
  */
-public class ElementNotDescribedException extends RuntimeException {
+public class ElementNotDescribedException extends AutoTestBrokenException {
     public ElementNotDescribedException(String elementName, String pageName) {
         super(String.format("Элемент \"%s\" не описан в yaml-файле страницы \"%s\"", elementName, pageName));
     }
@@ -18,8 +21,19 @@ public class ElementNotDescribedException extends RuntimeException {
     }
 
     public ElementNotDescribedException(String elementName, String pageName, IHasBlockElements blockElements) {
-        super(String.format("Элемент \"%s\" не описан в yaml-файле страницы \"%s\" в блоке \"%s\"",
-                elementName, pageName, blockElements.getElementName()));
+        super(String.format("""
+                        Элемент '%s' не описан в yaml-файле страницы '%s' в блоке '%s'.
+                        Описаны элементы: %s""",
+                elementName, pageName, blockElements.getElementName(),
+                blockElements.getElementList().stream().map(IElement::getElementName).collect(Collectors.toList())));
+    }
+
+    public ElementNotDescribedException(String elementName, String pageName, IHasTableElements iHasTableElements) {
+        super(String.format("""
+                        Элемент '%s' не описан в yaml-файле страницы '%s' в таблице '%s'.
+                        Структура таблицы: %s""",
+                elementName, pageName, iHasTableElements.getElementName(),
+                iHasTableElements.getModel()));
     }
 
 }

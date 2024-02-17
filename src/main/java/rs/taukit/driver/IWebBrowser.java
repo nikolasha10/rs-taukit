@@ -1,6 +1,6 @@
 package rs.taukit.driver;
 
-import rs.taukit.element.playwright.FileDownload;
+import rs.taukit.element.playwright.PwFileDownload;
 import rs.taukit.page.PageObject;
 import rs.taukit.records.ApiResponse;
 
@@ -33,7 +33,7 @@ public interface IWebBrowser {
 
     ApiResponse sendGet(String requestUrl);
 
-    void downloadByClick(FileDownload element, String fileName);
+    void downloadByClick(PwFileDownload element, String fileName);
 
     void closeTab(int tabIndex);
 
@@ -42,4 +42,6 @@ public interface IWebBrowser {
     void setUserLogin(String userLogin);
 
     void closeOtherPages(int activePageIndex);
+
+    void setDefaultTimeout(double timeProperty);
 }

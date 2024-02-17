@@ -8,11 +8,9 @@ import rs.taukit.element.interfaces.IHasText;
 import java.util.LinkedHashMap;
 
 public class PwButton extends PwElement implements IHasText {
-    protected final String textLocator;
 
     public PwButton(String elementName, Locator locator) {
         super(elementName, locator);
-        this.textLocator = getLocator();
     }
 
     public PwButton(String elementName, LinkedHashMap<String, Object> elementData) {
@@ -21,15 +19,14 @@ public class PwButton extends PwElement implements IHasText {
 
     public PwButton(String elementName, ElementModel model) {
         super(elementName, model);
-        this.textLocator = getLocator();
+    }
+
+    public PwButton(String elementName, Locator locator, ElementModel model) {
+        super(elementName, locator, model);
     }
 
     public PwButton(String elementName, IElement element) {
         this(elementName, element.getModel());
     }
 
-    @Override
-    public String getText() {
-        return element.innerText();
-    }
 }

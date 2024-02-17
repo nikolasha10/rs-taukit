@@ -1,10 +1,9 @@
 package rs.taukit.step.allure;
 
+import com.microsoft.playwright.TimeoutError;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.config.Config;
-import rs.taukit.element.ElementType;
-import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasTableElements;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.TableElementNotFoundException;
@@ -13,6 +12,8 @@ import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TimeStringParser;
 
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 public class AllureBasicTableStep extends BasicUtils {
@@ -21,14 +22,10 @@ public class AllureBasicTableStep extends BasicUtils {
 
     public AllureBasicTableStep(String tableName) {
         this.tableName = tableName;
-        Class<IElement> elementType = ElementType.getType("таблица").getElementClass();
-        this.tableElement = page().replaceElement(tableName, elementType).castTo(IHasTableElements.class);
-        try {
-            driver().waitForCondition(tableElement::isVisible);
-        } catch (Exception e) {
-            throw new TableElementNotFoundException(e, "Не удалось дождаться отображения таблицы \"%s\"", tableName);
-        }
-
+        this.tableElement = (IHasTableElements) Optional.ofNullable(page().getElement(tableName))
+                .orElseThrow(() -> new TableElementNotFoundException(
+                        "Не удалось найти таблицу %s",
+                        tableName));
     }
 
     public AllureBasicTableStep(IHasTableElements tableElement) {
@@ -49,11 +46,23 @@ public class AllureBasicTableStep extends BasicUtils {
     @Step("в таблице '{this.tableName}' найти строку, соответствующую условиям:")
     public void findRowByConditions(DataTable dataTable) {
         TauLogger.attach("Условия поиска строки", dataTable);
+        AtomicReference<Exception> exceptionAtomicReference = new AtomicReference<>();
         try {
-            int rowIndex = tableElement.findRowByConditions(dataTable);
-            scenarioStorage().saveStepAction(() -> tableElement.findRowByConditions(dataTable));
-            TauLogger.report("Найдена строка %d", rowIndex + 1);
+            driver().waitForCondition(() -> {
+                try {
+                    int rowIndex = tableElement.findRowByConditions(dataTable);
+                    scenarioStorage().saveStepAction(() -> tableElement.findRowByConditions(dataTable));
+                    TauLogger.report("Найдена строка %d", rowIndex + 1);
+                    return true;
+                } catch (Exception e) {
+                    exceptionAtomicReference.set(e);
+                    return false;
+                }
+            });
         } catch (Exception e) {
+            if (exceptionAtomicReference.get() != null) {
+                e.addSuppressed(exceptionAtomicReference.get());
+            }
             TauLogger.fail(e, "В таблице \"%s\" не удалось найти строку, соответствующую заданным условиям", tableName);
         }
     }
@@ -77,11 +86,13 @@ public class AllureBasicTableStep extends BasicUtils {
     public void waitForTableConditions(DataTable dataTable) {
         TauLogger.attachDataTable("Условия поиска строки", dataTable);
         TauLogger.console("В таблице \"%s\" ожидается появление строки, соответствующей условиям:", tableName, dataTable);
+        AtomicReference<Exception> exceptionAtomicReference = new AtomicReference<>();
         BooleanSupplier conditions = () -> {
             try {
                 tableElement.findRowByConditions(dataTable);
                 return true;
             } catch (Exception e) {
+                exceptionAtomicReference.set(e);
                 return false;
             }
         };
@@ -92,12 +103,18 @@ public class AllureBasicTableStep extends BasicUtils {
                 : TimeStringParser.getTime(timeout);
         try {
             driver().waitForCondition(conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage().getStepActions());
-            TauLogger.report("Условия выполнены");
             scenarioStorage().clearStepActions();
             scenarioStorage().stopToSaveActions();
         } catch (Exception e) {
-            if (e instanceof AutoTestBrokenException) throw e;
-            TauLogger.fail(e, "В таблице \"%s\" не удалось дождаться строки, соответствующей заданным условиям",
+            RuntimeException runtimeException = (RuntimeException) e;
+            if (runtimeException instanceof TimeoutError) {
+                runtimeException = new RuntimeException();
+            }
+            if (exceptionAtomicReference.get() != null) {
+                runtimeException.addSuppressed(exceptionAtomicReference.get());
+            }
+            if (runtimeException instanceof AutoTestBrokenException) throw runtimeException;
+            TauLogger.fail(runtimeException, "В таблице \"%s\" не удалось дождаться строки, соответствующей заданным условиям",
                     tableName);
         }
     }

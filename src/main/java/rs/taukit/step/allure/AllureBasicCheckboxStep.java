@@ -1,8 +1,6 @@
 package rs.taukit.step.allure;
 
 import io.qameta.allure.Step;
-import rs.taukit.element.ElementType;
-import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
@@ -13,8 +11,7 @@ public class AllureBasicCheckboxStep extends BasicUtils {
 
     public AllureBasicCheckboxStep(String fieldName) {
         this.fieldName = fieldName;
-        Class<IElement> elementType = ElementType.getType("чекбокс").getElementClass();
-        this.checkbox = page().replaceElement(fieldName, elementType).castTo(IHasEditableValue.class);
+        this.checkbox = page().getElement(fieldName);
     }
 
     @Step("установить чекбокс '{this.fieldName}'")

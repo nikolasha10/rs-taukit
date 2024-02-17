@@ -3,7 +3,7 @@ package rs.taukit.exceptions;
 /**
  * Исключение "Отсутствует конфигурация для базы данных".
  */
-public class DBConfigNotFoundException extends RuntimeException {
+public class DBConfigNotFoundException extends AutoTestBrokenException {
 
     /**
      * Конструктор.

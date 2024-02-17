@@ -1,7 +1,5 @@
 Название: Меню вкладок страницы 'Клиенты'
 Элементы:
   Меню вкладок страницы 'Клиенты':
-    Тип: список
-    Локатор: //div[@class='clients-tab']
-    Названия: //span[@class='tabs-name']
-    Кнопки: //parent::a
+    тип: список
+    xpath: //div[@class='clients-tab']//span[@class='tabs-name']

@@ -2,10 +2,18 @@
 Обязательная часть адреса:
 Название: Карточка клиента успешно сохранена
 Элементы:
-  Заголовок: //div[@class='popup-window-title' and text()='Карточка клиента успешно сохранена']
-  Сообщение: popup-content-message-content
-  Да: //div[starts-with(@class,'popup-container')]//span[text()='Да']/..
-  Нет: //div[starts-with(@class,'popup-container')]//span[text()='Нет']/..
+  Заголовок:
+    тип: текст
+    xpath: //div[@class='popup-window-title' and text()='Карточка клиента успешно сохранена']
+  Сообщение:
+    тип: текст
+    test-id: popup-content-message-content
+  Да:
+    тип: кнопка
+    xpath: //div[starts-with(@class,'popup-container')]//span[text()='Да']/..
+  Нет:
+    тип: кнопка
+    xpath: //div[starts-with(@class,'popup-container')]//span[text()='Нет']/..
 
 Обязательные элементы:
   - Заголовок

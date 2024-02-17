@@ -1,0 +1,145 @@
+# абстрактный элемент для работы с атрибутами в методах элементов
+элемент:
+  класс: rs.taukit.element.playwright.PwElement
+
+# элемент, содержащий текст.
+текст:
+  класс: rs.taukit.element.playwright.PwText
+
+# ссылка
+ссылка:
+  класс: rs.taukit.element.playwright.PwLink
+
+# кнопка
+кнопка:
+  класс: rs.taukit.element.playwright.PwButton
+
+# поле ввода
+поле:
+  класс: rs.taukit.element.playwright.PwTextField
+
+# поле для поиска и выбора значения из списка найденных вариантов
+поиск по значению:
+  класс: rs.taukit.element.playwright.PwSearchField
+  элементы:
+    поле ввода: # поле ввода искомого значения
+      тип: поле
+      xpath: //input[@class='search-input']
+    список значений: # список найденных значений
+      тип: список
+      xpath: //div[contains(@class,'search-option')]
+      элементы:
+        значение:
+          тип: текст
+          xpath: /div
+    заполнить вручную: # кнопка, для ввода значения вручную
+      тип: кнопка
+      xpath: //button[@class='search-button-fill-manually']
+
+# список элементов любого типа, найденных по одному локатору
+список:
+  класс: rs.taukit.element.playwright.PwList
+
+# контейнер, содержащий элементы любого типа
+контейнер:
+  класс: rs.taukit.element.playwright.PwBlock
+
+# переключатель
+переключатель:
+  класс: rs.taukit.element.playwright.PwToggle
+  элементы:
+    # элемент, позволяющий определить состояние переключателя
+    Включен:
+      тип: элемент
+      xpath: //ancestor::label[@class='toggle checked']
+
+# чекбокс
+чекбокс:
+  класс: rs.taukit.element.playwright.PwCheckbox
+  элементы:
+    # элемент, позволяющий определить состояние чекбокса
+    Установлен:
+      тип: элемент
+      xpath: //ancestor::label[@class='checkbox-container checked']
+
+# радио-кнопка
+радио-кнопка:
+  класс: rs.taukit.element.playwright.PwRadioButton
+  элементы:
+    # набор кнопок в контейнере радио-кнопки
+    Кнопки:
+      тип: список
+      xpath: //button
+      элементы:
+        # отмеченная кнопка
+        Выбрана:
+          тип: кнопка
+          xpath: //self::button[contains(@class,'currentSwitcher')]
+        # значение кнопки
+        Значение:
+          тип: текст
+          xpath: //div[@class='switcher-item-text']
+
+# выпадающий список
+выпадающий список:
+  класс: rs.taukit.element.playwright.PwDropdownList
+  элементы:
+    Значения:
+      тип: список
+      xpath: //div[@role='option']
+    Текущее значение:
+      тип: текст
+      xpath: //span[@role='option' and @aria-selected='true']
+
+# таблица
+таблица:
+  класс: rs.taukit.element.playwright.PwTable
+  элементы:
+    Заголовки:
+      тип: список
+      xpath: //th
+    Строки:
+      тип: список
+      xpath: //th/parent::tr/following::tr
+      элементы:
+        Столбцы:
+          тип: список
+          xpath: //td
+
+# кнопка для прикрепления файлов
+файл:
+  класс: rs.taukit.element.playwright.PwFileAttachment
+
+# кнопка для загрузки файлов
+загрузка файла:
+  класс: rs.taukit.element.playwright.PwFileDownload
+
+# выбор значения из справочника
+справочник:
+  класс: rs.taukit.element.playwright.PwDictionary
+  элементы:
+    открыть справочник:
+      тип: кнопка
+      xpath: //a
+  страница: Необходимо указать название страницы справочника
+  поле поиска: Название
+  кнопка поиска: Показать
+
+
+# поле ввода даты вручную или с помощью выбора в календаре
+дата:
+  класс: rs.taukit.element.playwright.PwTextField
+
+# меню с кнопкой, открывающей выпадающий список дополнительных пунктов меню
+меню:
+  класс: rs.taukit.element.playwright.PwMenu
+  элементы:
+    Пункты меню:
+      тип: список
+      xpath: //li/a
+    Дополнительные пункты:
+      тип: кнопка
+      xpath: //button[contains(@class,'dropdown-button')]
+    Выпадающий список:
+      тип: список
+      xpath: //div[@class='dropdown-list']/a

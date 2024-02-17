@@ -37,7 +37,7 @@ public class SubScenario {
         if (driver().isBrowserOpen() && browser().isPageOpen()) {
             TauLogger.report("[примечание] открыта страница: %s", page().getPageName());
             IHasBlockElements currentContext = page().getCurrentContext();
-            if (currentContext != null) {
+            if (!currentContext.getElementName().equals(page().getPageName())) {
                 TauLogger.report("[примечание] текущий контекст: %s \"%s\"",
                         currentContext.getModel().getType(), currentContext.getElementName());
             }

@@ -154,11 +154,8 @@ public class AllureEfrStep extends AllureBasicStep {
             if (page().getElement("Заголовок").getText().equals(operationName)) {
                 TauLogger.report("отображается всплывающее окно '%s'", operationName);
                 AllureBasicStep.clickElement("кнопку", "Сформировать новую заявку");
-                page().waitForClose();
-                TauLogger.report("закрыто всплывающее окно '%s'", operationName);
             }
         } catch (Exception e) {
-//            TauLogger.warn(e, e.getMessage());
             TauLogger.report("Незавершенные заявки по данной операции отсутствуют");
         }
     }

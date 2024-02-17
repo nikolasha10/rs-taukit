@@ -4,16 +4,28 @@
 Общие блоки элементов:
   - Главное меню
 Элементы:
-  Уведомление: //div[@class='notification notification-warning']
-  Серия: field-name-docSeries
-  Номер: field-name-docNumber
-  Найти: search-button
-  Новый клиент: create-button
+  Уведомление:
+    тип: текст
+    xpath: //div[@class='notification notification-warning']
+  Серия:
+    тип: поле
+    test-id: field-name-docSeries
+  Номер:
+    тип: поле
+    test-id: field-name-docNumber
+  Найти:
+    тип: кнопка
+    test-id: search-button
+  Новый клиент:
+    тип: кнопка
+    test-id: create-button
   Результаты:
-    тип: блок элементов
-    локатор: clients-list-panel
+    тип: контейнер
+    test-id: clients-list-panel
     элементы:
-      Выбрать: //span[text()='Выбрать']
+      Выбрать:
+        тип: кнопка
+        xpath: //span[text()='Выбрать']
 Обязательные элементы:
   - Серия
   - Номер

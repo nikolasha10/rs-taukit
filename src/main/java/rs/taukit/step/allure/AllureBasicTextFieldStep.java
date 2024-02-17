@@ -1,8 +1,6 @@
 package rs.taukit.step.allure;
 
 import io.qameta.allure.Step;
-import rs.taukit.element.ElementType;
-import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
@@ -13,8 +11,7 @@ public class AllureBasicTextFieldStep extends BasicUtils {
 
     public AllureBasicTextFieldStep(String fieldName) {
         this.fieldName = fieldName;
-        Class<IElement> elementType = ElementType.getType("поле").getElementClass();
-        this.textField = page().replaceElement(fieldName, elementType).castTo(IHasEditableValue.class);
+        this.textField = page().getElement(fieldName);
     }
 
     @Step("заполнить поле '{this.fieldName}' значением '{value}'")

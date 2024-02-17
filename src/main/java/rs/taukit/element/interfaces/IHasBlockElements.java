@@ -10,6 +10,8 @@ public interface IHasBlockElements extends IElement {
 
     IElement getElementByName(String elementName);
 
+    IElement getElementByText(String elementName);
+
     boolean containsElement(String elementName);
 
     Stream<IHasBlockElements> getStream();

@@ -7,7 +7,6 @@ import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.exceptions.DataTableFormatMismatchException;
-import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.PageStorage;
 import rs.taukit.scenario.CucumberScenario;
@@ -18,7 +17,6 @@ import rs.taukit.testdata.TestData;
 import rs.taukit.testdata.TestDataFile;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,9 +67,8 @@ public class BasicUtils {
      * @param elementName - название элемента
      * @return экземпляр класса, имплементирующего интерфейс IElement
      */
-    public static IElement element(String elementName) {
-        return Optional.ofNullable(page().getElement(elementName))
-                .orElseThrow(() -> new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName()));
+    public static <T extends IElement> T element(String elementName) {
+        return page().getElement(elementName);
     }
 
     public static TestData getCurrentUser() {

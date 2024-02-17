@@ -2,12 +2,16 @@
 Элементы:
   Заголовок:
     тип: текст
-    локатор: //div[@class='popup-window-title']
+    xpath: //div[@class='popup-window-title']
   Сообщение:
     тип: текст
-    локатор: popup-content-message-content
-  Продолжить оформление существующей: to-processes-button-id
-  Сформировать новую заявку: new-button-id
+    test-id: popup-content-message-content
+  Продолжить оформление существующей:
+    тип: кнопка
+    test-id: to-processes-button-id
+  Сформировать новую заявку:
+    тип: кнопка
+    test-id: new-button-id
 Обязательные элементы:
   - Заголовок
 Максимальное время ожидания: по умолчанию

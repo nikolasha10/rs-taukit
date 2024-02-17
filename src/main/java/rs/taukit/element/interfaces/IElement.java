@@ -1,18 +1,15 @@
 package rs.taukit.element.interfaces;
 
-import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.ElementModel;
 
 public interface IElement {
     <T> T castTo(Class<T> elementType);
 
-    String getLocator();
+    String getSelector();
 
     boolean isVisible();
 
     void click();
-
-    IWebDriver getDriver();
 
     String getText();
 
@@ -25,4 +22,6 @@ public interface IElement {
     String getBgColor();
 
     boolean hasBgColor(String colorRGB);
+
+    boolean hasText(String value);
 }

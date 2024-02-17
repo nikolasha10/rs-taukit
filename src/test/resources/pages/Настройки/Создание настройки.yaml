@@ -4,11 +4,21 @@
   - Главное меню
   - Настройки
 Элементы:
-  Имя: field-key
-  Значение: field-value
-  Описание: field-description
-  Сохранить: button-save
-  Назад: button-back
+  Имя:
+    тип: поле
+    test-id: field-key
+  Значение:
+    тип: поле
+    test-id: field-value
+  Описание:
+    тип: поле
+    test-id: field-description
+  Сохранить:
+    тип: кнопка
+    test-id: button-save
+  Назад:
+    тип: кнопка
+    test-id: button-back
 Обязательные элементы:
   - Имя
   - Значение

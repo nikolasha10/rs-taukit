@@ -1,194 +1,216 @@
 Название: Редактирование клиента
 Элементы:
-  Заголовок: //div[@class='fieldset-legend' and text()='Редактирование клиента']
-  Полная идентификация: client-data-full-identification
-  Упрощенная идентификация: client-data-simple-identification
+  Заголовок:
+    тип: текст
+    xpath: //div[@class='fieldset-legend' and text()='Редактирование клиента']
+  Полная идентификация:
+    тип: кнопка
+    test-id: client-data-full-identification
+  Упрощенная идентификация:
+    тип: кнопка
+    test-id: client-data-simple-identification
   Общие сведения:
-    тип: блок элементов
-    локатор: //div[text()='Общие сведения']/..
+    тип: контейнер
+    xpath: //div[text()='Общие сведения']/..
     элементы:
       Аватар:
-        Тип: файл
-        Локатор: client-avatar-download
-      Фамилия: field-group-clientData-field-name-surName
-      Имя: field-group-clientData-field-name-firstName
-      Отчество: field-group-clientData-field-name-middleName
-      Фамилия и Имя на латинице: otherInformation-field-latinName
-      Дата рождения: field-group-generalInformation-field-name-birthDate-input
+        тип: файл
+        test-id: client-avatar-download
+      Фамилия:
+        тип: поле
+        test-id: field-group-clientData-field-name-surName
+      Имя:
+        тип: поле
+        test-id: field-group-clientData-field-name-firstName
+      Отчество:
+        тип: поле
+        test-id: field-group-clientData-field-name-middleName
+      Фамилия и Имя на латинице:
+        тип: поле
+        test-id: otherInformation-field-latinName
+      Дата рождения:
+        тип: поле
+        test-id: field-group-generalInformation-field-name-birthDate-input
       Пол:
-        Тип: радио-кнопка
-        Локатор: //span[text()='Пол']/following::div[@class='field-value'][1]
-        Названия: //li//button/div
-        Кнопки: //parent::button
+        тип: радио-кнопка
+        xpath: //span[text()='Пол']/following::div[@class='field-value'][1]
       Гражданство:
         тип: справочник
-        локатор: //span[text()='Гражданство']/ancestor::div[@class='field undefined']
-        кнопка: client-nationalities-link-add
-        всплывающее окно: Выберите страну
-        поле поиска: Название
-        кнопка поиска: Показать
+        xpath: //span[text()='Гражданство']/ancestor::div[@class='field undefined']
       Резидент:
         тип: переключатель
-        локатор: //input[@data-id='client-residence-toggle']/ancestor::label
-        включен: //input[@data-id='client-residence-toggle']/ancestor::label[@class='toggle checked']
+        xpath: //input[@data-id='client-residence-toggle']/ancestor::label
   Место рождения:
-    тип: блок элементов
-    локатор: //div[text()='Место рождения']/..
+    тип: контейнер
+    xpath: //div[text()='Место рождения']/..
     элементы:
-      Место рождения: field-group-client-data-field-name-birthplace
+      Место рождения:
+        тип: поле
+        test-id: field-group-client-data-field-name-birthplace
       Страна:
         тип: справочник
-        локатор: //div[text()='Место рождения']/following::span[text()='Страна'][1]/ancestor::div[@class='field undefined']
-        кнопка: change-birth-place-okcm-code
-        всплывающее окно: Выберите страну
-        поле поиска: Название
-        кнопка поиска: Показать
+        xpath: //div[text()='Место рождения']/following::span[text()='Страна'][1]/ancestor::div[@class='field undefined']
       Субъект РФ:
         тип: справочник
-        локатор: //div[text()='Место рождения']/following::span[text()='Субъект РФ'][1]/ancestor::div[@class='field undefined']
-        кнопка: change-birth-place-okato-code
-        всплывающее окно: Субъекты РФ
-        поле поиска: Наименование
-        кнопка поиска: Показать
-      Район: birth-place-district
-      Населённый пункт: birth-place-locality
+        xpath: //div[text()='Место рождения']/following::span[text()='Субъект РФ'][1]/ancestor::div[@class='field undefined']
+      Район:
+        тип: поле
+        test-id: birth-place-district
+      Населённый пункт:
+        тип: поле
+        test-id: birth-place-locality
   Документы:
-    тип: блок элементов
-    локатор: //div[text()='Документы']/..
+    тип: контейнер
+    xpath: //div[text()='Документы']/..
     элементы:
       Документ:
-        тип: блок элементов
-        локатор: //div[@class='document-block']
+        тип: контейнер
+        xpath: //div[@class='document-block']
         элементы:
           Тип документа:
             тип: выпадающий список
-            локатор: //div[contains(@data-id,'docType')]
-            элементы: //div[@role='option']
-            значение: //span[@role='option' and @aria-selected='true']
-          Удалить документ: //a[contains(@data-id,'delete')]
+            xpath: //div[contains(@data-id,'docType')]
+          Удалить документ:
+            тип: кнопка
+            xpath: //a[contains(@data-id,'delete')]
           Серия:
             тип: поле
-            локатор: //input[contains(@data-id,'docSeries')]
+            xpath: //input[contains(@data-id,'docSeries')]
           Номер:
             тип: поле
-            локатор: //input[contains(@data-id,'docNumber')]
+            xpath: //input[contains(@data-id,'docNumber')]
           Код подразделения:
             тип: поле
-            локатор: //input[contains(@data-id,'divisionCode')]
+            xpath: //input[contains(@data-id,'divisionCode')]
           Кем выдан:
             тип: поле
-            локатор: //input[contains(@data-id,'issuedBy')]
+            xpath: //input[contains(@data-id,'issuedBy')]
           Дата выдачи:
             тип: дата
-            локатор: //input[contains(@data-id,'issuedDate-input')]
+            xpath: //input[contains(@data-id,'issuedDate-input')]
           Дата окончания:
             тип: дата
-            локатор: //input[contains(@data-id,'issuedEndDate-input')]
+            xpath: //input[contains(@data-id,'issuedEndDate-input')]
           Активен:
             тип: переключатель
-            локатор: //input[contains(@data-id,'active')]/..
-            включен: //input[contains(@data-id,'active')]/ancestor::label[@class='toggle checked']
+            xpath: //input[contains(@data-id,'active')]/..
           Основной документ:
             тип: переключатель
-            локатор: //input[contains(@data-id,'main')]/..
-            включен: //input[contains(@data-id,'main')]/ancestor::label[@class='toggle checked']
+            xpath: //input[contains(@data-id,'main')]/..
           Признак действительного документа:
             тип: переключатель
-            локатор: //input[contains(@data-id,'validDocument')]/..
-            включен: //input[contains(@data-id,'validDocument')]/ancestor::label[@class='toggle checked']
+            xpath: //input[contains(@data-id,'validDocument')]/..
           Скан документа:
             тип: файл
-            локатор: //input[contains(@data-id,'file-upload')]
-      Добавить документ: button-add-doc
-      Полис ОМС: oms
-      ИНН: field-group-documentsBlock-field-name-inn
-      СНИЛС: field-group-documentsBlock-field-name-snils
-      Серия водительского удостоверения: field-group-documentsBlock-field-name-licenseDriver
-      Номер водительского удостоверения: field-group-documentsBlock-field-name-licenseDriver
+            xpath: //input[contains(@data-id,'file-upload')]
+      Добавить документ:
+        тип: кнопка
+        test-id: button-add-doc
+      Полис ОМС:
+        тип: поле
+        test-id: oms
+      ИНН:
+        тип: поле
+        test-id: field-group-documentsBlock-field-name-inn
+      СНИЛС:
+        тип: поле
+        test-id: field-group-documentsBlock-field-name-snils
+      Серия водительского удостоверения:
+        тип: поле
+        test-id: field-group-documentsBlock-field-name-licenseDriver
+      Номер водительского удостоверения:
+        тип: поле
+        test-id: field-group-documentsBlock-field-name-licenseDriver
       Выдано:
         тип: дата
-        локатор: licenseDriverIssuedDate-input
+        xpath: licenseDriverIssuedDate-input
   Контакты:
-    тип: блок элементов
-    локатор: //div[text()='Контакты']/..
+    тип: контейнер
+    xpath: //div[text()='Контакты']/..
     элементы:
-      E-mail: field-email-value
+      E-mail:
+        тип: поле
+        test-id: field-email-value
       E-mail отсутствует:
         тип: чекбокс
-        локатор: //input[@data-id='field-email-empty']/..
-        установлен: //input[@data-id='field-email-empty']/parent::label[@class='checkbox-container checked']
+        xpath: //input[@data-id='field-email-empty']/..
       Телефон:
-        тип: блок элементов
-        локатор: //span[text()='Тип телефона']/ancestor::div[@class='field undefined']/..
+        тип: контейнер
+        xpath: //span[text()='Тип телефона']/ancestor::div[@class='field undefined']/..
         элементы:
           Тип телефона:
             тип: выпадающий список
-            локатор: //div[contains(@data-id,'phonetype')]
-            элементы: //div[@role='option']
-            значение: //span[@role='option' and @aria-selected='true']
-          Номер телефона: //input[contains(@data-id,'phoneNumber')]
-          Удалить: //a[contains(@data-id,'delete')]
+            xpath: //div[contains(@data-id,'phonetype')]
+          Номер телефона:
+            тип: поле
+            xpath: //input[contains(@data-id,'phoneNumber')]
+          Удалить:
+            тип: кнопка
+            xpath: //a[contains(@data-id,'delete')]
           Основной:
             тип: переключатель
-            локатор: //input[contains(@data-id,'phoneMain')]
-            включен: //input[contains(@data-id,'phoneMain')]/ancestor::label[@class='toggle checked']
+            xpath: //input[contains(@data-id,'phoneMain')]
   Адреса:
-    тип: блок элементов
-    локатор: //div[text()='Адреса']/..
+    тип: контейнер
+    xpath: //div[text()='Адреса']/..
     элементы:
       Адрес регистрации:
-        тип: блок элементов
-        локатор: //div[text()='Адрес регистрации']/following-sibling::div[1]
+        тип: контейнер
+        xpath: //div[text()='Адрес регистрации']/following-sibling::div[1]
         элементы:
           Страна:
             тип: справочник
-            локатор: //span[text()='Страна']/ancestor::div[@class='field undefined']
-            кнопка: //a[contains(@data-id,'change-country')]
-            всплывающее окно: Выберите страну
-            поле поиска: Название
-            кнопка поиска: Показать
+            xpath: //span[text()='Страна']/ancestor::div[@class='field undefined']
           Адрес:
             тип: поиск по значению
-            локатор: //span[text()='Адрес']/following::div[@class='field-value'][1]
-            поле ввода: //input[@class='search-input']
-            список значений: //div[contains(@class,'search-option')]/div
-            заполнить вручную: //button[@class='search-button-fill-manually']
+            xpath: //span[text()='Адрес']/following::div[@class='field-value'][1]
           Регион:
             тип: поиск по значению
-            локатор: //span[text()='Регион']/following::div[@class='field-value'][1]
-            поле ввода: //input[@class='search-input']
-            список значений: //div[contains(@class,'search-option')]/div
-            заполнить вручную: //button[@class='search-button-fill-manually']
-          Город: //input[contains(@data-id,'field-city')]
-          Улица: //input[contains(@data-id,'field-street')]
-          Номер дома: //input[contains(@data-id,'field-house')]
-          Индекс: //input[contains(@data-id,'field-index')]
-          Период регистрации (с): //..//input[@data-id='field-registrationAddress-reg-period-start-input']
+            xpath: //span[text()='Регион']/following::div[@class='field-value'][1]
+          Город:
+            тип: поле
+            xpath: //input[contains(@data-id,'field-city')]
+          Улица:
+            тип: поле
+            xpath: //input[contains(@data-id,'field-street')]
+          Номер дома:
+            тип: поле
+            xpath: //input[contains(@data-id,'field-house')]
+          Индекс:
+            тип: поле
+            xpath: //input[contains(@data-id,'field-index')]
+          Период регистрации (с):
+            тип: поле
+            xpath: //..//input[@data-id='field-registrationAddress-reg-period-start-input']
       Адрес фактического проживания:
-        тип: блок элементов
-        локатор: //div[text()='Адрес фактического проживания']/../following-sibling::div[1]
+        тип: контейнер
+        xpath: //div[text()='Адрес фактического проживания']/../following-sibling::div[1]
         элементы:
           Совпадает с адресом регистрации:
             тип: чекбокс
-            локатор: //preceding-sibling::div[1]//button
-            установлен: //preceding-sibling::div[1]//label[@class='radio-container checked']
+            xpath: //preceding-sibling::div[1]//button
       Почтовый адрес:
-        тип: блок элементов
-        локатор: //div[text()='Почтовый адрес']/../following-sibling::div[1]
+        тип: контейнер
+        xpath: //div[text()='Почтовый адрес']/../following-sibling::div[1]
         элементы:
           Совпадает с адресом регистрации:
             тип: чекбокс
-            локатор: //preceding-sibling::div[1]//button[@data-id='checkbox-mailSwitcher0']
-            установлен: //preceding-sibling::div[1]//button[@data-id='checkbox-mailSwitcher0']//label[@class='radio-container checked']
-  Кодовое слово: otherInformation-field-codeWord
+            xpath: //preceding-sibling::div[1]//button[@data-id='checkbox-mailSwitcher0']
+  Кодовое слово:
+    тип: поле
+    test-id: otherInformation-field-codeWord
   Печать заявления на изменение сведений (Односторонняя печать):
     тип: загрузка файла
-    локатор: buttonPrint-
+    test-id: buttonPrint-
   Печать заявления на изменение сведений (Двусторонняя печать):
     тип: загрузка файла
-    локатор: buttonPrint-twoSided
-  Сохранить: button-save
-  Отмена: button-cancel
+    test-id: buttonPrint-twoSided
+  Сохранить:
+    тип: кнопка
+    test-id: button-save
+  Отмена:
+    тип: кнопка
+    test-id: button-cancel
 
 Обязательные элементы:
   - Заголовок

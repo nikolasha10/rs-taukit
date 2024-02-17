@@ -1,6 +1,5 @@
 package rs.taukit.element;
 
-import rs.taukit.element.interfaces.IHasText;
 import rs.taukit.element.playwright.PwBrowserTab;
 import rs.taukit.exceptions.ElementStateNotFoundException;
 import rs.taukit.records.CheckedElement;
@@ -10,8 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-
-import static rs.taukit.utils.BasicUtils.page;
 
 /**
  * Перечисление, описывающее возможные состояния проверяемых объектов и методы проверки этих состояний
@@ -26,17 +23,11 @@ public enum ElementState {
     IS_DOWNLOADED("загружен", checked -> !checked.element().isVisible(), "не загружен"),
     IS_OPENED("открыта", checked -> checked.element().castTo(PwBrowserTab.class).isOpened(), "не открыта"),
     CONTENT_TEXT("содержит", checked -> {
-        IHasText hasText = page()
-                .replaceElement(checked.element().getElementName(), checked.elementType())
-                .castTo(IHasText.class);
-        String elementText = hasText.getText();
+        String elementText = checked.element().getText();
         return elementText.contains(checked.expectedValue().toString());
     }, "не содержит ожидаемый текст"),
     NOT_CONTENT_TEXT("не содержит", checked -> {
-        IHasText hasText = page()
-                .replaceElement(checked.element().getElementName(), checked.elementType())
-                .castTo(IHasText.class);
-        String elementText = hasText.getText();
+        String elementText = checked.element().getText();
         return !elementText.contains(checked.expectedValue().toString());
     }, "содержит текст, отсутствие которого ожидалось");
 

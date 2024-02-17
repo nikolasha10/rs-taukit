@@ -48,7 +48,7 @@
         <appender-ref ref="FILE" />
     </logger>
 
-    <logger name="consoleLog" level="INFO">
+    <logger name="consoleLog" level="DEBUG">
         <appender-ref ref="STDOUT" />
     </logger>
 

@@ -4,23 +4,33 @@
 Элементы:
   Кредитные заявки:
     тип: список
-    локатор: //ul[@class='left-menu-content']
-    названия: //li/div
-    кнопки: //li/div
+    xpath: //ul[@class='left-menu-content']
   Запрашиваемые параметры кредита:
-    тип: блок элементов
-    локатор: identification-credit-claim-form
+    тип: контейнер
+    test-id: identification-credit-claim-form
     элементы:
-      Кредитный продукт: //span[text()='Кредитный продукт']/following::div[@class='field-value'][1]
+      Кредитный продукт:
+        тип: поле
+        xpath: //span[text()='Кредитный продукт']/following::div[@class='field-value'][1]
   Данные клиента:
-    тип: блок элементов
-    локатор: //div[@class='fieldset-container black fieldset-container-border-none field-columns-1']
+    тип: контейнер
+    xpath: //div[@class='fieldset-container black fieldset-container-border-none field-columns-1']
     элементы:
-      Телефон: //span[text()='Телефон']/following::div[@class='field-value'][1]
-  Редактирование: edit-button
-  Поиск клиента: find-button
-  Отказ: refuse-button
-  Возврат: back-button
+      Телефон:
+        тип: поле
+        xpath: //span[text()='Телефон']/following::div[@class='field-value'][1]
+  Редактирование:
+    тип: кнопка
+    test-id: edit-button
+  Поиск клиента:
+    тип: кнопка
+    test-id: find-button
+  Отказ:
+    тип: кнопка
+    test-id: refuse-button
+  Возврат:
+    тип: кнопка
+    test-id: back-button
 Обязательные элементы:
   - Кредитные заявки
   - Запрашиваемые параметры кредита

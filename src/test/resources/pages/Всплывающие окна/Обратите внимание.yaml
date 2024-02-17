@@ -2,16 +2,36 @@
 Обязательная часть адреса:
 Название: Обратите внимание
 Элементы:
-  Заголовок: //div[@class='popup-window-title' and text()='Обратите внимание']
-  Сообщение: popup-content-message-content
-  Верифицировать: MessageBoxButton-Верифицировать
-  Продолжить без верификации: MessageBoxButton-Продолжить без верификации
-  Да: //div[starts-with(@class,'popup-container')]//span[text()='Да']/..
-  Нет: //div[starts-with(@class,'popup-container')]//span[text()='Нeт' or text()='Нет']/..
-  OK: //div[starts-with(@class,'popup-container')]//span[text()='OK']/..
-  ОК: //div[starts-with(@class,'popup-container')]//span[text()='OK']/..
-  Подтвердить: //div[starts-with(@class,'popup-container')]//span[text()='Подтвердить']/..
-  Отмена: //div[starts-with(@class,'popup-container')]//span[text()='Отмена']/..
+  Заголовок:
+    тип: текст
+    xpath: //div[@class='popup-window-title' and text()='Обратите внимание']
+  Сообщение:
+    тип: текст
+    test-id: popup-content-message-content
+  Верифицировать:
+    тип: кнопка
+    test-id: MessageBoxButton-Верифицировать
+  Продолжить без верификации:
+    тип: кнопка
+    test-id: MessageBoxButton-Продолжить без верификации
+  Да:
+    тип: кнопка
+    xpath: //div[starts-with(@class,'popup-container')]//span[text()='Да']/..
+  Нет:
+    тип: кнопка
+    xpath: //div[starts-with(@class,'popup-container')]//span[text()='Нeт' or text()='Нет']/..
+  OK:
+    тип: кнопка
+    xpath: //div[starts-with(@class,'popup-container')]//span[text()='OK']/..
+  ОК:
+    тип: кнопка
+    xpath: //div[starts-with(@class,'popup-container')]//span[text()='OK']/..
+  Подтвердить:
+    тип: кнопка
+    xpath: //div[starts-with(@class,'popup-container')]//span[text()='Подтвердить']/..
+  Отмена:
+    тип: кнопка
+    xpath: //div[starts-with(@class,'popup-container')]//span[text()='Отмена']/..
 Обязательные элементы:
   - Заголовок
 Максимальное время ожидания: по умолчанию

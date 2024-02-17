@@ -1,8 +1,20 @@
 Название: Список настроек
 Элементы:
-  Название: name-filter
-  Показать: search
-  Очистить результаты поиска: clearSearch
-  Создать: ButtonSettingsCreate
-  Удалить: ButtonSettingsRemove
-  Список настроек: gridId-gridTableRowColumn-key
+  Название:
+    тип: поле
+    test-id: name-filter
+  Показать:
+    тип: кнопка
+    test-id: search
+  Очистить результаты поиска:
+    тип: кнопка
+    test-id: clearSearch
+  Создать:
+    тип: кнопка
+    test-id: ButtonSettingsCreate
+  Удалить:
+    тип: кнопка
+    test-id: ButtonSettingsRemove
+  Список настроек:
+    тип: таблица
+    xpath: //table

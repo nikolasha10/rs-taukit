@@ -8,7 +8,7 @@ import rs.taukit.element.interfaces.IHasEditableValue;
 import java.util.LinkedHashMap;
 
 public class PwCheckbox extends PwElement implements IHasEditableValue, IHasCheckbox {
-    private final Locator checked;
+    private final PwElement checked;
 
     public PwCheckbox(String elementName, LinkedHashMap<String, Object> elementData) {
         this(elementName, new ElementModel(elementData));
@@ -16,12 +16,12 @@ public class PwCheckbox extends PwElement implements IHasEditableValue, IHasChec
 
     public PwCheckbox(String elementName, ElementModel model) {
         super(elementName, model);
-        this.checked = getPwLocator(model.get("установлен"));
+        this.checked = getDescendant("Установлен");
     }
 
     public PwCheckbox(String elementName, Locator locator, ElementModel model) {
-        super(elementName, locator);
-        this.checked = getPwLocator(model.get("установлен"));
+        super(elementName, locator, model);
+        this.checked = getDescendant("Установлен");
     }
 
     @Override
@@ -33,15 +33,15 @@ public class PwCheckbox extends PwElement implements IHasEditableValue, IHasChec
     }
 
     public boolean getValue() {
-        return element.locator(checked).isVisible();
+        return elementPwLocator.isVisible();
     }
 
     @Override
     public void setValue(String value) {
-        boolean isTurnedOn = element.locator(checked).isVisible();
+        boolean isTurnedOn = getDescendant("Установлен").isVisible();
         boolean switchOn = value.equalsIgnoreCase("да");
         if (switchOn != isTurnedOn) {
-            element.click();
+            elementPwLocator.click();
         }
     }
 

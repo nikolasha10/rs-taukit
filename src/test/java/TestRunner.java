@@ -34,7 +34,7 @@ public class TestRunner {
      * DataProvider - при запуске тестов автоматически формирует данные для запуска метода runByTag.
      *
      * @return двумерный массив объектов, содержащий данные для запуска сценариев,
-     * * отмеченных тегами, переданными в параметре запуска <i>scenario.tags</i>
+     * отмеченных тегами, переданными в параметре запуска <i>scenario.tags</i>
      */
     @DataProvider(parallel = true)
     public synchronized Object[][] getScenariosByTags() {

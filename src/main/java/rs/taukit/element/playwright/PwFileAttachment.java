@@ -9,27 +9,27 @@ import rs.taukit.element.interfaces.IHasEditableValue;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 
-public class FileAttachment extends PwElement implements IHasAttachment, IHasEditableValue {
+public class PwFileAttachment extends PwElement implements IHasAttachment, IHasEditableValue {
 
-    public FileAttachment(String elementName, LinkedHashMap<String, Object> elementData) {
+    public PwFileAttachment(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
     }
 
-    public FileAttachment(String elementName, ElementModel model) {
+    public PwFileAttachment(String elementName, ElementModel model) {
         super(elementName, model);
     }
 
-    public FileAttachment(String elementName, Locator locator, ElementModel model) {
-        super(elementName, locator);
+    public PwFileAttachment(String elementName, Locator locator, ElementModel model) {
+        super(elementName, locator, model);
     }
 
-    public FileAttachment(String elementName, IElement element) {
+    public PwFileAttachment(String elementName, IElement element) {
         super(elementName, element);
     }
 
     @Override
-    public String getLocator() {
-        return locator;
+    public String getSelector() {
+        return selector;
     }
 
     @Override
@@ -49,6 +49,6 @@ public class FileAttachment extends PwElement implements IHasAttachment, IHasEdi
 
     @Override
     public void attach(String fileBaseDir, String... pathChunk) {
-        element.setInputFiles(Paths.get(fileBaseDir, pathChunk));
+        elementPwLocator.setInputFiles(Paths.get(fileBaseDir, pathChunk));
     }
 }

@@ -2,15 +2,21 @@
 Обязательная часть адреса: mainProcessKey=ClientCreateProcess
 Название: Субъекты РФ
 Элементы:
-  Заголовок: //div[@class='popup-window-title' and text()='Субъекты РФ']
-  Наименование: regions-popup-input-filter
-  Показать: regions-popup-view
-  Очистить фильтр: regions-popup-clear-filter
+  Заголовок:
+    тип: текст
+    xpath: //div[@class='popup-window-title' and text()='Субъекты РФ']
+  Наименование:
+    тип: поле
+    test-id: regions-popup-input-filter
+  Показать:
+    тип: кнопка
+    test-id: regions-popup-view
+  Очистить фильтр:
+    тип: кнопка
+    test-id: regions-popup-clear-filter
   Значения справочника:
-    Тип: список
-    Локатор: link-region
-    Названия: //span[@class='link-text']
-    Кнопки: //parent::a
+    тип: список
+    test-id: link-region
 Обязательные элементы:
   - Заголовок
 Максимальное время ожидания: по умолчанию

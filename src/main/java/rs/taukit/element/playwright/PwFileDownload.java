@@ -13,18 +13,18 @@ import java.util.LinkedHashMap;
 
 import static rs.taukit.utils.BasicUtils.scenarioData;
 
-public class FileDownload extends PwElement implements IHasDownloadableFile {
+public class PwFileDownload extends PwElement implements IHasDownloadableFile {
 
-    public FileDownload(String elementName, LinkedHashMap<String, Object> elementData) {
+    public PwFileDownload(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
     }
 
-    public FileDownload(String elementName, ElementModel model) {
+    public PwFileDownload(String elementName, ElementModel model) {
         super(elementName, model);
     }
 
-    public FileDownload(String elementName, Locator locator, ElementModel model) {
-        super(elementName, locator);
+    public PwFileDownload(String elementName, Locator locator, ElementModel model) {
+        super(elementName, locator, model);
     }
 
     @Override

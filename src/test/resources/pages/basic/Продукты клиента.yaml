@@ -2,36 +2,33 @@
 Обязательная часть адреса: /efr/clientProducts
 Название: Продукты клиента
 Элементы:
-  ФИО клиента: //div[@title='ФИО']
-  Активная вкладка: //div[@class='clients-tab']//li[@class='active-tab']//span[text()='Продукты']
+  ФИО клиента:
+    тип: текст
+    xpath: //div[@title='ФИО']
+  Активная вкладка:
+    тип: текст
+    xpath: //div[@class='clients-tab']//li[@class='active-tab']//span[text()='Продукты']
   Карты:
-    тип: блок элементов
-    локатор: collapseCards
+    тип: контейнер
+    test-id: collapseCards
     элементы:
-      Карточный счет:
-        тип: блок элементов
-        локатор: //div[@class='card-account-wrapper card-account-title-main']/..
+      Карточные счета:
+        тип: список
+        xpath: //div[@class='card-account-wrapper card-account-title-main']/..
         элементы:
-          Заголовок:
-            тип: блок элементов
-            локатор: //div[@class='card-account-wrapper card-account-title-main']
-            элементы:
-              Номер счета:
-                тип: ссылка
-                локатор: //div[@class='card-account-link']//a//span
-          Карта:
-            тип: блок элементов
-            локатор: //div[@class='product-template-type card-distance']
+          Номер счета:
+            тип: ссылка
+            xpath: //div[@class='card-account-link']//a//span
+          Карты:
+            тип: список
+            xpath: //div[@class='product-template-type card-distance']
             элементы:
               Номер карты:
                 тип: текст
-                локатор: //div[@class='product-text-main-row']//span[@class='product-text'][1]
+                xpath: //div[@class='product-text-main-row']//span[@class='product-text'][1]
               Операции:
                 тип: меню
-                локатор: //div[@class='product-template-actions-item']
-                пункты меню: //li/a
-                ...: first-dropdown
-                выпадающий список: //div[@class='dropdown-list']/a
+                xpath: //div[@class='product-template-actions-item']
 Обязательные элементы:
   - Активная вкладка
 Общие блоки элементов:

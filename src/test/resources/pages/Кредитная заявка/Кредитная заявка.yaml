@@ -1,330 +1,366 @@
 Название: Кредитная заявка
 Элементы:
-  Заголовок: //div[@data-id='credit-claim-panel']/label[text()='Кредитная заявка']
-  Статус: //span[text()='Статус']/following::div[@class='field-value'][1]
+  Заголовок:
+    тип: текст
+    xpath: //div[@data-id='credit-claim-panel']/label[text()='Кредитная заявка']
+  Статус:
+    тип: текст
+    xpath: //span[text()='Статус']/following::div[@class='field-value'][1]
   Меню вкладок страницы:
-    Тип: список
-    Локатор: //div[@class='tabs tab-additional']/ul[@class='tabs__labels']
-    Названия: //span[@class='tabs-name']
-    Кнопки: //parent::a
+    тип: список
+    xpath: //div[@class='tabs tab-additional']/ul[@class='tabs__labels']//a
   Параметры заявки:
-    тип: блок элементов
-    локатор: //div[@class='tabs tab-primary']
+    тип: контейнер
+    xpath: //div[@class='tabs tab-primary']
     элементы:
       Меню вкладок подраздела:
         тип: список
-        локатор: //ul[@class='tabs__labels']
-        названия: //span[@class='tabs-name']
-        Кнопки: //parent::a
+        xpath: //ul[@class='tabs__labels']//a
       Запрошенные параметры:
-        тип: блок элементов
-        локатор: requested-params-view-tab
+        тип: контейнер
+        test-id: requested-params-view-tab
         элементы:
-          Продолжить: success
-          Ожидание клиента: revert
-          Задать параметры выдачи: success
-          Печать КОД: print-cod
-          Отказ: refuse
-          Подтвердить: success
-          Вернуть: revert
+          Ожидание клиента:
+            тип: кнопка
+            test-id: revert
+          Подтвердить:
+            тип: кнопка
+            test-id: success
+          Вернуть:
+            тип: кнопка
+            test-id: revert
       Запрошенные параметры (редактирование):
-        тип: блок элементов
-        локатор: edit-credit-params-tab-form
+        тип: контейнер
+        test-id: edit-credit-params-tab-form
         элементы:
           Сотрудник, осуществивший продажу:
             тип: выпадающий список
-            локатор: select-form-field-seller
-            элементы: //div[@role='option']
-            значение: //span[@role='option' and @aria-selected='true']
+            test-id: select-form-field-seller
           Личное страхование Заемщика:
             тип: переключатель
-            локатор: //input[@data-id='toggle-form-field-insuranceParams']/ancestor::label
-            включен: //input[@data-id='toggle-form-field-insuranceParams']/ancestor::label[@class='toggle checked']
+            xpath: //input[@data-id='toggle-form-field-insuranceParams']/ancestor::label
           Страховая программа:
             тип: выпадающий список
-            локатор: select-form-field-insuranceProgram
-            элементы: //div[@role='option']
-            значение: //span[@role='option' and @aria-selected='true']
+            test-id: select-form-field-insuranceProgram
           Вариант страхования:
             тип: радио-кнопка
-            локатор: //span[text()='Вариант страхования']/following::div[@class='field-value'][1]
-            названия: //li//button/div
-            кнопки: //parent::button
-          Страховая плата: input-form-field-insuranceAmount
+            test-id: //span[text()='Вариант страхования']/following::div[@class='field-value'][1]
+          Страховая плата:
+            тип: поле
+            test-id: input-form-field-insuranceAmount
           За счет кредитных средств:
             тип: чекбокс
-            локатор: //input[@data-id='input-form-field-dateFrom']/..
-            установлен: //input[@data-id='input-form-field-dateFrom']/parent::label[@class='checkbox-container checked']
-          Вознаграждения Банку: input-form-field-bankReward
-          Страховая премия страховой организации: input-form-field-insurancePremium
-          Комментарий сотрудника фронт-офиса: text-area-form-field-employeeComment
-          Продолжить: success
+            test-id: //input[@data-id='input-form-field-dateFrom']/..
+          Вознаграждения Банку:
+            тип: поле
+            test-id: input-form-field-bankReward
+          Страховая премия страховой организации:
+            тип: поле
+            test-id: input-form-field-insurancePremium
+          Комментарий сотрудника фронт-офиса:
+            тип: поле
+            test-id: text-area-form-field-employeeComment
+          Продолжить:
+            тип: кнопка
+            test-id: success
       Решение банка:
-        тип: блок элементов
-        локатор: //a[@class='active' and @data-id='bank-decision-credit-tab']/following::div[@class='tab-content']
+        тип: контейнер
+        xpath: //a[@class='active' and @data-id='bank-decision-credit-tab']/following::div[@class='tab-content']
         элементы:
-          Отказ: refuse
-          Подтвердить: //span[text()='Подтвердить']/..
-          Вернуть: revert
-      Создать КОД: success
+          Отказ:
+            тип: кнопка
+            test-id: refuse
+          Подтвердить:
+            тип: кнопка
+            xpath: //span[text()='Подтвердить']/..
+          Вернуть:
+            тип: кнопка
+            test-id: revert
+      Создать КОД:
+        тип: кнопка
+        test-id: success
   Параметры выдачи:
-    тип: блок элементов
-    локатор: issuance-params
+    тип: контейнер
+    test-id: issuance-params
     элементы:
-      Сумма кредита: input-form-field-amount
+      Сумма кредита:
+        тип: поле
+        test-id: input-form-field-amount
       День платежа:
         тип: выпадающий список
-        локатор: select-form-field-payDay
-        элементы: //div[@role='option']
-        значение: //span[@role='option' and @aria-selected='true']
+        test-id: select-form-field-payDay
       Форма расчетов:
         тип: выпадающий список
-        локатор: select-form-field-payForm
-        элементы: //div[@role='option']
-        значение: //span[@role='option' and @aria-selected='true']
+        test-id: select-form-field-payForm
       Счет:
         тип: выпадающий список
-        локатор: account
-        элементы: //div[@role='option']
-        значение: //span[@role='option' and @aria-selected='true']
+        test-id: account
       Создание поручений на перечисление ДС в счет погашения кредитных обязательств:
         тип: переключатель
-        локатор: toggle-form-field-creditPaymentOrder
-        включен: //input[@data-id='toggle-form-field-creditPaymentOrder']/ancestor::label[@class='toggle checked']
-      Далее: next
-      Оформить: confirm
-      Отмена: revert
+        test-id: toggle-form-field-creditPaymentOrder
+      Далее:
+        тип: кнопка
+        test-id: next
+      Оформить:
+        тип: кнопка
+        test-id: confirm
+      Отмена:
+        тип: кнопка
+        test-id: revert
   Страхование:
-    тип: блок элементов
-    локатор: Insurance-tab
+    тип: контейнер
+    test-id: Insurance-tab
     элементы:
-      Оформить: confirm
+      Оформить:
+        тип: кнопка
+        test-id: confirm
   Заемщик:
-    тип: блок элементов
-    локатор: //div[@class='tabs tab-progress']
+    тип: контейнер
+    xpath: //div[@class='tabs tab-progress']
     элементы:
       Меню вкладок подраздела:
         тип: список
-        локатор: //ul[@class='tabs__labels']
-        названия: //span[@class='tabs-name']
-        Кнопки: //parent::a
+        xpath: //ul[@class='tabs__labels']//a
       Персональные данные:
-        тип: блок элементов
-        локатор: personal-data
+        тип: контейнер
+        test-id: personal-data
         элементы:
           Образование:
             тип: выпадающий список
-            локатор: select-form-field-education
-            элементы: //div[@role='option']
-            значение: //span[@role='option' and @aria-selected='true']
-          СНИЛС: input-form-field-snils
+            test-id: select-form-field-education
+          СНИЛС:
+            тип: поле
+            test-id: input-form-field-snils
           Военный билет:
             тип: радио-кнопка
-            локатор: //span[text()='Военный билет']/following::div[@class='field-value'][1]
-            названия: //li//button/div
-            кнопки: //parent::button
+            xpath: //span[text()='Военный билет']/following::div[@class='field-value'][1]
           Тип жилья:
             тип: выпадающий список
-            локатор: select-form-field-housingType
-            элементы: //div[@role='option']
-            значение: //span[@role='option' and @aria-selected='true']
+            test-id: select-form-field-housingType
           Семейное положение:
             тип: выпадающий список
-            локатор: select-form-field-familyStatus
-            элементы: //div[@role='option']
-            значение: //span[@role='option' and @aria-selected='true']
-          Кол-во детей до 18 лет: input-form-field-underageChildCount
-          Кол-во иных иждивенцев, за исключением детей до 18 лет: input-form-field-dependantCount
+            test-id: select-form-field-familyStatus
+          Кол-во детей до 18 лет:
+            тип: поле
+            test-id: input-form-field-underageChildCount
+          Кол-во иных иждивенцев, за исключением детей до 18 лет:
+            тип: поле
+            test-id: input-form-field-dependantCount
       Работа:
-        тип: блок элементов
-        локатор: job-data
+        тип: контейнер
+        test-id: job-data
         элементы:
           Информация о трудоустройстве:
             тип: выпадающий список
-            локатор: select-form-field-employment
-            элементы: //div[@role='option']
-            значение: //span[@role='option' and @aria-selected='true']
+            test-id: select-form-field-employment
           Наличие трудовой книжки:
             тип: радио-кнопка
-            локатор: //span[text()='Наличие трудовой книжки']/following::div[@class='field-value'][1]
-            названия: //li//button/div
-            кнопки: //parent::button
+            xpath: //span[text()='Наличие трудовой книжки']/following::div[@class='field-value'][1]
           Платёжеспособность:
             тип: радио-кнопка
-            локатор: //span[text()='Платёжеспособность']/following::div[@class='field-value'][1]
-            названия: //li//button/div
-            кнопки: //parent::button
+            xpath: //span[text()='Платёжеспособность']/following::div[@class='field-value'][1]
           Общий стаж за последние 5 лет:
-            тип: блок элементов
-            локатор: //span[text()='Общий стаж за последние 5 лет']/following::div[@class='field-value'][1]
+            тип: контейнер
+            xpath: //span[text()='Общий стаж за последние 5 лет']/following::div[@class='field-value'][1]
             элементы:
-              лет: input-form-field-fiveYearsExperience-years
-              мес.: input-form-field-fiveYearsExperience-months
+              лет:
+                тип: поле
+                test-id: input-form-field-fiveYearsExperience-years
+              мес.:
+                тип: поле
+                test-id: input-form-field-fiveYearsExperience-months
       Доходы и расходы:
-        тип: блок элементов
-        локатор: incomes-expenses-data
+        тип: контейнер
+        test-id: incomes-expenses-data
         элементы:
           Доходы:
-            тип: блок элементов
-            локатор: //div[text()='Доходы']/following::div[@class='fieldset-content'][1]
+            тип: контейнер
+            xpath: //div[text()='Доходы']/following::div[@class='fieldset-content'][1]
             элементы:
               Способ подтверждения дохода по основному месту работы:
                 тип: выпадающий список
-                локатор: confirm-docmainIncomeConfirmDocument
-                элементы: //div[@role='option']
-                значение: //span[@role='option' and @aria-selected='true']
-              Основная зарплата: //span[text()='Основная зарплата']/following::input[1]
+                test-id: confirm-docmainIncomeConfirmDocument
+              Основная зарплата:
+                тип: поле
+                xpath: //span[text()='Основная зарплата']/following::input[1]
               Способ подтверждения дополнительного дохода:
                 тип: выпадающий список
-                локатор: confirm-docadditionalIncomeConfirmDocument
-                элементы: //div[@role='option']
-                значение: //span[@role='option' and @aria-selected='true']
-              Доход по совместительству: //span[text()='Доход по совместительству']/following::input[1]
+                test-id: confirm-docadditionalIncomeConfirmDocument
+              Доход по совместительству:
+                тип: поле
+                xpath: //span[text()='Доход по совместительству']/following::input[1]
               Способ подтверждения пенсионных доходов:
                 тип: выпадающий список
-                локатор: confirm-docpensionIncomeConfirmDocument
-                элементы: //div[@role='option']
-                значение: //span[@role='option' and @aria-selected='true']
-              Пенсия: input-form-field-pension
+                test-id: confirm-docpensionIncomeConfirmDocument
+              Пенсия:
+                тип: поле
+                test-id: input-form-field-pension
               Способ подтверждения иных доходов:
                 тип: выпадающий список
-                локатор: confirm-docotherIncomeConfirmDocument
-                элементы: //div[@role='option']
-                значение: //span[@role='option' and @aria-selected='true']
-              Иные доходы: input-form-field-otherIncome
+                test-id: confirm-docotherIncomeConfirmDocument
+              Иные доходы:
+                тип: поле
+                test-id: input-form-field-otherIncome
           Расходы:
-            тип: блок элементов
-            локатор: //div[text()='Расходы']/following::div[@class='fieldset-content'][1]
+            тип: контейнер
+            xpath: //div[text()='Расходы']/following::div[@class='fieldset-content'][1]
             элементы:
-              Обязательные выплаты: input-form-field-requiredPayments
-              Алименты: input-form-field-alimony
+              Обязательные выплаты:
+                тип: поле
+                test-id: input-form-field-requiredPayments
+              Алименты:
+                тип: поле
+                test-id: input-form-field-alimony
       Иная информация:
-        тип: блок элементов
-        локатор: other-info
+        тип: контейнер
+        test-id: other-info
         элементы:
           Отношение к воинской службе:
             тип: выпадающий список
-            локатор: select-form-field-militaryServiceRelation
-            элементы: //div[@role='option']
-            значение: //span[@role='option' and @aria-selected='true']
-      Продолжить: continue
-      Сохранить: save
-      Отказ: refuse
+            test-id: select-form-field-militaryServiceRelation
+      Продолжить:
+        тип: кнопка
+        test-id: continue
+      Сохранить:
+        тип: кнопка
+        test-id: save
+      Отказ:
+        тип: кнопка
+        test-id: refuse
   Документы:
-    тип: блок элементов
-    локатор: credit-document-id
+    тип: контейнер
+    test-id: credit-document-id
     элементы:
       Документы:
         тип: таблица
-        локатор: //table
-        заголовки: //th
-        строки: //th/parent::tr/following::tr
-        столбцы: //td
-      Добавить: add-doc-id
+        xpath: //table
+      Добавить:
+        тип: кнопка
+        test-id: add-doc-id
       Печать анкеты заявления (односторонняя):
         тип: загрузка файла
-        локатор: print-
+        test-id: print-
       Печать анкеты заявления (двусторонняя):
         тип: загрузка файла
-        локатор: print-twoSided
-      Продолжить: success
+        test-id: print-twoSided
+      Продолжить:
+        тип: кнопка
+        test-id: success
   Верификация:
-    тип: блок элементов
-    локатор: bio-verification-form
+    тип: контейнер
+    test-id: bio-verification-form
     элементы:
       Данные заемщика:
         тип: таблица
-        локатор: //table
-        заголовки: //th
-        строки: //th/parent::tr/following::tr
-        столбцы: //td
+        xpath: //table
         элементы:
-          Верифицировать: //a[span[text()='Верифицировать']]
-      Продолжить: next
-      Отказ: refuse
+          Строки:
+            элементы:
+              Верифицировать:
+                тип: кнопка
+                xpath: //a[span[text()='Верифицировать']]
+      Продолжить:
+        тип: кнопка
+        test-id: next
+      Отказ:
+        тип: кнопка
+        test-id: refuse
   Визуальная оценка:
-    тип: блок элементов
-    локатор: visual-assessment-credit-tab-form
+    тип: контейнер
+    test-id: visual-assessment-credit-tab-form
     элементы:
       У клиента имеются признаки алкогольного/наркотического опьянения?:
         тип: радио-кнопка
-        локатор: //span[text()='У клиента имеются признаки алкогольного/наркотического опьянения?']/following::div[@class='field-value'][1]
+        xpath: //span[text()='У клиента имеются признаки алкогольного/наркотического опьянения?']/following::div[@class='field-value'][1]
       У клиента наблюдаются явные отклонения в психическом состоянии?:
         тип: радио-кнопка
-        локатор: //span[text()='У клиента наблюдаются явные отклонения в психическом состоянии?']/following::div[@class='field-value'][1]
+        xpath: //span[text()='У клиента наблюдаются явные отклонения в психическом состоянии?']/following::div[@class='field-value'][1]
       У клиента имеются видимые отклонения в физическом состоянии?:
         тип: радио-кнопка
-        локатор: //span[text()='У клиента имеются видимые отклонения в физическом состоянии?']/following::div[@class='field-value'][1]
+        xpath: //span[text()='У клиента имеются видимые отклонения в физическом состоянии?']/following::div[@class='field-value'][1]
       У клиента имеются признаки судимости?:
         тип: радио-кнопка
-        локатор: //span[text()='У клиента имеются признаки судимости?']/following::div[@class='field-value'][1]
+        xpath: //span[text()='У клиента имеются признаки судимости?']/following::div[@class='field-value'][1]
       Ведет ли клиент себя неадекватно?:
         тип: радио-кнопка
-        локатор: //span[text()='Ведет ли клиент себя неадекватно?']/following::div[@class='field-value'][1]
+        xpath: //span[text()='Ведет ли клиент себя неадекватно?']/following::div[@class='field-value'][1]
       Выглядит ли клиент неопрятно?:
         тип: радио-кнопка
-        локатор: //span[text()='Выглядит ли клиент неопрятно?']/following::div[@class='field-value'][1]
+        xpath: //span[text()='Выглядит ли клиент неопрятно?']/following::div[@class='field-value'][1]
       Клиента сопровождают?:
         тип: радио-кнопка
-        локатор: //span[text()='Клиента сопровождают?']/following::div[@class='field-value'][1]
-      Продолжить: continue
-      Отказ: refuse
+        xpath: //span[text()='Клиента сопровождают?']/following::div[@class='field-value'][1]
+      Продолжить:
+        тип: кнопка
+        test-id: continue
+      Отказ:
+        тип: кнопка
+        test-id: refuse
   История:
-    тип: блок элементов
-    локатор: history-credit-view
+    тип: контейнер
+    test-id: history-credit-view
     элементы:
       История:
         тип: таблица
-        локатор: //table
-        заголовки: //th
-        строки: //th/parent::tr/following::tr
-        столбцы: //td
+        xpath: //table
   Проверка сведений о доходах:
-    тип: блок элементов
-    локатор: income-verification-view
+    тип: контейнер
+    test-id: income-verification-view
     элементы:
       Основной доход:
-        тип: блок элементов
-        локатор: //div[text()='Основной доход']/following::div[@class='fieldset-content'][1]
+        тип: контейнер
+        xpath: //div[text()='Основной доход']/following::div[@class='fieldset-content'][1]
         элементы:
           Сведения о доходе соответствуют заявленным в заявке?:
             тип: радио-кнопка
-            локатор: //span[text()='Сведения о доходе соответствуют заявленным в заявке?']/following::div[@class='field-value'][1]
-            названия: //li//button/div
-            кнопки: //parent::button
+            xpath: //span[text()='Сведения о доходе соответствуют заявленным в заявке?']/following::div[@class='field-value'][1]
       Пенсионный доход:
-        тип: блок элементов
-        локатор: //div[text()='Пенсионный доход']/following::div[@class='fieldset-content'][1]
+        тип: контейнер
+        xpath: //div[text()='Пенсионный доход']/following::div[@class='fieldset-content'][1]
         элементы:
           Сведения о доходе соответствуют заявленным в заявке?:
             тип: радио-кнопка
-            локатор: //span[text()='Сведения о доходе соответствуют заявленным в заявке?']/following::div[@class='field-value'][1]
-            названия: //li//button/div
-            кнопки: //parent::button
+            xpath: //span[text()='Сведения о доходе соответствуют заявленным в заявке?']/following::div[@class='field-value'][1]
       Дополнительный доход:
-        тип: блок элементов
-        локатор: //div[text()='Дополнительный доход']/following::div[@class='fieldset-content'][1]
+        тип: контейнер
+        xpath: //div[text()='Дополнительный доход']/following::div[@class='fieldset-content'][1]
         элементы:
           Сведения о доходе соответствуют заявленным в заявке?:
             тип: радио-кнопка
-            локатор: //span[text()='Сведения о доходе соответствуют заявленным в заявке?']/following::div[@class='field-value'][1]
-            названия: //li//button/div
-            кнопки: //parent::button
+            xpath: //span[text()='Сведения о доходе соответствуют заявленным в заявке?']/following::div[@class='field-value'][1]
       Иные доходы:
-        тип: блок элементов
-        локатор: //div[text()='Иные доходы']/following::div[@class='fieldset-content'][1]
+        тип: контейнер
+        xpath: //div[text()='Иные доходы']/following::div[@class='fieldset-content'][1]
         элементы:
           Сведения о доходе соответствуют заявленным в заявке?:
             тип: радио-кнопка
-            локатор: //span[text()='Сведения о доходе соответствуют заявленным в заявке?']/following::div[@class='field-value'][1]
-            названия: //li//button/div
-            кнопки: //parent::button
-      Продолжить: next
-      Отказ: refuse
-      Вернуть: cancel
-  Идентифицировать клиента: identification
+            xpath: //span[text()='Сведения о доходе соответствуют заявленным в заявке?']/following::div[@class='field-value'][1]
+      Продолжить:
+        тип: радио-кнопка
+        test-id: next
+      Отказ:
+        тип: радио-кнопка
+        test-id: refuse
+      Вернуть:
+        тип: радио-кнопка
+        test-id: cancel
+  Продолжить:
+    тип: кнопка
+    test-id: success
+  Идентифицировать клиента:
+    тип: радио-кнопка
+    test-id: identification
+  Задать параметры выдачи:
+    тип: кнопка
+    test-id: success
+  Печать КОД:
+    тип: кнопка
+    test-id: print-cod
+  Отказ:
+    тип: кнопка
+    test-id: refuse
 Обязательные элементы:
-  - Заголовок
+ - Заголовок
 Общие блоки элементов:
-  - Главное меню
+ - Главное меню
 Максимальное время ожидания: по умолчанию

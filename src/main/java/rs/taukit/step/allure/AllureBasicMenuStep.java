@@ -1,8 +1,6 @@
 package rs.taukit.step.allure;
 
 import io.qameta.allure.Step;
-import rs.taukit.element.ElementType;
-import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasMenu;
 import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
@@ -13,8 +11,7 @@ public class AllureBasicMenuStep extends BasicUtils {
 
     public AllureBasicMenuStep(String menuName) {
         this.menuName = menuName;
-        Class<IElement> elementType = ElementType.getType("меню").getElementClass();
-        this.menu = page().replaceElement(menuName, elementType).castTo(IHasMenu.class);
+        this.menu = page().getElement(menuName);
     }
 
     @Step("в меню '{this.menuName}' выбрать '{itemName}'")

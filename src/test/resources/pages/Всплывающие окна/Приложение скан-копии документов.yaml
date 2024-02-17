@@ -1,24 +1,20 @@
-Адрес:
-Обязательная часть адреса:
 Название: Приложение скан-копии документов
 Элементы:
-  Заголовок: //div[@class='popup-window-title' and text()='Приложение скан-копии документов']
+  Заголовок:
+    тип: текст
+    xpath: //div[@class='popup-window-title' and text()='Приложение скан-копии документов']
   Тип документа:
     тип: выпадающий список
-    локатор: documentType
-    элементы: //div[@role='option']
-    значение: //span[@role='option' and @aria-selected='true']
-  Скан-копия:
-    тип: блок элементов
-    локатор: //input[@data-id='field-scan-attach-file-upload']/ancestor::div[@class='file-attach-wrapper']
-    элементы:
-      Прикрепить файл:
-        тип: файл
-        локатор: field-scan-attach-file-upload
-      Файл:
-        тип: ссылка
-        локатор: //span[@class='download-filename']/span
-  Добавить: attach-scan-button
+    test-id: documentType
+  Прикрепить файл:
+    тип: файл
+    test-id: field-scan-attach-file-upload
+  Файл:
+    тип: ссылка
+    xpath: //span[@class='download-filename']/span
+  Добавить:
+    тип: кнопка
+    test-id: attach-scan-button
 Обязательные элементы:
   - Заголовок
 Максимальное время ожидания: по умолчанию

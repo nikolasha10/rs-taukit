@@ -46,7 +46,7 @@ public class AllureBasicBrowserStep extends BasicUtils {
         TauLogger.report("[примечание] открыта вкладка %d", browser.getActiveTabIndex() + 1);
         TauLogger.report("[примечание] открыта страница: %s", page().getPageName());
         IHasBlockElements currentContext = page().getCurrentContext();
-        if (currentContext != null) {
+        if (!currentContext.getElementName().equals(page().getPageName())) {
             TauLogger.report("[примечание] текущий контекст: %s %s", currentContext.getModel().getType(), currentContext.getElementName());
         }
     }

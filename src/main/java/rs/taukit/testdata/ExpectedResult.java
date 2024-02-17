@@ -97,7 +97,7 @@ public class ExpectedResult {
             case "параметр":
                 return scenarioData().get(objectName).toString().contains(expectedValue);
             default:
-                return ElementState.getState(objectState).apply(new CheckedElement(element(objectName), objectType, expectedValue));
+                return ElementState.getState(objectState).apply(new CheckedElement(element(objectName), expectedValue));
         }
     }
 

@@ -6,14 +6,12 @@ import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
 
 import java.util.LinkedHashMap;
-import java.util.Optional;
-import java.util.regex.Pattern;
 
 import static rs.taukit.utils.BasicUtils.page;
 
 public class PwDropdownList extends PwElement implements IHasEditableValue {
-    protected Locator options;
-    protected Locator selectedValue;
+    protected PwList options;
+    protected PwText selectedValue;
 
     public PwDropdownList(String elementName, ElementModel model) {
         super(elementName, model);
@@ -25,7 +23,7 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
     }
 
     public PwDropdownList(String elementName, Locator locator, ElementModel model) {
-        super(elementName, locator);
+        super(elementName, locator, model);
         initFields(model);
     }
 
@@ -34,15 +32,17 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
     }
 
     private void initFields(ElementModel model) {
-        this.options = getPwLocator(model.get("элементы"));
-        this.selectedValue = getPwLocator(model.get("значение"));
+        this.options = descendants.get("Значения").castTo(PwList.class);
+        this.selectedValue = descendants.get("Текущее значение").castTo(PwText.class);
     }
 
     @Override
     public void setValue(String value) {
-        element.click();
-        Locator optionsLocator = Optional.ofNullable(element.locator(options)).orElseThrow();
-        optionsLocator.filter(new Locator.FilterOptions().setHasText(Pattern.compile(value))).first().click();
+        driver.waitForCondition(() -> {
+            click();
+            return options.isVisible();
+        });
+        options.setValue(value);
     }
 
     @Override
@@ -56,11 +56,7 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
 
     @Override
     public String getText() {
-        return element.locator(selectedValue).innerText();
+        return selectedValue.getText();
     }
 
-    @Override
-    public void click() {
-
-    }
 }

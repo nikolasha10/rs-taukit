@@ -3,13 +3,12 @@ package rs.taukit.step.allure;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.driver.IWebDriver;
-import rs.taukit.element.ElementType;
-import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.page.PageObject;
 import rs.taukit.utils.TauLogger;
+import rs.taukit.utils.TestDataUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -45,9 +44,8 @@ public class AllureBasicFormDataStep {
             String value = Optional.ofNullable(row.get("Значение"))
                     .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Значение'"));
             String control = row.getOrDefault("Контроль", "");
-            Class<IElement> elementType = ElementType.getType(type).getElementClass();
             IHasEditableValue element = block == null
-                    ? pageObject.replaceElement(name, elementType).castTo(IHasEditableValue.class)
+                    ? pageObject.getElement(name).castTo(IHasEditableValue.class)
                     : block.getElementByName(name).castTo(IHasEditableValue.class);
             if (control.isEmpty()) {
                 element.setValue(value);
@@ -62,20 +60,23 @@ public class AllureBasicFormDataStep {
         TauLogger.attachDataTable("Значения полей блока", dataTable);
         String[] blocks = blockName.split(" -> ");
         IHasBlockElements currentBlock = pageObject.getElement(blocks[0]).castTo(IHasBlockElements.class);
-        driver.waitForCondition(currentBlock::isVisible);
-        if (blocks.length > 1) {
-            for (int i = 1; i < blocks.length; i++) {
-                currentBlock = currentBlock.getElementByName(1, blocks[i]).castTo(IHasBlockElements.class);
-                driver.waitForCondition(currentBlock::isVisible);
+        try {
+            driver.waitForCondition(currentBlock::isVisible);
+            if (blocks.length > 1) {
+                for (int i = 1; i < blocks.length; i++) {
+                    currentBlock = currentBlock.getElementByName(blocks[i]).castTo(IHasBlockElements.class);
+                    driver.waitForCondition(currentBlock::isVisible);
+                }
             }
+        } catch (Exception e) {
+            TauLogger.fail(e, "Не удалось дождаться отображения блока '%s'. Метод поиска: %s. Селектор: %s",
+                    currentBlock.getElementName(), currentBlock.getModel().getSearchMethod(), currentBlock.getSelector());
         }
         IHasBlockElements block = currentBlock;
         data.forEach((row) -> {
-            String name = Optional.ofNullable(row.get("Название"))
-                    .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Название'"));
-            String value = Optional.ofNullable(row.get("Значение"))
-                    .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Значение'"));
-            String control = row.get("Контроль");
+            String name = TestDataUtils.get(row, "Название");
+            String value = TestDataUtils.get(row, "Значение");
+            String control = TestDataUtils.getOptional(row, "Контроль");
             IHasEditableValue editableElement = block.getElementByName(blockNumber, name).castTo(IHasEditableValue.class);
             try {
                 if (control == null) {

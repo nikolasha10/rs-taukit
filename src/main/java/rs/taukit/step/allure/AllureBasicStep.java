@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
@@ -201,7 +202,8 @@ public class AllureBasicStep extends BasicUtils {
 
     @Step("[примечание] текущий контекст: блок '{blockName}'")
     public static void setBlockContext(String blockName) {
-        page().setCurrentContext(blockName);
+        String[] blocks = blockName.split(" -> ");
+        Arrays.stream(blocks).forEach(block -> page().setCurrentContext(block));
         scenarioStorage().setCurrentContextName("блок \"%s\"", blockName);
         TauLogger.console("[примечание] текущий контекст: %s", scenarioStorage().getCurrentContextName());
     }

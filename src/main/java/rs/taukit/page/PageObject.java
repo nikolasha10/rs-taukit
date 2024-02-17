@@ -12,9 +12,7 @@ public interface PageObject {
 
     void reload();
 
-    IElement getElement(String elementName);
-
-    IElement replaceElement(String elementName, Class<? extends IElement> elementType);
+    <T extends IElement> T getElement(String elementName);
 
     void waitForLoad();
 
@@ -26,7 +24,7 @@ public interface PageObject {
 
     void waitForElement(String elementName, boolean isVisible);
 
-    void waitForPopup(Runnable runnable);
+    void waitForPopup(String pageName);
 
     void waitForTimeout(double time);
 
@@ -36,7 +34,7 @@ public interface PageObject {
 
     IHasBlockElements getCurrentContext();
 
-    void setCurrentContext(String blockName);
+    void setCurrentContext(Object blockName);
 
     void replaceCurrentContext(IHasBlockElements blockElements);
 
@@ -54,4 +52,5 @@ public interface PageObject {
 
     void setActive();
 
+    void waitForPopupClose(String pageName);
 }

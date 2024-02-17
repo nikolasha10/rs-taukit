@@ -2,7 +2,4 @@
 Элементы:
   Главное меню:
     тип: меню
-    локатор: //ul[@class='main-menu']
-    пункты меню: //li/a
-    ...: top-menu-dropdown
-    выпадающий список: //div[@class='dropdown-list']/a
+    xpath: //ul[@class='main-menu']

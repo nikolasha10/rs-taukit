@@ -8,11 +8,8 @@ import rs.taukit.element.interfaces.IHasText;
 import java.util.LinkedHashMap;
 
 public class PwText extends PwElement implements IHasText {
-    protected final String textLocator;
-
     public PwText(String elementName, Locator locator) {
         super(elementName, locator);
-        this.textLocator = getLocator();
     }
 
     public PwText(String elementName, LinkedHashMap<String, Object> elementData) {
@@ -21,7 +18,6 @@ public class PwText extends PwElement implements IHasText {
 
     public PwText(String elementName, ElementModel model) {
         super(elementName, model);
-        this.textLocator = getLocator();
     }
 
     public PwText(String elementName, IElement element) {
@@ -29,12 +25,11 @@ public class PwText extends PwElement implements IHasText {
     }
 
     public PwText(String elementName, Locator locator, ElementModel model) {
-        super(elementName, locator);
-        this.textLocator = model.get("текст", false);
+        super(elementName, locator, model);
     }
 
     @Override
     public String getText() {
-        return element.innerText();
+        return elementPwLocator.innerText();
     }
 }

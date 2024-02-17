@@ -6,32 +6,29 @@
 Элементы:
   Канал подачи:
     тип: выпадающий список
-    локатор: channel
-    элементы: //div[@role='option']
-    значение: //span[@role='option' and @aria-selected='true']
-  Заемщик: secondName
+    test-id: channel
+  Заемщик:
+    тип: поле
+    test-id: secondName
   Продуктовая группа:
     тип: выпадающий список
-    локатор: creditProductGroupId
-    элементы: //div[@role='option']
-    значение: //span[@role='option' and @aria-selected='true']
+    test-id: creditProductGroupId
   Статус:
     тип: выпадающий список
-    локатор: state
-    элементы: //div[@role='option']
-    значение: //span[@role='option' and @aria-selected='true']
-  Показать: show-button
+    test-id: state
+  Показать:
+    тип: кнопка
+    test-id: show-button
   Кредитные заявки:
     Тип: таблица
-    Локатор: //table
-    Заголовки: //th
-    Строки: //th/parent::tr/following::tr
-    Столбцы: //td
-    Элементы:
-      Номер заявки:
-        Тип: ссылка
-        Локатор: //td[1]//a
-        Текст: //span
+    xpath: //table
+    элементы:
+      Строки:
+        элементы:
+          Номер заявки:
+            тип: ссылка
+            xpath: //td[1]//a
+
 Обязательные элементы:
   - Канал подачи
 Максимальное время ожидания: по умолчанию

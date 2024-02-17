@@ -23,7 +23,7 @@ public class PwTextField extends PwElement implements IHasEditableValue {
     }
 
     public PwTextField(String elementName, Locator locator, ElementModel model) {
-        super(elementName, locator);
+        super(elementName, locator, model);
     }
 
     public PwTextField(String elementName, IElement element) {
@@ -40,14 +40,14 @@ public class PwTextField extends PwElement implements IHasEditableValue {
         driver.waitForCondition(() -> {
             super.setValue(value);
             page().waitForTimeout(1000);
-            String currentValue = element.inputValue();
+            String currentValue = elementPwLocator.inputValue();
             return currentValue.equals(controlValue);
         });
     }
 
     @Override
     public String getText() {
-        return element.inputValue();
+        return elementPwLocator.inputValue();
     }
 
 

@@ -2,8 +2,12 @@
 Обязательная часть адреса: mainProcessKey=credit-identification-client-process
 Название: Сведения о Заёмщике
 Элементы:
-  Связать с кредитной заявкой: client-view-bpm-select
-  Отмена: client-view-bpm-cancel
+  Связать с кредитной заявкой:
+    тип: кнопка
+    test-id: client-view-bpm-select
+  Отмена:
+    тип: кнопка
+    test-id: client-view-bpm-cancel
 Обязательные элементы:
   - Связать с кредитной заявкой
 Общие блоки элементов:

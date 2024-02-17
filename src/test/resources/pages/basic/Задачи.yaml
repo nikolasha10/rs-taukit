@@ -4,21 +4,20 @@
 Элементы:
   Задачи:
     тип: список
-    локатор: //div[@class='left-menu-title' and text()='Задачи']/following::ul[1]
-    названия: //li/div
-    кнопки: //self
+    xpath: //div[@class='left-menu-title' and text()='Задачи']/following::ul[1]
   Все задачи:
-    тип: блок элементов
-    локатор: //div[@class='fieldset-legend' and text()='Все задачи']/ancestor::div[@class='content']
+    тип: контейнер
+    xpath: //div[@class='fieldset-legend' and text()='Все задачи']/ancestor::div[@class='content']
     элементы:
       Все задачи:
         тип: таблица
-        локатор: //table
-        заголовки: //th
-        строки: //th/parent::tr/following::tr
-        столбцы: //td
+        xpath: //table
         элементы:
-          Взять и исполнить: //span[text()='Взять и исполнить']/..
+          Строки:
+            элементы:
+              Взять и исполнить:
+                тип: кнопка
+                xpath: //span[text()='Взять и исполнить']/..
 Обязательные элементы:
   - Задачи
 Максимальное время ожидания: по умолчанию

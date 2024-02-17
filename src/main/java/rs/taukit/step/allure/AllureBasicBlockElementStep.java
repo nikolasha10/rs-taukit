@@ -2,7 +2,6 @@ package rs.taukit.step.allure;
 
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
-import rs.taukit.element.ElementType;
 import rs.taukit.element.interfaces.*;
 import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.utils.BasicUtils;
@@ -15,21 +14,23 @@ import java.util.function.BooleanSupplier;
 
 public class AllureBasicBlockElementStep extends BasicUtils {
     private final String blockName;
-    private final IHasBlockElements blockElements;
+    private IHasBlockElements blockElements;
 
     public AllureBasicBlockElementStep(String blockElementName) {
         this.blockName = blockElementName;
-        Class<IElement> elementType = ElementType.getType("блок элементов").getElementClass();
         String[] blockHierarchy = blockElementName.split(" -> ");
-        IHasBlockElements element = page().replaceElement(blockHierarchy[0], elementType).castTo(IHasBlockElements.class);
-        for (int i = 1; i < blockHierarchy.length; i++) {
-            element = element.getElementByName(1, blockHierarchy[i]).castTo(IHasBlockElements.class);
-        }
-        this.blockElements = element;
+        IHasBlockElements currentContext = page().getCurrentContext();
         try {
-            driver().waitForCondition(this.blockElements::isVisible);
-        } catch (Exception ignored) {
-            // ignored
+            driver().waitForCondition(currentContext::isVisible);
+            IHasBlockElements container = page().getElement(blockHierarchy[0]).castTo(IHasBlockElements.class);
+            for (int i = 1; i < blockHierarchy.length; i++) {
+                driver().waitForCondition(container::isVisible);
+                container = container.getElementByName(blockHierarchy[i]).castTo(IHasBlockElements.class);
+            }
+            driver().waitForCondition(container::isVisible);
+            this.blockElements = container;
+        } catch (Exception e) {
+            TauLogger.fail(e, "Не удалось дождаться блока '%s'", blockElementName);
         }
     }
 

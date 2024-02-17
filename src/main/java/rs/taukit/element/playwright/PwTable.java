@@ -3,6 +3,7 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
+import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasTableElements;
@@ -15,19 +16,15 @@ import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static rs.taukit.utils.BasicUtils.scenarioData;
 import static rs.taukit.utils.BasicUtils.scenarioStorage;
 
 public class PwTable extends PwElement implements IHasTableElements {
-    protected Locator headers;
-    protected Locator rows;
-    protected Locator cells;
-    protected Map<String, IElement> elements;
-    private Locator activeRow;
+    private PwBlock activeRow;
 
     public PwTable(String elementName, LinkedHashMap<String, Object> elementData) {
         this(elementName, new ElementModel(elementData));
@@ -38,74 +35,80 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     public PwTable(String elementName, Locator locator, ElementModel model) {
-        super(elementName, locator);
-        initFields(model);
+        super(elementName, locator, model);
     }
 
     public PwTable(String elementName, ElementModel model) {
         super(elementName, model);
-        initFields(model);
-    }
-
-    private void initFields(ElementModel model) {
-        this.headers = getPwLocator(model.get("заголовки"));
-        this.rows = getPwLocator(model.get("строки"));
-        this.cells = getPwLocator(model.get("столбцы"));
-        Map<String, Object> tableElementsMap = model.get("элементы", false);
-        this.elements = tableElementsMap == null
-                ? new HashMap<>()
-                : ElementBuilder.buildElements(model.get("элементы"));
-    }
-
-    private List<String> headerList() {
-        return element.locator(headers).all().stream().map(Locator::textContent).toList();
     }
 
     private int headerIndex(String headerName) {
-        if (!headerList().contains(headerName)) {
-            throw TableElementNotFoundException.header(elementName, headerName, headerList()).get();
+        PwList headers = getDescendant("Заголовки");
+        List<String> headerNames = headers.getItemList().stream()
+                .map(PwElement::getText)
+                .toList();
+        if (!headers.contains(headerName)) {
+            throw TableElementNotFoundException.header(elementName, headerName, headerNames).get();
         }
-        return headerList().indexOf(headerName);
+        return headerNames.indexOf(headerName);
     }
 
-    private Stream<Locator> rowStream() {
-        return element.locator(rows).all().stream();
-    }
-
-    private Predicate<Map<String, String>> condition(Locator row) {
+    private Predicate<Map<String, String>> condition(PwList cells) {
         return (searchCondition) -> {
             String headerName = searchCondition.get("Столбец");
             String expectedValue = searchCondition.get("Значение");
-            String cellContent = row.locator(cells).all().get(headerIndex(headerName)).textContent();
+            String cellContent = cells.get(headerIndex(headerName)).getText();
             return cellContent.contains(expectedValue);
         };
     }
 
-    private Predicate<Locator> conditions(DataTable dataTable) {
-        return row -> dataTable.asMaps().stream().allMatch(condition(row));
+    private Predicate<PwList> conditions(DataTable dataTable) {
+        return cells -> dataTable.asMaps().stream().allMatch(condition(cells));
     }
 
     @Override
     public int findRowByConditions(DataTable dataTable) {
-        List<Locator> rowList = rowStream().toList();
-        int rowIndex = IntStream.range(0, rowList.size())
-                .filter(index -> conditions(dataTable).test(rowList.get(index))).findFirst()
-                .orElseThrow(TableElementNotFoundException.row(elementName));
-        activeRow = rowList.get(rowIndex);
-        scenarioData().put("контекст таблицы", this);
-        return rowIndex;
+        PwList rowList = getDescendant("Строки");
+        AtomicReference<List<PwBlock>> itemList = new AtomicReference<>(rowList.getItemList());
+        AtomicReference<Exception> exceptionAtomicReference = new AtomicReference<>();
+        try {
+            driver.waitForCondition(() -> {
+                try {
+                    itemList.set(rowList.getItemList());
+                    return itemList.get().stream()
+                            .anyMatch(item -> conditions(dataTable)
+                                    .test(item.getElementByName("Столбцы").castTo(PwList.class)));
+                } catch (Exception e) {
+                    exceptionAtomicReference.set(e);
+                    return false;
+                }
+            }, Config.getTimeProperty("element.check.interval"));
+            int rowIndex = IntStream.range(0, itemList.get().size())
+                    .filter(index -> conditions(dataTable)
+                            .test(itemList.get().get(index).getElementByName("Столбцы").castTo(PwList.class)))
+                    .findFirst().orElseThrow(TableElementNotFoundException.row(elementName));
+            activeRow = itemList.get().get(rowIndex);
+            scenarioData().put("контекст таблицы", this);
+            return rowIndex;
+        } catch (Exception e) {
+            if (exceptionAtomicReference.get() != null) {
+                e.addSuppressed(exceptionAtomicReference.get());
+            }
+            throw e;
+        }
     }
 
     @Override
     public IElement getElementByConditions(String elementName, DataTable searchConditions) {
         try {
-            PwElement expectedElement = elements.get(elementName).castTo(PwElement.class);
-            Locator elementLocator = expectedElement.getElement();
-            Locator foundElement = rowStream()
+            PwElement expectedElement = descendants.get(elementName).castTo(PwElement.class);
+            Locator elementLocator = expectedElement.getElementPwLocator();
+            Locator foundElementLocator = descendants.get("Строки").castTo(PwList.class).getItemList().stream()
+                    .map(row -> row.getElementByName("Столбцы").castTo(PwList.class))
                     .filter(conditions(searchConditions))
                     .findFirst().orElseThrow(TableElementNotFoundException.row(this.elementName))
-                    .locator(elementLocator);
-            return ElementBuilder.buildElement(elementName, expectedElement, foundElement);
+                    .elementPwLocator.locator(elementLocator);
+            return ElementBuilder.buildElement(elementName, expectedElement, foundElementLocator);
         } catch (Exception e) {
             TauLogger.fail(e, "Не удалось найти элемент \"%s\" в таблице \"%s\"", elementName, this.elementName);
             return null;
@@ -120,10 +123,9 @@ public class PwTable extends PwElement implements IHasTableElements {
     @Override
     @Step("в таблице '{this.elementName}' найти строку ({rowName}), соответствующую условиям:")
     public void findTableRowByConditions(String rowName, DataTable searchTerms) {
-        activeRow = rowStream().filter(conditions(searchTerms)).findFirst()
-                .orElseThrow(TableElementNotFoundException.row(rowName, elementName));
+        findRowByConditions(searchTerms);
         scenarioData().put(rowName, this);
-        TauLogger.attachScreenshot("Строка найдена", activeRow.screenshot());
+        TauLogger.attachScreenshot("Строка найдена", activeRow.elementPwLocator.screenshot());
     }
 
     @Override
@@ -135,11 +137,12 @@ public class PwTable extends PwElement implements IHasTableElements {
             String parameterName = data.getOrDefault("Параметр", elementName);
             String elementText;
             if (tableElement.equalsIgnoreCase("столбец")) {
-                elementText = activeRow.locator(cells).all().get(headerIndex(elementName)).innerText();
+                elementText = activeRow.getElementByName("Столбцы").castTo(PwList.class)
+                        .get(headerIndex(elementName)).getText();
                 scenarioData().put(parameterName, elementText);
             } else {
-                PwElement expectedElement = elements.get(elementName).castTo(PwElement.class);
-                Locator expectedLocator = activeRow.locator(expectedElement.getElement());
+                PwElement expectedElement = descendants.get(elementName).castTo(PwElement.class);
+                Locator expectedLocator = activeRow.elementPwLocator.locator(expectedElement.getElementPwLocator());
                 elementText = ElementBuilder.buildElement(elementName, expectedElement, expectedLocator).getText();
                 scenarioData().put(parameterName, elementText);
             }
@@ -151,8 +154,8 @@ public class PwTable extends PwElement implements IHasTableElements {
     @Override
     @Step("в строке ({rowName}) нажать на '{elementName}'")
     public void tableRowElementClick(String rowName, String elementName) {
-        PwElement expectedElement = elements.get(elementName).castTo(PwElement.class);
-        Locator expectedLocator = activeRow.locator(expectedElement.getElement());
+        PwElement expectedElement = descendants.get(elementName).castTo(PwElement.class);
+        Locator expectedLocator = activeRow.elementPwLocator.locator(expectedElement.getElementPwLocator());
         ElementBuilder.buildElement(elementName, expectedElement, expectedLocator).click();
     }
 
@@ -173,10 +176,14 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     public void clickOnElement(String elementName) {
-        if (!elements.containsKey(elementName)) {
-            throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName());
+        PwList headers = descendants.get("Заголовки").castTo(PwList.class);
+        if (activeRow.containsElement(elementName)) {
+            activeRow.getElementByName(elementName).click();
+        } else if (headers.contains(elementName)) {
+            activeRow.getElementByName("Столбцы").castTo(PwList.class).get(headerIndex(elementName)).click();
+        } else {
+            throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName(), this);
         }
-        activeRow.locator(elements.get(elementName).getLocator()).click();
     }
 
     @Step("в таблице '{this.elementName}' нажать на '{elementName}', сохранив его значение, согласно условиям")

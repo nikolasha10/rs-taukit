@@ -1,18 +1,20 @@
 Название: Печать КОД
 Элементы:
-  Заголовок: //div[@class='popup-window-title' and text()='Печать КОД']
+  Заголовок:
+    тип: текст
+    xpath: //div[@class='popup-window-title' and text()='Печать КОД']
   Ответственный исполнитель:
     тип: выпадающий список
-    локатор: select-employee
-    элементы: //div[@role='option']
-    значение: //span[@role='option' and @aria-selected='true']
+    test-id: select-employee
   Печать (односторонняя):
     тип: загрузка файла
-    локатор: print-button-
+    test-id: print-button-
   Печать (двусторонняя):
     тип: загрузка файла
-    локатор: print-button-twoSided
-  Отмена: cancel-directory-button
+    test-id: print-button-twoSided
+  Отмена:
+    тип: кнопка
+    test-id: cancel-directory-button
 Обязательные элементы:
   - Заголовок
 Максимальное время ожидания: по умолчанию

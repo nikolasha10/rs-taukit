@@ -32,11 +32,6 @@ public class CucumberBasicTableStep {
         tableStep(tableName).waitForTableConditions(eval(dataTable));
     }
 
-    @И("^в таблице \"(.+)\" найти строку \\((.+)\\), соответствующую условиям:$")
-    public void findTableRowByConditions(String tableName, String rowName, DataTable dataTable) {
-        element(tableName).castTo(IHasTableElements.class).findTableRowByConditions(rowName, eval(dataTable));
-    }
-
     @И("^в таблице \"(.+)\" найти строку, соответствующую условиям:$")
     public void findTableRowByConditions(String tableName, DataTable dataTable) {
         tableStep(tableName).findRowByConditions(eval(dataTable));

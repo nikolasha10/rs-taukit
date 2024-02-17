@@ -13,10 +13,6 @@ import java.util.Map;
 import static rs.taukit.utils.BasicUtils.page;
 
 public class PwSearchField extends PwElement implements IHasEditableValue {
-    protected final Locator textField;
-    protected final Locator values;
-    protected final Locator fillManuallyButton;
-
     public PwSearchField(String elementName, String locator) {
         this(elementName, new LinkedHashMap<>(Map.of("Локатор", locator)));
     }
@@ -27,16 +23,10 @@ public class PwSearchField extends PwElement implements IHasEditableValue {
 
     public PwSearchField(String elementName, ElementModel model) {
         super(elementName, model);
-        this.textField = getPwLocator(model.get("поле ввода"));
-        this.values = getPwLocator(model.get("список значений"));
-        this.fillManuallyButton = getPwLocator(model.get("заполнить вручную"));
     }
 
     public PwSearchField(String elementName, Locator locator, ElementModel model) {
-        super(elementName, locator);
-        this.textField = getPwLocator(model.get("поле ввода"));
-        this.values = getPwLocator(model.get("список значений"));
-        this.fillManuallyButton = getPwLocator(model.get("заполнить вручную"));
+        super(elementName, locator, model);
     }
 
     public PwSearchField(String elementName, IElement element) {
@@ -45,13 +35,14 @@ public class PwSearchField extends PwElement implements IHasEditableValue {
 
     @Override
     public void setValue(String value) {
-        element.locator(textField).fill(value);
+        descendants.get("поле ввода").castTo(PwTextField.class).setValue(value);
         if (value.equalsIgnoreCase("заполнить вручную")) {
             double searchValueTimeout = TimeStringParser.getTime(Config.getProperty("searchValueTimeout"));
-            driver.waitForCondition(() -> element.locator(fillManuallyButton).isVisible(), searchValueTimeout);
-            element.locator(fillManuallyButton).click();
+            PwButton fillManually = descendants.get("заполнить вручную").castTo(PwButton.class);
+            driver.waitForCondition(fillManually::isVisible, searchValueTimeout);
+            fillManually.click();
         } else {
-            element.locator(values).filter(new Locator.FilterOptions().setHasText(value)).click();
+            descendants.get("список значений").castTo(PwList.class).setValue(value);
         }
     }
 
@@ -60,14 +51,14 @@ public class PwSearchField extends PwElement implements IHasEditableValue {
         driver.waitForCondition(() -> {
             super.setValue(value);
             page().waitForTimeout(1000);
-            String currentValue = element.inputValue();
+            String currentValue = elementPwLocator.inputValue();
             return currentValue.equals(controlValue);
         });
     }
 
     @Override
     public String getText() {
-        return element.inputValue();
+        return elementPwLocator.inputValue();
     }
 
 

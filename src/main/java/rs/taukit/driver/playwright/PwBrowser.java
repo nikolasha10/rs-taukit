@@ -5,7 +5,7 @@ import com.microsoft.playwright.options.RequestOptions;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebBrowser;
-import rs.taukit.element.playwright.FileDownload;
+import rs.taukit.element.playwright.PwFileDownload;
 import rs.taukit.page.playwright.PlaywrightPageObject;
 import rs.taukit.records.ApiResponse;
 import rs.taukit.utils.FileUtils;
@@ -30,6 +30,7 @@ public abstract class PwBrowser implements IWebBrowser {
     protected PwBrowser(BrowserType browserType, int index, boolean openPdf) {
         this.browser = launch(browserType);
         this.context = createContext(index, openPdf);
+        setDefaultTimeout(Config.getTimeProperty("defaultTimeout"));
     }
 
     protected abstract Browser launch(BrowserType browserType);
@@ -37,7 +38,12 @@ public abstract class PwBrowser implements IWebBrowser {
     protected abstract BrowserContext createContext(int index, boolean openPdf);
 
     private PlaywrightPageObject initPage(String pageName) {
-        return new PlaywrightPageObject(getPage(), pageName);
+        try {
+            return new PlaywrightPageObject(getPage(), pageName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     protected Page getPage() {
@@ -109,7 +115,7 @@ public abstract class PwBrowser implements IWebBrowser {
             try {
                 getPage().navigate(url);
                 return true;
-            } catch (Exception e){
+            } catch (Exception e) {
                 return false;
             }
         });
@@ -170,7 +176,7 @@ public abstract class PwBrowser implements IWebBrowser {
     }
 
     @Override
-    public void downloadByClick(FileDownload element, String fileName) {
+    public void downloadByClick(PwFileDownload element, String fileName) {
         getPage().onDownload((pwDownload) -> {
             String dirName = FileUtils.getDownloadFilePath();
             File file = new File(dirName, fileName);
@@ -179,7 +185,7 @@ public abstract class PwBrowser implements IWebBrowser {
         });
         double fileDownloadTimeout = TimeStringParser.getTime(Config.getProperty("file.download.timeout"));
         getPage().waitForDownload(new Page.WaitForDownloadOptions().setTimeout(fileDownloadTimeout), () -> {
-            element.getElement().click();
+            element.getElementPwLocator().click();
             TauLogger.report("Нажали на кнопку \"%s\"", element.getElementName());
         });
     }
@@ -204,5 +210,8 @@ public abstract class PwBrowser implements IWebBrowser {
         return getPage();
     }
 
-
+    @Override
+    public void setDefaultTimeout(double timeProperty) {
+        this.context.setDefaultTimeout(timeProperty);
+    }
 }
