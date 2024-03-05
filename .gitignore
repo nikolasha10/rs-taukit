@@ -2,4 +2,5 @@
 /target
 /src/test/resources/configs/runtime.properties
 /src/efr-at/
+./rs-taukit.iml
 
