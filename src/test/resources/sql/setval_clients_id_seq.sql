@@ -1,1 +1,0 @@
-SELECT setval('esb_stub_main.clients_id_seq', (SELECT max(id) FROM esb_stub_main.clients));

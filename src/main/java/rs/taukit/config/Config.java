@@ -2,6 +2,9 @@ package rs.taukit.config;
 
 import lombok.Getter;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
+import rs.taukit.exceptions.TestDataException;
+import rs.taukit.testdata.ITestData;
+import rs.taukit.testdata.TestData;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
@@ -15,6 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -67,10 +72,24 @@ public class Config {
                 }, File::getAbsolutePath));
     }
 
+    private static String eval(String template){
+        String format = "\\$\\{(.+?)}";
+        Matcher matcher = Pattern.compile(format).matcher(template);
+        try {
+            if (matcher.matches() && getProperty(matcher.group(1)).startsWith("$")) {
+                return getProperty(matcher.group(1));
+            }
+            return matcher.replaceAll(matchResult -> getProperty(matchResult.group(1)));
+        } catch (IllegalArgumentException e) {
+            String message = String.format("Не удалось вычислить значение свойства \"%s\"", template);
+            throw new TestDataException(e, message);
+        }
+    }
+
     public static String getProperty(String propertyName) {
-        return Optional.ofNullable(Optional.ofNullable(System.getProperty(propertyName))
+        return eval(Optional.ofNullable(Optional.ofNullable(System.getProperty(propertyName))
                         .orElse(RUNTIME_PROPERTIES.getProperty(propertyName)))
-                .orElse(CONFIG_PROPERTIES.getProperty(propertyName));
+                .orElse(CONFIG_PROPERTIES.getProperty(propertyName)));
     }
 
     public static Boolean getBooleanProperty(String propertyName) {

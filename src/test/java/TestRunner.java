@@ -2,8 +2,8 @@ import io.cucumber.testng.CucumberOptions;
 import io.cucumber.testng.FeatureWrapper;
 import io.cucumber.testng.PickleWrapper;
 import io.cucumber.testng.TestNGCucumberRunner;
-import listeners.SimpleInvokedMethodListener;
-import listeners.SuiteListener;
+import listeners.SampleInvokedMethodListener;
+import listeners.SampleSuiteListener;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.DataProvider;
@@ -26,7 +26,7 @@ import static rs.taukit.utils.BasicUtils.storage;
 @CucumberOptions(
         features = "src/test/resources/scenarios"
 )
-@Listeners({SuiteListener.class, SimpleInvokedMethodListener.class})
+@Listeners({SampleSuiteListener.class, SampleInvokedMethodListener.class})
 public class TestRunner {
     private final TestNGCucumberRunner runner = new TestNGCucumberRunner(this.getClass());
 

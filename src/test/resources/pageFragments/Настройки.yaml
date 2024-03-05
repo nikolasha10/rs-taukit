@@ -1,5 +1,0 @@
-Название: Настройки
-Элементы:
-  Настройки:
-    тип: список
-    xpath: //div[@class='left-menu']/ul[@class='left-menu-content']//li/div

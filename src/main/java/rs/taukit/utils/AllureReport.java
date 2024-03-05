@@ -37,7 +37,6 @@ public class AllureReport {
 
     public static synchronized void editReports(String scenarioName, String functionality, long testEndTime) {
         List<File> fileList = getFileList(scenarioName, testEndTime);
-        TauLogger.console("fileList: %s", fileList);
         fileList.forEach(file -> replaceReport(file, scenarioName, functionality));
     }
 
@@ -72,7 +71,7 @@ public class AllureReport {
                 report.replace("status", "unknown");
             }
             Map<String, String> statusDetails = (Map<String, String>) report.get("statusDetails");
-            if (errorList.size() > 0) {
+            if (!errorList.isEmpty()) {
                 String notes = "\n" + IntStream.range(1, errorList.size() + 1).boxed()
                         .map(i -> String.format("%d. %s", i, errorList.get(i - 1)))
                         .collect(Collectors.joining("\n"));

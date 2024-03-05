@@ -1,2 +1,5 @@
+/browserExtensions
 /target
-src/test/resources/configs/runtime.properties
+/src/test/resources/configs/runtime.properties
+/src/efr-at/
+
