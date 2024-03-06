@@ -1,6 +1,7 @@
 package rs.taukit.testdata;
 
 import lombok.Getter;
+import rs.taukit.config.Config;
 import rs.taukit.exceptions.TestDataException;
 import rs.taukit.utils.YamlParser;
 
@@ -27,6 +28,7 @@ public class TestData implements ITestData {
     public TestData(String fieldName, LinkedHashMap<String, ?> parameters, String dirPath) {
         this.fieldName = fieldName;
         String filePath = YamlParser.convert(parameters.get("файл"));
+        filePath = Config.eval(filePath);
         Map<String, String> searchBy = YamlParser.convert(parameters.get("поиск по полям"));
         this.searchValue = searchBy.values().stream().toList().get(0);
         File file = new File(filePath);

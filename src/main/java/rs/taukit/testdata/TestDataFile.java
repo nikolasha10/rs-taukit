@@ -1,6 +1,7 @@
 package rs.taukit.testdata;
 
 import lombok.Getter;
+import rs.taukit.config.Config;
 
 import java.io.File;
 import java.util.LinkedHashMap;
@@ -20,7 +21,7 @@ public class TestDataFile implements ITestData {
     public TestDataFile(String fieldName, LinkedHashMap<String, ?> data, String dirPath) {
         this.fieldName = fieldName;
         this.dataStorage = new DataStorage(data);
-        this.filePath = this.dataStorage.get("путь");
+        this.filePath = Config.eval(this.dataStorage.get("путь"));
         File file = new File(filePath);
         this.fileName = file.getName();
         String[] chunks = fileName.split("\\.");

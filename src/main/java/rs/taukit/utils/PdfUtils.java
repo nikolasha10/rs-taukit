@@ -182,7 +182,7 @@ public class PdfUtils {
                     standardBytes.close();
                     scenarioData().put("expected", "data:image/png;base64," + Base64.getEncoder().encodeToString(standardBytes.toByteArray()));
 
-                    File htmlTemplate = new File("src/test/resources/templates/htmlTemplate.html");
+                    File htmlTemplate = new File("${baseResourcesDir}/templates/htmlTemplate.html");
                     String attachment = eval(Files.readString(htmlTemplate.toPath()));
                     TauLogger.warn(() -> TauLogger.attachFile("Различия", ".html", attachment.getBytes()), "страница %d отличается от ожидаемой", i);
                 }

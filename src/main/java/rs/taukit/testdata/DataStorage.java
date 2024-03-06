@@ -1,6 +1,7 @@
 package rs.taukit.testdata;
 
 import io.cucumber.datatable.DataTable;
+import rs.taukit.config.Config;
 import rs.taukit.exceptions.TestDataException;
 import rs.taukit.testdata.constant.TestDataField;
 import rs.taukit.utils.TestDataUtils;
@@ -25,7 +26,7 @@ public class DataStorage {
                 ITestData testData = TestDataField.getField(fieldType, fieldName, fieldValue, featureDirPath);
                 this.dataStorage.put(fieldName, YamlParser.convert(testData));
             } else if (fieldValue instanceof String) {
-                String value = evalStrings(YamlParser.convert(fieldValue));
+                String value = evalStrings(Config.eval(YamlParser.convert(fieldValue)));
                 this.dataStorage.put(fieldName, YamlParser.convert(value));
             } else if (fieldValue instanceof Integer) {
                 this.dataStorage.put(fieldName, YamlParser.convert(fieldValue));

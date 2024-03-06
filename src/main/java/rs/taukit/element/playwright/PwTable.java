@@ -71,7 +71,9 @@ public class PwTable extends PwElement implements IHasTableElements {
         PwList rowList = getDescendant("Строки");
         AtomicReference<List<PwBlock>> itemList = new AtomicReference<>(rowList.getItemList());
         AtomicReference<Exception> exceptionAtomicReference = new AtomicReference<>();
+        double checkInterval = Config.getTimeProperty("element.check.interval");
         try {
+            driver.waitForCondition(() -> rowList.getItemList().stream().allMatch(PwElement::isVisible), checkInterval);
             driver.waitForCondition(() -> {
                 try {
                     itemList.set(rowList.getItemList());
@@ -82,7 +84,7 @@ public class PwTable extends PwElement implements IHasTableElements {
                     exceptionAtomicReference.set(e);
                     return false;
                 }
-            }, Config.getTimeProperty("element.check.interval"));
+            }, checkInterval);
             int rowIndex = IntStream.range(0, itemList.get().size())
                     .filter(index -> conditions(dataTable)
                             .test(itemList.get().get(index).getElementByName("Столбцы").castTo(PwList.class)))

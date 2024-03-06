@@ -3,8 +3,6 @@ package rs.taukit.config;
 import lombok.Getter;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 import rs.taukit.exceptions.TestDataException;
-import rs.taukit.testdata.ITestData;
-import rs.taukit.testdata.TestData;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
@@ -52,7 +50,7 @@ public class Config {
         try {
             InputStream configInputStream = new FileInputStream(filePath);
             properties.load(configInputStream);
-            if (!required){
+            if (!required) {
                 TauLogger.console("[примечание] установлены значения параметров из файла \"%s\"", filePath);
             }
         } catch (IOException e) {
@@ -72,7 +70,7 @@ public class Config {
                 }, File::getAbsolutePath));
     }
 
-    private static String eval(String template){
+    public static String eval(String template) {
         String format = "\\$\\{(.+?)}";
         Matcher matcher = Pattern.compile(format).matcher(template);
         try {
