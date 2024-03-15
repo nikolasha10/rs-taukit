@@ -4,35 +4,49 @@
 <h3>Перед началом работы</h3>
 1. Склонировать проект фреймворка с репозитория GitLab: 
     <p> git clone <a>http://git.dos.softlab.ru/kudryashov/rs-taukit.git</a> </p>
+
 2. Открыть в терминале папку src
+
 3. Склонировать проект автотестов ЕФР с репозитория GitLab:
     <p>git clone <a>http://git.dos.softlab.ru/kudryashov/efr-at.git</a></p>
+
 4. Пометить папку <a>src/efr-at/java</a> ,как <i>Test Sources Root</i> (правой кнопкой мыши - Mark Directory as)
+
 5. Пометить папку <a>src/efr-at/resources</a>, как <i>Test Resources Root</i>
+
 6. Открыть File -> Setting -> Plugins и проверить, установлены ли плагины:
    - Cucumber for Java
    - Gherkin
    - Lombok
+
 7. Открыть любой сценарий, например <a>src/efr-at/resources/scenarios/000. Подготовка тестовых условий/001. Установка настроек.feature</a>
+
 8. Убедиться в том, что
    - файлы *.feature ассоциированы с Cucumber (ассоциировать можно в настройках File -> Settings -> Editor -> File Types)
    - ключевые слова (Функционал, Сценарий) подсвечиваются;
    - шаги не подсвечиваются (если выделены желтым, какая-то проблема с плагином cucumber for java);
    - русские слова не подчеркнуты (можно отключить проверку в настройках File -> Settings -> Editor -> Inspections -> Internationalization -> Non-ASCII characters);
+
 9. Открыть конфигурацию запуска
+
 10. Добавить новую конфигурацию TestNG
+ 
 11. Настроить параметры:
     - Test kind: Method
     - Class: EFRTestRunner
     - Method: runByTag()
 12. Открыть файл с настройками запуска тестов <a>src/efr-at/resources/configs/taukit.properties</a>
+ 
 13. Если русские буквы отображаются некорректно, например, в виде кодов ascii: 
     - открыть настройки Settings -> File Encodings
     - указать кодировку для Default encoding for properties files: UTF-8
     - снять чекбокс Transparent native-to-ascii conversion и нажать Apply
     - снова установить чекбокс Transparent native-to-ascii conversion и нажать Apply
+
 14. Сделать его копию с названием runtime.properties (этот файл добавлен в .gitignor, так что можно его править, не боясь случайно закоммитить неправильные настройки)
+
 15. Распаковать архив browserExtensions/chromium.7z в ту же папку, где он находится (можно в другую, но тогда изменить значение настройки browser.extensions)
+ 
 16. Изменить настройки в соответствии с текущими условиями (например, указать стенд) и запустить тест @000.001.001 (будут загружены браузеры, которые использует фреймворк. Тест в итоге может упасть по таймауту или с другой ошибкой, при первом запуске это не имеет значения)
 
 <h3>Автотесты</h3>
