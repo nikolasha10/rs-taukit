@@ -61,6 +61,7 @@ public class CucumberScenario {
     }
 
     public void onStart(TestNGCucumberRunner runner) {
+        scenarioStorage.getDriverManager().getDriver(Config.getProperty("web.driver.name"));
         TauLogger.setLogPath(functionality, name);
         started = true;
         System.out.println();
