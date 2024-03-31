@@ -21,7 +21,12 @@ public class Stand {
     public Stand(String standsConfigFilePath, String standName) {
         name = standName;
         List<Map<String, ?>> standList = YamlParser.parse(standsConfigFilePath);
-        standData = standList.stream().filter(this::isNameEquals).findFirst().orElseThrow();
+        standData = standList.stream().filter(this::isNameEquals).findFirst()
+                .orElseThrow(() -> {
+                    String message = String.format("В файле '%s' отсутствует описание стенда '%s'",
+                            standsConfigFilePath, standName);
+                    return new RuntimeException(message);
+                });
         host = standData.get("hostApplication").toString();
         port = standData.get("portApplication").toString();
         stubPort = standData.get("portApplicationStub").toString();
