@@ -2,6 +2,7 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.TimeoutError;
+import io.cucumber.datatable.DataTable;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IHasDownloadableFile;
 import rs.taukit.testdata.TestDataFile;
@@ -33,7 +34,7 @@ public class PwFileDownload extends PwElement implements IHasDownloadableFile {
             driver.getCurrentBrowser().downloadByClick(this, fileName);
             String dirName = FileUtils.getDownloadFilePath();
             File file = new File(dirName, fileName);
-            TauLogger.attachFile(fileName, "pdf", file.getAbsolutePath());
+            TauLogger.attachFile(fileName, file.getAbsolutePath());
             LinkedHashMap<String, String> fileData = new LinkedHashMap<>();
             fileData.put("тип", "файл");
             fileData.put("путь", file.getPath());
@@ -43,5 +44,10 @@ public class PwFileDownload extends PwElement implements IHasDownloadableFile {
             TauLogger.fail(e, "Не удалось дождаться окончания загрузки файлов");
         }
 
+    }
+
+    @Override
+    public void click(DataTable dataTable) {
+        driver.getCurrentBrowser().downloadByClick(this, dataTable);
     }
 }

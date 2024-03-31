@@ -1,5 +1,9 @@
 package rs.taukit.utils;
 
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.parser.LocationTextExtractionStrategy;
+import com.itextpdf.text.pdf.parser.PdfTextExtractor;
+import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import io.cucumber.datatable.DataTable;
@@ -184,7 +188,7 @@ public class PdfUtils {
 
                     File htmlTemplate = new File("${baseResourcesDir}/templates/htmlTemplate.html");
                     String attachment = eval(Files.readString(htmlTemplate.toPath()));
-                    TauLogger.warn(() -> TauLogger.attachFile("Различия", ".html", attachment.getBytes()), "страница %d отличается от ожидаемой", i);
+                    TauLogger.warn(() -> TauLogger.attachFile("Различия", attachment.getBytes()), "страница %d отличается от ожидаемой", i);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -308,5 +312,32 @@ public class PdfUtils {
             }
         }
 
+    }
+
+    public static List<String> getPageContentFilePaths(String filePath) {
+        String fileName = FileUtils.getFileName(filePath);
+        List<String> pageContentFilePathList = new ArrayList<>();
+        try {
+            PdfReader reader = new PdfReader(filePath);
+            // не забываем, что нумерация страниц в PDF начинается с единицы.
+            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+//                TextExtractionStrategy strategy = new SimpleTextExtractionStrategy();
+                TextExtractionStrategy strategy = new LocationTextExtractionStrategy();
+                String pdfPageTextContent = PdfTextExtractor.getTextFromPage(reader, i, strategy);
+
+                String pdfPageTextContentFilePath = String.format("target/temp/%s/%s/%s/page_%d.txt",
+                        scenario().getFunctionality().replaceAll("[\\[\\]]", ""),
+                        scenario().getName(),
+                        fileName.replaceAll("-", "_").replaceAll("\\.pdf", ""),
+                        i);
+                pageContentFilePathList.add(pdfPageTextContentFilePath);
+                FileUtils.createFile(pdfPageTextContentFilePath);
+                FileUtils.writeFile(pdfPageTextContentFilePath, pdfPageTextContent);
+            }
+            reader.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return pageContentFilePathList;
     }
 }

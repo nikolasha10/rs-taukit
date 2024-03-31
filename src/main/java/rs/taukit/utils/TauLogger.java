@@ -339,8 +339,18 @@ public final class TauLogger {
         return attachData(dataTable);
     }
 
-    @Attachment(value = "{fileName}", fileExtension = "{fileExtension}")
-    public static byte[] attachFile(String fileName, String fileExtension, String filePath) {
+    @Attachment(value = "{fileName}")
+    public static byte[] attachFile(String fileName, String filePath) {
+        File file = new File(filePath);
+        try {
+            return Files.readAllBytes(file.toPath());
+        } catch (IOException ioException) {
+            warnWOSS(ioException, "Не удалось приложить файл \"%s\" к отчету", filePath);
+        }
+        return null;
+    }
+    @Attachment(value = "{fileName}", type = "application/pdf")
+    public static byte[] attachPdfFile(String fileName, String filePath) {
         File file = new File(filePath);
         try {
             return Files.readAllBytes(file.toPath());
@@ -351,15 +361,15 @@ public final class TauLogger {
     }
 
     @Attachment(value = "{fileName}")
-    public static byte[] attachFile(String fileName, String fileExtension, byte[] file) {
+    public static byte[] attachFile(String fileName, byte[] file) {
         return file;
     }
 
     public static void attach(String name, Object object) {
         switch (object) {
             case DataTable dataTable -> attachDataTable(name, dataTable);
-            case TestDataFile file -> attachFile(name, file.getFileExtension(), file.getFilePath());
-            case String text -> attachFile(name, "txt", text.getBytes());
+            case TestDataFile file -> attachFile(name, file.getFilePath());
+            case String text -> attachFile(name, text.getBytes());
             case null, default ->
                     throw new TestDataException("Не удалось прикрепить объект \"%s\" к отчёту. Не распознан тип вложения.", name);
         }

@@ -2,14 +2,13 @@ package rs.taukit.utils;
 
 import io.qameta.allure.Step;
 import rs.taukit.config.Config;
+import rs.taukit.exceptions.FileNotCreatedException;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -31,15 +30,16 @@ public class FileUtils {
         try {
             Files.move(file.toPath(), destinationFile.toPath(), REPLACE_EXISTING);
             TauLogger.report("Файл сохранен в \"%s\"", destinationFile.getPath());
-            TauLogger.attachFile(newFileName, "pdf", destinationFile.getPath());
+            TauLogger.attachPdfFile(newFileName, destinationFile.getPath());
         } catch (Exception e) {
             TauLogger.fail(e, "Не удалось сохранить файл \"%s\", как \"%s\"", fileName, newFileName);
         }
     }
 
     public static void createFile(String filePath) {
-        String[] chunks = filePath.split(File.pathSeparator);
-        String dirPath = Arrays.stream(chunks).limit(chunks.length - 1).collect(Collectors.joining(File.pathSeparator));
+        File tmpFile = new File(filePath);
+        String[] chunks = tmpFile.getAbsolutePath().split("[\\\\/]");
+        String dirPath = Arrays.stream(chunks).limit(chunks.length - 1).collect(Collectors.joining(File.separator));
         try {
             Files.createDirectories(new File(dirPath).toPath());
             File file = new File(filePath);
@@ -61,6 +61,15 @@ public class FileUtils {
         }
     }
 
+    public static void writeFile(String filePath, String content){
+        File file = new File(filePath);
+        try {
+            Files.writeString(file.toPath(), content);
+        } catch (IOException e){
+            throw new FileNotCreatedException(e, filePath);
+        }
+
+    }
     public static void appendFile(String filePath, String text) {
         File file = new File(filePath);
         try {
@@ -93,5 +102,45 @@ public class FileUtils {
             childDirName = childDirName.substring(0, childDirName.length() - 1);
         }
         return String.format("%s/%s", Config.getProperty("downloads.dir"), childDirName);
+    }
+
+    public static String getFileName(String filePath) {
+        File file = new File(filePath);
+        return file.getName();
+    }
+
+    public static void createDirectories(String filePath){
+        File file = new File(filePath);
+        try {
+            Files.createDirectories(file.toPath());
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static List<String> compareTextFiles(String testedFilePath, String standardFilePath) {
+        List<String> errorsList = new ArrayList<>();
+        String testedFileContent = readFile(testedFilePath);
+        String standardFileContent = readFile(standardFilePath);
+        if (!testedFileContent.equals(standardFileContent)){
+            List<String> testedFileRows = List.of(testedFileContent.split("\n"));
+            List<String> standardFileRows = List.of(standardFileContent.split("\n"));
+            int testedFileRowsSize = testedFileRows.size();
+            int standardFileRowsSize = standardFileRows.size();
+            if (testedFileRowsSize != standardFileRowsSize){
+                errorsList.add(String.format("Количество строк (%d) не равно ожидаемому (%d)",
+                        testedFileRowsSize, standardFileRowsSize));
+            }
+            List<Integer> differentRows = new ArrayList<>();
+            for (int i = 0; i < Math.min(testedFileRowsSize, standardFileRowsSize); i++) {
+                if (!testedFileRows.get(i).equals(standardFileRows.get(i))){
+                    differentRows.add(i + 1);
+                }
+            }
+            if (!differentRows.isEmpty()){
+                errorsList.add(String.format("Содержимое строк %s отличается от ожидаемого", differentRows));
+            }
+        }
+        return errorsList;
     }
 }

@@ -4,8 +4,6 @@ import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ru.И;
 import rs.taukit.step.allure.AllureBasicStep;
 import rs.taukit.utils.FileUtils;
-import rs.taukit.utils.PdfUtils;
-import rs.taukit.validator.PdfValidator;
 
 import static rs.taukit.utils.BasicUtils.eval;
 import static rs.taukit.utils.BasicUtils.scenarioStorage;
@@ -77,26 +75,6 @@ public class CucumberBasicStep {
     @И("^сохранить файл \"(.+)\", как \"(.+)\"$")
     public void saveDownloadedFileAs(String originalFileName, String fileName) {
         FileUtils.saveDownloadedFileAs(eval(originalFileName), eval(fileName));
-    }
-
-    @И("^сравнить печатную форму с эталоном$")
-    public void validatePrintForm() {
-        AllureBasicStep.validatePrintForm();
-    }
-
-    @И("^сформировать эталон \"(.+)\" по файлу \"(.+)\" и шаблону \"(.+)\"$")
-    public void createPdfStandard(String standardName, String originFileName, String templateName, DataTable dataTable) {
-        PdfUtils.createPdfStandard(eval(standardName), eval(originFileName), eval(templateName), eval(dataTable));
-    }
-
-    @И("^сравнить файл \"(.+)\" с эталоном \"(.+)\"$")
-    public void comparePdfWithStandard(String testedFileName, String standardName) {
-        PdfUtils.comparePdfFiles(eval(testedFileName), eval(standardName));
-    }
-
-    @И("^проверить документ \"(.+)\" на соответствие эталону$")
-    public void validateDocument(String fileName, DataTable dataTable) {
-        new PdfValidator(fileName).validate(eval(dataTable));
     }
 
     @И("^примечание: далее работаем в контексте блока \"(.+)\"$")

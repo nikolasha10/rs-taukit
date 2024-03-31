@@ -2,6 +2,7 @@ package rs.taukit.driver.playwright;
 
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.RequestOptions;
+import io.cucumber.datatable.DataTable;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebBrowser;
@@ -10,11 +11,15 @@ import rs.taukit.page.playwright.PlaywrightPageObject;
 import rs.taukit.records.ApiResponse;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
-import rs.taukit.utils.TimeStringParser;
+import rs.taukit.utils.TestDataUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static rs.taukit.utils.BasicUtils.driver;
@@ -177,17 +182,48 @@ public abstract class PwBrowser implements IWebBrowser {
 
     @Override
     public void downloadByClick(PwFileDownload element, String fileName) {
-        getPage().onDownload((pwDownload) -> {
+        AtomicBoolean isDownloaded = new AtomicBoolean(false);
+        Consumer<Download> download = pwDownload -> {
+            if (isDownloaded.get()) return;
             String dirName = FileUtils.getDownloadFilePath();
             File file = new File(dirName, fileName);
             pwDownload.saveAs(file.toPath());
             TauLogger.report("Загружен файл \"%s\" в папку \"%s\"", fileName, dirName);
-        });
-        double fileDownloadTimeout = TimeStringParser.getTime(Config.getProperty("file.download.timeout"));
+            isDownloaded.set(true);
+        };
+        getPage().onDownload(download);
+        double fileDownloadTimeout = Config.getTimeProperty("file.download.timeout");
         getPage().waitForDownload(new Page.WaitForDownloadOptions().setTimeout(fileDownloadTimeout), () -> {
             element.getElementPwLocator().click();
             TauLogger.report("Нажали на кнопку \"%s\"", element.getElementName());
         });
+    }
+
+    @Override
+    public void downloadByClick(PwFileDownload element, DataTable dataTable) {
+        double fileDownloadTimeout = Config.getTimeProperty("file.download.timeout");
+        String dirName = FileUtils.getDownloadFilePath();
+        AtomicBoolean wasClicked = new AtomicBoolean(false);
+        Page.WaitForDownloadOptions options = new Page.WaitForDownloadOptions().setTimeout(fileDownloadTimeout);
+        Map<String, File> filesMap = new HashMap<>();
+        dataTable.asMaps().forEach(data -> {
+            String fileName = TestDataUtils.get(data, "Имя файла");
+            String renameTo = TestDataUtils.get(data, "Новое имя файла");
+            File file = new File(dirName, renameTo);
+            filesMap.put(fileName, file);
+        });
+        Consumer<Download> download = pwDownload -> {
+            File file = filesMap.get(pwDownload.suggestedFilename());
+            pwDownload.saveAs(file.toPath());
+            TauLogger.report("Загружен файл \"%s\" в папку \"%s\"", file.getName(), dirName);
+        };
+        getPage().onDownload(download);
+        filesMap.forEach((fileName, file) -> getPage().waitForDownload(options, () -> {
+            if (!wasClicked.getAndSet(true)) {
+                element.getElementPwLocator().click();
+                TauLogger.report("Нажали на кнопку \"%s\"", element.getElementName());
+            }
+        }));
     }
 
     @Override

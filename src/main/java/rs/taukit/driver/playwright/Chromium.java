@@ -29,8 +29,11 @@ public class Chromium extends PwBrowser {
                 "--load-extension=" + browserExtensionPath,
                 "--disable-extensions-except=" + browserExtensionPath,
                 "--embedded-extension-options=true");
-        return browserType.launch(new BrowserType.LaunchOptions().setArgs(args)
-                .setHeadless(Config.getBooleanProperty("browser.headless")));
+        File downloadDir = new File(Config.getProperty("downloads.dir"));
+        return browserType.launch(new BrowserType.LaunchOptions()
+                .setArgs(args)
+                .setHeadless(Config.getBooleanProperty("browser.headless"))
+                .setDownloadsPath(downloadDir.toPath()));
     }
 
     @Override
@@ -71,6 +74,7 @@ public class Chromium extends PwBrowser {
                     "--embedded-extension-options=true"));
             persistentContext = chromeDirInternally;
         }
+        File downloadDir = new File(Config.getProperty("downloads.dir"));
         return browser.browserType()
                 .launchPersistentContext(
                         persistentContext.getAbsoluteFile().toPath(),
@@ -79,6 +83,8 @@ public class Chromium extends PwBrowser {
                                 .setViewportSize(
                                         Config.getIntegerProperty("window.width"),
                                         Config.getIntegerProperty("window.height"))
-                                .setHeadless(Config.getBooleanProperty("browser.headless")));
+                                .setHeadless(Config.getBooleanProperty("browser.headless"))
+                                .setDownloadsPath(downloadDir.toPath())
+                                .setIgnoreHTTPSErrors(true));
     }
 }

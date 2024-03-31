@@ -1,19 +1,10 @@
 package rs.taukit.validator;
 
-import io.cucumber.datatable.DataTable;
-import io.qameta.allure.Step;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.pdmodel.common.PDStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import rs.taukit.config.Config;
-import rs.taukit.testdata.ExpectedResult;
-import rs.taukit.testdata.TestDataInstruction;
-import rs.taukit.utils.FileUtils;
-import rs.taukit.utils.TauLogger;
-import rs.taukit.utils.TestDataUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,12 +13,14 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static rs.taukit.utils.BasicUtils.*;
+import static rs.taukit.utils.BasicUtils.driver;
+import static rs.taukit.utils.BasicUtils.scenario;
 
 /**
  * Класс для работы с pdf-документами
@@ -60,55 +53,11 @@ public class PdfValidator {
         return String.format("%s/%s/%s", downloadDirPath, scenarioName, fileName);
     }
 
-    /**
-     * Формирует текстовый файл шаблона pdf-документа из фрагментов, перечисленных в "инструкции"
-     *
-     * @param templateName - название формируемого файла шаблона
-     * @param instruction  - название параметра в тестовых данных, содержащего "инструкцию" по сборке шаблона
-     */
-    @Step("сформировать шаблон '{templateName}' в соответствии с инструкцией '{instruction}'")
-    public void createPdfTemplate(String templateName, String instruction) {
-        TestDataInstruction testDataInstruction = scenarioData().get(instruction);
-        createPdfTemplate(templateName, testDataInstruction.getDataTable());
-    }
-
-    /**
-     * Формирует текстовый файл шаблона pdf-документа из фрагментов, перечисленных в таблице данных
-     *
-     * @param templateName - название формируемого файла шаблона
-     * @param dataTable    - таблица данных, вида <br><table><tr><td>| Директория </td><td>| Фрагмент </td><td>|</td></tr>
-     *                     <tr><td>| <i>Папка с фрагментами </i></td><td>| <i>Название файла </i></td><td>|</td></tr></table>
-     */
-    public void createPdfTemplate(String templateName, DataTable dataTable) {
-        FileUtils.createFile(templateFilePath);
-        dataTable.asMaps().forEach(item -> {
-            String templatesDir = Config.getProperty("templates.dir");
-            String templateType = TestDataUtils.get(item, "Директория");
-            String fragmentName = TestDataUtils.get(item, "Фрагмент");
-            String fragmentPath = String.format("%s/%s/%s", templatesDir, templateType, fragmentName);
-            FileUtils.appendFile(templateFilePath, FileUtils.readFile(fragmentPath));
-        });
-    }
-
-    @Step("сформировать эталон '{this.standardFileName}' по файлу '{standardBaseFilePath}' и шаблону '{templateName}'")
-    public void createPdfStandard(String standardBaseFilePath, String templateName) {
-        String templateContent = eval(FileUtils.readFile(templateFilePath));
-        File standardFile = new File(standardBaseFilePath);
-        templateLineList = templateContent.lines().toList();
-        try (PDDocument document = PDDocument.load(standardFile)) {
-            PDPageTree pageTree = document.getDocumentCatalog().getPages();
-            pageTree.forEach(this::editPage);
-            document.save(standardFilePath);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
 
     private void editPage(PDPage page) {
         this.currentPdPage = page;
         page.getContentStreams().forEachRemaining(this::editPageContentWrapper);
-        page.setContents(pdStreamList);
+        page.setContents(this.pdStreamList);
     }
 
     private void editPageContentWrapper(PDStream pdStream) {
@@ -160,7 +109,7 @@ public class PdfValidator {
                     throw new RuntimeException(e);
                 }
             });
-            double xEnd = xStart + width.get();
+            double xEnd = xStart + Optional.ofNullable(width.get()).orElse(0.0);
             return String.format("%.2f %s", xEnd, matcher.group(4));
         } else {
             throw new RuntimeException(String.format("Формат строки \"%s\" не соответствует требованиям", line));
@@ -170,22 +119,6 @@ public class PdfValidator {
     public void comparePdfDocuments() {
         driver().openBrowser(true);
         String testedPdfUrl = new File(testedFilePath).toURI().toString();
-    }
-
-    @Step("проверить документ '{this.testedFileName}' на соответствие эталону")
-    public void validate(DataTable dataTable) {
-        TauLogger.attachDataTable("Параметры проверки", dataTable);
-        scenarioData().put(dataTable);
-        waitForDownload();
-        String instructionName = scenarioData().get("инструкция");
-        createPdfTemplate(templateFileName, instructionName);
-        String standardBaseFilePath = scenarioData().get("эталон");
-        createPdfStandard(standardBaseFilePath, templateFileName);
-    }
-
-    @Step("дождаться окончания загрузки файла '{this.testedFileName}'")
-    public void waitForDownload() {
-        new ExpectedResult(List.of("файл", this.testedFileName, "загружен")).waitForResult();
     }
 
 }

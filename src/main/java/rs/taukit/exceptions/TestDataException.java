@@ -12,7 +12,7 @@ public class TestDataException extends AutoTestBrokenException {
      * @param message сообщение, описывающее ошибку
      */
     public TestDataException(Throwable cause, String message) {
-        super(String.format("Ошибка при обработке тестовых данных: %s", message), cause);
+        super(cause, "Ошибка при обработке тестовых данных: %s", message);
     }
 
     public TestDataException() {

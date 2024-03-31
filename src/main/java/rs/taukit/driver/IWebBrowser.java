@@ -1,5 +1,6 @@
 package rs.taukit.driver;
 
+import io.cucumber.datatable.DataTable;
 import rs.taukit.element.playwright.PwFileDownload;
 import rs.taukit.page.PageObject;
 import rs.taukit.records.ApiResponse;
@@ -34,6 +35,8 @@ public interface IWebBrowser {
     ApiResponse sendGet(String requestUrl);
 
     void downloadByClick(PwFileDownload element, String fileName);
+
+    void downloadByClick(PwFileDownload element, DataTable dataTable);
 
     void closeTab(int tabIndex);
 

@@ -1,5 +1,6 @@
 package rs.taukit.step.cucumber;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ru.И;
 import rs.taukit.step.allure.AllureBasicFileStep;
 import rs.taukit.testdata.TestDataFile;
@@ -16,6 +17,10 @@ public class CucumberBasicFileStep {
         return new AllureBasicFileStep(fileDir, fileName);
     }
 
+    private AllureBasicFileStep fileStep(String fileDir, DataTable dataTable) {
+        return new AllureBasicFileStep(fileDir, dataTable);
+    }
+
     private AllureBasicFileStep fileStep(TestDataFile testDataFile) {
         return new AllureBasicFileStep(testDataFile);
     }
@@ -23,7 +28,13 @@ public class CucumberBasicFileStep {
     @И("^нажать на \"(.+)\" и скачать файл \"(.+)\"$")
     public void downloadFile(String buttonName, String fileName) {
         String dirPath = FileUtils.getDownloadFilePath();
-        fileStep(dirPath, fileName).downloadFile(buttonName, eval(fileName));
+        fileStep(dirPath, eval(fileName)).downloadFile(buttonName);
+    }
+
+    @И("^нажать на \"(.+)\" и скачать файлы:$")
+    public void downloadFiles(String buttonName, DataTable dataTable) {
+        String dirPath = FileUtils.getDownloadFilePath();
+        fileStep(dirPath, eval(dataTable)).downloadFiles(buttonName);
     }
 
     @И("^нажать на \"(.+)\" и выбрать загруженный файл \"(.+)\"$")

@@ -17,6 +17,10 @@ public class TestDataInstruction implements ITestData {
     private final LinkedHashMap<String, List<String>> content;
 
     public TestDataInstruction(String fieldName, LinkedHashMap<String, ?> data) {
+        this(fieldName, data, "");
+    }
+
+    public TestDataInstruction(String fieldName, LinkedHashMap<String, ?> data, String dirPath) {
         this.fieldName = fieldName;
         this.dataStorage = new DataStorage(data);
         this.content = YamlParser.parse(dataStorage.get("файл"));

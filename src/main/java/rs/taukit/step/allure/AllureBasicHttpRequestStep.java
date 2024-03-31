@@ -73,7 +73,6 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         } catch (Exception e) {
             throw new HttpRequestNotSentException(e, name, "POST");
         }
-
     }
 
     @Step("отправить GET-запрос '{this.name}' с параметрами:")
