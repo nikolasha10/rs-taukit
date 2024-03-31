@@ -6,6 +6,7 @@ import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import static rs.taukit.utils.BasicUtils.page;
 
@@ -38,6 +39,12 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
 
     @Override
     public void setValue(String value) {
+        try {
+            List<String> selectedValues = elementPwLocator.selectOption(value);
+            if (!selectedValues.isEmpty()) return;
+        } catch (Exception ignored) {
+            // ignored
+        }
         driver.waitForCondition(() -> {
             click();
             return options.isVisible();

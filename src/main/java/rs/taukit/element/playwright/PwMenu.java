@@ -7,7 +7,9 @@ import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasMenu;
 import rs.taukit.utils.TauLogger;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class PwMenu extends PwElement implements IHasMenu {
     public PwMenu(String elementName, LinkedHashMap<String, Object> elementData) {
@@ -29,13 +31,24 @@ public class PwMenu extends PwElement implements IHasMenu {
     @Override
     public void selectMenuItem(String itemName) {
         PwList itemList = getDescendant("Пункты меню");
-        if (itemList.getItemList().stream().anyMatch(item -> item.getText().equals(itemName))) {
-            itemList.setValue(itemName);
-        } else {
-            PwButton item = getDescendant("Дополнительные пункты");
-            item.click();
-            PwList additionalItemList = getDescendant("Выпадающий список");
-            additionalItemList.setValue(itemName);
+        List<String> itemValues = itemList.getValues();
+        List<String> additionalValues = new ArrayList<>();
+        try {
+            if (itemList.getItemList().stream().anyMatch(item -> item.getText().equals(itemName))) {
+                itemList.setValue(itemName);
+            } else {
+                PwButton item = getDescendant("Дополнительные пункты");
+                item.click();
+                PwList additionalItemList = getDescendant("Выпадающий список");
+                additionalValues = additionalItemList.getValues();
+                additionalItemList.setValue(itemName);
+            }
+        } catch (Exception e) {
+            String message = String.format("""
+                    Элемент с текстом '%s' не найден среди пунктов меню.
+                    Доступны основные: %s
+                    Дополнительные: %s""", itemName, itemValues, additionalValues);
+            throw new RuntimeException(message, e);
         }
     }
 
@@ -49,5 +62,4 @@ public class PwMenu extends PwElement implements IHasMenu {
             TauLogger.fail(e, "Не удалось выбрать значение \"%s\" в списке \"%s\"", value, elementName);
         }
     }
-
 }

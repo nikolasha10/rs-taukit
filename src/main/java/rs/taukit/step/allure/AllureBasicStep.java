@@ -55,14 +55,23 @@ public class AllureBasicStep extends BasicUtils {
         waitForConditions(dataTable);
     }
 
+    @Step("дождаться выполнения условий в течение {timeoutString}:")
+    public static void waitForConditionsWithinTimeIntervalNoName(String timeoutString, DataTable dataTable) {
+        waitForConditions(TimeStringParser.getTime(timeoutString), dataTable);
+    }
+
     public static void waitForConditions(DataTable dataTable) {
+        double elementCheckTimeout = Config.getTimeProperty("element.check.timeout");
+        waitForConditions(elementCheckTimeout, dataTable);
+    }
+
+    public static void waitForConditions(double elementCheckTimeout, DataTable dataTable) {
         TauLogger.attachDataTable("Ожидаемый результат", dataTable);
         TauLogger.console("Ожидается выполнение условий", dataTable);
         BooleanSupplier conditions = () -> dataTable.asMaps().stream()
                 .map(data -> new ExpectedResult(data).waitForResult())
                 .allMatch(ExpectedResult::isConditionMet);
         double elementCheckInterval = Config.getTimeProperty("element.check.interval");
-        double elementCheckTimeout = Config.getTimeProperty("element.check.timeout");
         try {
             driver().waitForCondition(conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage().getStepActions());
         } catch (Exception e) {
@@ -81,8 +90,14 @@ public class AllureBasicStep extends BasicUtils {
                 String expectedValue = firstUnexpectedResult.getExpectedValue() == null
                         ? ""
                         : String.format(" \"%s\"", firstUnexpectedResult.getExpectedValue());
-                TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s \"%s\" %s %s",
-                        objectType, objectName, objectState, expectedValue);
+                if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") == null) {
+                    TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s \"%s\" %s %s",
+                            objectType, objectName, objectState, expectedValue);
+                } else {
+                    TauLogger.warn(e, "Не удалось дождаться выполнения условия: %s \"%s\" %s %s",
+                            objectType, objectName, objectState, expectedValue);
+                    scenarioData().put("NEXT_CHECK_NOT_CRITICAL", null);
+                }
             }
         }
         TauLogger.report("Условия выполнены");
@@ -141,5 +156,10 @@ public class AllureBasicStep extends BasicUtils {
         pwList.setValue(eval(listValue));
         scenarioStorage().saveStepAction(() -> pwList.setValue(eval(listValue)));
         TauLogger.report("в списке \"%s\" выбран \"%s\"", listName, listValue);
+    }
+
+    @Step("[примечание] результат следующей проверки некритичен для теста")
+    public static void setNextCheckNotCritical() {
+        scenarioData().put("NEXT_CHECK_NOT_CRITICAL", "NOT CRITICAL");
     }
 }

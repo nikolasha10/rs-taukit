@@ -44,6 +44,11 @@ public class CucumberBasicStep {
         AllureBasicStep.waitForConditionsNoName(eval(datatable));
     }
 
+    @И("^дождаться выполнения условий в течение \"(.+)\":$")
+    public void expectedResultCheckWithinTimeInterval(String timeoutString, DataTable datatable) {
+        AllureBasicStep.waitForConditionsWithinTimeIntervalNoName(timeoutString, eval(datatable));
+    }
+
     /**
      * Ожидает выполнение условий, перечисленных в таблице datatable
      *
@@ -95,6 +100,11 @@ public class CucumberBasicStep {
     @И("^примечание: выходим из контекста блока \"(.+)\"$")
     public void closeBlockContext(String blockName) {
         AllureBasicStep.closeCurrentContext(true);
+    }
+
+    @И("^примечание: результат следующей проверки некритичен для теста$")
+    public void setNextCheckNotCritical() {
+        AllureBasicStep.setNextCheckNotCritical();
     }
 
 }
