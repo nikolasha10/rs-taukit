@@ -60,6 +60,14 @@ public class FileUtils {
             throw new RuntimeException(e);
         }
     }
+    public static List<String> readFileToLineList(String filePath) {
+        File file = new File(filePath);
+        try {
+            return Files.readAllLines(file.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void writeFile(String filePath, String content){
         File file = new File(filePath);

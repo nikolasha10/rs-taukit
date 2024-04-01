@@ -189,6 +189,11 @@ public final class TauLogger {
         fail(String.format(format, args));
     }
 
+    public static void fail(Runnable runnable, String format, Object... args) {
+        runnable.run();
+        fail(format, args);
+    }
+
     /**
      * Выводит сообщение о фатальной ошибке в действии и НЕ делает скриншот
      */

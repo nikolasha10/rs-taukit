@@ -314,8 +314,7 @@ public class PdfUtils {
 
     }
 
-    public static List<String> getPageContentFilePaths(String filePath) {
-        String fileName = FileUtils.getFileName(filePath);
+    public static List<String> getPageContentFilePaths(String fileName, String filePath) {
         List<String> pageContentFilePathList = new ArrayList<>();
         try {
             PdfReader reader = new PdfReader(filePath);

@@ -13,13 +13,14 @@ import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.testdata.TestDataInstruction;
 import rs.taukit.utils.*;
 
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -45,7 +46,7 @@ public class AllureBasicPrintFormStep extends BasicUtils {
         this.testedFilePath = getFilePath(testedFileName);
         this.templateFileName = this.testedFileName.replace(".pdf", " template.txt");
         this.templateFilePath = getFilePath(templateFileName);
-        this.standardFileName = this.testedFileName.replace(".pdf", " standard.pdf");
+        this.standardFileName = this.testedFileName.replace(".pdf", " (эталон).pdf");
         this.standardFilePath = getFilePath(standardFileName);
     }
 
@@ -57,19 +58,13 @@ public class AllureBasicPrintFormStep extends BasicUtils {
         TauLogger.attachPdfFile(testedFileName, testedFilePath);
         TauLogger.attachPdfFile(standardFileName, standardBaseFilePath);
         List<String> errorList = new ArrayList<>(validateTextContent(standardBaseFilePath));
-
-//        waitForDownload();
-//        String instructionName = scenarioData().get("инструкция");
-//        createPdfTemplate(templateFileName, instructionName);
-
-//        createPdfStandard(standardBaseFilePath, templateFileName);
     }
 
     @Step("проверить текстовое содержимое файла '{this.testedFileName}' на соответствие эталону")
     public List<String> validateTextContent(String standardBaseFilePath) {
         List<String> errorList = new ArrayList<>();
-        List<String> testedFilePageList = PdfUtils.getPageContentFilePaths(testedFilePath);
-        List<String> standardFilePageList = PdfUtils.getPageContentFilePaths(standardBaseFilePath);
+        List<String> testedFilePageList = PdfUtils.getPageContentFilePaths(testedFileName, testedFilePath);
+        List<String> standardFilePageList = PdfUtils.getPageContentFilePaths(standardFileName, standardBaseFilePath);
 
         int testedFilePageSize = testedFilePageList.size();
         int standardFilePageSize = standardFilePageList.size();
@@ -79,18 +74,36 @@ public class AllureBasicPrintFormStep extends BasicUtils {
         }
 
         List<Integer> differentPages = new ArrayList<>();
+        List<Map<String, BufferedImage>> images = new ArrayList<>();
         for (int i = 0; i < Math.min(testedFilePageSize, standardFilePageSize); i++) {
-            List<String> pageErrorsList = FileUtils.compareTextFiles(
-                    testedFilePageList.get(i), standardFilePageList.get(i));
+            String testedPageFilePath = testedFilePageList.get(i);
+            String standardPageFilePath = standardFilePageList.get(i);
+            List<String> pageErrorsList = FileUtils.compareTextFiles(testedPageFilePath, standardPageFilePath);
             if (!pageErrorsList.isEmpty()) {
                 differentPages.add(i + 1);
-                List<List<String>> dataTableList = new ArrayList<>();
-                pageErrorsList.forEach(errorMessage -> dataTableList.add(Collections.singletonList(errorMessage)));
-                DataTable pageErrorsTable = DataTable.create(dataTableList, TextUtils.tableConverter);
-                String pageErrorsTableName = String.format("Содержимое страницы %d отличается от ожидаемого", i + 1);
-                TauLogger.attachDataTable(pageErrorsTableName, pageErrorsTable);
-                TauLogger.attachFile(String.format("Текст страницы %d (тест)", i + 1), testedFilePageList.get(i));
-                TauLogger.attachFile(String.format("Текст страницы %d (ожидаемый)", i + 1), standardFilePageList.get(i));
+                List<String> testedLines = FileUtils.readFileToLineList(testedPageFilePath);
+                List<String> standardLines = FileUtils.readFileToLineList(standardPageFilePath);
+                int maxLineCount = Math.max(testedLines.size(), standardLines.size());
+                testedLines.addAll(standardLines);
+                int longerLineIndex = 0;
+                int maxLength = 0;
+                for (int j = 0; j < testedLines.size(); j++) {
+                    if (testedLines.get(j).length() > maxLength) {
+                        longerLineIndex = j;
+                        maxLength = testedLines.get(j).length();
+                    }
+                }
+                String longerString = testedLines.get(longerLineIndex);
+                BufferedImage testedImage = ImageUtils.textFileToImage(testedPageFilePath, longerString, maxLineCount);
+                BufferedImage standardImage = ImageUtils.textFileToImage(standardPageFilePath, longerString, maxLineCount);
+                BufferedImage differencesImage = ImageUtils.getDifferencesImage(testedImage, standardImage);
+                if (differencesImage != null) {
+                    images.add(Map.of(
+                            "tested", testedImage,
+                            "expected", standardImage,
+                            "differences", differencesImage
+                    ));
+                }
             }
         }
         if (!differentPages.isEmpty()) {
@@ -99,7 +112,18 @@ public class AllureBasicPrintFormStep extends BasicUtils {
         if (errorList.isEmpty()) {
             TauLogger.report("Текстовое содержимое файла соответствует эталону");
         } else {
-            TauLogger.fail("Текстовое содержимое файла '%s' не соответствует эталону", testedFileName);
+            Runnable runnable = () -> {
+                for (int i = 0; i < differentPages.size(); i++) {
+                    Map<String, BufferedImage> imageMap = images.get(i);
+                    String attachment = ImageUtils.getCompareResult(
+                            imageMap.get("tested"),
+                            imageMap.get("expected"),
+                            imageMap.get("differences"));
+                    TauLogger.attachFile("Страница " + differentPages.get(i), attachment.getBytes());
+                }
+            };
+            TauLogger.fail(runnable, "Текстовое содержимое файла '%s' не соответствует эталону. %s",
+                    testedFileName, String.join(" ", errorList));
         }
         return errorList;
     }
