@@ -5,10 +5,12 @@ KIT)
 
 <h3>Перед началом работы</h3>
 <ol>
-<li>Клонировать проект фреймворка с репозитория GitLab: <p> git clone http://git.dos.softlab.ru/kudryashov/rs-taukit.git </p></li>
+<li>Клонировать проект фреймворка с репозитория GitLab: <p> git clone http://git.dos.softlab.ru/autotest/rs-taukit.git </p></li>
+<li>Открыть проект в IntelliJ Idea</li>
 <li>Открыть в терминале папку src</li>
-<li>Клонировать проект автотестов ЕФР с репозитория GitLab: <p> git clone http://git.dos.softlab.ru/kudryashov/efr-at.git </p></li>
-<li>Пометить папку <a>src/efr-at/java</a>, как <i>Test Sources Root</i> (правой кнопкой мыши - Mark Directory as)</li>
+<li>Клонировать проект автотестов (например, с репозитория GitLab: <p> git clone http://git.dos.softlab.ru/autotest/efr-at.git </p></li>
+<li>Пометить папку <a>src/efr-at/java</a>, как <i>Test Sources Root</i> (правой кнопкой мыши - Mark Directory as). 
+Это необходимо, для того чтобы Idea включила эту папку в ClassPath и нашла класс TestRunner с исполняемым методом </li>
 <li>Пометить папку <a>src/efr-at/resources</a>, как <i>Test Resources Root</i></li>
 <li>Открыть File -> Setting -> Plugins и проверить, установлены ли плагины:
     <ul>
@@ -49,8 +51,8 @@ KIT)
 </li>
 <li>Сделать его копию с названием runtime.properties (этот файл добавлен в .gitignor, так что можно его править, не
 боясь случайно закоммитить неправильные настройки)</li>
-<li>Распаковать архив browserExtensions/chromium.7z в ту же папку, где он находится (можно в другую, но тогда изменить
-значение настройки browser.extensions)</li>
+<li>Распаковать содержимое архива browserExtensions/chromium.7z в ту же папку, где он находится (можно в другую, но тогда изменить
+значение настройки browser.extensions в runtime.properties)</li>
 <li>Изменить настройки в <u><i>runtime.properties</i></u> в соответствии с текущими
 условиями (например, указать стенд в опции <i>standName</i>)</li>
 <li>Указать для запуска какой-нибудь сценарий из набора <i>000. Подготовка тестовых условий</i>, прописав его тег в настройке <i>scenario.tags</i>. Например, scenario.tags = @000.001.001</li>
