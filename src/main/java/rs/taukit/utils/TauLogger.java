@@ -184,6 +184,7 @@ public final class TauLogger {
     @Step("{message}")
     public static void fail(Runnable runnable, String message) {
         runnable.run();
+        attachFullScreenshots();
         throw new AssertionError(message);
     }
 

@@ -72,11 +72,6 @@ public class CucumberBasicStep {
         AllureBasicStep.waitForElement(elementType, elementName);
     }
 
-    @И("^в списке \"(.+)\" выбрать \"(.+)\"$")
-    public void listValueClick(String listName, String listValue) {
-        AllureBasicStep.listValueClick(listName, eval(listValue));
-    }
-
     @И("^сохранить файл \"(.+)\", как \"(.+)\"$")
     public void saveDownloadedFileAs(String originalFileName, String fileName) {
         FileUtils.saveDownloadedFileAs(eval(originalFileName), eval(fileName));

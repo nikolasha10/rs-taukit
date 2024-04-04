@@ -53,7 +53,8 @@ public class AllureBasicPrintFormStep extends BasicUtils {
                     differentPages.add(pageDifferences.pageNumber());
                 }
             };
-            TauLogger.fail(runnable, "Страницы %s файла '%s' не соответствуют эталону", testedFileName);
+            TauLogger.fail(runnable, "Страницы %s файла '%s' не соответствуют эталону",
+                    differentPages, testedFileName);
             return false;
         }
     }

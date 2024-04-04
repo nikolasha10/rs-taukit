@@ -4,7 +4,6 @@ import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.config.Config;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.playwright.PwList;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.utils.BasicUtils;
@@ -148,14 +147,6 @@ public class AllureBasicStep extends BasicUtils {
             TauLogger.fail(e, "Не удалось дождаться отображения %s \"%s\" на странице \"%s\"",
                     elementType, elementName, scenarioStorage().getCurrentPageName());
         }
-    }
-
-    @Step("в списке '{listName}' выбрать '{listValue}'")
-    public static void listValueClick(String listName, String listValue) {
-        PwList pwList = element(listName).castTo(PwList.class);
-        pwList.setValue(eval(listValue));
-        scenarioStorage().saveStepAction(() -> pwList.setValue(eval(listValue)));
-        TauLogger.report("в списке \"%s\" выбран \"%s\"", listName, listValue);
     }
 
     @Step("[примечание] результат следующей проверки некритичен для теста")
