@@ -1,6 +1,5 @@
 package rs.taukit.utils;
 
-import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.comparison.ImageDiff;
 import ru.yandex.qatools.ashot.comparison.ImageDiffer;
 
@@ -58,9 +57,7 @@ public class ImageUtils {
     }
 
     public static BufferedImage getDifferencesImage(BufferedImage testedImage, BufferedImage standardImage) {
-        Screenshot testedScreenshot = new Screenshot(testedImage);
-        Screenshot standardScreenshot = new Screenshot(standardImage);
-        ImageDiff diff = new ImageDiffer().makeDiff(standardScreenshot, testedScreenshot);
+        ImageDiff diff = new ImageDiffer().makeDiff(standardImage, testedImage);
         if (diff.hasDiff()) {
             return diff.getMarkedImage();
         } else return null;
@@ -88,5 +85,23 @@ public class ImageUtils {
         } catch (IOException e) {
             throw new RuntimeException("Что-то пошло не так", e);
         }
+    }
+
+    public static BufferedImage generateCleanImage(int width, int height) {
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = img.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
+        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        g2d.setBackground(Color.WHITE);
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(0, 0, width, height);
+        g2d.dispose();
+        return img;
     }
 }

@@ -4,16 +4,23 @@
 	<style>
 		body { text-align: center; }
 		table { margin: 0 auto; }
+		th { font-weight: bold; text-align: center; border-bottom: 2px solid gray; }
 	</style>
 </head>
 
 <body>
 	<table>
 		<tr>
-			<td><div><div id="comparedFiles">Тест</div><img id="image" src=""></div></td>
-			<td><div><div>Различия:</div><img id="differences" src=""></div></td>
+			<th id="comparedFiles">Тест</th>
+			<th>Результат сравнения:</th>
+
+		</tr>
+		<tr>
+			<td><div><img id="image" src=""></div></td>
+			<td><div><div></div><img id="differences" src=""></div></td>
 		</tr>
 	</table>
+	<div></div>
 	<script type="text/javascript" defer>
 		var images = ["${tested}","${expected}","${differences}"];
 		var labels = ["Тест","Эталон"];

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static rs.taukit.utils.BasicUtils.driver;
+import static rs.taukit.utils.BasicUtils.scenarioData;
 
 /**
  * Класс отвечающий за вывод сообщений в лог и allure-отчеты
@@ -104,14 +105,14 @@ public final class TauLogger {
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
-        BasicUtils.scenarioData().put("WARNING", "PASSED with ERRORS");
+        scenarioData().put("WARNING", "PASSED with ERRORS");
         attachFullScreenshots();
     }
 
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message, Runnable runnable) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
-        BasicUtils.scenarioData().put("WARNING", "PASSED with ERRORS");
+        scenarioData().put("WARNING", "PASSED with ERRORS");
         runnable.run();
     }
 
@@ -129,13 +130,13 @@ public final class TauLogger {
     @Step("Некритическая ошибка: {message}")
     public static void warnWOSS(String message) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
-        BasicUtils.scenarioData().put("WARNING", "PASSED with ERRORS");
+        scenarioData().put("WARNING", "PASSED with ERRORS");
     }
 
     @Step("Некритическая ошибка: {message}")
     public static void warnWOSS(String message, Throwable e) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
-        BasicUtils.scenarioData().put("WARNING", "PASSED with ERRORS");
+        scenarioData().put("WARNING", "PASSED with ERRORS");
     }
 
     public static void warnWOSS(String message, Object... args) {
@@ -152,7 +153,7 @@ public final class TauLogger {
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message, Throwable e) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
-        BasicUtils.scenarioData().put("WARNING", "PASSED with ERRORS");
+        scenarioData().put("WARNING", "PASSED with ERRORS");
         attachFullScreenshots();
     }
 
@@ -173,11 +174,17 @@ public final class TauLogger {
     /**
      * Выводит сообщение о фатальной ошибке в действии. так же выводит сообщение об ошибке
      */
-    @Step("{0}")
+    @Step("{message}")
     public static void fail(String message, Throwable e) {
 //        attachPageSource();
         attachFullScreenshots();
         throw new AssertionError(message, e);
+    }
+
+    @Step("{message}")
+    public static void fail(Runnable runnable, String message) {
+        runnable.run();
+        throw new AssertionError(message);
     }
 
     public static void fail(Throwable e, String format, Object... args) {
@@ -190,8 +197,13 @@ public final class TauLogger {
     }
 
     public static void fail(Runnable runnable, String format, Object... args) {
-        runnable.run();
-        fail(format, args);
+        String message = String.format(format, args);
+        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") == null) {
+            fail(runnable, message);
+        } else {
+            warn(runnable, format, args);
+            scenarioData().put("NEXT_CHECK_NOT_CRITICAL", null);
+        }
     }
 
     /**
@@ -354,6 +366,7 @@ public final class TauLogger {
         }
         return null;
     }
+
     @Attachment(value = "{fileName}", type = "application/pdf")
     public static byte[] attachPdfFile(String fileName, String filePath) {
         File file = new File(filePath);

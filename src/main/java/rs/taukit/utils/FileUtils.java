@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static rs.taukit.utils.BasicUtils.eval;
 import static rs.taukit.utils.BasicUtils.scenario;
 
 public class FileUtils {
@@ -60,6 +61,7 @@ public class FileUtils {
             throw new RuntimeException(e);
         }
     }
+
     public static List<String> readFileToLineList(String filePath) {
         File file = new File(filePath);
         try {
@@ -69,15 +71,16 @@ public class FileUtils {
         }
     }
 
-    public static void writeFile(String filePath, String content){
+    public static void writeFile(String filePath, String content) {
         File file = new File(filePath);
         try {
             Files.writeString(file.toPath(), content);
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new FileNotCreatedException(e, filePath);
         }
 
     }
+
     public static void appendFile(String filePath, String text) {
         File file = new File(filePath);
         try {
@@ -117,11 +120,11 @@ public class FileUtils {
         return file.getName();
     }
 
-    public static void createDirectories(String filePath){
+    public static void createDirectories(String filePath) {
         File file = new File(filePath);
         try {
             Files.createDirectories(file.toPath());
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -130,25 +133,38 @@ public class FileUtils {
         List<String> errorsList = new ArrayList<>();
         String testedFileContent = readFile(testedFilePath);
         String standardFileContent = readFile(standardFilePath);
-        if (!testedFileContent.equals(standardFileContent)){
+        if (!testedFileContent.equals(standardFileContent)) {
             List<String> testedFileRows = List.of(testedFileContent.split("\n"));
             List<String> standardFileRows = List.of(standardFileContent.split("\n"));
             int testedFileRowsSize = testedFileRows.size();
             int standardFileRowsSize = standardFileRows.size();
-            if (testedFileRowsSize != standardFileRowsSize){
+            if (testedFileRowsSize != standardFileRowsSize) {
                 errorsList.add(String.format("Количество строк (%d) не равно ожидаемому (%d)",
                         testedFileRowsSize, standardFileRowsSize));
             }
             List<Integer> differentRows = new ArrayList<>();
             for (int i = 0; i < Math.min(testedFileRowsSize, standardFileRowsSize); i++) {
-                if (!testedFileRows.get(i).equals(standardFileRows.get(i))){
+                if (!testedFileRows.get(i).equals(standardFileRows.get(i))) {
                     differentRows.add(i + 1);
                 }
             }
-            if (!differentRows.isEmpty()){
+            if (!differentRows.isEmpty()) {
                 errorsList.add(String.format("Содержимое строк %s отличается от ожидаемого", differentRows));
             }
         }
         return errorsList;
+    }
+
+    public static void replaceValues(String filePath, String instructionPath) {
+        StringBuilder builder = new StringBuilder(readFile(filePath));
+        List<Map<String, String>> instruction = YamlParser.parse(instructionPath);
+        for (Map<String, String> item : instruction) {
+            try {
+                builder = new StringBuilder(builder.toString().replaceAll(item.get("текст"), eval(item.get("замена"))));
+            } catch (Exception ignored) {
+                TauLogger.console("Не удалось заменить '%s' на '%s'", item.get("текст"), eval(item.get("замена")));
+            }
+        }
+        writeFile(filePath, eval(builder.toString()));
     }
 }

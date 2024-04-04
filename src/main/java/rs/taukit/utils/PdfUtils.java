@@ -7,7 +7,6 @@ import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import io.cucumber.datatable.DataTable;
-import io.qameta.allure.Step;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
@@ -16,8 +15,11 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.common.PDStream;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import rs.taukit.config.Config;
 import rs.taukit.driver.playwright.PlaywrightDriver;
 import rs.taukit.page.playwright.PlaywrightPageObject;
+import rs.taukit.records.ImageDifferences;
 import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.comparison.ImageDiff;
 import ru.yandex.qatools.ashot.comparison.ImageDiffer;
@@ -68,12 +70,7 @@ public class PdfUtils {
         PdfUtils.replacePdfContent(originFilePath, editedFilePath, evaluatingContent);
     }
 
-    @Step("сравнить файл '{testedFileName}' с эталоном")
-    public static void comparePdfFiles(String testedFileName, String standardFileName) {
-        String testedFilePath = String.format("target/downloads/%s/%s",
-                scenario().getName(), testedFileName);
-        String standardFilePath = String.format("target/downloads/%s/%s",
-                scenario().getName(), standardFileName);
+    public static void comparePdfFiles(String testedFilePath, String standardFilePath) {
         PlaywrightDriver driver = driver().castTo();
         driver.openBrowser(true);
         PlaywrightPageObject pageObject = driver.getCurrentBrowser().getCurrentPage();
@@ -311,7 +308,48 @@ public class PdfUtils {
                 System.out.printf("%s%s: %s%n", space, name, baseObject);
             }
         }
+    }
 
+    public static List<ImageDifferences> comparePdf(String testedFilePath, String standardFilePath) {
+        List<ImageDifferences> images = new ArrayList<>();
+        try {
+            PDDocument testedDocument = PDDocument.load(new File(testedFilePath));
+            PDFRenderer testedRenderer = new PDFRenderer(testedDocument);
+            PDDocument standardDocument = PDDocument.load(new File(standardFilePath));
+            PDFRenderer standardRenderer = new PDFRenderer(standardDocument);
+            int testedPagesNumber = testedDocument.getNumberOfPages();
+            int standardPagesNumber = standardDocument.getNumberOfPages();
+            for (int i = 1; i < Math.max(testedPagesNumber, standardPagesNumber); i++) {
+                BufferedImage testedImage = null;
+                BufferedImage standardImage = null;
+                if (i <= testedPagesNumber) {
+                    testedImage = getPdfPageImage(testedRenderer, i);
+                }
+                if (i <= standardPagesNumber) {
+                    standardImage = getPdfPageImage(standardRenderer, i);
+                }
+                if (testedImage == null) {
+                    assert standardImage != null;
+                    testedImage = ImageUtils.generateCleanImage(standardImage.getWidth(), standardImage.getHeight());
+                }
+                if (standardImage == null) {
+                    standardImage = ImageUtils.generateCleanImage(testedImage.getWidth(), testedImage.getHeight());
+                }
+                BufferedImage differencesImage = ImageUtils.getDifferencesImage(testedImage, standardImage);
+                if (differencesImage != null) {
+                    images.add(new ImageDifferences(i, testedImage, standardImage, differencesImage));
+                }
+            }
+            standardDocument.close();
+            testedDocument.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return images;
+    }
+
+    private static BufferedImage getPdfPageImage(PDFRenderer renderer, int pageNumber) throws IOException {
+        return renderer.renderImageWithDPI(pageNumber, Config.getIntegerProperty("pdf.convert.dpi"));
     }
 
     public static List<String> getPageContentFilePaths(String fileName, String filePath) {
