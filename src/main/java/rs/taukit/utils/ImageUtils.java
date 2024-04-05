@@ -6,6 +6,8 @@ import ru.yandex.qatools.ashot.comparison.ImageDiffer;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -90,18 +92,26 @@ public class ImageUtils {
     public static BufferedImage generateCleanImage(int width, int height) {
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = img.createGraphics();
-        g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
-        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
         g2d.setBackground(Color.WHITE);
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, width, height);
         g2d.dispose();
         return img;
+    }
+
+    public static BufferedImage drawZone(BufferedImage originalImage, int x, int y, int width, int height) {
+        Graphics2D g2d = originalImage.createGraphics();
+        g2d.setBackground(Color.GRAY);
+        g2d.setColor(Color.GRAY);
+        g2d.fillRect(x, y, width, height);
+        g2d.dispose();
+        return originalImage;
+    }
+
+    static BufferedImage deepCopy(BufferedImage bi) {
+        ColorModel cm = bi.getColorModel();
+        boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+        WritableRaster raster = bi.copyData(null);
+        return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
     }
 }

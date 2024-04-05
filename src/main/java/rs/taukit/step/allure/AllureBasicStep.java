@@ -89,19 +89,14 @@ public class AllureBasicStep extends BasicUtils {
                 String expectedValue = firstUnexpectedResult.getExpectedValue() == null
                         ? ""
                         : String.format(" \"%s\"", firstUnexpectedResult.getExpectedValue());
-                if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") == null) {
-                    TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s \"%s\" %s %s",
-                            objectType, objectName, objectState, expectedValue);
-                } else {
-                    TauLogger.warn(e, "Не удалось дождаться выполнения условия: %s \"%s\" %s %s",
-                            objectType, objectName, objectState, expectedValue);
-                    scenarioData().put("NEXT_CHECK_NOT_CRITICAL", null);
-                }
+                TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s \"%s\" %s %s",
+                        objectType, objectName, objectState, expectedValue);
             }
         }
         TauLogger.report("Условия выполнены");
         scenarioStorage().clearStepActions();
         scenarioStorage().stopToSaveActions();
+        TauLogger.resetNotCritical();
     }
 
     @Step("[примечание] текущий контекст: блок '{blockName}'")
@@ -147,6 +142,7 @@ public class AllureBasicStep extends BasicUtils {
             TauLogger.fail(e, "Не удалось дождаться отображения %s \"%s\" на странице \"%s\"",
                     elementType, elementName, scenarioStorage().getCurrentPageName());
         }
+        TauLogger.resetNotCritical();
     }
 
     @Step("[примечание] результат следующей проверки некритичен для теста")

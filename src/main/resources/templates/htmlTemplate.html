@@ -3,13 +3,19 @@
 	<meta charset="utf-8">
 	<style>
 		body { text-align: center; }
-		table { margin: 0 auto; }
+с		table { margin: 0 auto; border-spacing: 10px; }
 		th { font-weight: bold; text-align: center; border-bottom: 2px solid gray; }
+		#draw {position: fixed; padding: 5px 10px; border: 1px solid gray; }
+		#show {position: fixed; top: 50px; padding: 5px 10px; border: 1px solid gray; }
+		.rectangle {position: absolute; border: 1px dashed gray; background-color: #90909050; }
+		.hidden {display: none}
 	</style>
 </head>
 
 <body>
-	<table>
+	<div id="draw"> + </div>
+	<div id="show"> S </div>
+	<table id="compareResults">
 		<tr>
 			<th id="comparedFiles">Тест</th>
 			<th>Результат сравнения:</th>
@@ -20,17 +26,197 @@
 			<td><div><div></div><img id="differences" src=""></div></td>
 		</tr>
 	</table>
-	<div></div>
 	<script type="text/javascript" defer>
 		var images = ["${tested}","${expected}","${differences}"];
 		var labels = ["Тест","Эталон"];
+		var ignoredZones = [${ignoredZonesData}];
 		var index = 0;
+		var drawing = 0;
+		var drawingStart = 0;
+		var areasCounter = 0;
 		image.src = images[index];
 		differences.src = images[2];
-		image.onclick = function(){
+		var switchComparedFiles = function(){
 			index = 1 - index;
 			this.src = images[index];
 			comparedFiles.innerText = labels[index];
+		}
+		image.onclick = switchComparedFiles;
+		var changeCursor = function(eventOver){
+			var x = eventOver.pageX;
+			var y = eventOver.pageY;
+			var dx = x - this.offsetLeft - this.offsetWidth;
+			var dy = y - this.offsetTop - this.offsetHeight;
+			var cursorStyle = [
+					["nwse-resize", "ns-resize", "nesw-resize"],
+					["ew-resize", "grab", "ew-resize"],
+					["nesw-resize", "ns-resize", "nwse-resize"]
+				];
+			var sy = 1;
+			var sx = 1;
+			if (dx <= 0 && dx > -5 ) sx = 2;
+			if (dx <= 5 - this.offsetWidth) sx = 0;
+			if (dy <= 0 && dy > -5) sy = 2;
+			if (dy <= 5 - this.offsetHeight) sy = 0;
+			this.style.cursor = cursorStyle[sy][sx];
+		}
+		var startReplaceZone = function(eventDown){
+			this.style.cursor = "grabbing";
+			var startX = eventDown.pageX;
+			var startY = eventDown.pageY;
+			var dx = startX - this.offsetLeft - this.offsetWidth;
+			var dy = startY - this.offsetTop - this.offsetHeight;
+			var sy = 1;
+			var sx = 1;
+			if (dx <= 0 && dx > -5 ) sx = 2;
+			if (dx <= 5 - this.offsetWidth) sx = 0;
+			if (dy <= 0 && dy > -5) sy = 2;
+			if (dy <= 5 - this.offsetHeight) sy = 0;
+
+			let x = startX - this.offsetLeft;
+			let y = startY - this.offsetTop;
+			let left = this.offsetLeft;
+			let right = this.offsetLeft + this.offsetWidth;
+			let bottom = this.offsetTop + this.offsetHeight;
+			let top = this.offsetTop;
+			let width = this.offsetWidth;
+			let height = this.offsetHeight;
+
+			let changeRectangle = function(rect, left, right, top, bottom){
+				rect.style.left = left + "px";
+				rect.style.top = top + "px";
+				rect.style.width = (right - left) + "px";
+				rect.style.height = (bottom - top) + "px"
+			}
+			let center = function(eventMove){
+				let left = eventMove.pageX - x;
+				let right = left + width;
+				let top = eventMove.pageY - y;
+				let bottom = top + height;
+				changeRectangle(this, left, right, top, bottom);
+			}
+			let leftUp = function(eventMove){
+				let left = eventMove.pageX - x - 15;
+				let top = eventMove.pageY - y - 15;
+				changeRectangle(this, left, right, top, bottom);
+			}
+			let leftDown = function(eventMove){
+				let left = eventMove.pageX - x - 15;
+				let bottom = eventMove.pageY + 15;
+				changeRectangle(this, left, right, top, bottom);
+			}
+			let rightUp = function(eventMove){
+				let right = eventMove.pageX + 15;
+				let top = eventMove.pageY - y - 15;
+				changeRectangle(this, left, right, top, bottom);
+			}
+			let rightDown = function(eventMove){
+				let right = eventMove.pageX + 15;
+				let bottom = eventMove.pageY + 15;
+				changeRectangle(this, left, right, top, bottom);
+			}
+			let up = function(eventMove){
+				let top = eventMove.pageY - y - 15;
+				changeRectangle(this, left, right, top, bottom);
+			}
+			let down = function(eventMove){
+				let bottom = eventMove.pageY + 15;
+				changeRectangle(this, left, right, top, bottom);
+			}
+			let leftEdge = function(eventMove){
+				let left = eventMove.pageX - x - 15;
+				changeRectangle(this, left, right, top, bottom);
+			}
+			let rightEdge = function(eventMove){
+				let right = eventMove.pageX + 15;
+				changeRectangle(this, left, right, top, bottom);
+			}
+			var onMouseMove = [
+				[leftUp, up, rightUp],
+				[leftEdge, center, rightEdge],
+				[leftDown, down, rightDown]
+			];
+			this.onmousemove = onMouseMove[sy][sx];
+		}
+		var endReplaceZone = function(event){
+			console.log(event.pageX,  compareResults.offsetLeft);
+			if (event.pageX < compareResults.offsetLeft){
+				this.remove();
+			}
+			this.onmousemove = changeCursor;
+		}
+		ignoredZones.forEach((zone) => {
+			let rectangle = document.createElement("div");
+			document.body.appendChild(rectangle);
+			rectangle.className = "rectangle";
+			rectangle.style.left = (zone.x + image.offsetLeft + image.parentNode.offsetLeft + image.parentNode.parentNode.offsetLeft + compareResults.offsetLeft) + "px";
+			rectangle.style.top = (zone.y + image.offsetTop + image.parentNode.offsetTop + image.parentNode.parentNode.offsetTop + compareResults.offsetTop) + "px";
+			rectangle.style.width = zone.w + "px";
+			rectangle.style.height = zone.h + "px";
+			rectangle.onmousemove = changeCursor;
+			rectangle.onmousedown = startReplaceZone;
+			rectangle.onmouseup = endReplaceZone;
+			rectangle.className = "rectangle hidden";
+		});
+		var drawRectangle = function(event){
+			drawingStart = 1 - drawingStart;
+			if (drawingStart == 1){
+				var rectangle = document.createElement("div");
+				document.body.appendChild(rectangle);
+				rectangle.className = "rectangle";
+				rectangle.id = "rectangle";
+				var x = event.pageX;
+				var y = event.pageY;
+				rectangle.style.left = x + "px";
+				rectangle.style.top = y + "px";
+				image.onmousemove = function(event){
+					rectangle.style.width = (event.pageX - x) + "px";
+					rectangle.style.height = (event.pageY - y) + "px";
+				}
+				rectangle.onmousemove = image.onmousemove;
+				rectangle.onclick = this.onclick;
+			} else {
+				image.style.cursor = "default";
+				image.onmousemove = null;
+				var rectangle = document.getElementById("rectangle")
+				rectangle.onmousemove = null;
+				rectangle.onclick = null;
+				rectangle.id = "rectangle_" + (++areasCounter);
+				rectangle.onmousemove = changeCursor;
+				rectangle.onmousedown = startReplaceZone;
+				rectangle.onmouseup = endReplaceZone;
+			}
+		}
+		draw.onclick = function(){
+			drawing = 1 - drawing;
+			image.onclick = drawing == 1 ? drawRectangle : switchComparedFiles;
+			this.style.backgroundColor = drawing == 1 ? "#afffaf" : "transparent";
+			image.style.cursor = drawing == 1 ? "crosshair" : "default";
+			var areas = document.getElementsByClassName("rectangle");
+			for (let i=0; i<areas.length; i++){
+				let element = areas[i];
+				if (drawing == 1){
+					element.className = element.className.replace("hidden", "");
+				} else {
+					element.className = element.className + " hidden";
+				}
+			}
+		}
+		show.onclick = function(){
+			var areas = document.getElementsByClassName("rectangle");
+			var lines = ["Страница ${pageNumber}:"];
+			for (let i=0; i<areas.length; i++){
+				let element = areas[i];
+				let leftUpX = element.offsetLeft - image.offsetLeft - image.parentNode.offsetLeft - image.parentNode.parentNode.offsetLeft - compareResults.offsetLeft;
+				let leftUpY = element.offsetTop - image.offsetTop - image.parentNode.offsetTop - image.parentNode.parentNode.offsetTop - compareResults.offsetTop;
+				let width = element.offsetWidth;
+				let height = element.offsetHeight;
+				lines.push("  - x: " + leftUpX);
+				lines.push("    y: " + leftUpY);
+				lines.push("    width: " + width);
+				lines.push("    height: " + height);
+			}
+			window.prompt("Координаты игнорируемых зон:", lines.join("\n"));
 		}
 	</script>
 </body>

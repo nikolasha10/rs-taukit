@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -203,7 +204,7 @@ public abstract class PwBrowser implements IWebBrowser {
     public void downloadByClick(PwFileDownload element, DataTable dataTable) {
         double fileDownloadTimeout = Config.getTimeProperty("file.download.timeout");
         String dirName = FileUtils.getDownloadFilePath();
-        AtomicBoolean wasClicked = new AtomicBoolean(false);
+        AtomicInteger waitTimes = new AtomicInteger(0);
         Page.WaitForDownloadOptions options = new Page.WaitForDownloadOptions().setTimeout(fileDownloadTimeout);
         Map<String, File> filesMap = new HashMap<>();
         dataTable.asMaps().forEach(data -> {
@@ -213,17 +214,21 @@ public abstract class PwBrowser implements IWebBrowser {
             filesMap.put(fileName, file);
         });
         Consumer<Download> download = pwDownload -> {
+            waitTimes.getAndAdd(1);
             File file = filesMap.get(pwDownload.suggestedFilename());
             pwDownload.saveAs(file.toPath());
             TauLogger.report("Загружен файл \"%s\" в папку \"%s\"", file.getName(), dirName);
         };
         getPage().onDownload(download);
-        filesMap.forEach((fileName, file) -> getPage().waitForDownload(options, () -> {
-            if (!wasClicked.getAndSet(true)) {
-                element.getElementPwLocator().click();
-                TauLogger.report("Нажали на кнопку \"%s\"", element.getElementName());
-            }
-        }));
+        filesMap.forEach((fileName, file) -> {
+            if (waitTimes.get() >= filesMap.size()) return;
+            getPage().waitForDownload(options, () -> {
+                if (waitTimes.getAndAdd(1) == 0) {
+                    element.getElementPwLocator().click();
+                    TauLogger.report("Нажали на кнопку \"%s\"", element.getElementName());
+                }
+            });
+        });
     }
 
     @Override

@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
@@ -108,11 +110,16 @@ public class FileUtils {
     }
 
     public static String getDownloadFilePath() {
-        String childDirName = scenario().getName();
-        while (childDirName.endsWith(".")) {
-            childDirName = childDirName.substring(0, childDirName.length() - 1);
+        String downloadDirPath = Config.getProperty("downloads.dir");
+        String functionality = scenario().getFunctionality();
+        Matcher matcher = Pattern.compile("\\[(.+)]\\[(.+)]").matcher(functionality);
+        String suites = functionality;
+        if (matcher.matches()){
+            suites = String.format("%s/%s", matcher.group(1), matcher.group(2));
         }
-        return String.format("%s/%s", Config.getProperty("downloads.dir"), childDirName);
+        String scenarioName = scenario().getName();
+        return String.format("%s/%s/%s", downloadDirPath, suites, scenarioName);
+
     }
 
     public static String getFileName(String filePath) {
@@ -166,5 +173,17 @@ public class FileUtils {
             }
         }
         writeFile(filePath, eval(builder.toString()));
+    }
+
+    public static String getTestFilePath(String filePath) {
+        if (filePath == null) {
+            return null;
+        }
+        File file = new File(filePath);
+        if (!file.exists()) {
+            File featureDir = new File(scenario().getPickleWrapper().getPickle().getUri().getPath()).getParentFile();
+            file = new File(featureDir.getPath(), filePath);
+        }
+        return file.getPath();
     }
 }

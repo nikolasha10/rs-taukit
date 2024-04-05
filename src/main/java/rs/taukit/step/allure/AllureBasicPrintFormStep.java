@@ -2,7 +2,6 @@ package rs.taukit.step.allure;
 
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
-import rs.taukit.config.Config;
 import rs.taukit.records.ImageDifferences;
 import rs.taukit.utils.*;
 
@@ -25,32 +24,41 @@ public class AllureBasicPrintFormStep extends BasicUtils {
     @Step("проверить документ '{this.testedFileName}' на соответствие эталону")
     public void validate(DataTable dataTable) {
         TauLogger.attachDataTable("Параметры проверки", dataTable);
-        scenarioData().put(dataTable);
-        String standardBaseFilePath = scenarioData().get("эталон");
+        String nameSpace = "Проверка PDF";
+        scenarioData().put(dataTable, nameSpace);
+        String standardBaseFilePath = FileUtils.getTestFilePath(scenarioData().get(nameSpace, "эталон"));
         TauLogger.attachPdfFile(testedFileName, testedFilePath);
         TauLogger.attachPdfFile(standardFileName, standardBaseFilePath);
-        if (validatePdfFullContent(standardBaseFilePath)) {
-            validatePdfTextContent(standardBaseFilePath);
-        }
+        String ignoredZones = scenarioData().getOptional(nameSpace, "игнорируемые зоны");
+        String ignoredZonesFilePath = FileUtils.getTestFilePath(ignoredZones);
+        validatePdfFullContent(standardBaseFilePath, ignoredZonesFilePath);
+        String autoReplacing = scenarioData().getOptional(nameSpace, "автозамена текста");
+        String autoReplacingFilePath = FileUtils.getTestFilePath(autoReplacing);
+        validatePdfTextContent(standardBaseFilePath, autoReplacingFilePath);
+        TauLogger.resetNotCritical();
     }
 
     //    @Step("проверить содержимое файла '{this.testedFileName}' на соответствие эталону")
-    public boolean validatePdfFullContent(String standardBaseFilePath) {
-        List<ImageDifferences> differences = PdfUtils.comparePdf(testedFilePath, standardBaseFilePath);
+    public boolean validatePdfFullContent(String standardBaseFilePath, String instructionPath) {
+        List<ImageDifferences> differences = PdfUtils.comparePdf(testedFilePath, standardBaseFilePath, instructionPath);
         List<Integer> differentPages = new ArrayList<>();
         if (differences.isEmpty()) {
-            TauLogger.report("Содержимое файла '%s' соответствует эталону");
+            TauLogger.report("Содержимое файла '%s' соответствует эталону", testedFileName);
             return true;
         } else {
+            for (ImageDifferences pageDifferences : differences) {
+                differentPages.add(pageDifferences.pageNumber());
+            }
             Runnable runnable = () -> {
-                for (int i = 0; i < differences.size(); i++) {
-                    ImageDifferences pageDifferences = differences.get(i);
+                for (ImageDifferences pageDifferences : differences) {
+                    String pageNumber = String.valueOf(pageDifferences.pageNumber());
+                    scenarioData().put("pageNumber", pageNumber);
+                    scenarioData().put("ignoredZonesData", scenarioData().get("ignoredZonesData_" + pageNumber));
                     String attachment = ImageUtils.getCompareResult(
                             pageDifferences.tested(),
                             pageDifferences.expected(),
                             pageDifferences.differences());
                     TauLogger.attachFile("Страница " + pageDifferences.pageNumber(), attachment.getBytes());
-                    differentPages.add(pageDifferences.pageNumber());
                 }
             };
             TauLogger.fail(runnable, "Страницы %s файла '%s' не соответствуют эталону",
@@ -60,7 +68,7 @@ public class AllureBasicPrintFormStep extends BasicUtils {
     }
 
     //    @Step("проверить текстовое содержимое файла '{this.testedFileName}' на соответствие эталону")
-    public List<String> validatePdfTextContent(String standardBaseFilePath) {
+    public List<String> validatePdfTextContent(String standardBaseFilePath, String instructionPath) {
         List<String> errorList = new ArrayList<>();
         List<String> testedFilePageList = PdfUtils.getPageContentFilePaths(testedFileName, testedFilePath);
         List<String> standardFilePageList = PdfUtils.getPageContentFilePaths(standardFileName, standardBaseFilePath);
@@ -77,7 +85,6 @@ public class AllureBasicPrintFormStep extends BasicUtils {
         for (int i = 0; i < Math.min(testedFilePageSize, standardFilePageSize); i++) {
             String testedPageFilePath = testedFilePageList.get(i);
             String standardPageFilePath = standardFilePageList.get(i);
-            String instructionPath = scenarioData().getOptional("инструкция-текст");
             if (instructionPath != null) {
                 FileUtils.replaceValues(standardPageFilePath, instructionPath);
             }
@@ -118,6 +125,9 @@ public class AllureBasicPrintFormStep extends BasicUtils {
             Runnable runnable = () -> {
                 for (int i = 0; i < differentPages.size(); i++) {
                     Map<String, BufferedImage> imageMap = images.get(i);
+                    String pageNumber = String.valueOf(differentPages.get(i));
+                    scenarioData().put("pageNumber", pageNumber);
+                    scenarioData().put("ignoredZonesData", "");
                     String attachment = ImageUtils.getCompareResult(
                             imageMap.get("tested"),
                             imageMap.get("expected"),
@@ -132,9 +142,7 @@ public class AllureBasicPrintFormStep extends BasicUtils {
     }
 
     private String getFilePath(String fileName) {
-        String downloadDirPath = Config.getProperty("downloads.dir");
-        String scenarioName = scenario().getName();
-        return String.format("%s/%s/%s", downloadDirPath, scenarioName, fileName);
+        return String.format("%s/%s", FileUtils.getDownloadFilePath(), fileName);
     }
 
 }

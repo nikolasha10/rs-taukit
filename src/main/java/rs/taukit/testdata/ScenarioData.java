@@ -8,21 +8,20 @@ import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.YamlParser;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Getter
 public class ScenarioData {
     private final DataStorage dataStorage;
     private final String scenarioName;
     private final String featurePath;
+    private final Map<String, DataStorage> nameSpaces;
 
     public ScenarioData(Pickle pickle) {
         this.featurePath = pickle.getUri().getPath();
         this.scenarioName = pickle.getName();
         this.dataStorage = new DataStorage(featurePath, getScenarioData(getFeatureData(featurePath)));
+        this.nameSpaces = new HashMap<>();
         put("Адрес стенда", Config.getSTAND().getUrl());
     }
 
@@ -58,13 +57,27 @@ public class ScenarioData {
             put(parameterName, parameterValue);
         });
     }
+    public void put(DataTable dataTable, String nameSpace) {
+        nameSpaces.put(nameSpace, new DataStorage(new HashMap<>()));
+        dataTable.asMaps().forEach(item -> {
+            String parameterName = TestDataUtils.get(item, "Параметр");
+            String parameterValue = TestDataUtils.get(item, "Значение");
+            nameSpaces.get(nameSpace).put(parameterName, parameterValue);
+        });
+    }
 
     public <T> T get(String fieldName) {
         return dataStorage.get(fieldName);
     }
+    public <T> T get(String nameSpace, String fieldName) {
+        return nameSpaces.get(nameSpace).get(fieldName);
+    }
 
     public <T> T getOptional(String fieldName) {
         return dataStorage.getOptional(fieldName);
+    }
+    public <T> T getOptional(String nameSpace, String fieldName) {
+        return nameSpaces.get(nameSpace).getOptional(fieldName);
     }
 
     public String evalObjectField(String template) {

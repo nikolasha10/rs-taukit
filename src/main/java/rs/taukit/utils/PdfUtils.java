@@ -30,10 +30,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
@@ -310,7 +308,11 @@ public class PdfUtils {
         }
     }
 
-    public static List<ImageDifferences> comparePdf(String testedFilePath, String standardFilePath) {
+    public static List<ImageDifferences> comparePdf(String testedFilePath, String standardFilePath, String instructionPath) {
+        Map<String, List<Map<String, Integer>>> ignoredZones = new HashMap<>();
+        if (instructionPath != null) {
+            ignoredZones = YamlParser.parse(instructionPath);
+        }
         List<ImageDifferences> images = new ArrayList<>();
         try {
             PDDocument testedDocument = PDDocument.load(new File(testedFilePath));
@@ -335,7 +337,27 @@ public class PdfUtils {
                 if (standardImage == null) {
                     standardImage = ImageUtils.generateCleanImage(testedImage.getWidth(), testedImage.getHeight());
                 }
-                BufferedImage differencesImage = ImageUtils.getDifferencesImage(testedImage, standardImage);
+                BufferedImage differencesImage;
+                BufferedImage zonedTestedImage = ImageUtils.deepCopy(testedImage);
+                BufferedImage zonedStandardImage = ImageUtils.deepCopy(standardImage);
+                if (instructionPath != null && ignoredZones.containsKey("Страница " + i)) {
+                    List<Map<String, Integer>> ignoredZoneList = ignoredZones.get("Страница " + i);
+                    List<String> ignoredZonesDataList = new ArrayList<>();
+                    for (Map<String, Integer> zone : ignoredZoneList) {
+                        int x = zone.get("x");
+                        int y = zone.get("y");
+                        int width = zone.get("width");
+                        int height = zone.get("height");
+                        ImageUtils.drawZone(zonedTestedImage, x, y, width, height);
+                        ImageUtils.drawZone(zonedStandardImage, x, y, width, height);
+                        ignoredZonesDataList.add(String.format("{x: %d, y: %d, w: %d, h: %d}", x, y, width, height));
+                    }
+                    differencesImage = ImageUtils.getDifferencesImage(zonedTestedImage, zonedStandardImage);
+                    scenarioData().put("ignoredZonesData_" + i, String.join(", ", ignoredZonesDataList));
+                } else {
+                    scenarioData().put("ignoredZonesData_" + i, "");
+                    differencesImage = ImageUtils.getDifferencesImage(testedImage, standardImage);
+                }
                 if (differencesImage != null) {
                     images.add(new ImageDifferences(i, testedImage, standardImage, differencesImage));
                 }

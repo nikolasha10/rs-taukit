@@ -190,11 +190,19 @@ public final class TauLogger {
 
     public static void fail(Throwable e, String format, Object... args) {
         String message = String.format(format, args);
-        fail(message, e);
+        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") == null) {
+            warn(message,e);
+        } else {
+            fail(message, e);
+        }
     }
 
     public static void fail(String format, Object... args) {
-        fail(String.format(format, args));
+        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") == null) {
+            warn(format, args);
+        } else {
+            fail(String.format(format, args));
+        }
     }
 
     public static void fail(Runnable runnable, String format, Object... args) {
@@ -203,7 +211,6 @@ public final class TauLogger {
             fail(runnable, message);
         } else {
             warn(runnable, format, args);
-            scenarioData().put("NEXT_CHECK_NOT_CRITICAL", null);
         }
     }
 
@@ -266,60 +273,7 @@ public final class TauLogger {
                         screenshotList.get(index)));
     }
 
-    //
-//    public static void attachFullScreenshot() {
-//        try {
-//            int height = Integer.parseInt(DriverManager.execute("return window.innerHeight").toString());
-//            DriverManager.execute("window.scrollTo(0,0)");
-//            int currentScrollBy = Integer.parseInt(DriverManager.execute("return window.pageYOffset").toString());
-//            int lastScrollBy = -1;
-//            while (currentScrollBy - lastScrollBy > 0) {
-//                attachScreenshot();
-//                lastScrollBy = currentScrollBy;
-//                DriverManager.execute("window.scrollBy(0,arguments[0])", height);
-//                currentScrollBy = Integer.parseInt(DriverManager.execute("return window.pageYOffset").toString());
-//            }
-//        } catch (Exception e){
-//            CustomLogger.debug("Не удалось сделать снимок экрана");
-//        }
-//    }
-//
-//    /**
-//     * Создает Page source страницы.
-//     */
-//    @Attachment(value = "Page source", type = "text/xml")
-//    public static byte[] attachPageSource() {
-//        try {
-//            return DriverManager.get().getPageSource().getBytes();
-//        } catch (Exception e) {
-//            return new byte[0];
-//        }
-//    }
-//
-//    public static byte[] attachData(List<Map<String, String>> parameters) {
-//        try {
-//            String headers = String.join("\t", parameters.get(0).keySet()) + "\r\n";
-//            String text = headers + parameters.stream()
-//                    .map(item -> String.join("\t", item.values()))
-//                    .collect(Collectors.joining("\r\n"));
-//            return text.getBytes();
-//        } catch (Exception e) {
-//            return new byte[0];
-//        }
-//    }
-//
-//    public static byte[] attachData(Map<String, String> parameterMap) {
-//        try {
-//            String headers = String.join("\t", "Параметр", "Значение") + "\r\n";
-//            String text = headers + parameterMap.entrySet().stream()
-//                    .map(entry -> String.join("\t", entry.getKey(), entry.getValue()))
-//                    .collect(Collectors.joining("\r\n"));
-//            return text.getBytes();
-//        } catch (Exception e) {
-//            return new byte[0];
-//        }
-//    }
-//
+
     public static byte[] attachData(DataTable dataTable) {
         try {
             return TextUtils.correctDatatable(dataTable).stream()
@@ -331,27 +285,6 @@ public final class TauLogger {
         }
     }
 
-    //
-//    @Attachment(value = "Таблица параметров", type = "text/tab-separated-values", fileExtension = ".csv")
-//    public static byte[] attachDataTable(List<Map<String, String>> parameters) {
-//        return attachData(parameters);
-//    }
-//
-//    @Attachment(value = "Таблица параметров", type = "text/tab-separated-values", fileExtension = ".csv")
-//    public static byte[] attachDataTable(Map<String, String> parameterMap) {
-//        return attachData(parameterMap);
-//    }
-//
-//    @Attachment(value = "{tableName}", type = "text/tab-separated-values", fileExtension = ".csv")
-//    public static byte[] attachDataTable(String tableName, Map<String, String> parameterMap) {
-//        return attachData(parameterMap);
-//    }
-//
-//    @Attachment(value = "{tableName}", type = "text/tab-separated-values", fileExtension = ".csv")
-//    public static byte[] attachDataTable(String tableName, List<Map<String, String>> parameterList) {
-//        return attachData(parameterList);
-//    }
-//
     @Attachment(value = "{tableName}", type = "text/tab-separated-values", fileExtension = ".csv")
     public static byte[] attachDataTable(String tableName, DataTable dataTable) {
         return attachData(dataTable);
@@ -392,5 +325,9 @@ public final class TauLogger {
             case null, default ->
                     throw new TestDataException("Не удалось прикрепить объект \"%s\" к отчёту. Не распознан тип вложения.", name);
         }
+    }
+
+    public static void resetNotCritical() {
+        scenarioData().put("NEXT_CHECK_NOT_CRITICAL", null);
     }
 }
