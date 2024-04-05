@@ -74,7 +74,7 @@ public class AllureBasicListStep extends BasicUtils {
             }
         });
 
-        if (resultList.isEmpty()) {
+        if (resultList.size() == 1) {
             TauLogger.console("Состав элементов списка '%s' соответствует ожидаемому", this.listName);
         } else {
             DataTable validationResultTable = DataTable.create(resultList, TextUtils.tableConverter);
