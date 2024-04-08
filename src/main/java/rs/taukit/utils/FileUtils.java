@@ -118,8 +118,10 @@ public class FileUtils {
             suites = String.format("%s/%s", matcher.group(1), matcher.group(2));
         }
         String scenarioName = scenario().getName();
+        while (scenarioName.endsWith(".")){
+            scenarioName = scenarioName.substring(0, scenarioName.length() - 1);
+        }
         return String.format("%s/%s/%s", downloadDirPath, suites, scenarioName);
-
     }
 
     public static String getFileName(String filePath) {

@@ -190,7 +190,7 @@ public final class TauLogger {
 
     public static void fail(Throwable e, String format, Object... args) {
         String message = String.format(format, args);
-        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") == null) {
+        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
             warn(message,e);
         } else {
             fail(message, e);
@@ -198,7 +198,7 @@ public final class TauLogger {
     }
 
     public static void fail(String format, Object... args) {
-        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") == null) {
+        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
             warn(format, args);
         } else {
             fail(String.format(format, args));
@@ -207,10 +207,10 @@ public final class TauLogger {
 
     public static void fail(Runnable runnable, String format, Object... args) {
         String message = String.format(format, args);
-        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") == null) {
-            fail(runnable, message);
-        } else {
+        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
             warn(runnable, format, args);
+        } else {
+            fail(runnable, message);
         }
     }
 
