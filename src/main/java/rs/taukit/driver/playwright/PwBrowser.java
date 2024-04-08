@@ -218,16 +218,16 @@ public abstract class PwBrowser implements IWebBrowser {
             File file = filesMap.get(pwDownload.suggestedFilename());
             pwDownload.saveAs(file.toPath());
             TauLogger.report("Загружен файл \"%s\" в папку \"%s\"", file.getName(), dirName);
+            try {
+                driver().waitForCondition(() -> waitTimes.get() == filesMap.size());
+            } catch (TimeoutError te){
+                getPage().waitForDownload(options, () -> TauLogger.console("Ожидаем загрузки следующего файла"));
+            }
         };
         getPage().onDownload(download);
-        filesMap.forEach((fileName, file) -> {
-            if (waitTimes.get() >= filesMap.size()) return;
-            getPage().waitForDownload(options, () -> {
-                if (waitTimes.getAndAdd(1) == 0) {
-                    element.getElementPwLocator().click();
-                    TauLogger.report("Нажали на кнопку \"%s\"", element.getElementName());
-                }
-            });
+        getPage().waitForDownload(options, () -> {
+            element.getElementPwLocator().click();
+            TauLogger.report("Нажали на кнопку \"%s\"", element.getElementName());
         });
     }
 
