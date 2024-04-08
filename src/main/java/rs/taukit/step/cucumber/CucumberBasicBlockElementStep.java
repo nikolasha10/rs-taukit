@@ -35,6 +35,10 @@ public class CucumberBasicBlockElementStep {
     public void setCheckbox(String blockName, String fieldName) {
         blockElement(eval(blockName)).setCheckbox(fieldName);
     }
+    @И("^в блоке \"(.+)\" установить переключатель \"(.+)\" в значение \"(.+)\"$")
+    public void setRadioButton(String blockName, String fieldName, String value) {
+        blockElement(eval(blockName)).setRadiButton(fieldName, eval(value));
+    }
 
     @И("^в блоке \"(.+)\" в списке \"(.+)\" выбрать \"(.+)\"$")
     public void listValueClick(String blockName, String listName, String itemName) {

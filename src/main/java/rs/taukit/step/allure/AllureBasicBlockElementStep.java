@@ -84,7 +84,7 @@ public class AllureBasicBlockElementStep extends BasicUtils {
     public void attachFile(String buttonName, String fileName) {
         String dirPath = FileUtils.getDownloadFilePath();
         blockElements.getElementByName(buttonName).castTo(IHasAttachment.class).attach(dirPath, fileName);
-        TauLogger.report("Нажата кнопка \"%s\"", buttonName);
+        TauLogger.report("В блоке \"%s\" Нажата кнопка \"%s\"", blockName, buttonName);
         TauLogger.report("Выбран файл \"%s\" из папки \"%s\"", fileName, dirPath);
     }
 
@@ -129,5 +129,12 @@ public class AllureBasicBlockElementStep extends BasicUtils {
             }
             TauLogger.fail(e, "Не удалось найти блок '%s', соответствующий заданным условиям", blockName);
         }
+    }
+
+    @Step("в блоке '{this.blockName}' установить переключатель '{fieldName}' в значение '{value}'$")
+    public void setRadiButton(String fieldName, String value) {
+        IHasEditableValue editable = blockElements.getElementByName(fieldName).castTo(IHasEditableValue.class);
+        editable.setValue(value);
+        TauLogger.report("Переключатель '%s' в блоке '%s' установлен в значение '%s'", fieldName, this.blockName, value);
     }
 }
