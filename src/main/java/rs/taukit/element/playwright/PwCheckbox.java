@@ -2,6 +2,7 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasCheckbox;
 import rs.taukit.element.interfaces.IHasEditableValue;
 
@@ -38,10 +39,11 @@ public class PwCheckbox extends PwElement implements IHasEditableValue, IHasChec
 
     @Override
     public void setValue(String value) {
+        IElement clickable = getDescendant("Чекбокс");
         boolean isTurnedOn = getDescendant("Установлен").isVisible();
         boolean switchOn = value.equalsIgnoreCase("да");
         if (switchOn != isTurnedOn) {
-            elementPwLocator.click();
+            clickable.click();
         }
     }
 

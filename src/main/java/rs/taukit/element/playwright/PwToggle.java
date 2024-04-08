@@ -2,8 +2,8 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
-import rs.taukit.utils.TestDataUtils;
 
 import java.util.LinkedHashMap;
 
@@ -22,10 +22,11 @@ public class PwToggle extends PwElement implements IHasEditableValue {
 
     @Override
     public void setValue(String value) {
-        boolean isTurnedOn = TestDataUtils.get(descendants, "Включен").isVisible();
+        IElement clickable = getDescendant("Переключатель");
+        boolean isTurnedOn = getDescendant("Включен").isVisible();
         boolean switchOn = value.equalsIgnoreCase("да");
         if (switchOn != isTurnedOn) {
-            click();
+            clickable.click();
         }
     }
 

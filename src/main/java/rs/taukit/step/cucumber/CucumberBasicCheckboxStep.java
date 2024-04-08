@@ -9,7 +9,12 @@ public class CucumberBasicCheckboxStep {
     }
 
     @И("^установить чекбокс \"(.+)\"$")
-    public void setCheckbox(String fieldName) {
-        checkbox(fieldName).setValue();
+    public void checkBox(String fieldName) {
+        checkbox(fieldName).check();
+    }
+
+    @И("^снять чекбокс \"(.+)\"$")
+    public void uncheckBox(String fieldName) {
+        checkbox(fieldName).uncheck();
     }
 }

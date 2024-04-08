@@ -17,12 +17,12 @@ public class AllureBasicToggleStep extends BasicUtils {
     @Step("включить переключатель '{this.fieldName}'")
     public void turnOn() {
         toggle.setValue("да");
-        TauLogger.report("переключатель \"%s\" включен", fieldName);
+        TauLogger.report("Включен переключатель\"%s\"", fieldName);
     }
 
     @Step("выключить переключатель '{this.fieldName}'")
     public void turnOff() {
         toggle.setValue("нет");
-        TauLogger.report("переключатель \"%s\" выключен", fieldName);
+        TauLogger.report("Выключен переключатель \"%s\"", fieldName);
     }
 }
