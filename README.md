@@ -39,7 +39,7 @@ KIT)
 </li>
 <li>Открыть файл с настройками запуска тестов
 
-[taukit.properties](src/efr-at/resources/configs/taukit.properties)
+[taukit.properties](src/test/resources/configs/taukit.properties)
 </li>
 <li>Если русские буквы отображаются некорректно, например, в виде кодов ascii:
 <ul>

@@ -3,7 +3,7 @@
 	<meta charset="utf-8">
 	<style>
 		select {padding: 5px}
-		input {padding: 5px }
+        input {padding: 5px }
         #restart {margin: 20px; padding: 10px;}
         .expand {
             border: 1px solid gray;
@@ -63,14 +63,18 @@
 </head>
 
 <body>
-<table><tr>
-	<td><select id="standSelect" title="Тестовый стенд"></select></td>
-	<td><select id="branchSelect" title="Ветка автотестов"></select></td>
-	<td><input id="customBranch" title="Произвольная ветка автотестов"></td>
-	<td><select id="filter" title="Фильтр"></select></td>
-</tr></table>
-<div id="scenarioTreeContainer"></div>
-<div id="buttons"><button id="restart">Перезапустить</button></div>
+<table>
+	<tr>
+		<td><select id="standSelect" title="Тестовый стенд"></select></td>
+		<td><select id="branchSelect" title="Ветка автотестов"></select></td>
+		<td><input id="customBranch" title="Произвольная ветка автотестов"></td>
+		<td><select id="filter" title="Фильтр"></select></td>
+	</tr>
+</table>
+<div id="scenarioTreeContainer" class="grid3"></div>
+<div id="buttons">
+	<button id="restart">Перезапустить</button>
+</div>
 
 <script type="text/javascript" defer>
 	const pipelineUrl = '${jenkinsPipelineUrl}';
@@ -87,13 +91,44 @@
         for (child of children){
             var currentClass = child.className;
             if (!currentClass) continue;
-            if (currentClass.includes('hidden')){
-                child.className = currentClass.replace(' hidden', '');
+            if (this.innerText === '+'){
+                child.className = currentClass.replaceAll(' hidden', '');
             } else {
                 child.className = currentClass.trim() + ' hidden';
             }
         }
-        this.innerHTML = this.innerHTML == '+' ? '&ndash;' : '+';
+        let checkbox = this.parentNode.getElementsByTagName('input')[0];
+        if (this.innerText === '+'){
+                this.innerHTML = '&ndash;';
+                checkbox.disabled = false;
+        } else {
+                this.innerHTML = '+';
+                if (!children[1] || children[1].className === 'error'){
+                    return;
+                }
+                checkbox.checked = false;
+                checkbox.onchange();
+                checkbox.disabled = true;
+        }
+    }
+    function expandAll(){
+        let expandButtons = scenarioTreeContainer.getElementsByTagName('div')[2].getElementsByClassName('expand');
+        for (expand of expandButtons){
+            if (expand !== this && expand.parentNode.parentNode.parentNode === scenarioTreeContainer){
+                expand.innerHTML = this.innerHTML;
+                expand.onclick();
+            }
+        }
+        let checkbox = this.parentNode.getElementsByTagName('input')[0];
+        if (this.innerText === '+'){
+                this.innerHTML = '&ndash;';
+                checkbox.disabled = false;
+        } else {
+                this.innerHTML = '+';
+                checkbox.checked = false;
+                checkbox.onchange();
+                checkbox.disabled = true;
+        }
     }
     function isHidden(el){ return (el.offsetParent === null) }
     function checkAll(){
@@ -103,30 +138,30 @@
         }
     }
     function setFilter(){
-    	if (this.value === 'Неуспешные'){
-    		let expandButtons = scenarioTreeContainer.getElementsByClassName('expand passed');
-    		for (let expand of expandButtons){
-    			expand.parentNode.className += ' hidden';
-    		}
-    		let ready = false;
-    		for (let i=0; i<2; i++){
-    		    let containers = scenarioTreeContainer.getElementsByClassName('grid3');
-    		    for (let container of containers){
-    		    	if (!container.className.includes('hidden')){
-    		    		let children = container.getElementsByClassName('grid3');
-    		    		let hiddenChildren = container.getElementsByClassName('grid3 hidden');
-    		    		if (children.length > 0 && children.length == hiddenChildren.length){
-    		    			container.className += ' hidden';
-    		    		}
-    		    	}
-    		    }
-    		 }
-    	} else {
-    		let containers = scenarioTreeContainer.getElementsByClassName('grid3');
-    		for (container of containers){
-    			container.className = container.className.replace(' hidden', '');
-			}
-    	}
+        if (this.value === 'Неуспешные'){
+            let expandButtons = scenarioTreeContainer.getElementsByClassName('expand passed');
+            for (let expand of expandButtons){
+                expand.parentNode.className += ' hidden';
+            }
+            let ready = false;
+            for (let i=0; i<2; i++){
+                let containers = scenarioTreeContainer.getElementsByClassName('grid3');
+                for (let container of containers){
+                    if (!container.className.includes('hidden')){
+                        let children = container.getElementsByClassName('grid3');
+                        let hiddenChildren = container.getElementsByClassName('grid3 hidden');
+                        if (children.length > 0 && children.length == hiddenChildren.length){
+                            container.className += ' hidden';
+                        }
+                    }
+                }
+             }
+        } else {
+            let containers = scenarioTreeContainer.getElementsByClassName('grid3');
+            for (container of containers){
+                container.className = container.className.replace(' hidden', '');
+            }
+        }
     }
     function createContainers(parentContainer, text){
         let expand = document.createElement('div');
@@ -176,7 +211,7 @@
         formData.append('trackDependencies', 'false');
         let parameters = []
         for (const pair of formData.entries()) {
-        	parameters.push(pair.join('='));
+            parameters.push(pair.join('='));
         }
         let fetchBody = parameters.join('&');
         fetch(pipelineUrl + '/buildWithParameters', {
@@ -189,8 +224,8 @@
         }).then(response => {
             switch (response.status) {
                 case 201:
-                	let buildLink = document.getElementById('buildLink');
-					buildLink && buildLink.remove();
+                    let buildLink = document.getElementById('buildLink');
+                    buildLink && buildLink.remove();
                     let currentStatus = document.createElement('span');
                     currentStatus.innerText = 'Запрос отправлен. Ожидается запуск тестов...';
                     buttons.appendChild(currentStatus);
@@ -203,7 +238,7 @@
                             currentStatus.remove();
                             let link = document.createElement('a');
                             link.id = 'buildLink';
-                        	buttons.appendChild(link);
+                            buttons.appendChild(link);
                             link.href = data.url;
                             link.target = '_blank';
                             link.innerHTML = data.fullDisplayName;
@@ -224,24 +259,26 @@
         standSelect.add(option);
     }
     for (let branch of branches){
-    	  let selected = branch === defaultBranch;
+          let selected = branch === defaultBranch;
         let option = new Option(branch, branch, selected, selected);
         branchSelect.add(option);
     }
     let filters = ['Все', 'Неуспешные'];
     for (let filterValue of filters){
-    	let selected = filterValue === 'Все';
-    	filter.add(new Option(filterValue, filterValue, selected, selected));
+        let selected = filterValue === 'Все';
+        filter.add(new Option(filterValue, filterValue, selected, selected));
     }
     filter.onchange = setFilter;
 
+    let commonContainer = createContainers(scenarioTreeContainer, ' *** Результаты автотестов');
+    let expandAllButton = scenarioTreeContainer.getElementsByClassName('expand')[0];
     let suiteNames = Object.keys(scenarioData);
     suiteNames.sort();
     for (let suiteName of suiteNames){
         let suiteTag = suiteName.split('.')[0];
         let scenarioSuiteContainer = document.createElement('div');
         scenarioSuiteContainer.className = 'grid3';
-        scenarioTreeContainer.appendChild(scenarioSuiteContainer);
+        commonContainer.appendChild(scenarioSuiteContainer);
         let suiteContainer = createContainers(scenarioSuiteContainer, suiteName);
         let testGroupResults = scenarioData[suiteName].testGroupResults;
         let groupNames = Object.keys(testGroupResults);
@@ -280,15 +317,16 @@
     for (let button of expandButtons){
         button.onclick = expandFunction;
     }
+    expandAllButton.onclick = expandAll;
     restart.onclick = function(){
         checkBuildStatus((data) => {
             let startConfirm = true;
             if (data.inProgress){
-            	startConfirm = window.confirm('Тесты уже выполняются. Вы уверены, что хотите запустить выбранные тесты параллельно?')
+                startConfirm = window.confirm('Тесты уже выполняются. Вы уверены, что хотите запустить выбранные тесты параллельно?')
             }
-			if (startConfirm){
-				startNewBuild(data.id);
-			}
+            if (startConfirm){
+                startNewBuild(data.id);
+            }
         });
     }
 </script>
