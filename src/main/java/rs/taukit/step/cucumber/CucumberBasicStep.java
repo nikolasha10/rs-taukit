@@ -102,4 +102,9 @@ public class CucumberBasicStep {
         AllureBasicStep.setNextCheckNotCritical();
     }
 
+    @И("^сформировать отчёт$")
+    public void createReport() {
+        AllureBasicStep.createReport();
+    }
+
 }

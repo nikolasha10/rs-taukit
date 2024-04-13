@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class BasicUtils {
+
     public static Storage storage = Storage.getInstance();
 
     public static CucumberScenario scenario() {
@@ -128,5 +129,4 @@ public class BasicUtils {
             throw new DataTableFormatMismatchException(message);
         }
     }
-
 }

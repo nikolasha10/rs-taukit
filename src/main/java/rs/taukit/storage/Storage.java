@@ -3,6 +3,7 @@ package rs.taukit.storage;
 import io.cucumber.testng.FeatureWrapper;
 import io.cucumber.testng.PickleWrapper;
 import lombok.Getter;
+import lombok.Setter;
 import rs.taukit.exceptions.ScenarioNotFoundException;
 import rs.taukit.scenario.CucumberScenario;
 
@@ -13,6 +14,13 @@ public class Storage {
     private final ThreadLocal<CucumberScenario> scenarioThreadLocal = new ThreadLocal<>();
     @Getter
     private final List<CucumberScenario> scenarioList = new ArrayList<>();
+
+    @Setter
+    @Getter
+    private boolean testsFinished = false;
+    @Setter
+    @Getter
+    private boolean reportCollected = false;
 
     public static Storage getInstance() {
         return StorageManagerHolder.INSTANCE;

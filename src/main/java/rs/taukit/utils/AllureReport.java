@@ -35,13 +35,13 @@ public class AllureReport {
                 }).toList();
     }
 
-    public static synchronized void editReports(String scenarioName, String functionality, long testEndTime) {
+    public static synchronized void editReports(String scenarioName, String functionality, String status, long testEndTime) {
         List<File> fileList = getFileList(scenarioName, testEndTime);
-        fileList.forEach(file -> replaceReport(file, scenarioName, functionality));
+        fileList.forEach(file -> replaceReport(file, scenarioName, functionality, status));
     }
 
     @SuppressWarnings("unchecked")
-    private static void replaceReport(File file, String scenarioName, String functionality) {
+    private static void replaceReport(File file, String scenarioName, String functionality, String status) {
         try {
             String fileContent = Files.readString(file.toPath());
             Gson gson = new Gson();
@@ -69,6 +69,8 @@ public class AllureReport {
             int warningFlag = checkBrokenSteps(report);
             if (testStatus.equals("passed") && warningFlag == 0) {
                 report.replace("status", "unknown");
+            } else {
+                report.replace("status", status);
             }
             Map<String, String> statusDetails = (Map<String, String>) report.get("statusDetails");
             if (!errorList.isEmpty()) {

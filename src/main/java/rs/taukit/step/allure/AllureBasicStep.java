@@ -6,11 +6,11 @@ import rs.taukit.config.Config;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.testdata.ExpectedResult;
-import rs.taukit.utils.BasicUtils;
-import rs.taukit.utils.TauLogger;
-import rs.taukit.utils.TimeStringParser;
+import rs.taukit.utils.*;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -148,5 +148,19 @@ public class AllureBasicStep extends BasicUtils {
     @Step("[примечание] результат следующей проверки некритичен для теста")
     public static void setNextCheckNotCritical() {
         scenarioData().put("NEXT_CHECK_NOT_CRITICAL", "NOT CRITICAL");
+    }
+
+    @Step("Отчёт")
+    public static void createReport() {
+        scenarioData().put("jenkinsPipelineUrl", Config.getProperty("jenkins.pipeline.url"));
+        scenarioData().put("jenkinsAuth", Config.getProperty("jenkins.auth"));
+        List<Map<String, ?>> standList = YamlParser.parse(Config.eval("${baseResourcesDir}/configs/stands.yaml"));
+        String stands = standList.stream().map((item -> "'" + item.get("Название").toString() + "'")).toList().toString();
+        scenarioData().put("stands", stands);
+        scenarioData().put("currentStand", Config.getSTAND().getName());
+        scenarioData().put("defaultBranch", Config.getProperty("defaultBranch"));
+        String template = FileUtils.readFile("src/main/resources/templates/finalReportTemplate.html");
+        FileUtils.writeFile("target/temp/finalReport.html", eval(template));
+        TauLogger.attachFile("Отчёт", "target/temp/finalReport.html");
     }
 }

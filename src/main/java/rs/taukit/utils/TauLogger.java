@@ -19,8 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static rs.taukit.utils.BasicUtils.driver;
-import static rs.taukit.utils.BasicUtils.scenarioData;
+import static rs.taukit.utils.BasicUtils.*;
 
 /**
  * Класс отвечающий за вывод сообщений в лог и allure-отчеты
@@ -162,7 +161,7 @@ public final class TauLogger {
     }
 
     /**
-     * Выводит сообщение о фатальной ошибке в действии, и делает скриншот.
+     * Выводит сообщение о критической ошибке, и делает скриншот.
      */
     @Step("{0}")
     public static void fail(String message) {
@@ -172,7 +171,7 @@ public final class TauLogger {
     }
 
     /**
-     * Выводит сообщение о фатальной ошибке в действии. так же выводит сообщение об ошибке
+     * Выводит сообщение о критической ошибке.
      */
     @Step("{message}")
     public static void fail(String message, Throwable e) {
@@ -191,7 +190,7 @@ public final class TauLogger {
     public static void fail(Throwable e, String format, Object... args) {
         String message = String.format(format, args);
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
-            warn(message,e);
+            warn(message, e);
         } else {
             fail(message, e);
         }
@@ -330,4 +329,5 @@ public final class TauLogger {
     public static void resetNotCritical() {
         scenarioData().put("NEXT_CHECK_NOT_CRITICAL", null);
     }
+
 }

@@ -1,0 +1,296 @@
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<style>
+		select {padding: 5px}
+		input {padding: 5px }
+        #restart {margin: 20px; padding: 10px;}
+        .expand {
+            border: 1px solid gray;
+            border-radius: 10px;
+            width: 15px;
+            height: 12px;
+            text-align: center;
+            padding: 0px 0px 3px 0px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .grid2 {
+            display: grid;
+            grid-template-columns: 25px auto;
+            grid-auto-rows: minmax(20px, auto);
+        }
+        .grid3 {
+            display: grid;
+            grid-template-columns: 20px 20px auto;
+            grid-auto-rows: minmax(20px, auto);
+            margin-top: 5px;
+        }
+        .grid-row { display: grid; grid-row: 1}
+        .error {
+                background-color: #ffe7e6;
+                border-color: #fd5a3e;
+                padding: 15px;
+        }
+        .passed{
+            background-color: #97cc64;
+            color: white;
+            border-color: #97cc64;
+        }
+        .broken{
+            background-color: #ffd050;
+            color: white;
+            border-color: #ffd050;
+        }
+        .unknown{
+            background-color: #d35ebe;
+            color: white;
+            border-color: #d35ebe;
+        }
+        .skipped{
+            background-color: #aaa;
+            color: white;
+            border-color: #aaa;
+        }
+        .failed{
+            background-color: #fd5a3e;
+            color: white;
+            border-color: #fd5a3e;
+        }
+        .hidden {display: none}
+	</style>
+	<title>Отчёт</title>
+</head>
+
+<body>
+<table><tr>
+	<td><select id="standSelect" title="Тестовый стенд"></select></td>
+	<td><select id="branchSelect" title="Ветка автотестов"></select></td>
+	<td><input id="customBranch" title="Произвольная ветка автотестов"></td>
+	<td><select id="filter" title="Фильтр"></select></td>
+</tr></table>
+<div id="scenarioTreeContainer"></div>
+<div id="buttons"><button id="restart">Перезапустить</button></div>
+
+<script type="text/javascript" defer>
+	const pipelineUrl = '${jenkinsPipelineUrl}';
+    const authorization = 'Basic ${jenkinsAuth}';
+    const stands = ${stands};
+    const currentStand = '${currentStand}';
+    const branches = ['develop', 'psi', 'r-test'];
+    const defaultBranch = '${defaultBranch}';
+    const scenarioData = ${scenarioData};
+
+    function expandFunction(ev){
+        var container = this.parentNode.getElementsByTagName('div')[2];
+        var children = container.childNodes;
+        for (child of children){
+            var currentClass = child.className;
+            if (!currentClass) continue;
+            if (currentClass.includes('hidden')){
+                child.className = currentClass.replace(' hidden', '');
+            } else {
+                child.className = currentClass.trim() + ' hidden';
+            }
+        }
+        this.innerHTML = this.innerHTML == '+' ? '&ndash;' : '+';
+    }
+    function isHidden(el){ return (el.offsetParent === null) }
+    function checkAll(){
+        let checkboxes = this.parentNode.parentNode.getElementsByTagName('input');
+        for (let checkbox of checkboxes){
+            checkbox.checked = this.checked;
+        }
+    }
+    function setFilter(){
+    	if (this.value === 'Неуспешные'){
+    		let expandButtons = scenarioTreeContainer.getElementsByClassName('expand passed');
+    		for (let expand of expandButtons){
+    			expand.parentNode.className += ' hidden';
+    		}
+    		let ready = false;
+    		for (let i=0; i<2; i++){
+    		    let containers = scenarioTreeContainer.getElementsByClassName('grid3');
+    		    for (let container of containers){
+    		    	if (!container.className.includes('hidden')){
+    		    		let children = container.getElementsByClassName('grid3');
+    		    		let hiddenChildren = container.getElementsByClassName('grid3 hidden');
+    		    		if (children.length > 0 && children.length == hiddenChildren.length){
+    		    			container.className += ' hidden';
+    		    		}
+    		    	}
+    		    }
+    		 }
+    	} else {
+    		let containers = scenarioTreeContainer.getElementsByClassName('grid3');
+    		for (container of containers){
+    			container.className = container.className.replace(' hidden', '');
+			}
+    	}
+    }
+    function createContainers(parentContainer, text){
+        let expand = document.createElement('div');
+        expand.className = 'expand';
+        expand.innerHTML = '&ndash;';
+        parentContainer.appendChild(expand);
+        let checkboxContainer = document.createElement('div');
+        parentContainer.appendChild(checkboxContainer);
+        let checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkboxContainer.appendChild(checkbox);
+        checkbox.onchange = checkAll;
+        let container = document.createElement('div');
+        container.innerHTML = text;
+        parentContainer.appendChild(container);
+        return container;
+    }
+    function checkBuildStatus(callback, lastBuildId){
+        fetch(pipelineUrl + '/lastBuild/api/json', {
+            method: 'GET',
+            headers: {
+                'Authorization': authorization
+            }
+        }).then(response => {
+            if (response.status == 200){
+                return response.json();
+            } else {
+                alert('Запрос статуса вернул ошибку ' + response.status);
+            }
+        }).then(data => {
+            callback(data, lastBuildId);
+        });
+    }
+    function startNewBuild(lastBuildId){
+        const checkboxes = document.body.getElementsByTagName('input');
+        const tags = [];
+        for (let checkbox of checkboxes){
+            if (isHidden(checkbox) || !checkbox.checked || checkbox.value[0] != '@') continue;
+            tags.push(checkbox.value);
+        }
+        let scenarioTags = tags.join(',');
+        let formData = new FormData();
+        formData.append('standName', standSelect.value);
+        formData.append('branch', customBranch.value || branchSelect.value);
+        formData.append('mavenGoal', 'test');
+        formData.append('scenarioTags', scenarioTags);
+        formData.append('trackDependencies', 'false');
+        let parameters = []
+        for (const pair of formData.entries()) {
+        	parameters.push(pair.join('='));
+        }
+        let fetchBody = parameters.join('&');
+        fetch(pipelineUrl + '/buildWithParameters', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': authorization
+            },
+            body: fetchBody
+        }).then(response => {
+            switch (response.status) {
+                case 201:
+                	let buildLink = document.getElementById('buildLink');
+					buildLink && buildLink.remove();
+                    let currentStatus = document.createElement('span');
+                    currentStatus.innerText = 'Запрос отправлен. Ожидается запуск тестов...';
+                    buttons.appendChild(currentStatus);
+                    let waitNewBuild = (lastBuildId) => {
+                        checkBuildStatus((data, lastBuildId) => {
+                            if (lastBuildId == data.id){
+                                waitNewBuild(lastBuildId);
+                                return;
+                            }
+                            currentStatus.remove();
+                            let link = document.createElement('a');
+                            link.id = 'buildLink';
+                        	buttons.appendChild(link);
+                            link.href = data.url;
+                            link.target = '_blank';
+                            link.innerHTML = data.fullDisplayName;
+                        }, lastBuildId);
+                    }
+                    waitNewBuild(lastBuildId);
+                    break;
+                default:
+                    console.error('Запрос на запуск автотестов вернул ошибку с кодом ' + response.status);
+                    alert('Запрос на запуск автотестов вернул ошибку с кодом ' + response.status)
+            }
+        });
+    }
+
+    for (let stand of stands){
+        let selected = stand === 'workstation';
+        let option = new Option(stand, stand, selected, selected);
+        standSelect.add(option);
+    }
+    for (let branch of branches){
+    	  let selected = branch === defaultBranch;
+        let option = new Option(branch, branch, selected, selected);
+        branchSelect.add(option);
+    }
+    let filters = ['Все', 'Неуспешные'];
+    for (let filterValue of filters){
+    	let selected = filterValue === 'Все';
+    	filter.add(new Option(filterValue, filterValue, selected, selected));
+    }
+    filter.onchange = setFilter;
+
+    let suiteNames = Object.keys(scenarioData);
+    suiteNames.sort();
+    for (let suiteName of suiteNames){
+        let suiteTag = suiteName.split('.')[0];
+        let scenarioSuiteContainer = document.createElement('div');
+        scenarioSuiteContainer.className = 'grid3';
+        scenarioTreeContainer.appendChild(scenarioSuiteContainer);
+        let suiteContainer = createContainers(scenarioSuiteContainer, suiteName);
+        let testGroupResults = scenarioData[suiteName].testGroupResults;
+        let groupNames = Object.keys(testGroupResults);
+        groupNames.sort();
+        for (let groupName of groupNames){
+            let groupTag = groupName.split('.')[0];
+            let scenarioGroupContainer = document.createElement('div');
+            scenarioGroupContainer.className = 'grid3';
+            suiteContainer.appendChild(scenarioGroupContainer);
+            let groupContainer = createContainers(scenarioGroupContainer, groupName);
+            let testResults = testGroupResults[groupName].testResults;
+            let scenarioNames = Object.keys(testResults);
+            scenarioNames.sort();
+            for (let scenarioName of scenarioNames){
+                let scenarioTag = scenarioName.split('.')[0];
+                let scenarioContainer = document.createElement('div');
+                scenarioContainer.className = 'grid3';
+                groupContainer.appendChild(scenarioContainer);
+                let scenarioNameContainer = createContainers(scenarioContainer, scenarioName);
+                let expand = scenarioContainer.getElementsByClassName('expand')[0];
+                let status = testResults[scenarioName].status;
+                if (status) expand.className+= ' ' + status;
+                let checkbox = scenarioContainer.getElementsByTagName('input')[0];
+                checkbox.value = '@' + [suiteTag, groupTag, scenarioTag].join('.');
+                let errorMessage = testResults[scenarioName].errorMessage;
+                if (errorMessage){
+                    let errorContainer = document.createElement('div');
+                    errorContainer.className = 'error';
+                    errorContainer.innerHTML = errorMessage;
+                    scenarioNameContainer.appendChild(errorContainer);
+                }
+            }
+        }
+    }
+    var expandButtons = document.getElementsByClassName('expand');
+    for (let button of expandButtons){
+        button.onclick = expandFunction;
+    }
+    restart.onclick = function(){
+        checkBuildStatus((data) => {
+            let startConfirm = true;
+            if (data.inProgress){
+            	startConfirm = window.confirm('Тесты уже выполняются. Вы уверены, что хотите запустить выбранные тесты параллельно?')
+            }
+			if (startConfirm){
+				startNewBuild(data.id);
+			}
+        });
+    }
+</script>
+</body>
+</html>

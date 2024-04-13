@@ -88,7 +88,7 @@ public class DataStorage {
                 if (get(matchResult.group(1)) instanceof ITestData iTestData) {
                     return iTestData.getStringValue();
                 } else {
-                    return get(matchResult.group(1));
+                    return get(matchResult.group(1)).toString();
                 }
             });
         } catch (IllegalArgumentException e) {

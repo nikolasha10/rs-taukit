@@ -23,6 +23,7 @@ public class ScenarioData {
         this.dataStorage = new DataStorage(featurePath, getScenarioData(getFeatureData(featurePath)));
         this.nameSpaces = new HashMap<>();
         put("Адрес стенда", Config.getSTAND().getUrl());
+        put("Теги", String.join(" ", pickle.getTags()));
     }
 
     private List<Map<String, ?>> getFeatureData(String featurePath) {
@@ -50,6 +51,11 @@ public class ScenarioData {
         dataStorage.put(fieldName, value);
     }
 
+    public void put(String nameSpace, String fieldName, Object value) {
+        nameSpaces.putIfAbsent(nameSpace, new DataStorage(new HashMap<>()));
+        nameSpaces.get(nameSpace).put(fieldName, value);
+    }
+
     public void put(DataTable dataTable) {
         dataTable.asMaps().forEach(item -> {
             String parameterName = TestDataUtils.get(item, "Параметр");
@@ -57,8 +63,9 @@ public class ScenarioData {
             put(parameterName, parameterValue);
         });
     }
+
     public void put(DataTable dataTable, String nameSpace) {
-        nameSpaces.put(nameSpace, new DataStorage(new HashMap<>()));
+        nameSpaces.putIfAbsent(nameSpace, new DataStorage(new HashMap<>()));
         dataTable.asMaps().forEach(item -> {
             String parameterName = TestDataUtils.get(item, "Параметр");
             String parameterValue = TestDataUtils.get(item, "Значение");
@@ -69,6 +76,7 @@ public class ScenarioData {
     public <T> T get(String fieldName) {
         return dataStorage.get(fieldName);
     }
+
     public <T> T get(String nameSpace, String fieldName) {
         return nameSpaces.get(nameSpace).get(fieldName);
     }
@@ -76,6 +84,7 @@ public class ScenarioData {
     public <T> T getOptional(String fieldName) {
         return dataStorage.getOptional(fieldName);
     }
+
     public <T> T getOptional(String nameSpace, String fieldName) {
         return nameSpaces.get(nameSpace).getOptional(fieldName);
     }

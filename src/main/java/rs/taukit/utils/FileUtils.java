@@ -74,6 +74,7 @@ public class FileUtils {
     }
 
     public static void writeFile(String filePath, String content) {
+        createFile(filePath);
         File file = new File(filePath);
         try {
             Files.writeString(file.toPath(), content);
