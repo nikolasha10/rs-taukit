@@ -31,7 +31,7 @@ public class TestRunner {
         List<CucumberScenario> scenarios = storage.getScenarioList();
         if (scenarios.isEmpty()) {
             if (storage.isTestsFinished()) {
-                scenarios.addAll(findScenariosByTags("@Отчёт"));
+                scenarios.addAll(findScenariosByTags("@finalReport"));
                 List<String> excludedScenarios = findScenariosByTags("@disabled").stream()
                         .map(scenario -> String.format("%s %s %s",
                                 scenario.getSuiteName(), scenario.getGroupName(), scenario.getName()))
