@@ -85,6 +85,7 @@ public class AllureReport {
                             "Также, выявлены некритические ошибки:", notes));
                 }
             }
+            errorList.clear();
             Files.writeString(file.toPath(), gson.toJson(report));
         } catch (IOException e) {
             throw new ConfigFileNotFoundException(e, file.getPath());

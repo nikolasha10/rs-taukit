@@ -80,8 +80,10 @@ public class TestRunner {
                     }
                 });
                 try {
-                    String json = mapper.writeValueAsString(suiteResults);
-                    scenarios.get(0).getScenarioStorage().getScenarioData().put("scenarioData", json);
+                    if (!scenarios.isEmpty()) {
+                        String json = mapper.writeValueAsString(suiteResults);
+                        scenarios.get(0).getScenarioStorage().getScenarioData().put("scenarioData", json);
+                    }
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
@@ -117,6 +119,9 @@ public class TestRunner {
         suiteName = suiteName.replaceAll("\"", "&quot;");
         groupName = groupName.replaceAll("\"", "&quot;");
         scenarioName = scenarioName.replaceAll("\"", "&quot;");
+        if (errorMessage != null){
+            errorMessage = errorMessage.replaceAll("\n", "<br>");
+        }
         TestResults testResults = new TestResults(status, finished, errorMessage);
         TestSuiteResults testSuiteResults = suiteResults.getOrDefault(suiteName, new TestSuiteResults(new HashMap<>()));
         TestGroupResults testGroupResults = testSuiteResults.testGroupResults().getOrDefault(groupName, new TestGroupResults(new HashMap<>()));

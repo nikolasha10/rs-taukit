@@ -103,7 +103,7 @@
                 checkbox.disabled = false;
         } else {
                 this.innerHTML = '+';
-                if (!children[1] || children[1].className === 'error'){
+                if (!children[1] || children[1].className.includes('error')){
                     return;
                 }
                 checkbox.checked = false;
@@ -134,7 +134,7 @@
     function checkAll(){
         let checkboxes = this.parentNode.parentNode.getElementsByTagName('input');
         for (let checkbox of checkboxes){
-            checkbox.checked = this.checked;
+            if (!checkbox.disabled) checkbox.checked = this.checked;
         }
     }
     function setFilter(){
@@ -307,7 +307,7 @@
                 if (errorMessage){
                     let errorContainer = document.createElement('div');
                     errorContainer.className = 'error';
-                    errorContainer.innerHTML = errorMessage;
+                    errorContainer.innerHTML = errorMessage.replaceAll('\\n', '<br>');
                     scenarioNameContainer.appendChild(errorContainer);
                 }
             }
