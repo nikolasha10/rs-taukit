@@ -1,7 +1,3 @@
-/rs-taukit.iml
 .allure
 /browserExtensions
 /target
-/src/example-test/resources/configs/runtime.properties
-/src/efr-at
-
