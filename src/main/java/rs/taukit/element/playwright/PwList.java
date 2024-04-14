@@ -15,6 +15,7 @@ import rs.taukit.utils.TestDataUtils;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -49,8 +50,9 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
     @Override
     public void setValue(String value) {
         try {
-            driver.waitForCondition(() -> getValues().stream().anyMatch(itemValue -> itemValue.contains(value)),
-                    Config.getTimeProperty("element.check.interval"));
+            BooleanSupplier condition = () -> getValues().stream().anyMatch(itemValue -> itemValue.contains(value));
+            double timeout = Config.getTimeProperty("element.check.interval");
+            driver.waitForCondition(condition, timeout);
         } catch (Exception e) {
             throw valueNotFoundException(value).get();
         }
