@@ -97,7 +97,7 @@ public class ScenarioData {
         return dataStorage.evalObject(template);
     }
 
-    public String evalStrings(String template) {
-        return dataStorage.evalStrings(template);
+    public String evalString(String template) {
+        return dataStorage.evalString(template);
     }
 }
