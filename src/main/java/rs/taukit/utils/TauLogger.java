@@ -184,7 +184,12 @@ public final class TauLogger {
     public static void fail(Runnable runnable, String message) {
         runnable.run();
         attachFullScreenshots();
-        throw new AssertionError(message);
+        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
+            scenarioData().put("WARNING", "PASSED with ERRORS");
+        } else {
+            throw new AssertionError(message);
+        }
     }
 
     public static void fail(Throwable e, String format, Object... args) {
@@ -265,11 +270,13 @@ public final class TauLogger {
     }
 
     public static void attachFullScreenshots() {
-        List<byte[]> screenshotList = driver().getCurrentBrowser().takeScreenshots();
-        IntStream.range(0, screenshotList.size())
-                .forEach(index -> attachScreenshot(
-                        String.format("Вкладка %d", index + 1),
-                        screenshotList.get(index)));
+        if (driver().isBrowserOpen()) {
+            List<byte[]> screenshotList = driver().getCurrentBrowser().takeScreenshots();
+            IntStream.range(0, screenshotList.size())
+                    .forEach(index -> attachScreenshot(
+                            String.format("Вкладка %d", index + 1),
+                            screenshotList.get(index)));
+        }
     }
 
 
