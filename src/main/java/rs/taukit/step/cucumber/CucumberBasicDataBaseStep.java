@@ -10,6 +10,9 @@ public class CucumberBasicDataBaseStep {
     private AllureBasicDataBaseStep dataBaseStep(String dataBaseName) {
         return new AllureBasicDataBaseStep(dataBaseName);
     }
+    private AllureBasicDataBaseStep dataBaseStep() {
+        return new AllureBasicDataBaseStep();
+    }
 
     @И("^в базе данных \"(.+)\" выполнить sql-скрипт из файла \"(.+)\"$")
     public void runSqlScriptFromFile(String dataBaseName, String sqlFileName) {
@@ -23,6 +26,11 @@ public class CucumberBasicDataBaseStep {
     @И("^в базе данных \"(.+)\" для всех значений списка \"(.+)\" выполнить sql-скрипт из файла \"(.+)\" с параметрами:$")
     public void runSqlScriptFromFileForList(String dataBaseName, String listOfValues, String sqlFileName, DataTable dataTable) {
         dataBaseStep(dataBaseName).execute(sqlFileName, eval(dataTable));
+    }
+
+    @И("^сохранить результат выполнения sql-скрипта в параметры:$")
+    public void saveSqlResultSet(DataTable dataTable) {
+        dataBaseStep().saveSqlResultSet(eval(dataTable));
     }
 
 }

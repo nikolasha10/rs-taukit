@@ -8,6 +8,7 @@ import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.utils.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,43 @@ public class AllureBasicStep extends BasicUtils {
         waitForConditions(dataTable);
     }
 
+    @Step("проверить выполнение условий '{conditionsName}':")
+    public static void checkConditions(String conditionsName, DataTable dataTable) {
+        TauLogger.attachDataTable("Ожидаемый результат", dataTable);
+        Map<String, String> expectedHeaders = dataTable.asMaps().get(0);
+        List<List<String>> unexpectedResultList = new ArrayList<>();
+        List<String> resultsHeaders = new ArrayList<>(expectedHeaders.keySet().stream().toList());
+        if (resultsHeaders.contains("Значение")) {
+            resultsHeaders.add("Текущее значение");
+        }
+        unexpectedResultList.add(resultsHeaders);
+        dataTable.asMaps().stream()
+                .map(data -> new ExpectedResult(data).waitForResult())
+                .filter(result -> !result.isConditionMet())
+                .forEach(result -> {
+                            List<String> unexpected = new ArrayList<>();
+                            unexpected.add(result.getObjectType());
+                            unexpected.add(result.getObjectName());
+                            unexpected.add(result.getObjectState());
+                            if (resultsHeaders.contains("Значение")) {
+                                unexpected.add(result.getExpectedValue());
+                                unexpected.add(result.getCurrentValue());
+                            }
+                            unexpectedResultList.add(unexpected);
+                        }
+                );
+        if (unexpectedResultList.size() > 1) {
+            Runnable runnable = () -> {
+                DataTable unexpectedResultsTable = DataTable.create(unexpectedResultList, TextUtils.tableConverter);
+                TauLogger.attachDataTable("Результаты неуспешных проверок", unexpectedResultsTable);
+            };
+            TauLogger.fail(runnable, "Результаты проверки условий '%s' не соответствуют ожидаемым", conditionsName);
+        } else {
+            TauLogger.report("Условия '%s' выполнены", conditionsName);
+        }
+        TauLogger.resetNotCritical();
+    }
+
     @Step("дождаться выполнения условий:")
     public static void waitForConditionsNoName(DataTable dataTable) {
         waitForConditions(dataTable);
@@ -56,6 +94,11 @@ public class AllureBasicStep extends BasicUtils {
 
     @Step("дождаться выполнения условий в течение {timeoutString}:")
     public static void waitForConditionsWithinTimeIntervalNoName(String timeoutString, DataTable dataTable) {
+        waitForConditions(TimeStringParser.getTime(timeoutString), dataTable);
+    }
+
+    @Step("дождаться выполнения условий '{conditionsName}' в течение {timeoutString}:")
+    public static void waitForConditionsWithinTimeIntervalNoName(String conditionsName, String timeoutString, DataTable dataTable) {
         waitForConditions(TimeStringParser.getTime(timeoutString), dataTable);
     }
 
@@ -162,5 +205,11 @@ public class AllureBasicStep extends BasicUtils {
         String template = FileUtils.readFile("src/main/resources/templates/finalReportTemplate.html");
         FileUtils.writeFile("target/temp/finalReport.html", eval(template));
         TauLogger.attachFile("Отчёт", "target/temp/finalReport.html");
+    }
+
+    @Step("сохранить '{value}', как '{parameterName}'")
+    public static void saveValueAs(String value, String parameterName) {
+        scenarioData().put(parameterName, value);
+        TauLogger.report("Значение '%s' сохранено, как '%s'", value, parameterName);
     }
 }

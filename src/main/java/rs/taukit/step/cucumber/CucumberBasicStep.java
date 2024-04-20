@@ -39,14 +39,24 @@ public class CucumberBasicStep {
         AllureBasicStep.waitForTimeout(timeValue, timeUnit);
     }
 
+    @И("^проверить выполнение условий \"(.+)\":$")
+    public void checkConditions(String conditionsName, DataTable datatable) {
+        AllureBasicStep.checkConditions(conditionsName, eval(datatable));
+    }
+
     @И("^дождаться выполнения условий:$")
-    public void expectedResultCheck(DataTable datatable) {
+    public void waitForConditions(DataTable datatable) {
         AllureBasicStep.waitForConditionsNoName(eval(datatable));
     }
 
     @И("^дождаться выполнения условий в течение \"(.+)\":$")
     public void expectedResultCheckWithinTimeInterval(String timeoutString, DataTable datatable) {
         AllureBasicStep.waitForConditionsWithinTimeIntervalNoName(timeoutString, eval(datatable));
+    }
+
+    @И("^дождаться выполнения условий \"(.+)\" в течение \"(.+)\":$")
+    public void expectedResultCheckWithinTimeInterval(String conditionsName, String timeoutString, DataTable datatable) {
+        AllureBasicStep.waitForConditionsWithinTimeIntervalNoName(conditionsName, timeoutString, eval(datatable));
     }
 
     /**
@@ -62,8 +72,8 @@ public class CucumberBasicStep {
      *                           <li>[любой тип элемента]</li>
      *                       </ul>
      */
-    @И("^дождаться выполнения условий \"(.+)\":$")
-    public void expectedResultCheck(String conditionsName, DataTable datatable) {
+    @И("^дождаться выполнения условий \"([а-яА-Я\\w\\d\\s']+)\":$")
+    public void waitForConditions(String conditionsName, DataTable datatable) {
         AllureBasicStep.waitForConditions(conditionsName, eval(datatable));
     }
 
@@ -107,4 +117,8 @@ public class CucumberBasicStep {
         AllureBasicStep.createReport();
     }
 
+    @И("^сохранить значение \"(.+)\", как \"(.+)\"$")
+    public void saveValueAs(String value, String parameterName) {
+        AllureBasicStep.saveValueAs(eval(value), parameterName);
+    }
 }
