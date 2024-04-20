@@ -1,8 +1,8 @@
 <html lang="ru">
 <head>
-	<meta charset="utf-8">
-	<style>
-		select {padding: 5px}
+    <meta charset="utf-8">
+    <style>
+        select {padding: 5px}
         input {padding: 5px }
         #restart {margin: 20px; padding: 10px;}
         .expand {
@@ -58,26 +58,26 @@
             border-color: #fd5a3e;
         }
         .hidden {display: none}
-	</style>
-	<title>Отчёт</title>
+    </style>
+    <title>Отчёт</title>
 </head>
 
 <body>
 <table>
-	<tr>
-		<td><select id="standSelect" title="Тестовый стенд"></select></td>
-		<td><select id="branchSelect" title="Ветка автотестов"></select></td>
-		<td><input id="customBranch" title="Произвольная ветка автотестов"></td>
-		<td><select id="filter" title="Фильтр"></select></td>
-	</tr>
+    <tr>
+        <td><select id="standSelect" title="Тестовый стенд"></select></td>
+        <td><select id="branchSelect" title="Ветка автотестов"></select></td>
+        <td><input id="customBranch" title="Произвольная ветка автотестов"></td>
+        <td><select id="filter" title="Фильтр"></select></td>
+    </tr>
 </table>
 <div id="scenarioTreeContainer" class="grid3"></div>
 <div id="buttons">
-	<button id="restart">Перезапустить</button>
+    <button id="restart">Перезапустить</button>
 </div>
 
 <script type="text/javascript" defer>
-	const pipelineUrl = '${jenkinsPipelineUrl}';
+    const pipelineUrl = '${jenkinsPipelineUrl}';
     const authorization = 'Basic ${jenkinsAuth}';
     const stands = ${stands};
     const currentStand = '${currentStand}';
@@ -272,43 +272,61 @@
 
     let commonContainer = createContainers(scenarioTreeContainer, ' *** Результаты автотестов');
     let expandAllButton = scenarioTreeContainer.getElementsByClassName('expand')[0];
-    let suiteNames = Object.keys(scenarioData);
-    suiteNames.sort();
-    for (let suiteName of suiteNames){
-        let suiteTag = suiteName.split('.')[0];
-        let scenarioSuiteContainer = document.createElement('div');
-        scenarioSuiteContainer.className = 'grid3';
-        commonContainer.appendChild(scenarioSuiteContainer);
-        let suiteContainer = createContainers(scenarioSuiteContainer, suiteName);
-        let testGroupResults = scenarioData[suiteName].testGroupResults;
-        let groupNames = Object.keys(testGroupResults);
-        groupNames.sort();
-        for (let groupName of groupNames){
-            let groupTag = groupName.split('.')[0];
-            let scenarioGroupContainer = document.createElement('div');
-            scenarioGroupContainer.className = 'grid3';
-            suiteContainer.appendChild(scenarioGroupContainer);
-            let groupContainer = createContainers(scenarioGroupContainer, groupName);
-            let testResults = testGroupResults[groupName].testResults;
-            let scenarioNames = Object.keys(testResults);
-            scenarioNames.sort();
-            for (let scenarioName of scenarioNames){
-                let scenarioTag = scenarioName.split('.')[0];
-                let scenarioContainer = document.createElement('div');
-                scenarioContainer.className = 'grid3';
-                groupContainer.appendChild(scenarioContainer);
-                let scenarioNameContainer = createContainers(scenarioContainer, scenarioName);
-                let expand = scenarioContainer.getElementsByClassName('expand')[0];
-                let status = testResults[scenarioName].status;
-                if (status) expand.className+= ' ' + status;
-                let checkbox = scenarioContainer.getElementsByTagName('input')[0];
-                checkbox.value = '@' + [suiteTag, groupTag, scenarioTag].join('.');
-                let errorMessage = testResults[scenarioName].errorMessage;
-                if (errorMessage){
-                    let errorContainer = document.createElement('div');
-                    errorContainer.className = 'error';
-                    errorContainer.innerHTML = errorMessage.replaceAll('\\n', '<br>');
-                    scenarioNameContainer.appendChild(errorContainer);
+    let parentSuiteNames = Object.keys(scenarioData);
+    parentSuiteNames.sort();
+    for (let parentSuiteName of parentSuiteNames){
+        let parentSuiteTag = parentSuiteName.split('.')[0];
+        let scenarioParentSuiteContainer = document.createElement('div');
+        scenarioParentSuiteContainer.className = 'grid3';
+        commonContainer.appendChild(scenarioParentSuiteContainer);
+        let parentSuiteContainer = createContainers(scenarioParentSuiteContainer, parentSuiteName);
+        let testSuiteResults = scenarioData[parentSuiteName].testSuiteResults;
+        let suiteNames = Object.keys(testSuiteResults);
+        suiteNames.sort();
+        for (let suiteName of suiteNames){
+         	let suiteTag = '';
+         	let suiteContainer = parentSuiteContainer;
+         	if (suiteName !== '-'){
+	            let suiteTag = suiteName.split('.')[0];
+	            let scenarioSuiteContainer = document.createElement('div');
+	            scenarioSuiteContainer.className = 'grid3';
+	            parentSuiteContainer.appendChild(scenarioSuiteContainer);
+	            suiteContainer = createContainers(scenarioSuiteContainer, suiteName);
+            }
+            let subSuiteResults = testSuiteResults[suiteName].testSubSuiteResults;
+            let subSuiteNames = Object.keys(subSuiteResults);
+            subSuiteNames.sort();
+            for (let subSuiteName of subSuiteNames){
+            	let subSuiteTag = '';
+            	let subSuiteContainer = suiteContainer;
+            	if (subSuiteName !== '-'){
+						subSuiteTag = subSuiteName.split('.')[0];
+                	let scenarioSubSuiteContainer = document.createElement('div');
+                	scenarioSubSuiteContainer.className = 'grid3';
+                	suiteContainer.appendChild(scenarioSubSuiteContainer);
+                	subSuiteContainer = createContainers(scenarioSubSuiteContainer, subSuiteName);
+               }
+                let testResults = subSuiteResults[subSuiteName].testResults;
+                let scenarioNames = Object.keys(testResults);
+                scenarioNames.sort();
+                for (let scenarioName of scenarioNames){
+                    let scenarioTag = scenarioName.split('.')[0];
+                    let scenarioContainer = document.createElement('div');
+                    scenarioContainer.className = 'grid3';
+                    subSuiteContainer.appendChild(scenarioContainer);
+                    let scenarioNameContainer = createContainers(scenarioContainer, scenarioName);
+                    let expand = scenarioContainer.getElementsByClassName('expand')[0];
+                    let status = testResults[scenarioName].status;
+                    if (status) expand.className+= ' ' + status;
+                    let checkbox = scenarioContainer.getElementsByTagName('input')[0];
+                    checkbox.value = '@' + [parentSuiteTag, suiteTag, subSuiteTag, scenarioTag].join('.');
+                    let errorMessage = testResults[scenarioName].errorMessage;
+                    if (errorMessage){
+                        let errorContainer = document.createElement('div');
+                        errorContainer.className = 'error';
+                        errorContainer.innerHTML = errorMessage;
+                        scenarioNameContainer.appendChild(errorContainer);
+                    }
                 }
             }
         }
