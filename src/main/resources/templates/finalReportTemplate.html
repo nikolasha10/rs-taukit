@@ -259,7 +259,7 @@
         standSelect.add(option);
     }
     for (let branch of branches){
-          let selected = branch === defaultBranch;
+        let selected = branch === defaultBranch;
         let option = new Option(branch, branch, selected, selected);
         branchSelect.add(option);
     }
@@ -287,7 +287,7 @@
          	let suiteTag = '';
          	let suiteContainer = parentSuiteContainer;
          	if (suiteName !== '-'){
-	            let suiteTag = suiteName.split('.')[0];
+	            suiteTag = suiteName.split('.')[0];
 	            let scenarioSuiteContainer = document.createElement('div');
 	            scenarioSuiteContainer.className = 'grid3';
 	            parentSuiteContainer.appendChild(scenarioSuiteContainer);
@@ -300,7 +300,7 @@
             	let subSuiteTag = '';
             	let subSuiteContainer = suiteContainer;
             	if (subSuiteName !== '-'){
-						subSuiteTag = subSuiteName.split('.')[0];
+					subSuiteTag = subSuiteName.split('.')[0];
                 	let scenarioSubSuiteContainer = document.createElement('div');
                 	scenarioSubSuiteContainer.className = 'grid3';
                 	suiteContainer.appendChild(scenarioSubSuiteContainer);
@@ -319,7 +319,11 @@
                     let status = testResults[scenarioName].status;
                     if (status) expand.className+= ' ' + status;
                     let checkbox = scenarioContainer.getElementsByTagName('input')[0];
-                    checkbox.value = '@' + [parentSuiteTag, suiteTag, subSuiteTag, scenarioTag].join('.');
+                    let tags = [parentSuiteTag];
+                    if (suiteTag !== '') tags.push(suiteTag);
+                    if (subSuiteTag !== '') tags.push(subSuiteTag);
+                    tags.push(scenarioTag);
+                    checkbox.value = '@' + tags.join('.');
                     let errorMessage = testResults[scenarioName].errorMessage;
                     if (errorMessage){
                         let errorContainer = document.createElement('div');
