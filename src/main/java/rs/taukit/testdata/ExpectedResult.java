@@ -30,6 +30,7 @@ public class ExpectedResult {
     private final double checkTimeout;
     private final BooleanSupplier condition;
     private Exception thrownException;
+    private String currentValue;
     private boolean conditionMet;
 
     /**
@@ -95,7 +96,17 @@ public class ExpectedResult {
                 String dirName = String.format("%s/%s", Config.getProperty("downloads.dir"), scenario().getName());
                 return new File(dirName, objectName).exists();
             case "параметр":
-                return scenarioData().get(objectName).toString().contains(expectedValue);
+                this.currentValue = scenarioData().get(objectName);
+                switch (objectState){
+                    case "равен": return currentValue.equals(expectedValue);
+                    case "не равен": return !currentValue.equals(expectedValue);
+                    case "содержит": return currentValue.contains(expectedValue);
+                    case "не содержит": return !currentValue.contains(expectedValue);
+                    case "пуст": return currentValue.isEmpty();
+                    case "не пуст": return !currentValue.isEmpty();
+                    default: this.thrownException = new RuntimeException(String.format(
+                            "Проверка состояния '%s' для объекта '%s' не реализована", objectState, objectType));
+                }
             default:
                 return ElementState.getState(objectState).apply(new CheckedElement(element(objectName), expectedValue));
         }
@@ -115,6 +126,11 @@ public class ExpectedResult {
             this.thrownException = e;
             conditionMet = false;
         }
+        return this;
+    }
+
+    public ExpectedResult checkResult(){
+        this.conditionMet = condition.getAsBoolean();
         return this;
     }
 }

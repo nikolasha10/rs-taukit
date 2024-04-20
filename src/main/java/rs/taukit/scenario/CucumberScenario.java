@@ -27,8 +27,9 @@ public class CucumberScenario {
     private final List<String> tagList;
     private final Map<String, String> dependencyMap;
     private final ScenarioStorage scenarioStorage = new ScenarioStorage();
+    private final String parentSuiteName;
     private final String suiteName;
-    private final String groupName;
+    private final String subSuiteName;
     @Setter
     private boolean started = false;
     @Setter
@@ -44,13 +45,15 @@ public class CucumberScenario {
         this.dependencyMap = Config.getDependencies().getScenarioDependencyMap(tagList);
         scenarioStorage.setScenarioData(new ScenarioData(pickleWrapper.getPickle()));
         String functionality = getFunctionality();
-        Matcher matcher = Pattern.compile("\\[(.+)]\\[(.+)]").matcher(functionality);
-        if (matcher.matches()) {
-            this.suiteName = matcher.group(1);
-            this.groupName = matcher.group(2);
+        Matcher matcher = Pattern.compile("(\\[(.+?)])+?").matcher(functionality);
+        if (matcher.find()) {
+            this.parentSuiteName = matcher.group(2);
+            this.suiteName = matcher.find() ? matcher.group(2) : "-";
+            this.subSuiteName = matcher.find() ? matcher.group(2) : "-";
         } else {
-            this.suiteName = functionality;
-            this.groupName = null;
+            this.parentSuiteName = functionality;
+            this.suiteName = "-";
+            this.subSuiteName = "-";
         }
     }
 

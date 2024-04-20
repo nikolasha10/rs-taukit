@@ -80,7 +80,7 @@ public class BasicUtils {
         ScenarioData scenarioData = scenarioStorage().getScenarioData();
         if (scenarioData == null) return template;
         String evalResult = scenarioData.evalObjectField(template);
-        return scenarioData.evalStrings(evalResult);
+        return scenarioData.evalString(evalResult);
     }
 
     public static <T> T evalObject(String template) {
@@ -110,7 +110,7 @@ public class BasicUtils {
                     return scenarioData.evalObjectField(template);
                 }
             } else {
-                return scenarioData.evalStrings(template);
+                return scenarioData.evalString(template);
             }
         };
         return DataTable.create(dataTable.asLists().stream()
