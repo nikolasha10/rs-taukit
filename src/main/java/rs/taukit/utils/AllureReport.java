@@ -48,17 +48,25 @@ public class AllureReport {
             Map<Object, Object> report = gson.fromJson(fileContent, Map.class);
             report.replace("name", scenarioName);
             List<Map<String, String>> labels = new ArrayList<>();
-            String format = "\\[(.+)]\\[(.+)]";
+            String format = "(\\[(.+?)])+?";
             Matcher matcher = Pattern.compile(format).matcher(functionality);
             Map<String, String> parentSuitName = new HashMap<>();
-            Map<String, String> suiteName = new HashMap<>();
             parentSuitName.put("name", "parentSuite");
-            suiteName.put("name", "suite");
-            if (matcher.matches()) {
-                parentSuitName.put("value", matcher.group(1));
-                suiteName.put("value", matcher.group(2));
+            if (matcher.find()) {
+                parentSuitName.put("value", matcher.group(2));
                 labels.add(parentSuitName);
-                labels.add(suiteName);
+                if (matcher.find()) {
+                    Map<String, String> suiteName = new HashMap<>();
+                    suiteName.put("name", "suite");
+                    suiteName.put("value", matcher.group(2));
+                    labels.add(suiteName);
+                }
+                if (matcher.find()) {
+                    Map<String, String> subSuiteName = new HashMap<>();
+                    subSuiteName.put("name", "subSuite");
+                    subSuiteName.put("value", matcher.group(2));
+                    labels.add(subSuiteName);
+                }
             } else {
                 parentSuitName.put("value", functionality);
                 labels.add(parentSuitName);

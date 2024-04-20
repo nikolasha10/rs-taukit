@@ -7,7 +7,8 @@ import io.cucumber.testng.FeatureWrapper;
 import io.cucumber.testng.PickleWrapper;
 import io.cucumber.testng.TestNGCucumberRunner;
 import rs.taukit.config.Config;
-import rs.taukit.records.TestGroupResults;
+import rs.taukit.records.TestSubSuiteResults;
+import rs.taukit.records.TestParentSuiteResults;
 import rs.taukit.records.TestResults;
 import rs.taukit.records.TestSuiteResults;
 import rs.taukit.utils.FileUtils;
@@ -34,14 +35,15 @@ public class TestRunner {
                 scenarios.addAll(findScenariosByTags("@finalReport"));
                 List<String> excludedScenarios = findScenariosByTags("@disabled").stream()
                         .map(scenario -> String.format("%s %s %s",
-                                scenario.getSuiteName(), scenario.getGroupName(), scenario.getName()))
+                                scenario.getParentSuiteName(), scenario.getSuiteName(), scenario.getName()))
                         .toList();
                 List<CucumberScenario> allScenarios = findAllScenariosExceptTag("@disabled");
-                Map<String, TestSuiteResults> suiteResults = new HashMap<>();
+                Map<String, TestParentSuiteResults> parentSuiteResults = new HashMap<>();
                 allScenarios.forEach(scenario -> updateSuiteResults(
-                        suiteResults,
+                        parentSuiteResults,
+                        scenario.getParentSuiteName(),
                         scenario.getSuiteName(),
-                        scenario.getGroupName(),
+                        scenario.getSubSuiteName(),
                         scenario.getName(),
                         null,
                         null,
@@ -56,32 +58,33 @@ public class TestRunner {
                     try {
                         result = YamlParser.convert(mapper.readValue(file, result.getClass()));
                         List<Map<String, String>> labels = YamlParser.convert(result.get("labels"));
-                        String suiteName = labels.get(0).get("value");
-                        String groupName = labels.get(1).get("value");
+                        String parentSuiteName = labels.get(0).get("value");
+                        String suiteName = labels.size() > 1 ? labels.get(1).get("value") : "-";
+                        String subSuiteName = labels.size() > 2 ? labels.get(2).get("value") : "-";
                         String scenarioName = result.get("name").toString();
                         String status = YamlParser.convert(result.get("status"));
                         String finished = String.valueOf(file.lastModified());
                         Map<String, String> statusDetails = YamlParser.convert(result.get("statusDetails"));
                         String errorMessage = statusDetails.getOrDefault("message", "").replaceAll("\"", "&quot;");
-                        if (!excludedScenarios.contains(String.format("%s %s %s", suiteName, groupName, scenarioName))) {
+                        if (!excludedScenarios.contains(String.format("%s %s %s", parentSuiteName, suiteName, scenarioName))) {
                             updateSuiteResults(
-                                    suiteResults,
+                                    parentSuiteResults,
+                                    parentSuiteName,
                                     suiteName,
-                                    groupName,
+                                    subSuiteName,
                                     scenarioName,
                                     status,
                                     finished,
                                     errorMessage
                             );
                         }
-
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 });
                 try {
                     if (!scenarios.isEmpty()) {
-                        String json = mapper.writeValueAsString(suiteResults);
+                        String json = mapper.writeValueAsString(parentSuiteResults);
                         scenarios.get(0).getScenarioStorage().getScenarioData().put("scenarioData", json);
                     }
                 } catch (JsonProcessingException e) {
@@ -109,25 +112,29 @@ public class TestRunner {
     }
 
     private void updateSuiteResults(
-            Map<String, TestSuiteResults> suiteResults,
+            Map<String, TestParentSuiteResults> parentSuiteResults,
+            String parentSuiteName,
             String suiteName,
-            String groupName,
+            String subSuiteName,
             String scenarioName,
             String status,
             String finished,
-            String errorMessage){
+            String errorMessage) {
+        parentSuiteName = parentSuiteName.replaceAll("\"", "&quot;");
         suiteName = suiteName.replaceAll("\"", "&quot;");
-        groupName = groupName.replaceAll("\"", "&quot;");
+        subSuiteName = subSuiteName.replaceAll("\"", "&quot;");
         scenarioName = scenarioName.replaceAll("\"", "&quot;");
-        if (errorMessage != null){
+        if (errorMessage != null) {
             errorMessage = errorMessage.replaceAll("\n", "<br>");
         }
         TestResults testResults = new TestResults(status, finished, errorMessage);
-        TestSuiteResults testSuiteResults = suiteResults.getOrDefault(suiteName, new TestSuiteResults(new HashMap<>()));
-        TestGroupResults testGroupResults = testSuiteResults.testGroupResults().getOrDefault(groupName, new TestGroupResults(new HashMap<>()));
-        testGroupResults.testResults().put(scenarioName, testResults);
-        testSuiteResults.testGroupResults().put(groupName, testGroupResults);
-        suiteResults.put(suiteName, testSuiteResults);
+        TestParentSuiteResults testParentSuiteResults = parentSuiteResults.getOrDefault(parentSuiteName, new TestParentSuiteResults(new HashMap<>()));
+        TestSuiteResults testSuiteResults = testParentSuiteResults.testSuiteResults().getOrDefault(suiteName, new TestSuiteResults(new HashMap<>()));
+        TestSubSuiteResults testSubSuiteResults = testSuiteResults.testSubSuiteResults().getOrDefault(subSuiteName, new TestSubSuiteResults(new HashMap<>()));
+        testSubSuiteResults.testResults().put(scenarioName, testResults);
+        testSuiteResults.testSubSuiteResults().put(subSuiteName, testSubSuiteResults);
+        testParentSuiteResults.testSuiteResults().put(suiteName, testSuiteResults);
+        parentSuiteResults.put(parentSuiteName, testParentSuiteResults);
     }
 
     /**
