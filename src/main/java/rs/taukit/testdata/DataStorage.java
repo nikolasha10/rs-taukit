@@ -26,7 +26,7 @@ public class DataStorage {
                 ITestData testData = TestDataField.getField(fieldType, fieldName, fieldValue, featureDirPath);
                 this.dataStorage.put(fieldName, YamlParser.convert(testData));
             } else if (fieldValue instanceof String) {
-                String value = evalStrings(Config.eval(YamlParser.convert(fieldValue)));
+                String value = evalString(Config.eval(YamlParser.convert(fieldValue)));
                 this.dataStorage.put(fieldName, YamlParser.convert(value));
             } else if (fieldValue instanceof Integer) {
                 this.dataStorage.put(fieldName, YamlParser.convert(fieldValue));
@@ -63,7 +63,7 @@ public class DataStorage {
                 linkTableMap.putAll(testData.getAttachments());
                 dataTable.add(Arrays.asList(fieldName, testData.getStringValue()));
             } else if (fieldValue instanceof String) {
-                String value = evalStrings(YamlParser.convert(fieldValue));
+                String value = evalString(YamlParser.convert(fieldValue));
                 dataTable.add(Arrays.asList(fieldName, value));
             } else if (fieldValue instanceof Integer) {
                 dataTable.add(Arrays.asList(fieldName, YamlParser.convert(fieldValue)));
@@ -77,12 +77,15 @@ public class DataStorage {
         return result;
     }
 
-    public String evalStrings(String template) {
+    public String evalString(String template) {
         String format = "\\$\\{(.+?)}";
         Matcher matcher = Pattern.compile(format).matcher(template);
         try {
-            if (matcher.matches() && get(matcher.group(1)).toString().startsWith("$")) {
-                return get(matcher.group(1)).toString();
+            if (matcher.matches()) {
+                Object optional = getOptional(matcher.group(1));
+                if (optional != null && optional.toString().startsWith("$")) {
+                    return optional.toString();
+                }
             }
             return matcher.replaceAll(matchResult -> {
                 if (get(matchResult.group(1)) instanceof ITestData iTestData) {
