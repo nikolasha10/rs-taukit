@@ -59,8 +59,8 @@ public class ScenarioData {
     public void put(DataTable dataTable) {
         dataTable.asMaps().forEach(item -> {
             String parameterName = TestDataUtils.get(item, "Параметр");
-            String parameterValue = TestDataUtils.get(item, "Значение");
-            put(parameterName, parameterValue);
+            String parameterValue = TestDataUtils.getOptional(item, "Значение");
+            put(parameterName, Optional.ofNullable(parameterValue).orElse(""));
         });
     }
 
