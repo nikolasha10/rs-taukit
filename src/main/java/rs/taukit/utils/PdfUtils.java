@@ -321,13 +321,20 @@ public class PdfUtils {
             PDFRenderer standardRenderer = new PDFRenderer(standardDocument);
             int testedPagesNumber = testedDocument.getNumberOfPages();
             int standardPagesNumber = standardDocument.getNumberOfPages();
-            for (int i = 1; i < Math.max(testedPagesNumber, standardPagesNumber); i++) {
+            if (testedPagesNumber != standardPagesNumber) {
+                String errorMessage = String.format(
+                        "Количество страниц тестируемого файла (%d) не равно количеству страниц эталонного (%d). ",
+                        testedPagesNumber, standardPagesNumber);
+                scenarioData().put("Проверка PDF", "Ошибки при сравнении PDF", errorMessage);
+            }
+            for (int i = 0; i < Math.max(testedPagesNumber, standardPagesNumber); i++) {
+                int pageNumber = i + 1;
                 BufferedImage testedImage = null;
                 BufferedImage standardImage = null;
-                if (i <= testedPagesNumber) {
+                if (i < testedPagesNumber) {
                     testedImage = getPdfPageImage(testedRenderer, i);
                 }
-                if (i <= standardPagesNumber) {
+                if (i < standardPagesNumber) {
                     standardImage = getPdfPageImage(standardRenderer, i);
                 }
                 if (testedImage == null) {
@@ -340,8 +347,8 @@ public class PdfUtils {
                 BufferedImage differencesImage;
                 BufferedImage zonedTestedImage = ImageUtils.deepCopy(testedImage);
                 BufferedImage zonedStandardImage = ImageUtils.deepCopy(standardImage);
-                if (instructionPath != null && ignoredZones.containsKey("Страница " + i)) {
-                    List<Map<String, Integer>> ignoredZoneList = ignoredZones.get("Страница " + i);
+                if (instructionPath != null && ignoredZones.containsKey("Страница " + pageNumber)) {
+                    List<Map<String, Integer>> ignoredZoneList = ignoredZones.get("Страница " + pageNumber);
                     List<String> ignoredZonesDataList = new ArrayList<>();
                     for (Map<String, Integer> zone : ignoredZoneList) {
                         int x = zone.get("x");
@@ -353,13 +360,13 @@ public class PdfUtils {
                         ignoredZonesDataList.add(String.format("{x: %d, y: %d, w: %d, h: %d}", x, y, width, height));
                     }
                     differencesImage = ImageUtils.getDifferencesImage(zonedTestedImage, zonedStandardImage);
-                    scenarioData().put("ignoredZonesData_" + i, String.join(", ", ignoredZonesDataList));
+                    scenarioData().put("ignoredZonesData_" + pageNumber, String.join(", ", ignoredZonesDataList));
                 } else {
-                    scenarioData().put("ignoredZonesData_" + i, "");
+                    scenarioData().put("ignoredZonesData_" + pageNumber, "");
                     differencesImage = ImageUtils.getDifferencesImage(testedImage, standardImage);
                 }
                 if (differencesImage != null) {
-                    images.add(new ImageDifferences(i, testedImage, standardImage, differencesImage));
+                    images.add(new ImageDifferences(pageNumber, testedImage, standardImage, differencesImage));
                 }
             }
             standardDocument.close();

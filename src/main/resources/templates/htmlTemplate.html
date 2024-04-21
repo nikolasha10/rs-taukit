@@ -1,31 +1,35 @@
-<html>
+<html lang="ru">
 <head>
 	<meta charset="utf-8">
 	<style>
 		body { text-align: center; }
-с		table { margin: 0 auto; border-spacing: 10px; }
+		table { margin: 0 auto; border-spacing: 10px; }
 		th { font-weight: bold; text-align: center; border-bottom: 2px solid gray; }
-		#draw {position: fixed; padding: 5px 10px; border: 1px solid gray; }
-		#show {position: fixed; top: 50px; padding: 5px 10px; border: 1px solid gray; }
+		#draw {position: fixed; padding: 5px 10px; border: 1px solid gray; left: 5px; top: 50px; }
+		#show {position: fixed; top: 50px; padding: 5px 10px; border: 1px solid gray; left: 5px; top: 90px; }
+		#divResults {position: absolute; width: 97%; height: 98%; overflow: auto; left: 45px; }
 		.rectangle {position: absolute; border: 1px dashed gray; background-color: #90909050; }
 		.hidden {display: none}
 	</style>
+	<title>Сравнение PDF</title>
 </head>
 
 <body>
 	<div id="draw"> + </div>
 	<div id="show"> S </div>
-	<table id="compareResults">
-		<tr>
-			<th id="comparedFiles">Тест</th>
-			<th>Результат сравнения:</th>
+	<div id=divResults>
+		<table id="compareResults">
+			<tr>
+				<th id="comparedFiles">Тест</th>
+				<th>Результат сравнения:</th>
 
-		</tr>
-		<tr>
-			<td><div><img id="image" src=""></div></td>
-			<td><div><div></div><img id="differences" src=""></div></td>
-		</tr>
-	</table>
+			</tr>
+			<tr>
+				<td><div><img id="image" src=""></div></td>
+				<td><div><div></div><img id="differences" src=""></div></td>
+			</tr>
+		</table>
+	</div>
 	<script type="text/javascript" defer>
 		var images = ["${tested}","${expected}","${differences}"];
 		var labels = ["Тест","Эталон"];
@@ -139,8 +143,7 @@
 			this.onmousemove = onMouseMove[sy][sx];
 		}
 		var endReplaceZone = function(event){
-			console.log(event.pageX,  compareResults.offsetLeft);
-			if (event.pageX < compareResults.offsetLeft){
+			if (event.pageX < divResults.offsetLeft){
 				this.remove();
 			}
 			this.onmousemove = changeCursor;

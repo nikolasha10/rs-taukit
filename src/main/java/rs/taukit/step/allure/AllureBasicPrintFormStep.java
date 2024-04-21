@@ -6,14 +6,16 @@ import rs.taukit.records.ImageDifferences;
 import rs.taukit.utils.*;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class AllureBasicPrintFormStep extends BasicUtils {
     private final String testedFileName;
-    private final String testedFilePath;
     private final String standardFileName;
+    private String testedFilePath;
 
     public AllureBasicPrintFormStep(String testedFileName) {
         this.testedFileName = testedFileName;
@@ -26,6 +28,11 @@ public class AllureBasicPrintFormStep extends BasicUtils {
         TauLogger.attachDataTable("Параметры проверки", dataTable);
         String nameSpace = "Проверка PDF";
         scenarioData().put(dataTable, nameSpace);
+        String testedFileDirPath = scenarioData().getOptional(nameSpace, "путь к папке с файлом");
+        if (testedFileDirPath != null) {
+            File file = new File(testedFileDirPath, testedFileName);
+            testedFilePath = file.getAbsolutePath();
+        }
         String standardBaseFilePath = FileUtils.getTestFilePath(scenarioData().get(nameSpace, "эталон"));
         TauLogger.attachPdfFile(testedFileName, testedFilePath);
         TauLogger.attachPdfFile(standardFileName, standardBaseFilePath);
@@ -61,8 +68,10 @@ public class AllureBasicPrintFormStep extends BasicUtils {
                     TauLogger.attachFile("Страница " + pageDifferences.pageNumber(), attachment.getBytes());
                 }
             };
-            TauLogger.fail(runnable, "Страницы %s файла '%s' не соответствуют эталону",
-                    differentPages, testedFileName);
+            String errorMessage = scenarioData().getOptional("Проверка PDF", "Ошибки при сравнении PDF");
+            String message = Optional.ofNullable(errorMessage).orElse("");
+            TauLogger.fail(runnable, "%sСтраницы %s файла '%s' не соответствуют эталону",
+                    message, differentPages, testedFileName);
             return false;
         }
     }
