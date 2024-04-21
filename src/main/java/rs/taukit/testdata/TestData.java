@@ -65,6 +65,10 @@ public class TestData implements ITestData {
     public <T> T get(String fieldName) {
         return dataStorage.get(fieldName);
     }
+    @Override
+    public <T> T getOptional(String fieldName) {
+        return dataStorage.getOptional(fieldName);
+    }
 
     @Override
     public String getStringValue() {

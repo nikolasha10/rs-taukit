@@ -39,6 +39,11 @@ public class TestDataFile implements ITestData {
     }
 
     @Override
+    public <T> T getOptional(String fieldName) {
+        return dataStorage.getOptional(fieldName);
+    }
+
+    @Override
     public String getStringValue() {
         return fileName;
     }

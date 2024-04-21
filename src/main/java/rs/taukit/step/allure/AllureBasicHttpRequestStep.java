@@ -82,7 +82,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             if (response.ok()) {
                 LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
                 TestData testData = new TestData(this.name + "_response", responseMap);
-                responseMap.forEach((key, value) -> scenarioData().put(key, testData.get(key)));
+                responseMap.forEach((key, value) -> scenarioData().put(key, testData.getOptional(key)));
                 TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d (%s)",
                         name, response.status(), response.statusText());
                 TauLogger.attach("Тело ответа", response.text());

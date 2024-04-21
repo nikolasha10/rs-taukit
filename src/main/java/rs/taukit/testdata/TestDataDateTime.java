@@ -89,6 +89,11 @@ public class TestDataDateTime implements ITestData {
     }
 
     @Override
+    public <T> T getOptional(String fieldName) {
+        return dataStorage.getOptional(fieldName);
+    }
+
+    @Override
     public String getStringValue() {
         LocalDate localDate = LocalDate.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DATE));
         LocalTime localTime = LocalTime.of(calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
