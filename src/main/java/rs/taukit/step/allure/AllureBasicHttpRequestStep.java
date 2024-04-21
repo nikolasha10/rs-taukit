@@ -1,21 +1,23 @@
 package rs.taukit.step.allure;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.config.Config;
-import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.exceptions.HttpRequestNotSentException;
 import rs.taukit.records.ApiResponse;
+import rs.taukit.testdata.TestData;
 import rs.taukit.utils.*;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class AllureBasicHttpRequestStep extends BasicUtils {
@@ -25,7 +27,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         this.name = name;
     }
 
-    private static Runnable getRunnable(DataTable dataTable, List<List<String>> parsedValues, String responseParameterName) {
+    private static Runnable getRunnableParseResponse(DataTable dataTable, List<List<String>> parsedValues, String responseParameterName) {
         Runnable runnable = () -> {
             String responseBody = scenarioData().get(responseParameterName);
             parsedValues.clear();
@@ -45,26 +47,46 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
     public void sendPost(DataTable dataTable) {
         scenarioData().put(dataTable);
         Map<String, String> requestParametersMap = dataTable.asMaps().stream()
-                .collect(Collectors.toMap(row -> row.get("Параметр"), row -> row.get("Значение")));
-
+                .collect(Collectors.toMap(
+                        row -> TestDataUtils.get(row, "Параметр"),
+                        row -> TestDataUtils.get(row, "Значение")));
         String requestUrl = requestParametersMap.getOrDefault("url", createPostUrl().toString());
-        String jsonFileName = requestParametersMap.getOrDefault("jsonFileName", name);
         List<List<String>> parameters = new ArrayList<>(dataTable.asLists());
-        parameters.add(1, Arrays.asList("requestURL", requestUrl));
-        String fullPath = Config.getProperty("json.files.dir") + jsonFileName + ".json";
-        parameters.add(2, Arrays.asList("jsonFileName", jsonFileName + ".json"));
+        String content;
+        if (requestParametersMap.containsKey("content")) {
+            content = requestParametersMap.get("content");
+        } else {
+            String jsonFileName = requestParametersMap.getOrDefault("jsonFileName", name);
+            parameters.add(1, Arrays.asList("requestURL", requestUrl));
+            String fullPath = Config.getProperty("json.files.dir") + jsonFileName + ".json";
+            File file = new File(fullPath);
+            if (!file.exists()) {
+                fullPath = TestDataUtils.get(requestParametersMap, "filePath");
+            }
+            content = eval(FileUtils.readFile(fullPath));
+        }
         DataTable modified = DataTable.create(parameters, TextUtils.tableConverter);
         TauLogger.attachDataTable("Параметры запроса", modified);
-        String content = eval(FileUtils.readFile(fullPath));
         TauLogger.attach("Тело запроса", content);
         try {
-            ApiResponse response = driver().getCurrentBrowser().sendPost(requestUrl, content);
+            String contentType = TestDataUtils.getOptional(requestParametersMap, "contentType");
+            String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
+            ApiResponse response;
+            if (contentType != null) {
+                response = browser().sendPost(requestUrl, contentType, accept, content);
+            } else {
+                response = browser().sendPostJson(requestUrl, content);
+            }
             String parameterName = String.format("Результат запроса '%s'", name);
             scenarioData().put(parameterName, response.text());
             if (response.ok()) {
+                LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
+                TestData testData = new TestData(this.name + "_response", responseMap);
+                responseMap.forEach((key, value) -> scenarioData().put(key, testData.get(key)));
                 TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d (%s)",
                         name, response.status(), response.statusText());
                 TauLogger.attach("Тело ответа", response.text());
+                testData.getAttachments().forEach(TauLogger::attach);
             } else {
                 throw new RuntimeException(String.format(
                         "Не удалось отправить POST-запрос \"%s\". Сервер вернул статус %d (%s)",
@@ -78,28 +100,43 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
     @Step("отправить GET-запрос '{this.name}' с параметрами:")
     public void sendGet(DataTable dataTable) {
         TauLogger.attachDataTable("Параметры GET-запроса", dataTable);
-        String urlString = dataTable.asMaps().stream()
-                .filter(data -> TestDataUtils.get(data, "Параметр").equalsIgnoreCase("url"))
-                .findFirst()
-                .orElseThrow(() -> new DataTableFormatMismatchException("Не найден обязательный параметр 'url'"))
-                .get("Значение");
-        try {
-            ApiResponse response = driver().getCurrentBrowser().sendGet(urlString);
-            String parameterName = String.format("Результат запроса '%s'", name);
-            scenarioData().put(parameterName, response.text());
-            if (response.ok()) {
-                TauLogger.report("Отправлен GET-запрос \"%s\". Статус: %d (%s)",
-                        name, response.status(), response.statusText());
-                TauLogger.attach("Тело ответа", response.text());
-            } else {
-                throw new RuntimeException(String.format(
-                        "Не удалось отправить GET-запрос \"%s\". Сервер вернул статус %d (%s)",
-                        name, response.status(), response.statusText()));
+        Map<String, String> requestParametersMap = dataTable.asMaps().stream()
+                .collect(Collectors.toMap(
+                        row -> TestDataUtils.get(row, "Параметр"),
+                        row -> TestDataUtils.get(row, "Значение")));
+        String urlString = TestDataUtils.get(requestParametersMap, "url");
+        requestParametersMap.remove("url");
+        String query = requestParametersMap.entrySet().stream()
+                .map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining("&"));
+        AtomicReference<ApiResponse> responseAtomicReference = new AtomicReference<>();
+        AtomicReference<TestData> testDataAtomicReference = new AtomicReference<>();
+        Runnable runnable = () -> {
+            try {
+                ApiResponse response = driver().getCurrentBrowser().sendGet(urlString + "?" + query);
+                responseAtomicReference.set(response);
+                String parameterName = String.format("Результат запроса '%s'", name);
+                scenarioData().put(parameterName, response.text());
+                if (response.ok()) {
+                    LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
+                    TestData testData = new TestData(this.name + "_response", responseMap);
+                    testDataAtomicReference.set(testData);
+                    responseMap.forEach((key, value) -> scenarioData().put(key, testData.get(key)));
+                } else {
+                    throw new RuntimeException(String.format("Сервер вернул статус %d (%s)",
+                            response.status(), response.statusText()));
+                }
+            } catch (Exception e) {
+                throw new HttpRequestNotSentException(e, name, "GET");
             }
-        } catch (Exception e) {
-            throw new HttpRequestNotSentException(e, name, "GET");
-        }
-
+        };
+        runnable.run();
+        scenarioStorage().saveStepAction(runnable);
+        ApiResponse response = responseAtomicReference.get();
+        String statusText = response.statusText().isEmpty() ? "" : String.format("(%s)", response.statusText());
+        TauLogger.report("Отправлен GET-запрос \"%s\". Статус: %d %s", name, response.status(), statusText);
+        TauLogger.attach("Тело ответа", response.text());
+        testDataAtomicReference.get().getAttachments().forEach(TauLogger::attach);
     }
 
     public URL createPostUrl() {
@@ -123,12 +160,44 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         TauLogger.attachDataTable("Параметры поиска результатов", dataTable);
         String responseParameterName = String.format("Результат запроса '%s'", name);
         List<List<String>> parsedValues = new ArrayList<>();
-        Runnable runnable = getRunnable(dataTable, parsedValues, responseParameterName);
+        Runnable runnable = getRunnableParseResponse(dataTable, parsedValues, responseParameterName);
         scenarioStorage().saveStepAction(runnable);
         DataTable parsedValuesTable = DataTable.create(parsedValues, TextUtils.tableConverter);
         TauLogger.attachDataTable("Полученные значения", parsedValuesTable);
         TauLogger.console("Получены значения:", parsedValuesTable);
     }
 
+    @Step("разобрать json-ответ запроса '{this.name}', сохранив результат, как '{parameterName}'")
+    public void parseJsonResponse(String parameterName) {
+        String responseParameterName = String.format("Результат запроса '%s'", name);
+        String responseBody = scenarioData().get(responseParameterName);
+        TestData testData = new TestData(parameterName, parseJsonResponseToMap(responseBody));
+        scenarioData().put(parameterName, testData);
+        testData.getAttachments().forEach(TauLogger::attach);
+    }
 
+    private LinkedHashMap<String, ?> parseJsonResponseToMap(String responseBody) {
+        ObjectMapper jsonMapper = new JsonMapper();
+
+        if (responseBody.startsWith("[")) {
+            LinkedHashMap<String, ?> resultMap = new LinkedHashMap<>();
+            List<?> parsedList = new ArrayList<>();
+            try {
+                parsedList = YamlParser.convert(jsonMapper.readValue(responseBody, parsedList.getClass()));
+                for (int i = 0; i < parsedList.size(); i++) {
+                    resultMap.put("Результат_" + i, YamlParser.convert(parsedList.get(i)));
+                }
+            } catch (JsonProcessingException ignored) {
+                // ignored
+            }
+            return resultMap;
+        }
+        Map<String, ?> resultMap = new HashMap<>();
+        try {
+            resultMap = YamlParser.convert(jsonMapper.readValue(responseBody, resultMap.getClass()));
+        } catch (JsonProcessingException ignored) {
+            // ignored
+        }
+        return new LinkedHashMap<>(resultMap);
+    }
 }

@@ -30,7 +30,9 @@ public interface IWebBrowser {
 
     void navigate(String url);
 
-    ApiResponse sendPost(String requestUrl, String content);
+    ApiResponse sendPostJson(String requestUrl, String content);
+
+    ApiResponse sendPost(String requestUrl, String contentType, String accept, String content);
 
     ApiResponse sendGet(String requestUrl);
 

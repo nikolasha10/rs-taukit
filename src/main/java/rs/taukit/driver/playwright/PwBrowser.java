@@ -128,13 +128,18 @@ public abstract class PwBrowser implements IWebBrowser {
     }
 
     @Override
-    public ApiResponse sendPost(String requestUrl, String content) {
+    public ApiResponse sendPostJson(String requestUrl, String content) {
+        return sendPost(requestUrl, "application/json; charset=utf-8", "application/json", content);
+    }
+
+    @Override
+    public ApiResponse sendPost(String requestUrl, String contentType, String accept, String content) {
         APIRequestContext apiRequestContext = context.request();
         APIResponse response = apiRequestContext.post(
                 requestUrl,
                 RequestOptions.create()
-                        .setHeader("Content-Type", "application/json; charset=utf-8")
-                        .setHeader("Accept", "application/json")
+                        .setHeader("Content-Type", contentType)
+                        .setHeader("Accept", accept)
                         .setData(content));
         return new ApiResponse(response.ok(), response.status(), response.statusText(), response.text());
     }
@@ -220,7 +225,7 @@ public abstract class PwBrowser implements IWebBrowser {
             TauLogger.report("Загружен файл \"%s\" в папку \"%s\"", file.getName(), dirName);
             try {
                 driver().waitForCondition(() -> waitTimes.get() == filesMap.size());
-            } catch (TimeoutError te){
+            } catch (TimeoutError te) {
                 getPage().waitForDownload(options, () -> TauLogger.console("Ожидаем загрузки следующего файла"));
             }
         };

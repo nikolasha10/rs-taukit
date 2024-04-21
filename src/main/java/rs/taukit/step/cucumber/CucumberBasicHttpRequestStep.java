@@ -24,4 +24,9 @@ public class CucumberBasicHttpRequestStep {
     public void parseResponseResult(String name, DataTable dataTable) {
         httpRequestStep(name).parseResponse(eval(dataTable));
     }
+
+    @И("^разобрать json-ответ запроса \"(.+)\", сохранив результат, как \"(.+)\"$")
+    public void parseResponseJsonResult(String name, String parameterName) {
+        httpRequestStep(name).parseJsonResponse(parameterName);
+    }
 }
