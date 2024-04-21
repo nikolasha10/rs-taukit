@@ -23,7 +23,9 @@ public class DataStorage {
             if (fieldValue instanceof Map) {
                 Map<String, ?> fieldData = YamlParser.convert(fieldValue);
                 String fieldType = YamlParser.convert(fieldData.get("тип"));
-                ITestData testData = TestDataField.getField(fieldType, fieldName, fieldValue, featureDirPath);
+                ITestData testData = fieldType == null
+                        ? new TestData(fieldName, new LinkedHashMap<>(fieldData))
+                        : TestDataField.getField(fieldType, fieldName, fieldValue, featureDirPath);
                 this.dataStorage.put(fieldName, YamlParser.convert(testData));
             } else if (fieldValue instanceof String) {
                 String value = evalString(Config.eval(YamlParser.convert(fieldValue)));

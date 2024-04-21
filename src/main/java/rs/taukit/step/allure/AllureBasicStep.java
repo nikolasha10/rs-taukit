@@ -5,13 +5,11 @@ import io.qameta.allure.Step;
 import rs.taukit.config.Config;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.AutoTestBrokenException;
+import rs.taukit.exceptions.TestDataException;
 import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.utils.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -211,5 +209,37 @@ public class AllureBasicStep extends BasicUtils {
     public static void saveValueAs(String value, String parameterName) {
         scenarioData().put(parameterName, value);
         TauLogger.report("Значение '%s' сохранено, как '%s'", value, parameterName);
+    }
+
+    @Step("сохранить значения в параметры:")
+    public static void saveValues(DataTable dataTable) {
+        List<List<String>> resultList = new ArrayList<>();
+        resultList.add(Arrays.asList("Параметр", "Значение"));
+        dataTable.asMaps().forEach(data -> {
+            String value;
+            try {
+                value = eval(TestDataUtils.get(data, "Значение"));
+            } catch (TestDataException e){
+                value = "null";
+            }
+            resultList.add(Arrays.asList(eval(TestDataUtils.get(data, "Параметр")), value));
+        });
+        DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
+        scenarioData().put(resultTable);
+        TauLogger.attachDataTable("Значения параметров", resultTable);
+        TauLogger.console("Значения сохранены в параметры", resultTable);
+    }
+
+    @Step("сгенерировать guid и сохранить его, как '{parameterName}'")
+    public static void generateGuid(String parameterName) {
+        scenarioData().put(parameterName, UUID.randomUUID());
+        TauLogger.report("%s: %s", parameterName, scenarioData().get(parameterName));
+    }
+
+    @Step("кодировать значение '{value}' в base64 и сохранить, как '{parameterName}'")
+    public static void base64Encoding(String value, String parameterName) {
+        String encodeBytes = Base64.getEncoder().encodeToString(value.getBytes());
+        scenarioData().put(parameterName, encodeBytes);
+        TauLogger.report("%s: %s", parameterName, encodeBytes);
     }
 }

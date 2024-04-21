@@ -28,6 +28,11 @@ public class TestData implements ITestData {
     public TestData(String fieldName, LinkedHashMap<String, ?> parameters, String dirPath) {
         this.fieldName = fieldName;
         String filePath = YamlParser.convert(parameters.get("файл"));
+        if (filePath == null){
+            searchValue = fieldName;
+            dataStorage = new DataStorage(parameters);
+            return;
+        }
         filePath = Config.eval(filePath);
         Map<String, String> searchBy = YamlParser.convert(parameters.get("поиск по полям"));
         this.searchValue = searchBy.values().stream().toList().get(0);
@@ -49,7 +54,6 @@ public class TestData implements ITestData {
         });
         Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля \"%s\"", fieldName);
         dataStorage = new DataStorage(filePath, dataList.stream().filter(condition).findFirst().orElseThrow(exception));
-
     }
 
     @Override
