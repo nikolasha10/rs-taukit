@@ -20,16 +20,12 @@ public class Dependencies {
     public Map<String, String> getScenarioDependencyMap(List<String> tagList) {
         List<String> tagValues = tagList.stream().map(tag -> tag.substring(1)).toList();
         Map<String, String> resultMap = new HashMap<>();
-        if (oneToMany != null) {
-            oneToMany.entrySet().stream()
-                    .filter(entry -> tagValues.contains(entry.getKey()))
-                    .forEach(entry -> entry.getValue().forEach(resultMap::putAll));
-        }
-        if (manyToOne != null) {
-            manyToOne.forEach((dependencyTag, dependentList) -> dependentList.stream()
-                    .filter(dependent -> dependent.keySet().stream().anyMatch(tagValues::contains))
-                    .forEach(dependent -> dependent.forEach((tag, status) -> resultMap.put(dependencyTag, status))));
-        }
+        oneToMany.entrySet().stream()
+                .filter(entry -> tagValues.contains(entry.getKey()))
+                .forEach(entry -> entry.getValue().forEach(resultMap::putAll));
+        manyToOne.forEach((dependencyTag, dependentList) -> dependentList.stream()
+                .filter(dependent -> dependent.keySet().stream().anyMatch(tagValues::contains))
+                .forEach(dependent -> dependent.forEach((tag, status) -> resultMap.put(dependencyTag, status))));
         return resultMap;
     }
 
