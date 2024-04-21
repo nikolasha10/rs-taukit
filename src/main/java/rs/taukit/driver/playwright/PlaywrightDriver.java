@@ -141,6 +141,9 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public PwBrowser getCurrentBrowser() {
+        if (browserList.isEmpty()){
+            throw new RuntimeException("Не запущен браузер");
+        }
         return browserList.get(currentBrowserIndex);
     }
 
