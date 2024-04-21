@@ -33,16 +33,19 @@ public class AllureBasicDataBaseStep extends BasicUtils {
     private static Runnable getRunnable(DataTable dataTable, List<List<String>> resultList) {
         Runnable runnable = () -> {
             ResultSet resultSet = scenarioData().get("sqlQueryResultSet");
+            try {
+                resultSet.next();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
             dataTable.asMaps().forEach(map -> {
                 String fieldName = TestDataUtils.get(map, "Поле");
                 String parameterName = TestDataUtils.get(map, "Параметр");
                 String fieldValue = "null";
                 try {
-                    while (resultSet.next()) {
-                        fieldValue = resultSet.getString(fieldName);
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                    fieldValue = resultSet.getString(fieldName);
+                } catch (SQLException ignored) {
+                    // ignored
                 }
                 scenarioData().put(parameterName, fieldValue);
                 resultList.add(Arrays.asList(fieldName, fieldValue, parameterName));
