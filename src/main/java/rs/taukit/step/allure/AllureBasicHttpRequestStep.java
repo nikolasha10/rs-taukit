@@ -115,8 +115,10 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             try {
                 ApiResponse response = driver().getCurrentBrowser().sendGet(urlString + "?" + query);
                 responseAtomicReference.set(response);
-                String parameterName = String.format("Результат запроса '%s'", name);
-                scenarioData().put(parameterName, response.text());
+                String responseStatusParameterName = String.format("%s_status", name);
+                String responseTextParameterName = String.format("Результат запроса '%s'", name);
+                scenarioData().put(responseStatusParameterName, String.valueOf(response.status()));
+                scenarioData().put(responseTextParameterName, response.text());
                 if (response.ok()) {
                     LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
                     TestData testData = new TestData(this.name + "_response", responseMap);

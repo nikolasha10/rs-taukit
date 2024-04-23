@@ -96,7 +96,7 @@ public class ExpectedResult {
                 String dirName = String.format("%s/%s", Config.getProperty("downloads.dir"), scenario().getName());
                 return new File(dirName, objectName).exists();
             case "параметр":
-                this.currentValue = scenarioData().get(objectName);
+                this.currentValue = Optional.ofNullable(scenarioData().getOptional(objectName)).orElse("<отсутствует>").toString();
                 switch (objectState){
                     case "равен": return currentValue.equals(expectedValue);
                     case "не равен": return !currentValue.equals(expectedValue);

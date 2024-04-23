@@ -59,7 +59,7 @@ public class AllureBasicStep extends BasicUtils {
         }
         unexpectedResultList.add(resultsHeaders);
         dataTable.asMaps().stream()
-                .map(data -> new ExpectedResult(data).waitForResult())
+                .map(data -> new ExpectedResult(data).checkResult())
                 .filter(result -> !result.isConditionMet())
                 .forEach(result -> {
                             List<String> unexpected = new ArrayList<>();
@@ -76,8 +76,10 @@ public class AllureBasicStep extends BasicUtils {
         if (unexpectedResultList.size() > 1) {
             Runnable runnable = () -> {
                 DataTable unexpectedResultsTable = DataTable.create(unexpectedResultList, TextUtils.tableConverter);
+                TauLogger.console("Результаты неуспешных проверок", unexpectedResultsTable);
                 TauLogger.attachDataTable("Результаты неуспешных проверок", unexpectedResultsTable);
             };
+
             TauLogger.fail(runnable, "Результаты проверки условий '%s' не соответствуют ожидаемым", conditionsName);
         } else {
             TauLogger.report("Условия '%s' выполнены", conditionsName);
