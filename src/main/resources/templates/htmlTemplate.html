@@ -210,8 +210,8 @@
 			var lines = ["Страница ${pageNumber}:"];
 			for (let i=0; i<areas.length; i++){
 				let element = areas[i];
-				let leftUpX = element.offsetLeft - image.offsetLeft - image.parentNode.offsetLeft - image.parentNode.parentNode.offsetLeft - compareResults.offsetLeft;
-				let leftUpY = element.offsetTop - image.offsetTop - image.parentNode.offsetTop - image.parentNode.parentNode.offsetTop - compareResults.offsetTop;
+				let leftUpX = element.offsetLeft - divResults.offsetLeft - image.offsetLeft - image.parentNode.offsetLeft - image.parentNode.parentNode.offsetLeft - compareResults.offsetLeft;
+				let leftUpY = element.offsetTop - divResults.offsetTop - image.offsetTop - image.parentNode.offsetTop - image.parentNode.parentNode.offsetTop - compareResults.offsetTop;
 				let width = element.offsetWidth;
 				let height = element.offsetHeight;
 				lines.push("  - x: " + leftUpX);
