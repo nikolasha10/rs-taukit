@@ -244,4 +244,15 @@ public class AllureBasicStep extends BasicUtils {
         scenarioData().put(parameterName, encodeBytes);
         TauLogger.report("%s: %s", parameterName, encodeBytes);
     }
+
+    @Step("сгенерировать строку длиной {length} символа из набора символов '{charSet}' и сохранить, как '{parameterName}'")
+    public static void generateString(int length, String charSet, String parameterName) {
+        Random random = new Random();
+        byte[] chars = charSet.getBytes();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            builder.append((char) chars[random.nextInt(charSet.length() - 1)]);
+        }
+        scenarioData().put(parameterName, builder.toString());
+    }
 }

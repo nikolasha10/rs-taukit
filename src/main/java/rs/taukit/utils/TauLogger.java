@@ -318,6 +318,17 @@ public final class TauLogger {
         return null;
     }
 
+    @Attachment(value = "{fileName}", type = "application/pdf")
+    public static byte[] attachJson(String fileName, String filePath) {
+        File file = new File(filePath);
+        try {
+            return Files.readAllBytes(file.toPath());
+        } catch (IOException ioException) {
+            warnWOSS(ioException, "Не удалось приложить файл \"%s\" к отчету", filePath);
+        }
+        return null;
+    }
+
     @Attachment(value = "{fileName}")
     public static byte[] attachFile(String fileName, byte[] file) {
         return file;

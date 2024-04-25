@@ -4,6 +4,7 @@ import rs.taukit.config.Config;
 import rs.taukit.scenario.CucumberScenario;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static rs.taukit.utils.BasicUtils.storage;
@@ -13,7 +14,10 @@ public class TauListener {
         if (!methodName.equals("afterMethod")) {
             return;
         }
-        int startedCount = storage.getScenarioList().stream().filter(CucumberScenario::isStarted).toList().size();
+        int startedCount = storage.getScenarioList().stream()
+                .filter(Objects::nonNull)
+                .filter(CucumberScenario::isStarted)
+                .toList().size();
         if (storage.getScenarioList().isEmpty()) {
             if (!storage.isTestsFinished()) {
                 storage.setTestsFinished(true);

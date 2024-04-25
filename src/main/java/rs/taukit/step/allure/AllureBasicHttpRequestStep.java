@@ -99,7 +99,6 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
 
     @Step("отправить GET-запрос '{this.name}' с параметрами:")
     public void sendGet(DataTable dataTable) {
-        TauLogger.attachDataTable("Параметры GET-запроса", dataTable);
         Map<String, String> requestParametersMap = dataTable.asMaps().stream()
                 .collect(Collectors.toMap(
                         row -> TestDataUtils.get(row, "Параметр"),
@@ -109,11 +108,28 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         String query = requestParametersMap.entrySet().stream()
                 .map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining("&"));
+        String uriString = urlString + "?" + query;
+        List<List<String>> replacedParametersList = new ArrayList<>();
+        replacedParametersList.add(Arrays.asList("Параметр", "Значение"));
+        replacedParametersList.add(Arrays.asList("uri", urlString));
+        requestParametersMap.forEach((key, value) -> replacedParametersList.add(Arrays.asList(key, value)));
+        DataTable replacedParametersTable = DataTable.create(replacedParametersList, TextUtils.tableConverter);
+        TauLogger.attachDataTable("Параметры GET-запроса", replacedParametersTable);
         AtomicReference<ApiResponse> responseAtomicReference = new AtomicReference<>();
         AtomicReference<TestData> testDataAtomicReference = new AtomicReference<>();
+        Runnable runnable = getRunnableSendGet(uriString, responseAtomicReference, testDataAtomicReference);
+        scenarioStorage().saveStepAction(runnable);
+        ApiResponse response = responseAtomicReference.get();
+        String statusText = response.statusText().isEmpty() ? "" : String.format("(%s)", response.statusText());
+        TauLogger.report("Отправлен GET-запрос \"%s\". Статус: %d %s", name, response.status(), statusText);
+        TauLogger.attach("Тело ответа", response.text());
+        testDataAtomicReference.get().getAttachments().forEach(TauLogger::attach);
+    }
+
+    private Runnable getRunnableSendGet(String uriString, AtomicReference<ApiResponse> responseAtomicReference, AtomicReference<TestData> testDataAtomicReference) {
         Runnable runnable = () -> {
             try {
-                ApiResponse response = driver().getCurrentBrowser().sendGet(urlString + "?" + query);
+                ApiResponse response = driver().getCurrentBrowser().sendGet(uriString);
                 responseAtomicReference.set(response);
                 String responseStatusParameterName = String.format("%s_status", name);
                 String responseTextParameterName = String.format("Результат запроса '%s'", name);
@@ -133,12 +149,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             }
         };
         runnable.run();
-        scenarioStorage().saveStepAction(runnable);
-        ApiResponse response = responseAtomicReference.get();
-        String statusText = response.statusText().isEmpty() ? "" : String.format("(%s)", response.statusText());
-        TauLogger.report("Отправлен GET-запрос \"%s\". Статус: %d %s", name, response.status(), statusText);
-        TauLogger.attach("Тело ответа", response.text());
-        testDataAtomicReference.get().getAttachments().forEach(TauLogger::attach);
+        return runnable;
     }
 
     public URL createPostUrl() {

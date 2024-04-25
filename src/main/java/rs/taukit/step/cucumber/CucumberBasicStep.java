@@ -121,14 +121,22 @@ public class CucumberBasicStep {
     public void saveValueAs(String value, String parameterName) {
         AllureBasicStep.saveValueAs(eval(value), parameterName);
     }
+
     @И("^сохранить значения в параметры:$")
     public void saveValueAs(DataTable dataTable) {
         AllureBasicStep.saveValues(dataTable);
     }
+
     @И("^сгенерировать guid и сохранить, как \"(.+)\"$")
     public void generateGuid(String parameterName) {
         AllureBasicStep.generateGuid(parameterName);
     }
+
+    @И("^сгенерировать строку длиной (\\d+) символа из набора символов \"(.+)\" и сохранить, как \"(.+)\"$")
+    public void generateString(int length, String charSet, String parameterName) {
+        AllureBasicStep.generateString(length, charSet, parameterName);
+    }
+
     @И("^кодировать значение \"(.+)\" в base64 и сохранить, как \"(.+)\"$")
     public void base64Encoding(String value, String parameterName) {
         AllureBasicStep.base64Encoding(eval(value), parameterName);
