@@ -64,4 +64,10 @@ public class AllureBasicFileStep extends BasicUtils {
         TauLogger.report("Нажата кнопка \"%s\"", buttonName);
         TauLogger.report("Выбран файл \"%s\"", fileName);
     }
+
+    @Step("сохранить значение параметра {parameterName} в файл {fileName}")
+    public void writeValueToFile(String parameterName, String fileName) {
+        FileUtils.writeFile(filePath, scenarioData().get(parameterName));
+        TauLogger.report("Файл '%s' создан", filePath);
+    }
 }

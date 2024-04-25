@@ -59,4 +59,10 @@ public class CucumberBasicFileStep {
         fileStep(testDataFile).attachFile(buttonName);
     }
 
+    @И("^сохранить значение параметра \"(.+)\" в файл \"(.+)\"$")
+    public void writeValueToFile(String parameterName, String fileName) {
+        String dirPath = FileUtils.getDownloadFilePath();
+        fileStep(dirPath, fileName).writeValueToFile(parameterName, eval(fileName));
+    }
+
 }
