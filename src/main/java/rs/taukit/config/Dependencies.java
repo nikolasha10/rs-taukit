@@ -5,6 +5,7 @@ import rs.taukit.utils.YamlParser;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class Dependencies {
     private final Map<String, List<Map<String, String>>> oneToMany;
@@ -13,8 +14,10 @@ public class Dependencies {
 
     public Dependencies(String filePath) {
         Map<String, Object> dependencyMap = YamlParser.parse(filePath);
-        this.oneToMany = YamlParser.convert(dependencyMap.get("Зависимость одного от многих"));
-        this.manyToOne = YamlParser.convert(dependencyMap.get("Зависимость многих от одного"));
+        Map<String, List<Map<String, String>>> oneToMany = YamlParser.convert(dependencyMap.get("Зависимость одного от многих"));
+        this.oneToMany = Optional.ofNullable(oneToMany).orElse(new HashMap<>());
+        Map<String, List<Map<String, String>>> manyToOne = YamlParser.convert(dependencyMap.get("Зависимость многих от одного"));
+        this.manyToOne = Optional.ofNullable(manyToOne).orElse(new HashMap<>());
     }
 
     public Map<String, String> getScenarioDependencyMap(List<String> tagList) {
