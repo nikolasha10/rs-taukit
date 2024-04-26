@@ -68,6 +68,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         DataTable modified = DataTable.create(parameters, TextUtils.tableConverter);
         TauLogger.attachDataTable("Параметры запроса", modified);
         TauLogger.attach("Тело запроса", content);
+        int status = 0;
         try {
             String contentType = TestDataUtils.getOptional(requestParametersMap, "contentType");
             String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
@@ -79,6 +80,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             }
             String parameterName = String.format("Результат запроса '%s'", name);
             scenarioData().put(parameterName, response.text());
+            status = response.status();
             if (response.ok()) {
                 LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
                 TestData testData = new TestData(this.name + "_response", responseMap);
@@ -93,7 +95,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
                         name, response.status(), response.statusText()));
             }
         } catch (Exception e) {
-            throw new HttpRequestNotSentException(e, name, "POST");
+            throw new HttpRequestNotSentException(e, name, "POST", status);
         }
     }
 
@@ -128,6 +130,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
 
     private Runnable getRunnableSendGet(String uriString, AtomicReference<ApiResponse> responseAtomicReference, AtomicReference<TestData> testDataAtomicReference) {
         Runnable runnable = () -> {
+            int status = 0;
             try {
                 ApiResponse response = driver().getCurrentBrowser().sendGet(uriString);
                 responseAtomicReference.set(response);
@@ -135,6 +138,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
                 String responseTextParameterName = String.format("Результат запроса '%s'", name);
                 scenarioData().put(responseStatusParameterName, String.valueOf(response.status()));
                 scenarioData().put(responseTextParameterName, response.text());
+                status = response.status();
                 if (response.ok()) {
                     LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
                     TestData testData = new TestData(this.name + "_response", responseMap);
@@ -145,7 +149,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
                             response.status(), response.statusText()));
                 }
             } catch (Exception e) {
-                throw new HttpRequestNotSentException(e, name, "GET");
+                throw new HttpRequestNotSentException(e, name, "GET", status);
             }
         };
         runnable.run();

@@ -13,7 +13,7 @@ public class HttpRequestNotSentException extends RuntimeException {
      * @param cause исключение
      * @param name  описание пользователя в файле Пользователи.yaml
      */
-    public HttpRequestNotSentException(Throwable cause, String name, String type) {
-        TauLogger.fail(cause, "Не удалось отправить %s-запрос \"%s\"", type, name);
+    public HttpRequestNotSentException(Throwable cause, String name, String type, int status) {
+        TauLogger.fail(cause, "Не удалось отправить %s-запрос \"%s\". Сервер вернул статус %d", type, name, status);
     }
 }
