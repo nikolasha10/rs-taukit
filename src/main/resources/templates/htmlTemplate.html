@@ -34,6 +34,7 @@
 		var images = ["${tested}","${expected}","${differences}"];
 		var labels = ["Тест","Эталон"];
 		var ignoredZones = [${ignoredZonesData}];
+		const pageNumber = ${pageNumber};
 		var index = 0;
 		var drawing = 0;
 		var drawingStart = 0;
@@ -85,12 +86,54 @@
 			let top = this.offsetTop;
 			let width = this.offsetWidth;
 			let height = this.offsetHeight;
+		}
+		var changeCursor = function(eventOver){
+			var x = eventOver.pageX;
+			var y = eventOver.pageY;
+			var dx = x - this.offsetLeft - this.offsetWidth;
+			var dy = y - this.offsetTop - this.offsetHeight;
+			var cursorStyle = [
+					["nwse-resize", "ns-resize", "nesw-resize"],
+					["ew-resize", "grab", "ew-resize"],
+					["nesw-resize", "ns-resize", "nwse-resize"]
+				];
+			var sy = 1;
+			var sx = 1;
+			if (dx <= 0 && dx > -5 ) sx = 2;
+			if (dx <= 5 - this.offsetWidth) sx = 0;
+			if (dy <= 0 && dy > -5) sy = 2;
+			if (dy <= 5 - this.offsetHeight) sy = 0;
+			this.style.cursor = cursorStyle[sy][sx];
+		}
+		var startReplaceZone = function(eventDown){
+			this.style.cursor = "grabbing";
+			var startX = eventDown.pageX;
+			var startY = eventDown.pageY;
+			var dx = startX - this.offsetLeft - this.offsetWidth;
+			var dy = startY - this.offsetTop - this.offsetHeight;
+			var sy = 1;
+			var sx = 1;
+			if (dx <= 0 && dx > -5 ) sx = 2;
+			if (dx <= 5 - this.offsetWidth) sx = 0;
+			if (dy <= 0 && dy > -5) sy = 2;
+			if (dy <= 5 - this.offsetHeight) sy = 0;
+
+			let x = startX - this.offsetLeft;
+			let y = startY - this.offsetTop;
+			let left = this.offsetLeft;
+			let right = this.offsetLeft + this.offsetWidth;
+			let bottom = this.offsetTop + this.offsetHeight;
+			let top = this.offsetTop;
+			let width = this.offsetWidth;
+			let height = this.offsetHeight;
 
 			let changeRectangle = function(rect, left, right, top, bottom){
 				rect.style.left = left + "px";
 				rect.style.top = top + "px";
 				rect.style.width = (right - left) + "px";
 				rect.style.height = (bottom - top) + "px"
+				rect.setAttribute('baseX', left + divResults.scrollLeft);
+				rect.setAttribute('baseY', top + divResults.scrollTop);
 			}
 			let center = function(eventMove){
 				let left = eventMove.pageX - x;
@@ -143,7 +186,8 @@
 			this.onmousemove = onMouseMove[sy][sx];
 		}
 		var endReplaceZone = function(event){
-			if (event.pageX < divResults.offsetLeft){
+			const rectangle = event.srcElement || event.target;
+			if (event.pageX < divResults.offsetLeft || rectangle.offsetLeft < 0){
 				this.remove();
 			}
 			this.onmousemove = changeCursor;
@@ -152,14 +196,28 @@
 			let rectangle = document.createElement("div");
 			document.body.appendChild(rectangle);
 			rectangle.className = "rectangle";
-			rectangle.style.left = (zone.x + image.offsetLeft + image.parentNode.offsetLeft + image.parentNode.parentNode.offsetLeft + compareResults.offsetLeft) + "px";
-			rectangle.style.top = (zone.y + image.offsetTop + image.parentNode.offsetTop + image.parentNode.parentNode.offsetTop + compareResults.offsetTop) + "px";
+			let x = zone.x
+				+ divResults.offsetLeft
+				+ image.offsetLeft
+				+ image.parentNode.offsetLeft
+				+ image.parentNode.parentNode.offsetLeft
+				+ compareResults.offsetLeft;
+			let y = zone.y
+				+ divResults.offsetTop
+				+ image.offsetTop
+				+ image.parentNode.offsetTop
+				+ image.parentNode.parentNode.offsetTop
+				+ compareResults.offsetTop;
+			rectangle.style.left = x + "px";
+			rectangle.style.top = y + "px";
 			rectangle.style.width = zone.w + "px";
 			rectangle.style.height = zone.h + "px";
 			rectangle.onmousemove = changeCursor;
 			rectangle.onmousedown = startReplaceZone;
 			rectangle.onmouseup = endReplaceZone;
 			rectangle.className = "rectangle hidden";
+			rectangle.setAttribute('baseX', x);
+			rectangle.setAttribute('baseY', y);
 		});
 		var drawRectangle = function(event){
 			drawingStart = 1 - drawingStart;
@@ -178,6 +236,8 @@
 				}
 				rectangle.onmousemove = image.onmousemove;
 				rectangle.onclick = this.onclick;
+				rectangle.setAttribute('baseX', x);
+				rectangle.setAttribute('baseY', y);
 			} else {
 				image.style.cursor = "default";
 				image.onmousemove = null;
@@ -207,11 +267,22 @@
 		}
 		show.onclick = function(){
 			var areas = document.getElementsByClassName("rectangle");
-			var lines = ["Страница ${pageNumber}:"];
+			var lines = ["Страница " + pageNumber + ":"];
 			for (let i=0; i<areas.length; i++){
 				let element = areas[i];
-				let leftUpX = element.offsetLeft - divResults.offsetLeft - image.offsetLeft - image.parentNode.offsetLeft - image.parentNode.parentNode.offsetLeft - compareResults.offsetLeft;
-				let leftUpY = element.offsetTop - divResults.offsetTop - image.offsetTop - image.parentNode.offsetTop - image.parentNode.parentNode.offsetTop - compareResults.offsetTop;
+				let leftUpX = element.offsetLeft
+					- divResults.offsetLeft
+					- image.offsetLeft
+					- image.parentNode.offsetLeft
+					- image.parentNode.parentNode.offsetLeft
+					- compareResults.offsetLeft;
+				let leftUpY = element.offsetTop
+					- divResults.offsetTop
+					- image.offsetTop
+					- image.parentNode.offsetTop
+					- image.parentNode.parentNode.offsetTop
+					- compareResults.offsetTop
+					+ divResults.scrollTop;
 				let width = element.offsetWidth;
 				let height = element.offsetHeight;
 				lines.push("  - x: " + leftUpX);
@@ -220,6 +291,14 @@
 				lines.push("    height: " + height);
 			}
 			window.prompt("Координаты игнорируемых зон:", lines.join("\n"));
+		}
+		divResults.onscroll = function(event){
+			var areas = document.getElementsByClassName("rectangle");
+			for (let i=0; i<areas.length; i++){
+				let area = areas[i];
+				area.style.left = area.getAttribute('baseX') - this.scrollLeft + 'px';
+				area.style.top = area.getAttribute('baseY') - this.scrollTop + 'px';
+			}
 		}
 	</script>
 </body>
