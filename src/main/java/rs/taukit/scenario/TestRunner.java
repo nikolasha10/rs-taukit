@@ -12,6 +12,7 @@ import rs.taukit.records.TestParentSuiteResults;
 import rs.taukit.records.TestResults;
 import rs.taukit.records.TestSuiteResults;
 import rs.taukit.utils.FileUtils;
+import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.YamlParser;
 
 import java.io.File;
@@ -93,13 +94,27 @@ public class TestRunner {
             } else {
                 String tags = Config.getProperty("scenario.tags").trim();
                 scenarios.addAll(findScenariosByTags(tags));
+                storage.getScenarioList().set(scenarios);
             }
         }
         List<CucumberScenario> readyToRunScenarios = new ArrayList<>(scenarios.stream()
                 .filter(CucumberScenario::isReadyForStart).toList());
         List<CucumberScenario> notStarted = scenarios.stream().filter(scenario -> !scenario.isStarted()).toList();
         boolean isRunning = scenarios.stream().anyMatch(CucumberScenario::isStarted);
-        if (readyToRunScenarios.isEmpty() && !notStarted.isEmpty() && !isRunning) {
+        long start = new Date().getTime();
+        boolean isReadyToSkipAll = readyToRunScenarios.isEmpty() && !notStarted.isEmpty() && !isRunning;
+        while (isReadyToSkipAll && new Date().getTime() - start < 10000){
+            scenarios = storage.getScenarioList().get();
+            readyToRunScenarios = new ArrayList<>(scenarios.stream()
+                    .filter(CucumberScenario::isReadyForStart).toList());
+            notStarted = scenarios.stream().filter(scenario -> !scenario.isStarted()).toList();
+            isRunning = scenarios.stream().anyMatch(CucumberScenario::isStarted);
+            isReadyToSkipAll = readyToRunScenarios.isEmpty() && !notStarted.isEmpty() && !isRunning;
+            if (!isReadyToSkipAll){
+                TauLogger.console("Костыль сработал");
+            }
+        }
+        if (isReadyToSkipAll) {
             notStarted.forEach(scenario -> scenario.setSkipped(true));
             readyToRunScenarios.addAll(notStarted);
         }
