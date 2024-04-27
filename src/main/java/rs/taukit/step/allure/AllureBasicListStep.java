@@ -46,7 +46,8 @@ public class AllureBasicListStep extends BasicUtils {
         try {
             driver().waitForCondition(condition);
         } catch (Exception e) {
-            throw ElementListException.itemNotFound(listName, itemType, e).get();
+            Exception exception = ElementListException.itemNotFound(listName, itemType, e).get();
+            TauLogger.fail(exception, exception.getMessage());
         }
         int foundItemNumber = foundItem.get().getCurrentIndex() + 1;
         TauLogger.report("Найден %s № %d", itemType, foundItemNumber);
