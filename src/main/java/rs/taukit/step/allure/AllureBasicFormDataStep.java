@@ -47,10 +47,15 @@ public class AllureBasicFormDataStep {
             IHasEditableValue element = block == null
                     ? pageObject.getElement(name).castTo(IHasEditableValue.class)
                     : block.getElementByName(name).castTo(IHasEditableValue.class);
-            if (control.isEmpty()) {
-                element.setValue(value);
-            } else {
-                element.setValue(value, control);
+            try {
+                if (control.isEmpty()) {
+                    element.setValue(value);
+                } else {
+                    element.setValue(value, control);
+                }
+            } catch (Exception e) {
+                TauLogger.fail(e, "Не удалось заполнить %s '%s' в блоке '%s' значением '%s'",
+                        type, name, pageObject.getCurrentContext().getElementName(), value);
             }
         });
         TauLogger.report("Поля формы заполнены значениями из таблицы", dataTable);
