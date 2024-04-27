@@ -29,7 +29,7 @@ public class TestRunner {
     }
 
     public Object[][] getScenarioByTags() {
-        List<CucumberScenario> scenarios = storage.getScenarioList();
+        List<CucumberScenario> scenarios = storage.getScenarioList().get();
         if (scenarios.isEmpty()) {
             if (storage.isTestsFinished()) {
                 scenarios.addAll(findScenariosByTags("@finalReport"));

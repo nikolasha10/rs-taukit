@@ -14,11 +14,11 @@ public class TauListener {
         if (!methodName.equals("afterMethod")) {
             return;
         }
-        int startedCount = storage.getScenarioList().stream()
+        int startedCount = storage.getScenarioList().get().stream()
                 .filter(Objects::nonNull)
                 .filter(CucumberScenario::isStarted)
                 .toList().size();
-        if (storage.getScenarioList().isEmpty()) {
+        if (storage.getScenarioList().get().isEmpty()) {
             if (!storage.isTestsFinished()) {
                 storage.setTestsFinished(true);
                 suite.run();

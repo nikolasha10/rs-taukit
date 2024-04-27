@@ -9,11 +9,12 @@ import rs.taukit.scenario.CucumberScenario;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Storage {
     private final ThreadLocal<CucumberScenario> scenarioThreadLocal = new ThreadLocal<>();
     @Getter
-    private final List<CucumberScenario> scenarioList = new ArrayList<>();
+    private final AtomicReference<List<CucumberScenario>> scenarioList = new AtomicReference<>(new ArrayList<>());
 
     @Setter
     @Getter
@@ -38,7 +39,7 @@ public class Storage {
      * @return объект класса CucumberScenario из списка сценариев, сформированного при запуске тестов
      */
     public CucumberScenario getScenario(PickleWrapper pickleWrapper, FeatureWrapper featureWrapper) {
-        return scenarioList.stream()
+        return scenarioList.get().stream()
                 .filter(scenario -> scenario.hasEqualName(pickleWrapper, featureWrapper))
                 .findFirst().orElseThrow(() -> new ScenarioNotFoundException(pickleWrapper.getPickle().getName()));
     }
@@ -49,7 +50,9 @@ public class Storage {
     }
 
     public void remove(PickleWrapper pickleWrapper, FeatureWrapper featureWrapper) {
-        scenarioList.removeIf(scenario -> scenario.hasEqualName(pickleWrapper, featureWrapper));
+        List<CucumberScenario> tempList = scenarioList.get();
+        tempList.removeIf(scenario -> scenario.hasEqualName(pickleWrapper, featureWrapper));
+        scenarioList.set(tempList);
     }
 
     private static class StorageManagerHolder {

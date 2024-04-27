@@ -92,7 +92,9 @@ public class CucumberScenario {
     }
 
     public void onFinish(int statusCode, long endMillis) {
-        storage.getScenarioList().remove(this);
+        List<CucumberScenario> tempList = storage.getScenarioList().get();
+        tempList.remove(this);
+        storage.getScenarioList().set(tempList);
         scenarioStorage.getDriverManager().close();
         String testStatus = switch (statusCode) {
             case 1 -> "PASSED";
