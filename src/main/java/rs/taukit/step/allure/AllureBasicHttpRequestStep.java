@@ -78,15 +78,17 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             } else {
                 response = browser().sendPostJson(requestUrl, content);
             }
+            String responseStatusParameterName = String.format("Статус запроса '%s'", name);
             String parameterName = String.format("Результат запроса '%s'", name);
+            scenarioData().put(responseStatusParameterName, String.valueOf(response.status()));
             scenarioData().put(parameterName, response.text());
             status = response.status();
             if (response.ok()) {
                 LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
                 TestData testData = new TestData(this.name + "_response", responseMap);
                 responseMap.forEach((key, value) -> scenarioData().put(key, testData.getOptional(key)));
-                TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d (%s)",
-                        name, response.status(), response.statusText());
+                String statusText = response.statusText().isEmpty() ? "" : String.format("(%s)", response.statusText());
+                TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d %s", name, response.status(), statusText);
                 TauLogger.attach("Тело ответа", response.text());
                 testData.getAttachments().forEach(TauLogger::attach);
             } else {
@@ -134,7 +136,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             try {
                 ApiResponse response = driver().getCurrentBrowser().sendGet(uriString);
                 responseAtomicReference.set(response);
-                String responseStatusParameterName = String.format("%s_status", name);
+                String responseStatusParameterName = String.format("Статус запроса '%s'", name);
                 String responseTextParameterName = String.format("Результат запроса '%s'", name);
                 scenarioData().put(responseStatusParameterName, String.valueOf(response.status()));
                 scenarioData().put(responseTextParameterName, response.text());
