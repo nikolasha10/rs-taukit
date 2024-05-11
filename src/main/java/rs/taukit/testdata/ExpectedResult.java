@@ -99,6 +99,7 @@ public class ExpectedResult {
                 this.currentValue = Optional.ofNullable(scenarioData().getOptional(objectName)).orElse("<отсутствует>").toString();
                 switch (objectState){
                     case "равен": return currentValue.equals(expectedValue);
+                    case "равен без учета регистра": return currentValue.equalsIgnoreCase(expectedValue);
                     case "не равен": return !currentValue.equals(expectedValue);
                     case "содержит": return currentValue.contains(expectedValue);
                     case "не содержит": return !currentValue.contains(expectedValue);
