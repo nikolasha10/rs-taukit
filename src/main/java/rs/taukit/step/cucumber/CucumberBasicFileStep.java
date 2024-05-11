@@ -65,4 +65,39 @@ public class CucumberBasicFileStep {
         fileStep(dirPath, fileName).writeValueToFile(parameterName, eval(fileName));
     }
 
+    @И("^сохранить содержимое файла \"(.+)\", как \"(.+)\"$")
+    public void saveFileContentAs(String testDataFileName, String parameterName) {
+        TestDataFile testDataFile = scenarioData().get(testDataFileName);
+        fileStep(testDataFile).saveFileContentAs(testDataFileName, parameterName);
+    }
+
+    @И("^служебный шаг: создать файл \"(.+)\" с параметрами:$")
+    public void createFile(String parameterName, DataTable dataTable) {
+        DataTable newTable = eval(dataTable);
+        fileStep(null, newTable).createFile(parameterName);
+    }
+
+    @И("^сохранить содержимое файла \"(.+)\" в файл \"(.+)\" с параметрами:$")
+    public void executeScript(String sourceFileParameter, String destinationFileParameter, DataTable dataTable) {
+        TestDataFile testDataFile = scenarioData().get(sourceFileParameter);
+        fileStep(testDataFile).saveFileWithParameters(destinationFileParameter, eval(dataTable));
+    }
+
+    @И("^выполнить команду \"(.+)\" и сохранить результат в файл \"(.+)\"$")
+    public void executeScript(String command, String resultFileParameterName) {
+        TestDataFile testDataFile = scenarioData().get(resultFileParameterName);
+        fileStep(testDataFile).execute(eval(command));
+    }
+
+    @И("^найти файл по маске \"(.+)\" в папке \"(.+)\" и сохранить, как \"(.+)\"$")
+    public void findFileByMask(String format, String dirPath, String fileParameterName) {
+        fileStep(eval(dirPath), "_").findFileByMask(eval(format), fileParameterName);
+    }
+
+    @И("^переименовать файл \"(.+)\" в \"(.+)\"$")
+    public void renameFile(String fileParameterName, String fileNewName) {
+        TestDataFile testDataFile = scenarioData().get(fileParameterName);
+        fileStep(testDataFile).rename(eval(fileNewName));
+    }
+
 }

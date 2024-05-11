@@ -9,6 +9,7 @@ import rs.taukit.config.Config;
 import rs.taukit.storage.ScenarioStorage;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.utils.AllureReport;
+import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 
 import java.util.List;
@@ -55,6 +56,8 @@ public class CucumberScenario {
             this.suiteName = "-";
             this.subSuiteName = "-";
         }
+        scenarioStorage.getScenarioData().put("SCENARIO_TEMP_DIR",
+                FileUtils.getScenarioTempDir(parentSuiteName, suiteName, subSuiteName, name));
     }
 
     public CucumberScenario(Object[] scenarioObject) {

@@ -6,6 +6,7 @@ import rs.taukit.exceptions.FileNotCreatedException;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
@@ -42,7 +43,7 @@ public class FileUtils {
     public static void createFile(String filePath) {
         File tmpFile = new File(filePath);
         String[] chunks = tmpFile.getAbsolutePath().split("[\\\\/]");
-        String dirPath = Arrays.stream(chunks).limit(chunks.length - 1).collect(Collectors.joining(File.separator));
+        String dirPath = Arrays.stream(chunks).limit(chunks.length - 1).collect(Collectors.joining("/"));
         try {
             Files.createDirectories(new File(dirPath).toPath());
             File file = new File(filePath);
@@ -63,6 +64,14 @@ public class FileUtils {
             throw new RuntimeException(e);
         }
     }
+    public static String readFile(String filePath, String encoding) {
+        File file = new File(filePath);
+        try {
+            return Files.readString(file.toPath(), Charset.forName(encoding));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static List<String> readFileToLineList(String filePath) {
         File file = new File(filePath);
@@ -78,6 +87,17 @@ public class FileUtils {
         File file = new File(filePath);
         try {
             Files.writeString(file.toPath(), content);
+        } catch (IOException e) {
+            throw new FileNotCreatedException(e, filePath);
+        }
+
+    }
+
+    public static void writeFile(String filePath, String content, String encoding) {
+        createFile(filePath);
+        File file = new File(filePath);
+        try {
+            Files.writeString(file.toPath(), content, Charset.forName(encoding));
         } catch (IOException e) {
             throw new FileNotCreatedException(e, filePath);
         }
@@ -188,5 +208,15 @@ public class FileUtils {
             file = new File(featureDir.getPath(), filePath);
         }
         return file.getPath();
+    }
+
+    public static String getScenarioTempDir(String parentSuiteName, String suiteName, String subSuiteName, String scenarioName) {
+        String tempDirPath = String.format("target/temp/%s%s%s/%s",
+                parentSuiteName,
+                suiteName.equals("-") ? "" : "/" + suiteName,
+                subSuiteName.equals("-") ? "" : "/" + subSuiteName,
+                scenarioName);
+        File file = new File(tempDirPath);
+        return file.getAbsolutePath().replaceAll("\\\\", "/");
     }
 }

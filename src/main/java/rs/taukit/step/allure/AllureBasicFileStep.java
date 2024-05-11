@@ -5,18 +5,23 @@ import io.qameta.allure.Step;
 import rs.taukit.element.interfaces.IHasAttachment;
 import rs.taukit.element.interfaces.IHasDownloadableFile;
 import rs.taukit.testdata.TestDataFile;
-import rs.taukit.utils.BasicUtils;
-import rs.taukit.utils.FileUtils;
-import rs.taukit.utils.TauLogger;
+import rs.taukit.utils.*;
 
 import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AllureBasicFileStep extends BasicUtils {
-    private final String fileDir;
+    private String fileDir;
     private String fileName;
     private String fileExtension;
     private String filePath;
-    private DataTable fileList;
+    private DataTable dataTable;
 
     public AllureBasicFileStep(String fileDir, String fileName) {
         this.fileName = fileName;
@@ -28,7 +33,7 @@ public class AllureBasicFileStep extends BasicUtils {
 
     public AllureBasicFileStep(String fileDir, DataTable dataTable) {
         this.fileDir = fileDir;
-        this.fileList = dataTable;
+        this.dataTable = dataTable;
     }
 
     public AllureBasicFileStep(TestDataFile testDataFile) {
@@ -45,8 +50,8 @@ public class AllureBasicFileStep extends BasicUtils {
 
     @Step("нажать на '{buttonName}' и скачать файлы:")
     public void downloadFiles(String buttonName) {
-        TauLogger.attachDataTable("Список загружаемых файлов", this.fileList);
-        element(buttonName).castTo(IHasDownloadableFile.class).click(this.fileList);
+        TauLogger.attachDataTable("Список загружаемых файлов", this.dataTable);
+        element(buttonName).castTo(IHasDownloadableFile.class).click(this.dataTable);
     }
 
     @Step("нажать на '{buttonName}' и выбрать загруженный файл '{fileName}'")
@@ -69,5 +74,86 @@ public class AllureBasicFileStep extends BasicUtils {
     public void writeValueToFile(String parameterName, String fileName) {
         FileUtils.writeFile(filePath, scenarioData().get(parameterName));
         TauLogger.report("Файл '%s' создан", filePath);
+    }
+
+    @Step("сохранить содержимое файла '{fileName}', как '{parameterName}'")
+    public void saveFileContentAs(String fileName, String parameterName) {
+        scenarioData().put(parameterName, FileUtils.readFile(filePath));
+        TauLogger.report("Параметр '%s' содержит значение '%s'", parameterName, scenarioData().get(parameterName));
+    }
+
+    @Step("выполнить команду '{command}' и сохранить результат в файл '{this.fileName}'")
+    public void execute(String command) {
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        File file = new File(this.filePath);
+        processBuilder.redirectOutput(file);
+        TauLogger.console("Выполняется команда: %s", command);
+        try {
+            Process process = processBuilder.start();
+            while (process.isAlive()) ;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        TauLogger.report("Команда '%s' выполнена", command);
+    }
+
+    public void createFile(String testFileParameterName) {
+        Map<String, String> dataMap = new LinkedHashMap<>();
+        dataTable.asMaps().forEach(row -> dataMap.put(row.get("Параметр"), row.get("Значение")));
+        this.fileName = TestDataUtils.get(dataMap, "название");
+        this.fileDir = TestDataUtils.get(dataMap, "директория");
+        File file = new File(this.fileDir, this.fileName);
+        this.filePath = file.getAbsolutePath();
+        FileUtils.createFile(this.filePath);
+        Map<String, String> testFileMap = new LinkedHashMap<>();
+        testFileMap.put("тип", "файл");
+        testFileMap.put("путь", this.filePath);
+        TestDataFile testDataFile = new TestDataFile(testFileParameterName, YamlParser.convert(testFileMap));
+        scenarioData().put(testFileParameterName, testDataFile);
+    }
+
+    @Step("сохранить содержимое файла '{this.fileName}' в файл '{destinationFileParameter}' с параметрами:")
+    public void saveFileWithParameters(String destinationFileParameter, DataTable dataTable) {
+        TauLogger.attachDataTable("Подстановка значений", dataTable);
+        scenarioData().put(dataTable);
+        TestDataFile testDataFile = scenarioData().get(destinationFileParameter);
+        Map<String, String> dataMap = new HashMap<>();
+        dataTable.asMaps().forEach(map -> dataMap.put(map.get("Параметр"), map.get("Значение")));
+        String sourceEncoding = TestDataUtils.getOptional(dataMap, "кодировка источника");
+        String resultEncoding = TestDataUtils.getOptional(dataMap, "кодировка результата");
+        String content = FileUtils.readFile(filePath, sourceEncoding);
+        FileUtils.writeFile(testDataFile.getFilePath(), eval(content), resultEncoding);
+        TauLogger.report("Содержимое файла '%s' сохранено в файл '%s'", this.fileName, testDataFile.getFileName());
+    }
+
+    @Step("найти файл по маске '{format}' в папке '{this.fileDir}' и сохранить, как '{fileParameterName}'")
+    public void findFileByMask(String format, String fileParameterName) {
+        File directory = new File(fileDir);
+        FilenameFilter filenameFilter = (dir, name) -> {
+            Matcher matcher = Pattern.compile(format).matcher(name);
+            return matcher.matches();
+        };
+        String[] found = directory.list(filenameFilter);
+        if (found != null && found.length > 0) {
+            LinkedHashMap<String, String> fileMap = new LinkedHashMap<>();
+            fileMap.put("тип", "файл");
+            fileMap.put("путь", fileDir + "/" + found[0]);
+            TestDataFile testDataFile = new TestDataFile(fileParameterName, YamlParser.convert(fileMap));
+            scenarioData().put(fileParameterName, testDataFile);
+            TauLogger.report("Файл '%s' был сохранён в параметр '%s'", testDataFile.getFileName(), fileParameterName);
+        } else {
+            TauLogger.fail("Не удалось найти файл в папке '%s', соответствующий маске '%s'", fileDir, format);
+        }
+    }
+
+    @Step("переименовать файл '{this.fileName}' в '{fileNewName}'")
+    public void rename(String fileNewName) {
+        File file = new File(filePath);
+        File newFile = new File(fileDir, fileNewName);
+        if (file.renameTo(newFile)) {
+            TauLogger.report("Файл '%s' переименован в '%s'", fileName, fileNewName);
+        } else {
+            TauLogger.fail("Не удалось переименовать файл '%s' в '%s'", fileName, fileNewName);
+        }
     }
 }
