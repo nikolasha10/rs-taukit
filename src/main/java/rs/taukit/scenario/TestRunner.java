@@ -97,8 +97,15 @@ public class TestRunner {
                 storage.getScenarioList().set(scenarios);
             }
         }
-        List<CucumberScenario> readyToRunScenarios = new ArrayList<>(scenarios.stream()
-                .filter(CucumberScenario::isReadyForStart).toList());
+        List<CucumberScenario> readyToRunScenarios = new ArrayList<>();
+        try {
+            readyToRunScenarios.addAll(scenarios.stream()
+                    .filter(CucumberScenario::isReadyForStart)
+                    .toList());
+        } catch (Exception ignored){
+            // ignored
+            TauLogger.console("NullPointerException TestRunner.java:102");
+        }
         List<CucumberScenario> notStarted = scenarios.stream().filter(scenario -> !scenario.isStarted()).toList();
         boolean isRunning = scenarios.stream().anyMatch(CucumberScenario::isStarted);
         long start = new Date().getTime();
