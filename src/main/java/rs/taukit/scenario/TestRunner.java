@@ -30,7 +30,7 @@ public class TestRunner {
     }
 
     public Object[][] getScenarioByTags() {
-        List<CucumberScenario> scenarios = storage.getScenarioList().get();
+        List<CucumberScenario> scenarios = new ArrayList<>(storage.getScenarioList().get().stream().filter(Objects::nonNull).toList());
         if (scenarios.isEmpty()) {
             if (storage.isTestsFinished()) {
                 scenarios.addAll(findScenariosByTags("@finalReport"));
@@ -97,15 +97,9 @@ public class TestRunner {
                 storage.getScenarioList().set(scenarios);
             }
         }
-        List<CucumberScenario> readyToRunScenarios = new ArrayList<>();
-        try {
-            readyToRunScenarios.addAll(scenarios.stream()
-                    .filter(CucumberScenario::isReadyForStart)
-                    .toList());
-        } catch (Exception ignored){
-            // ignored
-            TauLogger.console("NullPointerException TestRunner.java:102");
-        }
+        List<CucumberScenario> readyToRunScenarios = new ArrayList<>(scenarios.stream()
+                .filter(CucumberScenario::isReadyForStart)
+                .toList());
         List<CucumberScenario> notStarted = scenarios.stream().filter(scenario -> !scenario.isStarted()).toList();
         boolean isRunning = scenarios.stream().anyMatch(CucumberScenario::isStarted);
         long start = new Date().getTime();
@@ -130,6 +124,7 @@ public class TestRunner {
                         .toArray(Object[]::new))
                 .toArray(Object[][]::new);
         readyToRunScenarios.forEach(scenario -> scenario.setStarted(true));
+        storage.getScenarioList().set(scenarios);
         return startList;
     }
 
