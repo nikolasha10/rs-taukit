@@ -188,7 +188,7 @@ public class AllureBasicStep extends BasicUtils {
         TauLogger.resetNotCritical();
     }
 
-    @Step("[примечание] результат следующей проверки некритичен для теста")
+    //    @Step("[примечание] результат следующей проверки некритичен для теста")
     public static void setNextCheckNotCritical() {
         scenarioData().put("NEXT_CHECK_NOT_CRITICAL", "NOT CRITICAL");
     }
@@ -221,7 +221,7 @@ public class AllureBasicStep extends BasicUtils {
             String value;
             try {
                 value = eval(TestDataUtils.get(data, "Значение"));
-            } catch (TestDataException e){
+            } catch (TestDataException e) {
                 value = "null";
             }
             resultList.add(Arrays.asList(eval(TestDataUtils.get(data, "Параметр")), value));
@@ -254,5 +254,15 @@ public class AllureBasicStep extends BasicUtils {
             builder.append((char) chars[random.nextInt(charSet.length() - 1)]);
         }
         scenarioData().put(parameterName, builder.toString());
+    }
+
+    public static void chooseValueByConditions(DataTable dataTable, String parameterName) {
+        Map<String, String> result = dataTable.asMaps().stream().filter(map -> {
+            ExpectedResult expectedResult = new ExpectedResult(map);
+            return expectedResult.checkResult().isConditionMet();
+        }).findFirst().orElseThrow(() -> new RuntimeException("Не найден результат, соответствующий хотя бы одному условию"));
+        String resultValue = TestDataUtils.get(result, "Результат");
+        scenarioData().put(parameterName, resultValue);
+        TauLogger.console("Параметр '%s' содержит '%s'", parameterName, scenarioData().get(parameterName));
     }
 }

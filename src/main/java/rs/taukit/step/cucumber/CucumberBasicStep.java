@@ -141,4 +141,9 @@ public class CucumberBasicStep {
     public void base64Encoding(String value, String parameterName) {
         AllureBasicStep.base64Encoding(eval(value), parameterName);
     }
+
+    @И("^служебный шаг: выбрать значение, соответствующее условиям, и сохранить, как \"(.+)\":$")
+    public void chooseValueByConditions(String parameterName, DataTable dataTable) {
+        AllureBasicStep.chooseValueByConditions(eval(dataTable), parameterName);
+    }
 }
