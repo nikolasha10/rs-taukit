@@ -209,6 +209,7 @@
         formData.append('mavenGoal', 'test');
         formData.append('scenarioTags', scenarioTags);
         formData.append('trackDependencies', 'false');
+        formData.append('sendEmail', 'false');
         let parameters = []
         for (const pair of formData.entries()) {
             parameters.push(pair.join('='));
