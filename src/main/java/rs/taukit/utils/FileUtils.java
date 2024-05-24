@@ -15,8 +15,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static rs.taukit.utils.BasicUtils.eval;
-import static rs.taukit.utils.BasicUtils.scenario;
+import static rs.taukit.utils.BasicUtils.*;
 
 public class FileUtils {
     @Step("переименовать файл '{fileName}' в '{newFileName}'")
@@ -58,6 +57,13 @@ public class FileUtils {
 
     public static String readFile(String filePath) {
         File file = new File(filePath);
+        if (!file.exists()){
+            File featureFile = new File(scenarioData().getFeaturePath());
+            File localFile = new File(featureFile.getParent() + File.separator + filePath);
+            if (localFile.exists()) {
+                file = localFile;
+            }
+        }
         try {
             return Files.readString(file.toPath());
         } catch (IOException e) {
@@ -66,6 +72,13 @@ public class FileUtils {
     }
     public static String readFile(String filePath, String encoding) {
         File file = new File(filePath);
+        if (!file.exists()){
+            File featureFile = new File(scenarioData().getFeaturePath());
+            File localFile = new File(featureFile.getParent() + File.separator + filePath);
+            if (localFile.exists()) {
+                file = localFile;
+            }
+        }
         try {
             return Files.readString(file.toPath(), Charset.forName(encoding));
         } catch (IOException e) {
