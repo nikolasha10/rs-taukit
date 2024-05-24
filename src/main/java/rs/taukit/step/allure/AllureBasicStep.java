@@ -254,7 +254,7 @@ public class AllureBasicStep extends BasicUtils {
         TauLogger.report("%s: %s", parameterName, decoded);
     }
 
-    @Step("декодировать значения '{value}' из base64 и сохранить в параметры:")
+    @Step("декодировать значения из base64 и сохранить в параметры:")
     public static void base64Decoding(DataTable dataTable) {
         List<List<String>> results = new ArrayList<>();
         results.add(Arrays.asList("Параметр", "Значение"));
