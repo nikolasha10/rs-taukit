@@ -9,6 +9,7 @@ import rs.taukit.exceptions.TestDataException;
 import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.utils.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 
@@ -245,6 +246,30 @@ public class AllureBasicStep extends BasicUtils {
         TauLogger.report("%s: %s", parameterName, encodeBytes);
     }
 
+    @Step("декодировать значение '{value}' из base64 и сохранить, как '{parameterName}'")
+    public static void base64Decoding(String value, String parameterName) {
+        byte[] decodeBytes = Base64.getDecoder().decode(value);
+        String decoded = new String(decodeBytes, StandardCharsets.UTF_8);
+        scenarioData().put(parameterName, decoded);
+        TauLogger.report("%s: %s", parameterName, decoded);
+    }
+
+    @Step("декодировать значения '{value}' из base64 и сохранить в параметры:")
+    public static void base64Decoding(DataTable dataTable) {
+        List<List<String>> results = new ArrayList<>();
+        results.add(Arrays.asList("Параметр", "Значение"));
+        dataTable.asMaps().forEach(row -> {
+            String value = TestDataUtils.get(row, "Значение");
+            String parameterName = TestDataUtils.get(row, "Параметр");
+            byte[] decodeBytes = Base64.getDecoder().decode(value);
+            String decoded = new String(decodeBytes, StandardCharsets.UTF_8);
+            scenarioData().put(parameterName, decoded);
+            results.add(Arrays.asList(parameterName, decoded));
+        });
+        DataTable resultTable = DataTable.create(results, TextUtils.tableConverter);
+        TauLogger.attachDataTable("Результаты декодирования", resultTable);
+    }
+
     @Step("сгенерировать строку длиной {length} символа из набора символов '{charSet}' и сохранить, как '{parameterName}'")
     public static void generateString(int length, String charSet, String parameterName) {
         Random random = new Random();
@@ -265,4 +290,5 @@ public class AllureBasicStep extends BasicUtils {
         scenarioData().put(parameterName, resultValue);
         TauLogger.console("Параметр '%s' содержит '%s'", parameterName, scenarioData().get(parameterName));
     }
+
 }
