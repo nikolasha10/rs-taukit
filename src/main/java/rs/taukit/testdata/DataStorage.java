@@ -30,7 +30,7 @@ public class DataStorage {
             } else if (fieldValue instanceof String) {
                 String value = evalString(Config.eval(YamlParser.convert(fieldValue)));
                 this.dataStorage.put(fieldName, YamlParser.convert(value));
-            } else if (fieldValue instanceof Integer) {
+            } else if (fieldValue instanceof Integer || fieldValue instanceof Boolean) {
                 this.dataStorage.put(fieldName, YamlParser.convert(fieldValue));
             }
         });
