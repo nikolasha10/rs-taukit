@@ -53,7 +53,7 @@ public class TestRunner {
                         null));
                 List<File> resultFiles = FileUtils.getDirFileList("target/allure-results").stream()
                         .filter(file -> file.getName().endsWith("result.json"))
-                        .sorted((f1, f2) -> Math.toIntExact((f1.lastModified() - f2.lastModified())))
+                        .sorted((f1, f2) -> Math.toIntExact(f1.lastModified() - f2.lastModified()))
                         .toList();
                 ObjectMapper mapper = new JsonMapper();
                 resultFiles.forEach(file -> {
