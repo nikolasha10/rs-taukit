@@ -130,9 +130,10 @@ public class AllureBasicStep extends BasicUtils {
                 String objectType = firstUnexpectedResult.getObjectType();
                 String objectName = firstUnexpectedResult.getObjectName();
                 String objectState = firstUnexpectedResult.getObjectState();
+                String currentValue = firstUnexpectedResult.getCurrentValue();
                 String expectedValue = firstUnexpectedResult.getExpectedValue() == null
                         ? ""
-                        : String.format(" \"%s\"", firstUnexpectedResult.getExpectedValue());
+                        : String.format(" \"%s\"/. Текущее значение: %s", firstUnexpectedResult.getExpectedValue(), currentValue);
                 TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s \"%s\" %s %s",
                         objectType, objectName, objectState, expectedValue);
             }
