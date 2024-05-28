@@ -17,6 +17,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -68,37 +69,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         DataTable modified = DataTable.create(parameters, TextUtils.tableConverter);
         TauLogger.attachDataTable("Параметры запроса", modified);
         TauLogger.attach("Тело запроса", content);
-        int status = 0;
-        try {
-            String contentType = TestDataUtils.getOptional(requestParametersMap, "contentType");
-            String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
-            ApiResponse response;
-            if (contentType != null) {
-                response = browser().sendPost(requestUrl, contentType, accept, content);
-            } else {
-                response = browser().sendPostJson(requestUrl, content);
-            }
-            String responseStatusParameterName = String.format("Статус запроса '%s'", name);
-            String parameterName = String.format("Результат запроса '%s'", name);
-            scenarioData().put(responseStatusParameterName, String.valueOf(response.status()));
-            scenarioData().put(parameterName, response.text());
-            status = response.status();
-            if (response.ok()) {
-                LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
-                TestData testData = new TestData(this.name + "_response", responseMap);
-                responseMap.forEach((key, value) -> scenarioData().put(key, testData.getOptional(key)));
-                String statusText = response.statusText().isEmpty() ? "" : String.format("(%s)", response.statusText());
-                TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d %s", name, response.status(), statusText);
-                TauLogger.attach("Тело ответа", response.text());
-                testData.getAttachments().forEach(TauLogger::attach);
-            } else {
-                throw new RuntimeException(String.format(
-                        "Не удалось отправить POST-запрос \"%s\". Сервер вернул статус %d (%s)",
-                        name, response.status(), response.statusText()));
-            }
-        } catch (Exception e) {
-            throw new HttpRequestNotSentException(e, name, "POST", status);
-        }
+        scenarioStorage().saveStepAction(getRunnableSendPost(requestParametersMap, requestUrl, content));
     }
 
     @Step("отправить GET-запрос '{this.name}' с параметрами:")
@@ -130,6 +101,43 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         testDataAtomicReference.get().getAttachments().forEach(TauLogger::attach);
     }
 
+    private Runnable getRunnableSendPost(Map<String, String> requestParametersMap, String requestUrl, String content){
+        Runnable runnable = () -> {
+            AtomicInteger status = new AtomicInteger();
+            try {
+                String contentType = TestDataUtils.getOptional(requestParametersMap, "contentType");
+                String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
+                ApiResponse response;
+                if (contentType != null) {
+                    response = browser().sendPost(requestUrl, contentType, accept, content);
+                } else {
+                    response = browser().sendPostJson(requestUrl, content);
+                }
+                String responseStatusParameterName = String.format("Статус запроса '%s'", name);
+                String parameterName = String.format("Результат запроса '%s'", name);
+                scenarioData().put(responseStatusParameterName, String.valueOf(response.status()));
+                scenarioData().put(parameterName, response.text());
+                status.set(response.status());
+                if (response.ok()) {
+                    LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
+                    TestData testData = new TestData(this.name + "_response", responseMap);
+                    responseMap.forEach((key, value) -> scenarioData().put(key, testData.getOptional(key)));
+                    String statusText = response.statusText().isEmpty() ? "" : String.format("(%s)", response.statusText());
+                    TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d %s", name, response.status(), statusText);
+                    TauLogger.attach("Тело ответа", response.text());
+                    testData.getAttachments().forEach(TauLogger::attach);
+                } else {
+                    throw new RuntimeException(String.format(
+                            "Не удалось отправить POST-запрос \"%s\". Сервер вернул статус %d (%s)",
+                            name, response.status(), response.statusText()));
+                }
+            } catch (Exception e) {
+                throw new HttpRequestNotSentException(e, name, "POST", status.get());
+            }
+        };
+        runnable.run();
+        return runnable;
+    }
     private Runnable getRunnableSendGet(String uriString, AtomicReference<ApiResponse> responseAtomicReference, AtomicReference<TestData> testDataAtomicReference) {
         Runnable runnable = () -> {
             int status = 0;
