@@ -29,7 +29,15 @@ public enum ElementState {
     NOT_CONTENT_TEXT("не содержит", checked -> {
         String elementText = checked.element().getText();
         return !elementText.contains(checked.expectedValue().toString());
-    }, "содержит текст, отсутствие которого ожидалось");
+    }, "содержит текст, отсутствие которого ожидалось"),
+    TEXT_EQUALS("равен", checked -> {
+        String elementText = checked.element().getText();
+        return elementText.equals(checked.expectedValue().toString());
+    }, "отличается от ожидаемого текста"),
+    TEXT_NOT_EQUALS("не равен", checked -> {
+        String elementText = checked.element().getText();
+        return !elementText.equals(checked.expectedValue().toString());
+    }, "совпадает с текстом, отсутствие которого ожидалось");
 
     private static final Map<String, ElementState> BY_NAME = new HashMap<>();
 
