@@ -28,8 +28,4 @@ public class PwText extends PwElement implements IHasText {
         super(elementName, locator, model);
     }
 
-    @Override
-    public String getText() {
-        return elementPwLocator.innerText();
-    }
 }

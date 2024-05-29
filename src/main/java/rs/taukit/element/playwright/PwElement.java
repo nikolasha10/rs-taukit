@@ -99,7 +99,12 @@ public class PwElement extends Element {
 
     @Override
     public String getText() {
-        return elementPwLocator.innerText();
+        try {
+            return elementPwLocator.innerText();
+        } catch (Exception e){
+            String message = String.format("Не удалось получить значение элемента '%s'", elementName);
+            throw new RuntimeException(message, e);
+        }
     }
 
     @Override
