@@ -133,7 +133,7 @@ public class AllureBasicStep extends BasicUtils {
                 String currentValue = firstUnexpectedResult.getCurrentValue();
                 String expectedValue = firstUnexpectedResult.getExpectedValue() == null
                         ? ""
-                        : String.format(" \"%s\"/. Текущее значение: %s", firstUnexpectedResult.getExpectedValue(), currentValue);
+                        : String.format(" \"%s\". Текущее значение: %s", firstUnexpectedResult.getExpectedValue(), currentValue);
                 TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s \"%s\" %s %s",
                         objectType, objectName, objectState, expectedValue);
             }
