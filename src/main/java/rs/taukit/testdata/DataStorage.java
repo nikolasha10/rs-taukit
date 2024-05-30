@@ -29,7 +29,7 @@ public class DataStorage {
                 Map<String, ?> fieldData = YamlParser.convert(fieldValue);
                 String fieldType = YamlParser.convert(fieldData.get("тип"));
                 ITestData testData = fieldType == null
-                        ? new TestData(fieldName, new LinkedHashMap<>(fieldData))
+                        ? new TestData(fieldName, new LinkedHashMap<>(fieldData), featureDirPath)
                         : TestDataField.getField(fieldType, fieldName, fieldValue, featureDirPath);
                 this.dataStorage.put(fieldName, YamlParser.convert(testData));
             } else if (fieldValue instanceof String) {

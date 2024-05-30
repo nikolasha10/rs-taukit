@@ -21,8 +21,12 @@ public class TestDataFile implements ITestData {
     public TestDataFile(String fieldName, LinkedHashMap<String, ?> data, String dirPath) {
         this.fieldName = fieldName;
         this.dataStorage = new DataStorage(data);
-        this.filePath = Config.eval(this.dataStorage.get("путь"));
+        String filePath = Config.eval(this.dataStorage.get("путь"));
         File file = new File(filePath);
+        if (!file.exists()) {
+            file = new File(dirPath, filePath);
+        }
+        this.filePath = file.getPath().replaceAll("\\\\", "/");
         this.fileName = file.getName();
         String[] chunks = fileName.split("\\.");
         this.fileExtension = chunks[chunks.length - 1];

@@ -20,7 +20,7 @@ import java.util.stream.IntStream;
 public class AllureReport {
     private static final List<String> errorList = new ArrayList<>();
 
-    private static List<File> getFileList(String scenarioName, long testEndTime) {
+    private static List<File> getFileList(String functionality, String scenarioName, long testEndTime) {
         File directory = new File(Config.getProperty("allure-results.path"));
         return Arrays.stream(Objects.requireNonNull(directory.listFiles()))
                 .filter(file -> file.getName().endsWith("result.json"))
@@ -28,7 +28,9 @@ public class AllureReport {
                 .filter(file -> {
                     try {
                         String fileContent = Files.readString(file.toPath());
-                        return fileContent.contains(scenarioName.replaceAll("\"", "\\\\\""));
+                        boolean containsScenarioName = fileContent.contains(scenarioName.replaceAll("\"", "\\\\\""));
+                        boolean containsFunctionality = fileContent.contains(functionality);
+                        return containsScenarioName && containsFunctionality;
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -36,7 +38,7 @@ public class AllureReport {
     }
 
     public static synchronized void editReports(String scenarioName, String functionality, String status, long testEndTime) {
-        List<File> fileList = getFileList(scenarioName, testEndTime);
+        List<File> fileList = getFileList(functionality, scenarioName, testEndTime);
         fileList.forEach(file -> replaceReport(file, scenarioName, functionality, status));
     }
 

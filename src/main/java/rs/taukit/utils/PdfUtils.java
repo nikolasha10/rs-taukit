@@ -20,6 +20,7 @@ import rs.taukit.config.Config;
 import rs.taukit.driver.playwright.PlaywrightDriver;
 import rs.taukit.page.playwright.PlaywrightPageObject;
 import rs.taukit.records.ImageDifferences;
+import rs.taukit.testdata.TestDataFile;
 import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.comparison.ImageDiff;
 import ru.yandex.qatools.ashot.comparison.ImageDiffer;
@@ -308,15 +309,24 @@ public class PdfUtils {
         }
     }
 
-    public static List<ImageDifferences> comparePdf(String testedFilePath, String standardFilePath, String instructionPath) {
+    public static List<ImageDifferences> comparePdf(String testedFilePath,
+                                                    String standardFilePath,
+                                                    String ignoredZonesParameterName,
+                                                    String autoReplacingParameterName,
+                                                    boolean validateVisual,
+                                                    boolean validateText) {
         Map<String, List<Map<String, Integer>>> ignoredZones = new HashMap<>();
-        if (instructionPath != null) {
-            ignoredZones = YamlParser.parse(instructionPath);
+        if (ignoredZonesParameterName != null) {
+            TestDataFile ignoredZonesFileData = scenarioData().get(ignoredZonesParameterName);
+            ignoredZones = YamlParser.parse(ignoredZonesFileData.getFilePath());
         }
         List<ImageDifferences> images = new ArrayList<>();
+
+
         try {
             PDDocument testedDocument = PDDocument.load(new File(testedFilePath));
             PDFRenderer testedRenderer = new PDFRenderer(testedDocument);
+
             PDDocument standardDocument = PDDocument.load(new File(standardFilePath));
             PDFRenderer standardRenderer = new PDFRenderer(standardDocument);
             int testedPagesNumber = testedDocument.getNumberOfPages();
@@ -327,54 +337,120 @@ public class PdfUtils {
                         testedPagesNumber, standardPagesNumber);
                 scenarioData().put("Проверка PDF", "Ошибки при сравнении PDF", errorMessage);
             }
-            for (int i = 0; i < Math.max(testedPagesNumber, standardPagesNumber); i++) {
-                int pageNumber = i + 1;
-                BufferedImage testedImage = null;
-                BufferedImage standardImage = null;
-                if (i < testedPagesNumber) {
-                    testedImage = getPdfPageImage(testedRenderer, i);
+            for (int pageNumber = 1; pageNumber <= Math.max(testedPagesNumber, standardPagesNumber); pageNumber++) {
+                if (validateVisual) {
+                    addVisualDifference(
+                            pageNumber,
+                            testedPagesNumber, standardPagesNumber,
+                            testedRenderer, standardRenderer, ignoredZones, images);
                 }
-                if (i < standardPagesNumber) {
-                    standardImage = getPdfPageImage(standardRenderer, i);
-                }
-                if (testedImage == null) {
-                    assert standardImage != null;
-                    testedImage = ImageUtils.generateCleanImage(standardImage.getWidth(), standardImage.getHeight());
-                }
-                if (standardImage == null) {
-                    standardImage = ImageUtils.generateCleanImage(testedImage.getWidth(), testedImage.getHeight());
-                }
-                BufferedImage differencesImage;
-                BufferedImage zonedTestedImage = ImageUtils.deepCopy(testedImage);
-                BufferedImage zonedStandardImage = ImageUtils.deepCopy(standardImage);
-                if (instructionPath != null && ignoredZones.containsKey("Страница " + pageNumber)) {
-                    List<Map<String, Integer>> ignoredZoneList = ignoredZones.get("Страница " + pageNumber);
-                    List<String> ignoredZonesDataList = new ArrayList<>();
-                    for (Map<String, Integer> zone : ignoredZoneList) {
-                        int x = zone.get("x");
-                        int y = zone.get("y");
-                        int width = zone.get("width");
-                        int height = zone.get("height");
-                        ImageUtils.drawZone(zonedTestedImage, x, y, width, height);
-                        ImageUtils.drawZone(zonedStandardImage, x, y, width, height);
-                        ignoredZonesDataList.add(String.format("{x: %d, y: %d, w: %d, h: %d}", x, y, width, height));
-                    }
-                    differencesImage = ImageUtils.getDifferencesImage(zonedTestedImage, zonedStandardImage);
-                    scenarioData().put("ignoredZonesData_" + pageNumber, String.join(", ", ignoredZonesDataList));
-                } else {
-                    scenarioData().put("ignoredZonesData_" + pageNumber, "");
-                    differencesImage = ImageUtils.getDifferencesImage(testedImage, standardImage);
-                }
-                if (differencesImage != null) {
-                    images.add(new ImageDifferences(pageNumber, testedImage, standardImage, differencesImage));
+                if (validateText) {
+                    addTextDifference(
+                            pageNumber,
+                            testedPagesNumber, standardPagesNumber,
+                            testedFilePath, standardFilePath, autoReplacingParameterName, images);
                 }
             }
-            standardDocument.close();
-            testedDocument.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return images;
+    }
+    private static void addVisualDifference(int pageNumber,
+                                            int testedPagesNumber,
+                                            int standardPagesNumber,
+                                            PDFRenderer testedRenderer,
+                                            PDFRenderer standardRenderer,
+                                            Map<String, List<Map<String, Integer>>> ignoredZones,
+                                            List<ImageDifferences> images) throws IOException {
+        BufferedImage testedImage;
+        BufferedImage standardImage = null;
+        if (pageNumber > testedPagesNumber) {
+            standardImage = getPdfPageImage(standardRenderer, pageNumber - 1);
+            testedImage = ImageUtils.generateCleanImage(standardImage.getWidth(), standardImage.getHeight());
+        } else {
+            testedImage = getPdfPageImage(testedRenderer, pageNumber - 1);
+        }
+        if (pageNumber > standardPagesNumber) {
+            standardImage = ImageUtils.generateCleanImage(testedImage.getWidth(), testedImage.getHeight());
+        } else if (standardImage == null) {
+            standardImage = getPdfPageImage(standardRenderer, pageNumber - 1);
+        }
+        BufferedImage differencesImage;
+        BufferedImage zonedTestedImage = ImageUtils.deepCopy(testedImage);
+        BufferedImage zonedStandardImage = ImageUtils.deepCopy(standardImage);
+        if (ignoredZones.containsKey("Страница " + pageNumber)) {
+            List<Map<String, Integer>> ignoredZoneList = ignoredZones.get("Страница " + pageNumber);
+            List<String> ignoredZonesDataList = new ArrayList<>();
+            for (Map<String, Integer> zone : ignoredZoneList) {
+                int x = zone.get("x");
+                int y = zone.get("y");
+                int width = zone.get("width");
+                int height = zone.get("height");
+                ImageUtils.drawZone(zonedTestedImage, x, y, width, height);
+                ImageUtils.drawZone(zonedStandardImage, x, y, width, height);
+                ignoredZonesDataList.add(String.format("{x: %d, y: %d, w: %d, h: %d}", x, y, width, height));
+            }
+            differencesImage = ImageUtils.getDifferencesImage(zonedTestedImage, zonedStandardImage);
+            scenarioData().put("ignoredZonesData_" + pageNumber, String.join(", ", ignoredZonesDataList));
+        } else {
+            scenarioData().put("ignoredZonesData_" + pageNumber, "");
+            differencesImage = ImageUtils.getDifferencesImage(testedImage, standardImage);
+        }
+        if (differencesImage != null) {
+            String name = String.format("Страница %d. Визуальные различия.", pageNumber);
+            images.add(new ImageDifferences(pageNumber, name, testedImage, standardImage, differencesImage));
+        }
+    }
+
+    private static void addTextDifference(int pageNumber,
+                                          int testedPagesNumber,
+                                          int standardPagesNumber,
+                                          String testedFilePath,
+                                          String standardFilePath,
+                                          String autoReplacingParameterName,
+                                          List<ImageDifferences> images) throws IOException {
+        // TextExtractionStrategy strategy = new SimpleTextExtractionStrategy();
+
+        String pdfTestedPageTextContent;
+        if (pageNumber <= testedPagesNumber) {
+            PdfReader testedReader = new PdfReader(testedFilePath);
+            TextExtractionStrategy testedStrategy = new LocationTextExtractionStrategy();
+            pdfTestedPageTextContent = PdfTextExtractor.getTextFromPage(testedReader, pageNumber, testedStrategy);
+            testedReader.close();
+        } else {
+            pdfTestedPageTextContent = "";
+        }
+        String originalPdfStandardPageTextContent;
+        if (pageNumber <= standardPagesNumber) {
+            PdfReader standardReader = new PdfReader(standardFilePath);
+            TextExtractionStrategy standardStrategy = new LocationTextExtractionStrategy();
+            originalPdfStandardPageTextContent = PdfTextExtractor.getTextFromPage(standardReader, pageNumber, standardStrategy);
+            standardReader.close();
+        } else {
+            originalPdfStandardPageTextContent = "";
+        }
+        String pdfStandardPageTextContent = TextUtils.replaceValues(originalPdfStandardPageTextContent, autoReplacingParameterName);
+        if (!pdfTestedPageTextContent.equals(pdfStandardPageTextContent)){
+            BufferedImage pdfTestedPageTextImage = ImageUtils.textToImage(pdfTestedPageTextContent, pdfStandardPageTextContent);
+            BufferedImage pdfStandardPageTextImage = ImageUtils.textToImage(pdfStandardPageTextContent, pdfTestedPageTextContent);
+            BufferedImage differencesImage = ImageUtils.getDifferencesImage(pdfTestedPageTextImage, pdfStandardPageTextImage);
+            String name = String.format("Страница %d. Текстовые различия.", pageNumber);
+            images.add(new ImageDifferences(pageNumber, name, pdfTestedPageTextImage, pdfStandardPageTextImage, differencesImage));
+        }
+        if (Config.getBooleanProperty("pdf.text.content.files.create")) {
+            String pdfTestedPageTextContentFilePath = String.format("target/temp/%s/%s/tested/page_%d.txt",
+                    scenario().getFunctionality().replaceAll("[\\[\\]]", ""),
+                    scenario().getName(),
+                    pageNumber);
+            FileUtils.writeFile(pdfTestedPageTextContentFilePath, pdfTestedPageTextContent);
+
+            String pdfStandardPageTextContentFilePath = String.format("target/temp/%s/%s/standard/page_%d.txt",
+                    scenario().getFunctionality().replaceAll("[\\[\\]]", ""),
+                    scenario().getName(),
+                    pageNumber);
+            FileUtils.writeFile(pdfStandardPageTextContentFilePath, pdfStandardPageTextContent);
+        }
     }
 
     private static BufferedImage getPdfPageImage(PDFRenderer renderer, int pageNumber) throws IOException {

@@ -8,10 +8,6 @@ import rs.taukit.utils.PdfUtils;
 import static rs.taukit.utils.BasicUtils.eval;
 
 public class CucumberBasicPrintFormStep {
-    private AllureBasicPrintFormStep printFormStep(String pageName) {
-        return new AllureBasicPrintFormStep(pageName);
-    }
-
     @И("^сформировать эталон \"(.+)\" по файлу \"(.+)\" и шаблону \"(.+)\"$")
     public void createPdfStandard(String standardName, String originFileName, String templateName, DataTable dataTable) {
         PdfUtils.createPdfStandard(eval(standardName), eval(originFileName), eval(templateName), eval(dataTable));
@@ -24,11 +20,11 @@ public class CucumberBasicPrintFormStep {
 
     /**
      * Сравнивает содержимое pdf-файла с эталонным
-     * @param fileName - имя проверяемого файла. Должен находиться в папке для загружаемых файлов
+     * @param fileParameterName - имя параметра, содержащего объект-тестируемый файл.
      * @param dataTable - таблица данных, вида<br>
      *                  <table>
      *                      <tr><td>|</td><th>Параметр</th><td>|</td><th>Значение</th><td>|</td></tr>
-     *                      <tr><td>|</td><td>эталон</td><td>|</td><td>путь к файлу эталона</td><td>|</td></tr>
+     *                      <tr><td>|</td><td>эталон</td><td>|</td><td>имя параметра, содержащего объект-эталонный файл</td><td>|</td></tr>
      *                      <tr><td>|</td><td>игнорируемые зоны</td><td>|</td><td>путь к yaml-файлу с координатами игнор-зон</td><td>|</td></tr>
      *                      <tr><td>|</td><td>автозамена текста</td><td>|</td><td>путь к yaml-файлу с параметрами замены</td><td>|</td></tr>
      *                  </table>
@@ -36,7 +32,7 @@ public class CucumberBasicPrintFormStep {
      *                  Путь к файлам может быть относительным к расположению feature-файла сценария.
      */
     @И("^проверить документ \"(.+)\" на соответствие эталону$")
-    public void validateDocument(String fileName, DataTable dataTable) {
-        printFormStep(fileName).validate(eval(dataTable));
+    public void validateDocument(String fileParameterName, DataTable dataTable) {
+        new AllureBasicPrintFormStep().validate(fileParameterName, eval(dataTable));
     }
 }
