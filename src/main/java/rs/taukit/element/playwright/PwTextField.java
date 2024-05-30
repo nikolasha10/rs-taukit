@@ -4,6 +4,7 @@ import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 
@@ -41,6 +42,9 @@ public class PwTextField extends PwElement implements IHasEditableValue {
             super.setValue(value);
             page().waitForTimeout(1000);
             String currentValue = elementPwLocator.inputValue();
+            if (!currentValue.equals(controlValue)) {
+                TauLogger.console("currentValue: %s, controlValue: %s", currentValue, controlValue);
+            }
             return currentValue.equals(controlValue);
         });
     }
