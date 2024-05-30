@@ -22,9 +22,9 @@ public class TestDataFile implements ITestData {
         this.fieldName = fieldName;
         this.dataStorage = new DataStorage(data);
         String filePath = Config.eval(this.dataStorage.get("путь"));
-        File file = new File(filePath);
+        File file = new File(dirPath, filePath);
         if (!file.exists()) {
-            file = new File(dirPath, filePath);
+            file = new File(filePath);
         }
         this.filePath = file.getPath().replaceAll("\\\\", "/");
         this.fileName = file.getName();
