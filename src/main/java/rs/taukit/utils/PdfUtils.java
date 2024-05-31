@@ -326,7 +326,6 @@ public class PdfUtils {
         try {
             PDDocument testedDocument = PDDocument.load(new File(testedFilePath));
             PDFRenderer testedRenderer = new PDFRenderer(testedDocument);
-
             PDDocument standardDocument = PDDocument.load(new File(standardFilePath));
             PDFRenderer standardRenderer = new PDFRenderer(standardDocument);
             int testedPagesNumber = testedDocument.getNumberOfPages();
@@ -351,6 +350,8 @@ public class PdfUtils {
                             testedFilePath, standardFilePath, autoReplacingParameterName, images);
                 }
             }
+            testedDocument.close();
+            standardDocument.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -53,7 +53,6 @@ public class TextUtils {
 
     public static String replaceValues(String originalText, String autoReplacingParameterName) {
         if (autoReplacingParameterName == null) return originalText;
-        TauLogger.console("start auto replacing");
         TestDataFile autoReplaceFileData = scenarioData().get(autoReplacingParameterName);
         StringBuilder builder = new StringBuilder(originalText);
         List<Map<String, String>> instruction = YamlParser.parse(autoReplaceFileData.getFilePath());
