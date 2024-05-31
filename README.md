@@ -8,10 +8,7 @@ KIT)
 <li>Клонировать проект фреймворка с репозитория GitLab: <p> git clone http://git.dos.softlab.ru/autotest/rs-taukit.git </p></li>
 <li>Открыть проект в IntelliJ Idea</li>
 <li>Открыть в терминале папку src</li>
-<li>Клонировать проект автотестов (например, с репозитория GitLab: <p> git clone http://git.dos.softlab.ru/autotest/efr-at.git </p></li>
-<li>Пометить папку <a>src/efr-at/java</a>, как <i>Test Sources Root</i> (правой кнопкой мыши - Mark Directory as). 
-Это необходимо, для того чтобы Idea включила эту папку в ClassPath и нашла класс TestRunner с исполняемым методом </li>
-<li>Пометить папку <a>src/efr-at/resources</a>, как <i>Test Resources Root</i></li>
+<li>Клонировать проект автотестов в папку test (например, с репозитория GitLab: <p> git clone http://git.dos.softlab.ru/autotest/efr-at.git test</p></li>
 <li>Открыть File -> Setting -> Plugins и проверить, установлены ли плагины:
     <ul>
         <li>Cucumber for Java</li>
@@ -33,7 +30,7 @@ KIT)
 <li>Настроить параметры:
     <ul>
         <li>Test kind: Method</li>
-        <li>Class: EFRTestRunner</li>
+        <li>Class: TestRunner</li>
         <li>Method: runByTag()</li>
     </ul>
 </li>
