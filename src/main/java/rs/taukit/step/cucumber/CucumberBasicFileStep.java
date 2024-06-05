@@ -65,6 +65,11 @@ public class CucumberBasicFileStep {
         fileStep(dirPath, fileName).writeValueToFile(parameterName, eval(fileName));
     }
 
+    @И("^сохранить значение параметра \"(.+)\" в файл:$")
+    public void writeValueToFile(String parameterName, DataTable dataTable) {
+        new AllureBasicFileStep(eval(dataTable)).writeValueToFile(parameterName);
+    }
+
     @И("^сохранить содержимое файла \"(.+)\", как \"(.+)\"$")
     public void saveFileContentAs(String testDataFileName, String parameterName) {
         TestDataFile testDataFile = scenarioData().get(testDataFileName);
@@ -99,5 +104,9 @@ public class CucumberBasicFileStep {
         TestDataFile testDataFile = scenarioData().get(fileParameterName);
         fileStep(testDataFile).rename(eval(fileNewName));
     }
-
+    @И("^проверить содержимое файла \"(.+)\" на соответствие эталону:$")
+    public void validateFile(String fileParameterName, DataTable dataTable) {
+        TestDataFile testDataFile = scenarioData().get(fileParameterName);
+        new AllureBasicFileStep(testDataFile).validate(eval(dataTable));
+    }
 }

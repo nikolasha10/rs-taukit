@@ -155,4 +155,10 @@ public class CucumberBasicStep {
     public void chooseValueByConditions(String parameterName, DataTable dataTable) {
         AllureBasicStep.chooseValueByConditions(eval(dataTable), parameterName);
     }
+
+    @И("^разобрать значение параметра \"(.+)\", сохранив значения в параметрах:$")
+    public void parseResponseResult(String parameterName, DataTable dataTable) {
+        AllureBasicStep.parseParameterValue(parameterName, eval(dataTable));
+    }
+
 }

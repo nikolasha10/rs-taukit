@@ -292,4 +292,31 @@ public class AllureBasicStep extends BasicUtils {
         TauLogger.console("Параметр '%s' содержит '%s'", parameterName, scenarioData().get(parameterName));
     }
 
+    @Step("разобрать значение параметра '{parameterName}', сохранив значения в параметрах:")
+    public static void parseParameterValue(String parameterName, DataTable dataTable) {
+        TauLogger.attachDataTable("Параметры поиска результатов", dataTable);
+        List<List<String>> parsedValues = new ArrayList<>();
+        String text = scenarioData().get(parameterName);
+        Runnable runnable = getRunnableParseText(dataTable, parsedValues, text);
+        scenarioStorage().saveStepAction(runnable);
+        DataTable parsedValuesTable = DataTable.create(parsedValues, TextUtils.tableConverter);
+        TauLogger.attachDataTable("Полученные значения", parsedValuesTable);
+        TauLogger.console("Получены значения:", parsedValuesTable);
+    }
+
+    private static Runnable getRunnableParseText(DataTable dataTable, List<List<String>> parsedValues, String text) {
+        Runnable runnable = () -> {
+            parsedValues.clear();
+            parsedValues.add(Arrays.asList("Параметр", "Значение"));
+            dataTable.asMaps().forEach(data -> {
+                String parameterName = TestDataUtils.get(data, "Параметр");
+                String regExp = TestDataUtils.get(data, "Регулярное выражение");
+                scenarioData().put(parameterName, TextUtils.findByRegExp(text, regExp));
+                parsedValues.add(Arrays.asList(parameterName, scenarioData().get(parameterName)));
+            });
+        };
+        runnable.run();
+        return runnable;
+    }
+
 }

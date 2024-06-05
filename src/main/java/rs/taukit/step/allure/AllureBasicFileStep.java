@@ -7,6 +7,7 @@ import rs.taukit.element.interfaces.IHasDownloadableFile;
 import rs.taukit.testdata.TestDataFile;
 import rs.taukit.utils.*;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -21,6 +22,7 @@ public class AllureBasicFileStep extends BasicUtils {
     private String fileName;
     private String fileExtension;
     private String filePath;
+    private TestDataFile testDataFile;
     private DataTable dataTable;
 
     public AllureBasicFileStep(String fileDir, String fileName) {
@@ -41,6 +43,18 @@ public class AllureBasicFileStep extends BasicUtils {
         this.fileExtension = testDataFile.getFileExtension();
         this.filePath = testDataFile.getFilePath();
         this.fileDir = filePath.replace(fileName, "");
+    }
+
+    public AllureBasicFileStep(DataTable dataTable) {
+        Map<String, String> dataMap = new LinkedHashMap<>();
+        dataTable.asMaps().forEach(row -> dataMap.put(row.get("Параметр"), row.get("Значение")));
+        this.fileName = TestDataUtils.get(dataMap, "название");
+        this.fileDir = TestDataUtils.get(dataMap, "директория");
+        LinkedHashMap<String, String> testDataMap = new LinkedHashMap<>();
+        this.filePath = String.format("%s/%s", fileDir, fileName);
+        testDataMap.put("путь", filePath);
+        this.testDataFile = new TestDataFile(fileName, testDataMap);
+        scenarioData().put(fileName, testDataFile);
     }
 
     @Step("нажать на '{buttonName}' и скачать файл '{this.fileName}'")
@@ -72,6 +86,12 @@ public class AllureBasicFileStep extends BasicUtils {
 
     @Step("сохранить значение параметра {parameterName} в файл {fileName}")
     public void writeValueToFile(String parameterName, String fileName) {
+        FileUtils.writeFile(filePath, scenarioData().get(parameterName));
+        TauLogger.report("Файл '%s' создан", filePath);
+    }
+
+    @Step("сохранить значение параметра {parameterName} в файл:")
+    public void writeValueToFile(String parameterName) {
         FileUtils.writeFile(filePath, scenarioData().get(parameterName));
         TauLogger.report("Файл '%s' создан", filePath);
     }
@@ -154,6 +174,39 @@ public class AllureBasicFileStep extends BasicUtils {
             TauLogger.report("Файл '%s' переименован в '%s'", fileName, fileNewName);
         } else {
             TauLogger.fail("Не удалось переименовать файл '%s' в '%s'", fileName, fileNewName);
+        }
+    }
+
+    @Step("проверить содержимое файла '{this.fileName}' на соответствие эталону")
+    public void validate(DataTable dataTable) {
+        TauLogger.attachDataTable("Параметры проверки", dataTable);
+        String nameSpace = "Проверка содержимого файла";
+        scenarioData().put(dataTable, nameSpace);
+        String standardFileParameterName = scenarioData().get(nameSpace, "эталон");
+        TestDataFile standardFileData = scenarioData().get(standardFileParameterName);
+        String testContent = FileUtils.readFile(filePath);
+        String standardContent = eval(FileUtils.readFile(standardFileData.getFilePath()));
+        String tempFilePath = String.format("%s/%s", eval("${SCENARIO_TEMP_DIR}"), standardFileData.getFileName());
+        FileUtils.writeFile(tempFilePath, standardContent);
+        TauLogger.attachFile(fileName, filePath);
+        TauLogger.attachFile(standardFileData.getFileName(), tempFilePath);
+
+        if (!testContent.equals(standardContent)) {
+            scenarioData().put("pageNumber", "1");
+            scenarioData().put("ignoredZonesData", "");
+            BufferedImage testTextImage = ImageUtils.textToImage(testContent, standardContent);
+            BufferedImage standardTextImage = ImageUtils.textToImage(standardContent, testContent);
+            BufferedImage differencesImage = ImageUtils.getDifferencesImage(testTextImage, standardTextImage);
+            String attachment = ImageUtils.getCompareResult(
+                    testTextImage,
+                    standardTextImage,
+                    differencesImage);
+            Runnable runnable = () -> {
+                TauLogger.attachFile("Различия содержимого файлов", attachment.getBytes());
+            };
+            TauLogger.fail(runnable, "Содержимое файла '%s' не соответствует ожидаемому", fileName);
+        } else {
+            TauLogger.console("Содержимое файла '%s' соответствует эталону");
         }
     }
 }
