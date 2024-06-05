@@ -179,7 +179,6 @@ public class AllureBasicFileStep extends BasicUtils {
 
     @Step("проверить содержимое файла '{this.fileName}' на соответствие эталону")
     public void validate(DataTable dataTable) {
-        TauLogger.attachDataTable("Параметры проверки", dataTable);
         String nameSpace = "Проверка содержимого файла";
         scenarioData().put(dataTable, nameSpace);
         String standardFileParameterName = scenarioData().get(nameSpace, "эталон");
