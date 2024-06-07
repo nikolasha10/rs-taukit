@@ -32,8 +32,11 @@ public class TestRunner {
     public Object[][] getScenarioByTags() {
         List<CucumberScenario> scenarios = new ArrayList<>(storage.getScenarioList().get().stream().filter(Objects::nonNull).toList());
         if (scenarios.isEmpty()) {
+            TauLogger.console("scenarios.isEmpty()");
             if (storage.isTestsFinished()) {
+                TauLogger.console("storage.isTestsFinished()");
                 if (Config.getBooleanProperty("generateFinalReport")) {
+                    TauLogger.console("generateFinalReport: %s", Config.getBooleanProperty("generateFinalReport"));
                     scenarios.addAll(findScenariosByTags("@finalReport"));
                 }
                 List<String> excludedScenarios = findScenariosByTags("@disabled").stream()
