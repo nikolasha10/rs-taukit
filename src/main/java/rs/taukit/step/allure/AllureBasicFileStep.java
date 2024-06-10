@@ -200,12 +200,10 @@ public class AllureBasicFileStep extends BasicUtils {
                     testTextImage,
                     standardTextImage,
                     differencesImage);
-            Runnable runnable = () -> {
-                TauLogger.attachFile("Различия содержимого файлов", attachment.getBytes());
-            };
+            Runnable runnable = () -> TauLogger.attachFile("Различия содержимого файлов", attachment.getBytes());
             TauLogger.fail(runnable, "Содержимое файла '%s' не соответствует ожидаемому", fileName);
         } else {
-            TauLogger.console("Содержимое файла '%s' соответствует эталону");
+            TauLogger.console("Содержимое файла '%s' соответствует эталону", fileName);
         }
     }
 }
