@@ -236,7 +236,9 @@ public class AllureBasicStep extends BasicUtils {
 
     @Step("сгенерировать guid и сохранить его, как '{parameterName}'")
     public static void generateGuid(String parameterName) {
-        scenarioData().put(parameterName, UUID.randomUUID());
+        Runnable runnable = () -> scenarioData().put(parameterName, UUID.randomUUID());
+        scenarioStorage().saveStepAction(runnable);
+        runnable.run();
         TauLogger.report("%s: %s", parameterName, scenarioData().get(parameterName));
     }
 

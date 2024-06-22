@@ -212,14 +212,8 @@ public class FileUtils {
     }
 
     public static String getTestFilePath(String filePath) {
-        if (filePath == null) {
-            return null;
-        }
-        File file = new File(filePath);
-        if (!file.exists()) {
-            File featureDir = new File(scenario().getPickleWrapper().getPickle().getUri().getPath()).getParentFile();
-            file = new File(featureDir.getPath(), filePath);
-        }
+        String fullPath = Config.getProperty("dir.resources") + "files/" + filePath;
+        File file = new File(fullPath);
         return file.getPath();
     }
 

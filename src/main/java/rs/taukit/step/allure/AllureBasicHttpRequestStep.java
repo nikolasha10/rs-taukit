@@ -11,7 +11,6 @@ import rs.taukit.records.ApiResponse;
 import rs.taukit.testdata.TestData;
 import rs.taukit.utils.*;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -54,17 +53,15 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         String requestUrl = requestParametersMap.getOrDefault("url", createPostUrl().toString());
         List<List<String>> parameters = new ArrayList<>(dataTable.asLists());
         String content;
-        if (requestParametersMap.containsKey("content")) {
+        if (requestParametersMap.containsKey("content") && !requestParametersMap.get("content").equalsIgnoreCase("null")) {
             content = requestParametersMap.get("content");
-        } else {
-            String jsonFileName = requestParametersMap.getOrDefault("jsonFileName", name);
+        } else if (requestParametersMap.containsKey("filePath")) {
+            String filePath = requestParametersMap.get("filePath");
+            String fullPath = Config.getProperty("dir.resources") + "files/" + filePath;
             parameters.add(1, Arrays.asList("requestURL", requestUrl));
-            String fullPath = Config.getProperty("json.files.dir") + jsonFileName + ".json";
-            File file = new File(fullPath);
-            if (!file.exists()) {
-                fullPath = TestDataUtils.get(requestParametersMap, "filePath");
-            }
             content = eval(FileUtils.readFile(fullPath));
+        } else {
+            throw new RuntimeException("Отсутствует один из обязательных параметров шага (content или filePath)");
         }
         DataTable modified = DataTable.create(parameters, TextUtils.tableConverter);
         TauLogger.attachDataTable("Параметры запроса", modified);
@@ -101,7 +98,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         testDataAtomicReference.get().getAttachments().forEach(TauLogger::attach);
     }
 
-    private Runnable getRunnableSendPost(Map<String, String> requestParametersMap, String requestUrl, String content){
+    private Runnable getRunnableSendPost(Map<String, String> requestParametersMap, String requestUrl, String content) {
         Runnable runnable = () -> {
             AtomicInteger status = new AtomicInteger();
             try {
@@ -138,6 +135,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         runnable.run();
         return runnable;
     }
+
     private Runnable getRunnableSendGet(String uriString, AtomicReference<ApiResponse> responseAtomicReference, AtomicReference<TestData> testDataAtomicReference) {
         Runnable runnable = () -> {
             int status = 0;

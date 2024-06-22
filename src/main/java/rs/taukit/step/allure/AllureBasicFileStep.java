@@ -181,14 +181,18 @@ public class AllureBasicFileStep extends BasicUtils {
     public void validate(DataTable dataTable) {
         String nameSpace = "Проверка содержимого файла";
         scenarioData().put(dataTable, nameSpace);
-        String standardFileParameterName = scenarioData().get(nameSpace, "эталон");
-        TestDataFile standardFileData = scenarioData().get(standardFileParameterName);
+        String standardFileRelativePath = scenarioData().get(nameSpace, "эталон");
+        String standardFilePath = FileUtils.getTestFilePath(standardFileRelativePath);
+        File standardFile = new File(standardFilePath);
+        if (!standardFile.exists()){
+            throw new RuntimeException(String.format("Не удалось найти файл %s", standardFilePath));
+        }
         String testContent = FileUtils.readFile(filePath);
-        String standardContent = eval(FileUtils.readFile(standardFileData.getFilePath()));
-        String tempFilePath = String.format("%s/%s", eval("${SCENARIO_TEMP_DIR}"), standardFileData.getFileName());
+        String standardContent = eval(FileUtils.readFile(standardFilePath));
+        String tempFilePath = String.format("%s/%s", eval("${SCENARIO_TEMP_DIR}"), standardFile.getName());
         FileUtils.writeFile(tempFilePath, standardContent);
         TauLogger.attachFile(fileName, filePath);
-        TauLogger.attachFile(standardFileData.getFileName(), tempFilePath);
+        TauLogger.attachFile(standardFile.getName(), tempFilePath);
 
         if (!testContent.equals(standardContent)) {
             scenarioData().put("pageNumber", "1");
