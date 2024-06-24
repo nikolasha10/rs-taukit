@@ -212,7 +212,7 @@ public class FileUtils {
     }
 
     public static String getTestFilePath(String filePath) {
-        String fullPath = Config.getProperty("dir.resources") + "files/" + filePath;
+        String fullPath = Config.getProperty("baseResourcesDir") + "files/" + filePath;
         File file = new File(fullPath);
         return file.getPath();
     }

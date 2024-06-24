@@ -57,7 +57,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             content = requestParametersMap.get("content");
         } else if (requestParametersMap.containsKey("filePath")) {
             String filePath = requestParametersMap.get("filePath");
-            String fullPath = Config.getProperty("dir.resources") + "files/" + filePath;
+            String fullPath = Config.getProperty("baseResourcesDir") + "files/" + filePath;
             parameters.add(1, Arrays.asList("requestURL", requestUrl));
             content = eval(FileUtils.readFile(fullPath));
         } else {
