@@ -47,7 +47,7 @@ public class AllureBasicDataBaseStep extends BasicUtils {
                 } catch (SQLException ignored) {
                     // ignored
                 }
-                scenarioData().put(parameterName, fieldValue);
+                scenarioData().put(parameterName, String.valueOf(fieldValue));
                 resultList.add(Arrays.asList(fieldName, fieldValue, parameterName));
             });
         };
