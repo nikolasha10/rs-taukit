@@ -104,9 +104,16 @@ public class CucumberBasicFileStep {
         TestDataFile testDataFile = scenarioData().get(fileParameterName);
         fileStep(testDataFile).rename(eval(fileNewName));
     }
+
     @И("^проверить содержимое файла \"(.+)\" на соответствие эталону:$")
     public void validateFile(String fileParameterName, DataTable dataTable) {
         TestDataFile testDataFile = scenarioData().get(fileParameterName);
         new AllureBasicFileStep(testDataFile).validate(eval(dataTable));
+    }
+
+    @И("^проверить валидность файла \"(.+)\" по xsd-схеме \"(.+)\"$")
+    public void validateXmlByXsd(String xmlFileName, String xsdFileName) {
+        String fileDir = eval("${SCENARIO_TEMP_DIR}");
+        new AllureBasicFileStep(fileDir, xmlFileName).validateByXsd(eval(xsdFileName));
     }
 }

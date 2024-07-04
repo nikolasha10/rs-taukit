@@ -2,11 +2,19 @@ package rs.taukit.step.allure;
 
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
+import org.xml.sax.SAXException;
+import rs.taukit.config.Config;
 import rs.taukit.element.interfaces.IHasAttachment;
 import rs.taukit.element.interfaces.IHasDownloadableFile;
 import rs.taukit.testdata.TestDataFile;
 import rs.taukit.utils.*;
 
+import javax.xml.XMLConstants;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -209,5 +217,25 @@ public class AllureBasicFileStep extends BasicUtils {
         } else {
             TauLogger.console("Содержимое файла '%s' соответствует эталону", fileName);
         }
+    }
+
+    @Step("проверить валидность файла '{this.fileName}' по xsd-схеме '{xsdFileName}'")
+    public void validateByXsd(String xsdFileName) {
+        String xsdFilesDir = Config.getProperty("xsd.files.dir");
+        File schemaFile = new File(xsdFilesDir, xsdFileName);
+        TauLogger.attachFile(fileName, filePath);
+        TauLogger.attachFile(xsdFileName, schemaFile.getPath());
+        Source xmlFile = new StreamSource(new File(filePath));
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        try {
+            Schema schema = schemaFactory.newSchema(schemaFile);
+            Validator validator = schema.newValidator();
+            validator.validate(xmlFile);
+        } catch (SAXException e){
+            TauLogger.fail(e, "Файл '%s' не прошёл валидацию по схеме '%s'", fileName, xsdFileName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        TauLogger.report("Файл валиден");
     }
 }

@@ -1,9 +1,11 @@
 package rs.taukit.utils;
 
+import io.cucumber.datatable.DataTable;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.exceptions.PageFileNotFoundException;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,4 +29,9 @@ public class TestDataUtils {
         }
     }
 
+    public static Map<String, String> transform(DataTable dataTable, String keyField, String valueField) {
+        Map<String, String> dataMap = new HashMap<>();
+        dataTable.asMaps().forEach(row -> dataMap.put(row.get(keyField), row.get(valueField)));
+        return dataMap;
+    }
 }

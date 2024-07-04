@@ -146,6 +146,7 @@ public class CucumberBasicStep {
     public void base64Decoding(String value, String parameterName) {
         AllureBasicStep.base64Decoding(eval(value), parameterName);
     }
+
     @И("^декодировать значения из base64 и сохранить в параметры:$")
     public void base64Decoding(DataTable dataTable) {
         AllureBasicStep.base64Decoding(eval(dataTable));
@@ -159,6 +160,11 @@ public class CucumberBasicStep {
     @И("^разобрать значение параметра \"(.+)\", сохранив значения в параметрах:$")
     public void parseResponseResult(String parameterName, DataTable dataTable) {
         AllureBasicStep.parseParameterValue(parameterName, eval(dataTable));
+    }
+
+    @И("^преобразовать значение даты \"(.+)\" в другой формат и сохранить, как \"(.+)\":$")
+    public void convertDateTimeFormat(String dateTimeString, String parameterName, DataTable dataTable) {
+        AllureBasicStep.convertDateTimeFormat(eval(dateTimeString), parameterName, eval(dataTable));
     }
 
 }

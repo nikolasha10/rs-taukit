@@ -9,6 +9,8 @@ import rs.taukit.utils.*;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +45,13 @@ public class AllureBasicDataBaseStep extends BasicUtils {
                 String parameterName = TestDataUtils.get(map, "Параметр");
                 String fieldValue = "null";
                 try {
-                    fieldValue = resultSet.getString(fieldName);
+                    Object object = resultSet.getObject(fieldName);
+                    if (object instanceof Timestamp) {
+                        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                        fieldValue = ((Timestamp) object).toLocalDateTime().format(df);
+                    } else {
+                        fieldValue = resultSet.getString(fieldName);
+                    }
                 } catch (SQLException ignored) {
                     // ignored
                 }

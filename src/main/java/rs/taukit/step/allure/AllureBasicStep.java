@@ -10,6 +10,7 @@ import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.utils.*;
 
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 
@@ -321,4 +322,19 @@ public class AllureBasicStep extends BasicUtils {
         return runnable;
     }
 
+    @Step("преобразовать дату '{dateTimeString}' в другой формат:")
+    public static void convertDateTimeFormat(String dateTimeString, String parameterName, DataTable dataTable) {
+        Map<String, String> dataMap = TestDataUtils.transform(dataTable, "Параметр", "Значение");
+        String initialPattern = TestDataUtils.get(dataMap, "исходный формат");
+        String requiredPattern = TestDataUtils.get(dataMap, "требуемый формат");
+        SimpleDateFormat initialDateFormat = new SimpleDateFormat(initialPattern, Locale.forLanguageTag("ru"));
+        SimpleDateFormat requiredDateFormat = new SimpleDateFormat(requiredPattern, Locale.forLanguageTag("ru"));
+        try {
+            Date dateTime = initialDateFormat.parse(dateTimeString);
+            scenarioData().put(parameterName, requiredDateFormat.format(dateTime));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        TauLogger.console("дата '%s' преобразована в '%s'", dateTimeString, scenarioData().get(parameterName));
+    }
 }
