@@ -6,7 +6,6 @@ import rs.taukit.driver.IWebBrowser;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasBlockElements;
-import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.PageStorage;
 import rs.taukit.scenario.CucumberScenario;
@@ -16,7 +15,6 @@ import rs.taukit.testdata.ScenarioData;
 import rs.taukit.testdata.TestData;
 import rs.taukit.testdata.TestDataFile;
 
-import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,13 +77,12 @@ public class BasicUtils {
     public static String eval(String template) {
         ScenarioData scenarioData = scenarioStorage().getScenarioData();
         if (scenarioData == null) return template;
-        String evalResult = scenarioData.evalObjectField(template);
-        return scenarioData.evalString(evalResult);
+        String evalResult = storage.evalObjectField(template);
+        return storage.evalString(evalResult);
     }
 
     public static <T> T evalObject(String template) {
-        ScenarioData scenarioData = scenarioStorage().getScenarioData();
-        return scenarioData.evalObject(template);
+        return storage.evalObject(template);
     }
 
     /**
@@ -98,19 +95,18 @@ public class BasicUtils {
         if (scenarioStorage().getScenarioData() == null) {
             scenarioStorage().setScenarioData(new ScenarioData(scenarioStorage().getPickle()));
         }
-        ScenarioData scenarioData = scenarioStorage().getScenarioData();
         Function<String, String> eval = (template) -> {
             if (template == null) return null;
             String format = "\\$\\{(.+?)} -> (.+)";
             Matcher matcher = Pattern.compile(format).matcher(template);
             if (matcher.matches()) {
-                if (scenarioData.evalObject(template) instanceof TestDataFile) {
+                if (storage.evalObject(template) instanceof TestDataFile) {
                     return template;
                 } else {
-                    return scenarioData.evalObjectField(template);
+                    return storage.evalObjectField(template);
                 }
             } else {
-                return scenarioData.evalString(template);
+                return storage.evalString(template);
             }
         };
         return DataTable.create(dataTable.asLists().stream()
@@ -118,15 +114,5 @@ public class BasicUtils {
                         .map(eval)
                         .collect(Collectors.toList()))
                 .collect(Collectors.toList()), TextUtils.tableConverter);
-    }
-
-    public static void checkDataHeaders(DataTable dataTable, String expectedHeaders) {
-        Map<String, String> dataRow = dataTable.asMaps().get(0);
-        String dataTableHeaders = String.format("| %s |", String.join(" | ", dataRow.keySet()));
-        if (!expectedHeaders.equals(dataTableHeaders)) {
-            String message = String.format("Заголовки таблицы данных не соответствуют ожидаемым:%nОжидались: %s%nПереданы:  %s",
-                    expectedHeaders, dataTableHeaders);
-            throw new DataTableFormatMismatchException(message);
-        }
     }
 }

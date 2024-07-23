@@ -6,16 +6,21 @@ import lombok.Getter;
 import lombok.Setter;
 import rs.taukit.exceptions.ScenarioNotFoundException;
 import rs.taukit.scenario.CucumberScenario;
+import rs.taukit.testdata.DataStorage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static rs.taukit.utils.BasicUtils.scenarioData;
 
 public class Storage {
     private final ThreadLocal<CucumberScenario> scenarioThreadLocal = new ThreadLocal<>();
     @Getter
     private final AtomicReference<List<CucumberScenario>> scenarioList = new AtomicReference<>(new ArrayList<>());
-
+    private final DataStorage dataStorage = new DataStorage(new HashMap<>());
     @Setter
     @Getter
     private boolean testsFinished = false;
@@ -49,10 +54,38 @@ public class Storage {
         return scenario;
     }
 
-    public void remove(PickleWrapper pickleWrapper, FeatureWrapper featureWrapper) {
-        List<CucumberScenario> tempList = scenarioList.get();
-        tempList.removeIf(scenario -> scenario.hasEqualName(pickleWrapper, featureWrapper));
-        scenarioList.set(tempList);
+    public <T> T get(String key) {
+        Optional<T> optional = scenarioData().get(key);
+        return optional.orElse(dataStorage.get(key));
+    }
+
+    public void put(String key, Object value) {
+        dataStorage.put(key, value);
+    }
+
+
+    public String evalObjectField(String template) {
+        try {
+            return scenarioData().evalObjectField(template);
+        } catch (Exception ignored) {
+            return dataStorage.evalObjectField(template);
+        }
+    }
+
+    public <T> T evalObject(String template) {
+        try {
+            return scenarioData().evalObject(template);
+        } catch (Exception ignored) {
+            return dataStorage.evalObject(template);
+        }
+    }
+
+    public String evalString(String template) {
+        try {
+            return scenarioData().evalString(template);
+        } catch (Exception ignored) {
+            return dataStorage.evalString(template);
+        }
     }
 
     private static class StorageManagerHolder {

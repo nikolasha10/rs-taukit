@@ -225,6 +225,7 @@ public class AllureBasicStep extends BasicUtils {
             try {
                 value = eval(TestDataUtils.get(data, "Значение"));
             } catch (TestDataException e) {
+                e.printStackTrace();
                 value = "null";
             }
             resultList.add(Arrays.asList(eval(TestDataUtils.get(data, "Параметр")), value));

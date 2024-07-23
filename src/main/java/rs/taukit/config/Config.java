@@ -3,6 +3,7 @@ package rs.taukit.config;
 import lombok.Getter;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 import rs.taukit.exceptions.TestDataException;
+import rs.taukit.testdata.TestData;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
@@ -12,13 +13,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static rs.taukit.utils.BasicUtils.storage;
 
 /**
  * Класс настроек фреймворка
@@ -44,6 +44,8 @@ public class Config {
         pageMapping = buildPageMapping(getProperty("pagesDirPath"));
         fragmentMapping = buildPageMapping(getProperty("pageFragmentsDirPath"));
         dependencies = new Dependencies(configDirPath + "/dependencies.yaml");
+        LinkedHashMap<String, ?> testDataMap = new LinkedHashMap<>(STAND.getStandData());
+        storage.put("Тестовый стенд", new TestData("StandData", testDataMap));
     }
 
     private static void setConfig(Properties properties, String filePath, boolean required) {

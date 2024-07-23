@@ -57,6 +57,10 @@ public class DataStorage {
         dataStorage.put(key, YamlParser.convert(value));
     }
 
+    public void remove(String key){
+        dataStorage.remove(key);
+    }
+
     public LinkedHashMap<String, Object> getAttachments(String tableName) {
         Map<String, Object> linkTableMap = new LinkedHashMap<>();
         List<List<String>> dataTable = new ArrayList<>();

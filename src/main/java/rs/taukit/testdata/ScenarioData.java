@@ -81,6 +81,9 @@ public class ScenarioData {
         return nameSpaces.get(nameSpace).get(fieldName);
     }
 
+    public void remove(String key){
+        dataStorage.remove(key);
+    }
     public <T> T getOptional(String fieldName) {
         return dataStorage.getOptional(fieldName);
     }
