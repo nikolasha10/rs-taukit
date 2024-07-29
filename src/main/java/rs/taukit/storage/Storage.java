@@ -83,8 +83,12 @@ public class Storage {
     public String evalString(String template) {
         try {
             return scenarioData().evalString(template);
-        } catch (Exception ignored) {
-            return dataStorage.evalString(template);
+        } catch (Exception e) {
+            try {
+                return dataStorage.evalString(template);
+            } catch (Exception ignored) {
+                throw e;
+            }
         }
     }
 
