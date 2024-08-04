@@ -117,7 +117,8 @@ public class DataStorage {
         try {
             return matcher.replaceFirst(matchResult -> {
                 TestData workData = get(matchResult.group(1));
-                Object object = workData.getDataStorage().get(matchResult.group(2));
+                Object object = workData.getDataStorage().getOptional(matchResult.group(2));
+                if (object == null) return "null";
                 if (object instanceof ITestData testData) {
                     return testData.getStringValue();
                 } else return object.toString();
