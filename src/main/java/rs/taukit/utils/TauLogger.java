@@ -244,6 +244,28 @@ public final class TauLogger {
     }
 
     /**
+     * Выводит сообщение о непредвиденной ошибке (ошибке реализации теста)
+     */
+    @Step("{0}")
+    public static void error(String message) {
+        throw new RuntimeException(message);
+    }
+
+    @Step("{0}")
+    public static void error(String message, Throwable e) {
+        throw new RuntimeException(message, e);
+    }
+
+    public static void error(Throwable e, String format, Object... args) {
+        String message = String.format(format, args);
+        error(message, e);
+    }
+
+    public static void error(String format, Object... args) {
+        error(String.format(format, args));
+    }
+
+    /**
      * Задаёт значение параметра <b>logName</b> для логгера (см. файл logback.xml),
      * который определяет путь к файлу текущего лога
      *

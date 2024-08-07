@@ -178,10 +178,15 @@ public class AllureBasicFileStep extends BasicUtils {
     public void rename(String fileNewName) {
         File file = new File(filePath);
         File newFile = new File(fileDir, fileNewName);
-        if (file.renameTo(newFile)) {
-            TauLogger.report("Файл '%s' переименован в '%s'", fileName, fileNewName);
+        int i = 1;
+        while (newFile.exists()){
+            String tempName = String.format("%s_%d", fileNewName, i++);
+            newFile = new File(tempName);
+        }
+        if (file.renameTo(newFile)){
+            TauLogger.report("Файл '%s' переименован в '%s'", fileName, newFile.getName());
         } else {
-            TauLogger.fail("Не удалось переименовать файл '%s' в '%s'", fileName, fileNewName);
+            TauLogger.error("Не удалось переименовать файл '%s' в '%s'", fileName, newFile.getName());
         }
     }
 
