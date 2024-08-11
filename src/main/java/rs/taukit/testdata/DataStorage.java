@@ -19,8 +19,8 @@ public class DataStorage {
     public DataStorage(String featureFilePath, Map<String, ?> data) {
         File featureFile = new File(featureFilePath);
         String featureDirPath = featureFile.getParent();
-        if (featureDirPath != null){
-            String featureDir = featureDirPath.replaceAll("\\\\","/");
+        if (featureDirPath != null) {
+            String featureDir = featureDirPath.replaceAll("\\\\", "/");
             dataStorage.putIfAbsent("FEATURE_DIR", YamlParser.convert(featureDir));
         }
 
@@ -32,6 +32,8 @@ public class DataStorage {
                         ? new TestData(fieldName, new LinkedHashMap<>(fieldData), featureDirPath)
                         : TestDataField.getField(fieldType, fieldName, fieldValue, featureDirPath);
                 this.dataStorage.put(fieldName, YamlParser.convert(testData));
+            } else if (fieldValue instanceof List) {
+                this.dataStorage.put(fieldName, YamlParser.convert(fieldValue));
             } else if (fieldValue instanceof String) {
                 String value = evalString(Config.eval(YamlParser.convert(fieldValue)));
                 this.dataStorage.put(fieldName, YamlParser.convert(value));
@@ -57,7 +59,7 @@ public class DataStorage {
         dataStorage.put(key, YamlParser.convert(value));
     }
 
-    public void remove(String key){
+    public void remove(String key) {
         dataStorage.remove(key);
     }
 

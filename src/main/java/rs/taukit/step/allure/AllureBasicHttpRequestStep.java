@@ -151,7 +151,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
                     LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
                     TestData testData = new TestData(this.name + "_response", responseMap);
                     testDataAtomicReference.set(testData);
-                    responseMap.forEach((key, value) -> scenarioData().put(key, testData.get(key)));
+                    responseMap.forEach((key, value) -> scenarioData().put(key, testData.getOptional(key)));
                 } else {
                     throw new RuntimeException(String.format("Сервер вернул статус %d (%s)",
                             response.status(), response.statusText()));
@@ -214,6 +214,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
                 }
             } catch (JsonProcessingException ignored) {
                 // ignored
+                TauLogger.console("ignored 1");
             }
             return resultMap;
         }
@@ -222,6 +223,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             resultMap = YamlParser.convert(jsonMapper.readValue(responseBody, resultMap.getClass()));
         } catch (JsonProcessingException ignored) {
             // ignored
+            TauLogger.console("ignored 2");
         }
         return new LinkedHashMap<>(resultMap);
     }
