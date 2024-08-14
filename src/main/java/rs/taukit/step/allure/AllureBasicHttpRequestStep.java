@@ -115,19 +115,13 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
                 scenarioData().put(responseStatusParameterName, String.valueOf(response.status()));
                 scenarioData().put(parameterName, response.text());
                 status.set(response.status());
-                if (response.ok()) {
-                    LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
-                    TestData testData = new TestData(this.name + "_response", responseMap);
-                    responseMap.forEach((key, value) -> scenarioData().put(key, testData.getOptional(key)));
-                    String statusText = response.statusText().isEmpty() ? "" : String.format("(%s)", response.statusText());
-                    TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d %s", name, response.status(), statusText);
-                    TauLogger.attach("Тело ответа", response.text());
-                    testData.getAttachments().forEach(TauLogger::attach);
-                } else {
-                    throw new RuntimeException(String.format(
-                            "Не удалось отправить POST-запрос \"%s\". Сервер вернул статус %d (%s)",
-                            name, response.status(), response.statusText()));
-                }
+                LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
+                TestData testData = new TestData(this.name + "_response", responseMap);
+                responseMap.forEach((key, value) -> scenarioData().put(key, testData.getOptional(key)));
+                String statusText = response.statusText().isEmpty() ? "" : String.format("(%s)", response.statusText());
+                TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d %s", name, response.status(), statusText);
+                TauLogger.attach("Тело ответа", response.text());
+                testData.getAttachments().forEach(TauLogger::attach);
             } catch (Exception e) {
                 throw new HttpRequestNotSentException(e, name, "POST", status.get());
             }
