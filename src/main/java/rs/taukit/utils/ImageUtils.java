@@ -122,7 +122,7 @@ public class ImageUtils {
         List<String> comparedLines = comparedText.lines().toList();
         List<String> allLines = new ArrayList<>(comparedLines);
         allLines.addAll(comparedLines);
-        String longerString = allLines.stream().max(Comparator.comparingInt(String::length)).get();
+        String longerString = allLines.stream().max(Comparator.comparingInt(String::length)).orElse("");
         int maxLineNumber = Math.max(convertedLines.size(), comparedLines.size());
         BufferedImage img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = img.createGraphics();

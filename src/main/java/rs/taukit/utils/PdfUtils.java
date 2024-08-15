@@ -318,7 +318,11 @@ public class PdfUtils {
         Map<String, List<Map<String, Integer>>> ignoredZones = new HashMap<>();
         if (ignoredZonesParameterName != null) {
             TestDataFile ignoredZonesFileData = scenarioData().get(ignoredZonesParameterName);
-            ignoredZones = YamlParser.parse(ignoredZonesFileData.getFilePath());
+            try {
+                ignoredZones = YamlParser.parse(ignoredZonesFileData.getFilePath());
+            } catch (Exception ignored){
+                TauLogger.console("Не удалось обработать файл '%s'", ignoredZonesFileData.getFilePath());
+            }
         }
         List<ImageDifferences> images = new ArrayList<>();
 
