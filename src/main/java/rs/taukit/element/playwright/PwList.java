@@ -11,6 +11,7 @@ import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.element.interfaces.IHasListItems;
 import rs.taukit.page.playwright.ElementBuilder;
 import rs.taukit.records.CheckedElement;
+import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 
 import java.util.LinkedHashMap;
@@ -83,7 +84,12 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
     }
 
     public List<String> getValues() {
-        return getItemList().stream().filter(PwElement::isVisible).map(PwElement::getText).collect(Collectors.toList());
+        List<String> values = getItemList().stream()
+                .filter(PwElement::isVisible)
+                .map(PwElement::getText)
+                .collect(Collectors.toList());
+        TauLogger.console("values: %s", values);
+        return values;
     }
 
     public PwElement get(int itemIndex) {
