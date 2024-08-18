@@ -118,6 +118,10 @@ public class DataStorage {
         Matcher matcher = Pattern.compile(format).matcher(template);
         try {
             return matcher.replaceFirst(matchResult -> {
+                String workDataName = matcher.group(1);
+                if (workDataName.equals("System properties")) {
+                    return YamlParser.convert(System.getProperty(matcher.group(2)));
+                }
                 TestData workData = get(matchResult.group(1));
                 Object object = workData.getDataStorage().getOptional(matchResult.group(2));
                 if (object == null) return "null";
@@ -138,7 +142,11 @@ public class DataStorage {
             if (!matcher.matches()) {
                 throw new TestDataException("Ключ \"%s\" не соответствует формату \"%s\"", template, format);
             }
-            TestData workData = get(matcher.group(1));
+            String workDataName = matcher.group(1);
+            if (workDataName.equals("System properties")) {
+                return YamlParser.convert(System.getProperty(matcher.group(2)));
+            }
+            TestData workData = get(workDataName);
             return workData.getDataStorage().get(matcher.group(2));
         } catch (Exception e) {
             String message = String.format("Не удалось вычислить значение параметра \"%s\"", template);
