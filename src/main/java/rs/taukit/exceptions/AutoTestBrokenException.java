@@ -1,6 +1,6 @@
 package rs.taukit.exceptions;
 
-public abstract class AutoTestBrokenException extends RuntimeException {
+public class AutoTestBrokenException extends RuntimeException {
     public AutoTestBrokenException() {
         super();
     }

@@ -9,6 +9,7 @@ import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.element.interfaces.IHasListItems;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.page.playwright.ElementBuilder;
 import rs.taukit.records.CheckedElement;
 import rs.taukit.utils.TauLogger;
@@ -16,6 +17,7 @@ import rs.taukit.utils.TestDataUtils;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -50,9 +52,9 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
 
     @Override
     public void setValue(String value) {
+        double timeout = Config.getTimeProperty("element.check.interval");
+        BooleanSupplier condition = () -> getValues().stream().anyMatch(itemValue -> itemValue.contains(value));
         try {
-            BooleanSupplier condition = () -> getValues().stream().anyMatch(itemValue -> itemValue.contains(value));
-            double timeout = Config.getTimeProperty("element.check.interval");
             driver.waitForCondition(condition, timeout);
         } catch (Exception e) {
             throw valueNotFoundException(value).get();
@@ -84,12 +86,27 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
     }
 
     public List<String> getValues() {
-        List<String> values = getItemList().stream()
-                .filter(PwElement::isVisible)
-                .map(PwElement::getText)
-                .collect(Collectors.toList());
+        AtomicReference<List<String>> values = new AtomicReference<>();
+        AtomicReference<Exception> ex = new AtomicReference<>();
+        BooleanSupplier condition = () -> {
+            try {
+                values.set(getItemList().stream()
+                        .filter(PwElement::isVisible)
+                        .map(PwElement::getText)
+                        .collect(Collectors.toList()));
+                return true;
+            } catch (Exception e){
+                ex.set(e);
+                return false;
+            }
+        };
+        try {
+            driver.waitForCondition(condition, Config.getTimeProperty("searchValueTimeout"));
+        } catch (Exception e){
+            throw valuesNotFoundException(ex.get()).get();
+        }
         TauLogger.console("values: %s", values);
-        return values;
+        return values.get();
     }
 
     public PwElement get(int itemIndex) {
@@ -127,10 +144,15 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
                 value, elementName, page().getPageName(), getValues()));
     }
 
-    private Supplier<RuntimeException> itemNotFoundException(String itemType, Throwable cause) {
-        return () -> new RuntimeException(String.format(
+    private Supplier<AutoTestBrokenException> valuesNotFoundException(Exception e) {
+        return () -> new AutoTestBrokenException(e, "Не удалось получить значения списка '%s' на странице '%s'",
+                elementName, page().getPageName());
+    }
+
+    private Supplier<AutoTestBrokenException> itemNotFoundException(String itemType, Throwable cause) {
+        return () -> new AutoTestBrokenException(cause,
                 "Не удалось найти %s, соответствующий заданным условиям, в списке '%s' на странице '%s'",
-                itemType, elementName, page().getPageName()), cause);
+                itemType, elementName, page().getPageName());
     }
 
 }
