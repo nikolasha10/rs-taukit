@@ -71,6 +71,9 @@ public class PlaywrightPageObject implements PageObject {
                 .setFullPage(true);
     }
 
+    public String getCurrentUrl(){
+        return page.url();
+    }
     public boolean isUrlCorrect() {
         return page.url().contains(pageControlUrl);
     }

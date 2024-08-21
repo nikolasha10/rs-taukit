@@ -290,9 +290,9 @@ public final class TauLogger {
     public static byte[] attachScreenshot(String name, byte[] imageData) {
         if (page() != null) {
             List<List<String>> data = new ArrayList<>();
-            data.add(Arrays.asList("url", page().getPageUrl()));
+            data.add(Arrays.asList("url", page().getCurrentUrl()));
             DataTable dataTable = DataTable.create(data, TextUtils.tableConverter);
-            attach(name, dataTable);
+            attach(name + " (информация)", dataTable);
         }
         return imageData;
     }
@@ -301,9 +301,12 @@ public final class TauLogger {
         if (driver().isBrowserOpen()) {
             List<byte[]> screenshotList = driver().getCurrentBrowser().takeScreenshots();
             IntStream.range(0, screenshotList.size())
-                    .forEach(index -> attachScreenshot(
-                            String.format("Вкладка %d. %s", index + 1, page().getPageName()),
-                            screenshotList.get(index)));
+                    .forEach(index -> {
+                        browser().setActiveTab(index);
+                        attachScreenshot(
+                                String.format("Вкладка %d. %s", index + 1, page().getPageName()),
+                                screenshotList.get(index));
+                    });
         }
     }
 

@@ -53,4 +53,6 @@ public interface PageObject {
     void setActive();
 
     void waitForPopupClose(String pageName);
+
+    String getCurrentUrl();
 }
