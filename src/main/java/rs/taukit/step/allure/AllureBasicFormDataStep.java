@@ -90,8 +90,12 @@ public class AllureBasicFormDataStep {
                     editableElement.setValue(value, control);
                 }
             } catch (Exception e) {
-                TauLogger.fail(e, "Не удалось заполнить поле \"%s\" в блоке \"%s\" (%d) значением \"%s\"",
-                        name, blockName, blockNumber, value);
+                String controlErrorMessage = control == null
+                        ? ""
+                        : String.format(". Текущее значение (%s) не совпадает с контрольным (%s) ",
+                        editableElement.getText(), control);
+                TauLogger.fail(e, "Не удалось заполнить поле \"%s\" в блоке \"%s\" (%d) значением \"%s\"%s",
+                        name, blockName, blockNumber, value, controlErrorMessage);
             }
         });
         if (blockNumber == 1) {
