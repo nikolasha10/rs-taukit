@@ -38,14 +38,15 @@ public class PwTextField extends PwElement implements IHasEditableValue {
 
     @Override
     public void setValue(String value, String controlValue) {
+        String controlValueFinal = controlValue.equals("=") ? value : controlValue;
         driver.waitForCondition(() -> {
             super.setValue(value);
             page().waitForTimeout(1000);
             String currentValue = elementPwLocator.inputValue();
-            if (!currentValue.equals(controlValue)) {
-                TauLogger.console("currentValue: %s, controlValue: %s", currentValue, controlValue);
+            if (!currentValue.equals(controlValueFinal)) {
+                TauLogger.console("currentValue: %s, controlValue: %s", currentValue, controlValueFinal);
             }
-            return currentValue.equals(controlValue);
+            return currentValue.equals(controlValueFinal);
         });
     }
 
