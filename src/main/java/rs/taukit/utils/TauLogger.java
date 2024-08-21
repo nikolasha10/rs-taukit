@@ -14,6 +14,7 @@ import rs.taukit.testdata.TestDataFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -165,7 +166,6 @@ public final class TauLogger {
      */
     @Step("{0}")
     public static void fail(String message) {
-//        attachPageSource();
         attachFullScreenshots();
         throw new AssertionError(message);
     }
@@ -288,6 +288,12 @@ public final class TauLogger {
 
     @Attachment(value = "{name}", type = "image/png")
     public static byte[] attachScreenshot(String name, byte[] imageData) {
+        if (page() != null) {
+            List<List<String>> data = new ArrayList<>();
+            data.add(Arrays.asList("url", page().getPageUrl()));
+            DataTable dataTable = DataTable.create(data, TextUtils.tableConverter);
+            attach(name, dataTable);
+        }
         return imageData;
     }
 
@@ -296,7 +302,7 @@ public final class TauLogger {
             List<byte[]> screenshotList = driver().getCurrentBrowser().takeScreenshots();
             IntStream.range(0, screenshotList.size())
                     .forEach(index -> attachScreenshot(
-                            String.format("Вкладка %d", index + 1),
+                            String.format("Вкладка %d. %s", index + 1, page().getPageName()),
                             screenshotList.get(index)));
         }
     }
