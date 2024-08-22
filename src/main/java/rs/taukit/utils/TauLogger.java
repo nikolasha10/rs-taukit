@@ -106,7 +106,7 @@ public final class TauLogger {
     public static void warn(String message) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
         scenarioData().put("WARNING", "PASSED with ERRORS");
-        attachFullScreenshots();
+        if (page() != null) attachFullScreenshots();
     }
 
     @Step("Некритическая ошибка: {message}")
@@ -154,7 +154,7 @@ public final class TauLogger {
     public static void warn(String message, Throwable e) {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
         scenarioData().put("WARNING", "PASSED with ERRORS");
-        attachFullScreenshots();
+        if (page() != null) attachFullScreenshots();
     }
 
     public static void warn(Throwable e, String format, Object... args) {
@@ -166,7 +166,7 @@ public final class TauLogger {
      */
     @Step("{0}")
     public static void fail(String message) {
-        attachFullScreenshots();
+        if (page() != null) attachFullScreenshots();
         throw new AssertionError(message);
     }
 
@@ -176,14 +176,14 @@ public final class TauLogger {
     @Step("{message}")
     public static void fail(String message, Throwable e) {
 //        attachPageSource();
-        attachFullScreenshots();
+        if (page() != null) attachFullScreenshots();
         throw new AssertionError(message, e);
     }
 
     @Step("{message}")
     public static void fail(Runnable runnable, String message) {
         runnable.run();
-        attachFullScreenshots();
+        if (page() != null) attachFullScreenshots();
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
             logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
             scenarioData().put("WARNING", "PASSED with ERRORS");
@@ -292,7 +292,7 @@ public final class TauLogger {
             List<List<String>> data = new ArrayList<>();
             data.add(Arrays.asList("url", page().getCurrentUrl()));
             DataTable dataTable = DataTable.create(data, TextUtils.tableConverter);
-            attach(name + " (информация)", dataTable);
+            attach("Информация: " + name, dataTable);
         }
         return imageData;
     }
@@ -304,7 +304,7 @@ public final class TauLogger {
                     .forEach(index -> {
                         browser().setActiveTab(index);
                         attachScreenshot(
-                                String.format("Вкладка %d. %s", index + 1, page().getPageName()),
+                                String.format("Снимок: Вкладка %d. %s", index + 1, page().getPageName()),
                                 screenshotList.get(index));
                     });
         }
