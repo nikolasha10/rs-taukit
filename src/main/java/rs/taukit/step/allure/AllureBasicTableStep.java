@@ -77,9 +77,14 @@ public class AllureBasicTableStep extends BasicUtils {
     @Step("в найденной строке нажать на '{elementName}'")
     public void clickOnElement(String elementName) {
         Runnable runnable = () -> tableElement.clickOnElement(elementName);
-        runnable.run();
-        scenarioStorage().saveStepAction(runnable);
-        TauLogger.report("Нажали на элемент \"%s\" в таблице \"%s\"", elementName, tableName);
+        try {
+            runnable.run();
+            scenarioStorage().saveStepAction(runnable);
+            TauLogger.report("Нажали на элемент \"%s\" в таблице \"%s\"", elementName, tableName);
+        } catch (Exception e) {
+            TauLogger.fail(e, "Не удалось нажать на элемент \"%s\" в таблице \"%s\" на странице \"%s\"",
+                    elementName, tableName, page().getPageName());
+        }
     }
 
     @Step("в таблице '{this.tableName}' дождаться строки, соответствующей условиям")
