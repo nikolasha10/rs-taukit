@@ -164,6 +164,7 @@ public class TestRunner {
         String[] tagList = tags.split(",\\s*");
         return Arrays.stream(runner.provideScenarios())
                 .filter(scenarioEntity -> Arrays.stream(tagList).anyMatch(tag -> hasTag(scenarioEntity, tag)))
+                .filter(scenarioEntity -> Arrays.stream(tagList).noneMatch(tag -> hasTag(scenarioEntity, "@disabled")))
                 .map(CucumberScenario::new)
                 .collect(Collectors.toList());
     }
