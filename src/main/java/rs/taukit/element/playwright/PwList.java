@@ -12,7 +12,6 @@ import rs.taukit.element.interfaces.IHasListItems;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.page.playwright.ElementBuilder;
 import rs.taukit.records.CheckedElement;
-import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 
 import java.util.LinkedHashMap;
@@ -95,17 +94,16 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
                         .map(PwElement::getText)
                         .collect(Collectors.toList()));
                 return true;
-            } catch (Exception e){
+            } catch (Exception e) {
                 ex.set(e);
                 return false;
             }
         };
         try {
             driver.waitForCondition(condition, Config.getTimeProperty("searchValueTimeout"));
-        } catch (Exception e){
+        } catch (Exception e) {
             throw valuesNotFoundException(ex.get()).get();
         }
-        TauLogger.console("values: %s", values);
         return values.get();
     }
 
