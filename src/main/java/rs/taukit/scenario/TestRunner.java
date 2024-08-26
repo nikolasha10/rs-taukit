@@ -37,11 +37,11 @@ public class TestRunner {
                     TauLogger.console("generateFinalReport: %s", Config.getBooleanProperty("generateFinalReport"));
                     scenarios.addAll(findScenariosByTags("@finalReport"));
                 }
-                List<String> excludedScenarios = findScenariosByTags("@disabled").stream()
+                List<String> excludedScenarios = findScenariosByTags("@excluded").stream()
                         .map(scenario -> String.format("%s %s %s",
                                 scenario.getParentSuiteName(), scenario.getSuiteName(), scenario.getName()))
                         .toList();
-                List<CucumberScenario> allScenarios = findAllScenariosExceptTag("@disabled");
+                List<CucumberScenario> allScenarios = findAllScenariosExceptTag("@excluded");
                 Map<String, TestParentSuiteResults> parentSuiteResults = new HashMap<>();
                 allScenarios.forEach(scenario -> updateSuiteResults(
                         parentSuiteResults,
