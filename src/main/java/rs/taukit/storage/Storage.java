@@ -67,8 +67,13 @@ public class Storage {
     public String evalObjectField(String template) {
         try {
             return scenarioData().evalObjectField(template);
-        } catch (Exception ignored) {
-            return dataStorage.evalObjectField(template);
+        } catch (Exception e) {
+            try {
+                return dataStorage.evalObjectField(template);
+            } catch (Exception e2) {
+                e2.addSuppressed(e);
+                throw e2;
+            }
         }
     }
 
