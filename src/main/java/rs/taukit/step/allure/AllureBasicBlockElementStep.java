@@ -60,7 +60,12 @@ public class AllureBasicBlockElementStep extends BasicUtils {
             TauLogger.report("Нажали на %s \"%s\" в блоке \"%s\"", elementType, fieldName, blockName);
         };
         scenarioStorage().saveStepAction(runnable);
-        runnable.run();
+        try {
+            runnable.run();
+        } catch (Exception e){
+            TauLogger.fail(e, "Не удалось нажать на %s '%s' в блоке '%s' на странице '%s'",
+                    elementType, fieldName, blockName, page().getPageName());
+        }
     }
 
     @Step("в блоке '{this.blockName}' установить чекбокс '{fieldName}'")
