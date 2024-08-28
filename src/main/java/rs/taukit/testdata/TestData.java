@@ -41,6 +41,7 @@ public class TestData implements ITestData {
             filePath = dirPath + File.separator + filePath;
         }
         List<Map<String, ?>> dataList = YamlParser.parse(filePath);
+        String filePathTmp = filePath;
         Predicate<Map<String, ?>> condition = item -> searchBy.entrySet().stream().allMatch(entry -> {
             String dataFieldName = entry.getKey();
             String expectedValue = entry.getValue();
@@ -52,7 +53,8 @@ public class TestData implements ITestData {
                 return dataFieldValue != null && dataFieldValue.toString().equalsIgnoreCase(expectedValue);
             }
         });
-        Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля \"%s\"", fieldName);
+        Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля \"%s\". %s",
+                fieldName, filePathTmp);
         dataStorage = new DataStorage(filePath, dataList.stream().filter(condition).findFirst().orElseThrow(exception));
     }
 
