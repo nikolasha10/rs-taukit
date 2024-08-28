@@ -73,7 +73,7 @@ public class CucumberBasicFileStep {
     @И("^сохранить содержимое файла \"(.+)\", как \"(.+)\"$")
     public void saveFileContentAs(String testDataFileName, String parameterName) {
         TestDataFile testDataFile = scenarioData().get(testDataFileName);
-        fileStep(testDataFile).saveFileContentAs(testDataFileName, parameterName);
+        fileStep(testDataFile).saveFileContentAs(testDataFileName, eval(parameterName));
     }
 
     @И("^служебный шаг: создать файл \"(.+)\" с параметрами:$")
