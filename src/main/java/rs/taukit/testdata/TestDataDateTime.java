@@ -54,9 +54,9 @@ public class TestDataDateTime implements ITestData {
         String dateParseFormat = "";
         String basicDateExpr = matcher.group(1);
         if (basicDateExpr.matches(accurateTimeFormat)) {
-            dateParseFormat = "dd.MM.yyyy hh:mm:ss";
+            dateParseFormat = "dd.MM.yyyy HH:mm:ss";
         } else if (basicDateExpr.matches(shortTimeFormat)) {
-            dateParseFormat = "dd.MM.yyyy hh:mm";
+            dateParseFormat = "dd.MM.yyyy HH:mm";
         } else if (basicDateExpr.matches(specifiedDateFormat)) {
             dateParseFormat = "dd.MM.yyyy";
         }
