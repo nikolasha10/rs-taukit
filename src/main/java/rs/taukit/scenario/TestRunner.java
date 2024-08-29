@@ -93,7 +93,8 @@ public class TestRunner {
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
-            } else {
+            } else if (!storage.isTestRunStarted) {
+                storage.isTestRunStarted = true;
                 String tags = Config.getProperty("scenario.tags").trim();
                 scenarios.addAll(findScenariosByTags(tags));
                 storage.getScenarioList().set(scenarios);

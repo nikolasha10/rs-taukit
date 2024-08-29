@@ -21,6 +21,7 @@ public class Storage {
     @Getter
     private final AtomicReference<List<CucumberScenario>> scenarioList = new AtomicReference<>(new ArrayList<>());
     private final DataStorage dataStorage = new DataStorage(new HashMap<>());
+    public boolean isTestRunStarted = false;
     @Setter
     @Getter
     private boolean testsFinished = false;
