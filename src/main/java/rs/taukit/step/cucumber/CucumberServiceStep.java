@@ -19,6 +19,11 @@ public class CucumberServiceStep {
         scenarioStorage().startToSaveActions();
     }
 
+    /**
+     * Позволяет задать условия для пропуска шагов ниже, до служебного шага "продолжить выполнять дальнейшие действия"
+     * Пропускать можно только шаги вида "* выполнить сценарий ..."
+     * @param dataTable
+     */
     @И("^служебный шаг: пропустить действия при выполнении условий$")
     public void skipActionsIfTrue(DataTable dataTable) {
         new AllureBasicServiceStep().skipActionsIfTrue(eval(dataTable));
