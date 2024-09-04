@@ -212,7 +212,9 @@ public class AllureBasicStep extends BasicUtils {
 
     @Step("сохранить '{value}', как '{parameterName}'")
     public static void saveValueAs(String value, String parameterName) {
-        scenarioData().put(parameterName, value);
+        Runnable runnable = () -> scenarioData().put(parameterName, value);
+        scenarioStorage().saveStepAction(runnable);
+        runnable.run();
         TauLogger.report("Значение '%s' сохранено, как '%s'", value, parameterName);
     }
 
