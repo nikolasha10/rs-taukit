@@ -6,6 +6,7 @@ import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
 
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 public class AllureBasicPageStep extends BasicUtils {
     private final String pageName;
@@ -46,7 +47,15 @@ public class AllureBasicPageStep extends BasicUtils {
         page.waitForClose();
         TauLogger.report("Закрыто всплывающее окно \"%s\"", pageName);
         String currentPageName = scenarioStorage().getSavedPageName();
-        driver().getCurrentBrowser().getPage(currentPageName).waitForLoad();
+        BooleanSupplier condition = () -> {
+            try {
+                driver().getCurrentBrowser().getPage(currentPageName).waitForLoad();
+                return true;
+            } catch (IllegalStateException ise){
+                return false;
+            }
+        };
+        driver().waitForCondition(condition);
         TauLogger.report("Отображается страница \"%s\"", currentPageName);
     }
 
