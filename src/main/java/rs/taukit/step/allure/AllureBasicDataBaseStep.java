@@ -67,22 +67,6 @@ public class AllureBasicDataBaseStep extends BasicUtils {
     public void execute(String sqlFileName) {
         String sqlScript = eval(FileUtils.readFile(Config.getProperty("sql.files.dir") + sqlFileName));
         TauLogger.attach("sql-скрипт", sqlScript);
-        try {
-            int rowCount = dbDriver.execute(sqlScript);
-            String rowsUpdated = rowCount > 0 ? " Обновлено строк: " + rowCount : "";
-            TauLogger.report("В базе данных \"%s\" выполнен sql-скрипт из файла \"%s\".%s",
-                    dataBaseName, sqlFileName, rowsUpdated);
-        } catch (SQLException e) {
-            throw new DBExecuteSqlException(e, dataBaseName, sqlFileName);
-        }
-    }
-
-    @Step("в базе данных '{this.dataBaseName}' выполнить sql-скрипт из файла '{sqlFileName}'")
-    public void execute(String sqlFileName, DataTable dataTable) {
-        TauLogger.attachDataTable("Параметры sql-скрипта", dataTable);
-        scenarioStorage().getScenarioData().put(dataTable);
-        String sqlScript = eval(FileUtils.readFile(Config.getProperty("sql.files.dir") + sqlFileName));
-        TauLogger.attach("sql-скрипт", sqlScript);
         Supplier<Integer> supplier = () -> {
             try {
                 return dbDriver.execute(sqlScript);
@@ -95,6 +79,13 @@ public class AllureBasicDataBaseStep extends BasicUtils {
         String rowsUpdated = rowCount > 0 ? " Обновлено строк: " + rowCount : "";
         TauLogger.report("В базе данных \"%s\" выполнен sql-скрипт из файла \"%s\".%s",
                 dataBaseName, sqlFileName, rowsUpdated);
+    }
+
+    @Step("в базе данных '{this.dataBaseName}' выполнить sql-скрипт из файла '{sqlFileName}'")
+    public void execute(String sqlFileName, DataTable dataTable) {
+        TauLogger.attachDataTable("Параметры sql-скрипта", dataTable);
+        scenarioStorage().getScenarioData().put(dataTable);
+        execute(sqlFileName);
         TauLogger.console("Параметры sql-скрипта:", dataTable);
     }
 
