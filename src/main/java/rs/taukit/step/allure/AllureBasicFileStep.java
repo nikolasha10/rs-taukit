@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -179,11 +180,11 @@ public class AllureBasicFileStep extends BasicUtils {
         File file = new File(filePath);
         File newFile = new File(fileDir, fileNewName);
         int i = 1;
-        while (newFile.exists()){
+        while (newFile.exists()) {
             String tempName = String.format("%s_%d", fileNewName, i++);
             newFile = new File(tempName);
         }
-        if (file.renameTo(newFile)){
+        if (file.renameTo(newFile)) {
             TauLogger.report("Файл '%s' переименован в '%s'", fileName, newFile.getName());
         } else {
             TauLogger.error("Не удалось переименовать файл '%s' в '%s'", fileName, newFile.getName());
@@ -197,7 +198,7 @@ public class AllureBasicFileStep extends BasicUtils {
         String standardFileRelativePath = scenarioData().get(nameSpace, "эталон");
         String standardFilePath = FileUtils.getTestFilePath(standardFileRelativePath);
         File standardFile = new File(standardFilePath);
-        if (!standardFile.exists()){
+        if (!standardFile.exists()) {
             throw new RuntimeException(String.format("Не удалось найти файл %s", standardFilePath));
         }
         String testContent = FileUtils.readFile(filePath);
@@ -216,9 +217,13 @@ public class AllureBasicFileStep extends BasicUtils {
             String attachment = ImageUtils.getCompareResult(
                     testTextImage,
                     standardTextImage,
-                    differencesImage);
+                    Optional.ofNullable(differencesImage).orElse(testTextImage));
             Runnable runnable = () -> TauLogger.attachFile("Различия содержимого файлов", attachment.getBytes());
-            TauLogger.fail(runnable, "Содержимое файла '%s' не соответствует ожидаемому", fileName);
+            String haveNotVisibleDifferences = differencesImage == null
+                    ? " Нет видимых различий. Файлы различаются в непечатаемых символах (переносах или т.п.)"
+                    : "";
+            TauLogger.fail(runnable, "Содержимое файла '%s' не соответствует ожидаемому.%s",
+                    fileName, haveNotVisibleDifferences);
         } else {
             TauLogger.console("Содержимое файла '%s' соответствует эталону", fileName);
         }
@@ -236,7 +241,7 @@ public class AllureBasicFileStep extends BasicUtils {
             Schema schema = schemaFactory.newSchema(schemaFile);
             Validator validator = schema.newValidator();
             validator.validate(xmlFile);
-        } catch (SAXException e){
+        } catch (SAXException e) {
             TauLogger.fail(e, "Файл '%s' не прошёл валидацию по схеме '%s'", fileName, xsdFileName);
         } catch (IOException e) {
             throw new RuntimeException(e);
