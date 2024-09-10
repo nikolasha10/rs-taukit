@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -214,19 +213,16 @@ public class AllureBasicFileStep extends BasicUtils {
             BufferedImage testTextImage = ImageUtils.textToImage(testContent, standardContent);
             BufferedImage standardTextImage = ImageUtils.textToImage(standardContent, testContent);
             BufferedImage differencesImage = ImageUtils.getDifferencesImage(testTextImage, standardTextImage);
-            String attachment = ImageUtils.getCompareResult(
-                    testTextImage,
-                    standardTextImage,
-                    Optional.ofNullable(differencesImage).orElse(testTextImage));
-            Runnable runnable = () -> TauLogger.attachFile("Различия содержимого файлов", attachment.getBytes());
-            String haveNotVisibleDifferences = differencesImage == null
-                    ? " Нет видимых различий. Файлы различаются в непечатаемых символах (переносах или т.п.)"
-                    : "";
-            TauLogger.fail(runnable, "Содержимое файла '%s' не соответствует ожидаемому.%s",
-                    fileName, haveNotVisibleDifferences);
-        } else {
-            TauLogger.console("Содержимое файла '%s' соответствует эталону", fileName);
+            if (differencesImage != null) {
+                String attachment = ImageUtils.getCompareResult(
+                        testTextImage,
+                        standardTextImage,
+                        differencesImage);
+                Runnable runnable = () -> TauLogger.attachFile("Различия содержимого файлов", attachment.getBytes());
+                TauLogger.fail(runnable, "Содержимое файла '%s' не соответствует ожидаемому", fileName);
+            }
         }
+        TauLogger.console("Содержимое файла '%s' соответствует эталону", fileName);
     }
 
     @Step("проверить валидность файла '{this.fileName}' по xsd-схеме '{xsdFileName}'")
