@@ -52,6 +52,9 @@ public class AllureBasicListStep extends BasicUtils {
         int foundItemNumber = foundItem.get().getCurrentIndex() + 1;
         TauLogger.report("Найден %s № %d", itemType, foundItemNumber);
         page().setCurrentContext(foundItem.get());
+        scenarioStorage().clearStepActions();
+        scenarioStorage().stopToSaveActions();
+        TauLogger.resetNotCritical();
         TauLogger.report("[примечание] текущий контекст: %d-й элемент списка '%s'", foundItemNumber, listName);
     }
 
