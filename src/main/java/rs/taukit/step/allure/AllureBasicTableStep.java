@@ -48,20 +48,21 @@ public class AllureBasicTableStep extends BasicUtils {
         TauLogger.attach("Условия поиска строки", dataTable);
         double elementCheckInterval = Config.getTimeProperty("element.check.interval");
         double elementCheckTimeout = Config.getTimeProperty("element.check.timeout");
+        AtomicReference<Integer> rowIndex = new AtomicReference<>();
         AtomicReference<Exception> exceptionAtomicReference = new AtomicReference<>();
         try {
             driver().waitForCondition(() -> {
                 try {
-                    int rowIndex = tableElement.findRowByConditions(dataTable);
-                    scenarioStorage().clearStepActions();
-                    scenarioStorage().stopToSaveActions();
-                    TauLogger.report("Найдена строка %d", rowIndex + 1);
+                    rowIndex.set(tableElement.findRowByConditions(dataTable) + 1);
                     return true;
                 } catch (Exception e) {
                     exceptionAtomicReference.set(e);
                     return false;
                 }
             },elementCheckInterval, elementCheckTimeout, scenarioStorage().getStepActions());
+            TauLogger.report("Найдена строка %d", rowIndex.get());
+            scenarioStorage().clearStepActions();
+            scenarioStorage().stopToSaveActions();
         } catch (Exception e) {
             if (exceptionAtomicReference.get() != null) {
                 e.addSuppressed(exceptionAtomicReference.get());
