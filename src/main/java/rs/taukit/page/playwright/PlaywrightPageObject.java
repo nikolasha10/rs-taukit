@@ -98,6 +98,8 @@ public class PlaywrightPageObject implements PageObject {
     public void waitForLoad() {
         try {
             waitForLoadAndContinue();
+        } catch (IllegalStateException ise){
+            throw ise;
         } catch (Exception e) {
             throw new PageNotLoadException(e, getPageNotLoadMessage());
         }
