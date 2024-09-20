@@ -99,34 +99,35 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
     }
 
     private Runnable getRunnableSendPost(Map<String, String> requestParametersMap, String requestUrl, String content) {
+        AtomicReference<ApiResponse> response = new AtomicReference<>();
+        AtomicReference<TestData> testData = new AtomicReference<>();
         Runnable runnable = () -> {
             AtomicInteger status = new AtomicInteger();
             try {
                 String contentType = TestDataUtils.getOptional(requestParametersMap, "contentType");
                 String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
-                ApiResponse response;
                 if (contentType != null) {
-                    response = browser().sendPost(requestUrl, contentType, accept, content);
+                    response.set(browser().sendPost(requestUrl, contentType, accept, content));
                 } else {
-                    response = browser().sendPostJson(requestUrl, content);
+                    response.set(browser().sendPostJson(requestUrl, content));
                 }
                 String responseStatusParameterName = String.format("Статус запроса '%s'", name);
                 String parameterName = String.format("Результат запроса '%s'", name);
-                scenarioData().put(responseStatusParameterName, String.valueOf(response.status()));
-                scenarioData().put(parameterName, response.text());
-                status.set(response.status());
-                LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
-                TestData testData = new TestData(this.name + "_response", responseMap);
-                responseMap.forEach((key, value) -> scenarioData().put(key, testData.getOptional(key)));
-                String statusText = response.statusText().isEmpty() ? "" : String.format("(%s)", response.statusText());
-                TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d %s", name, response.status(), statusText);
-                TauLogger.attach("Тело ответа", response.text());
-                testData.getAttachments().forEach(TauLogger::attach);
+                scenarioData().put(responseStatusParameterName, String.valueOf(response.get().status()));
+                scenarioData().put(parameterName, response.get().text());
+                status.set(response.get().status());
+                LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.get().text());
+                testData.set(new TestData(this.name + "_response", responseMap));
+                responseMap.forEach((key, value) -> scenarioData().put(key, testData.get().getOptional(key)));
             } catch (Exception e) {
                 throw new HttpRequestNotSentException(e, name, "POST", status.get());
             }
         };
         runnable.run();
+        String statusText = response.get().statusText().isEmpty() ? "" : String.format("(%s)", response.get().statusText());
+        TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d %s", name, response.get().status(), statusText);
+        TauLogger.attach("Тело ответа", response.get().text());
+        testData.get().getAttachments().forEach(TauLogger::attach);
         return runnable;
     }
 
