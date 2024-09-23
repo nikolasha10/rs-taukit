@@ -255,7 +255,7 @@
     }
 
     for (let stand of stands){
-        let selected = stand === 'workstation';
+        let selected = stand === currentStand;
         let option = new Option(stand, stand, selected, selected);
         standSelect.add(option);
     }
