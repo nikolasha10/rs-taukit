@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static rs.taukit.utils.BasicUtils.storage;
+
 public class Dependencies {
     private final Map<String, List<Map<String, String>>> oneToMany;
     private final Map<String, List<Map<String, String>>> manyToOne;
@@ -42,8 +44,11 @@ public class Dependencies {
     public boolean checkStatus(String expected, String statusKey) {
         String current = statusMap.get(statusKey);
         boolean anyStatusExpected = expected.equals("any");
+        boolean isDependencyInTestRun = storage.getScenarioList().get().stream()
+                .anyMatch(scenario -> scenario.getTagList().contains("@" + statusKey));
         return Config.getBooleanProperty("trackDependencies")
-                && (current == null || (!current.equals(expected) && !anyStatusExpected));
+                && (current == null && isDependencyInTestRun
+                || !(current == null || current.equals(expected) || anyStatusExpected));
     }
 
     public void changeStatus(List<String> tagList, String status) {

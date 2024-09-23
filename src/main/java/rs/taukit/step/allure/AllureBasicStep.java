@@ -204,6 +204,7 @@ public class AllureBasicStep extends BasicUtils {
         String stands = standList.stream().map((item -> "'" + item.get("Название").toString() + "'")).toList().toString();
         scenarioData().put("stands", stands);
         scenarioData().put("currentStand", Config.getSTAND().getName());
+        scenarioData().put("branches", Config.getProperty("branches"));
         scenarioData().put("defaultBranch", Config.getProperty("defaultBranch"));
         String template = FileUtils.readFile("src/main/resources/templates/finalReportTemplate.html");
         FileUtils.writeFile("target/temp/finalReport.html", eval(template));

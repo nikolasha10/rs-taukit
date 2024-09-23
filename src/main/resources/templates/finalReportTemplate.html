@@ -76,12 +76,12 @@
     <button id="restart">Перезапустить</button>
 </div>
 
-<script type="text/javascript" defer>
+<script type="text/javascript">
     const pipelineUrl = '${jenkinsPipelineUrl}';
     const authorization = 'Basic ${jenkinsAuth}';
     const stands = ${stands};
     const currentStand = '${currentStand}';
-    const branches = ['develop', 'psi', 'r-test'];
+    const branches = '${branches}'.replaceAll(' ','').split(',');
     const defaultBranch = '${defaultBranch}';
     const scenarioData = ${scenarioData};
 
@@ -208,7 +208,7 @@
         formData.append('branch', customBranch.value || branchSelect.value);
         formData.append('mavenGoal', 'test');
         formData.append('scenarioTags', scenarioTags);
-        formData.append('trackDependencies', 'false');
+        formData.append('trackDependencies', 'true');
         formData.append('sendEmail', 'false');
         let parameters = []
         for (const pair of formData.entries()) {
