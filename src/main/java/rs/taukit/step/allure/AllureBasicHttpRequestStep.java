@@ -68,6 +68,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         TauLogger.attachDataTable("Параметры запроса", modified);
         TauLogger.attach("Тело запроса", content);
         scenarioStorage().saveStepAction(getRunnableSendPost(requestParametersMap, requestUrl, content));
+        scenarioData().remove("httpRequestStep_" + name);
     }
 
     @Step("отправить PUT-запрос '{this.name}' с параметрами")
@@ -94,6 +95,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         TauLogger.attachDataTable("Параметры запроса", modified);
         TauLogger.attach("Тело запроса", content);
         scenarioStorage().saveStepAction(getRunnableSendPut(requestUrl, content));
+        scenarioData().remove("httpRequestStep_" + name);
     }
 
     @Step("отправить GET-запрос '{this.name}' с параметрами:")
@@ -134,11 +136,9 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             try {
                 String contentType = TestDataUtils.getOptional(requestParametersMap, "contentType");
                 String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
-                if (contentType != null) {
-                    response.set(browser().sendPost(requestUrl, contentType, accept, content));
-                } else {
-                    response.set(browser().sendPostJson(requestUrl, content));
-                }
+                headers.putIfAbsent("Content-Type", Optional.ofNullable(contentType).orElse("application/json; charset=utf-8"));
+                headers.putIfAbsent("Accept", Optional.ofNullable(accept).orElse("application/json"));
+                response.set(browser().sendPost(requestUrl, headers, content));
                 String responseStatusParameterName = String.format("Статус запроса '%s'", name);
                 String parameterName = String.format("Результат запроса '%s'", name);
                 scenarioData().put(responseStatusParameterName, String.valueOf(response.get().status()));

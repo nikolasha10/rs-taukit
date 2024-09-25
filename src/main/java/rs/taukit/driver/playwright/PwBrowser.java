@@ -128,24 +128,11 @@ public abstract class PwBrowser implements IWebBrowser {
     }
 
     @Override
-    public ApiResponse sendPostJson(String requestUrl, String content) {
-        return sendPost(requestUrl, "application/json; charset=utf-8", "application/json", content);
-    }
-
-    @Override
-    public ApiResponse sendPutJson(String requestUrl, String content) {
-        return sendPut(requestUrl, Map.of("Content-Type", "application/json; charset=utf-8", "Accept","application/json"), content);
-    }
-
-    @Override
-    public ApiResponse sendPost(String requestUrl, String contentType, String accept, String content) {
+    public ApiResponse sendPost(String requestUrl, Map<String, String> headers, String content) {
         APIRequestContext apiRequestContext = context.request();
-        APIResponse response = apiRequestContext.post(
-                requestUrl,
-                RequestOptions.create()
-                        .setHeader("Content-Type", contentType)
-                        .setHeader("Accept", accept)
-                        .setData(content));
+        RequestOptions requestOptions = RequestOptions.create().setData(content);
+        headers.forEach(requestOptions::setHeader);
+        APIResponse response = apiRequestContext.post(requestUrl, requestOptions);
         return new ApiResponse(response.ok(), response.status(), response.statusText(), response.text());
     }
 
