@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 public class AllureBasicHttpRequestStep extends BasicUtils {
     private final String name;
+    private final Map<String, String> headers = new HashMap<>();
 
     public AllureBasicHttpRequestStep(String name) {
         this.name = name;
@@ -69,6 +70,32 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         scenarioStorage().saveStepAction(getRunnableSendPost(requestParametersMap, requestUrl, content));
     }
 
+    @Step("отправить PUT-запрос '{this.name}' с параметрами")
+    public void sendPut(DataTable dataTable) {
+        scenarioData().put(dataTable);
+        Map<String, String> requestParametersMap = dataTable.asMaps().stream()
+                .collect(Collectors.toMap(
+                        row -> TestDataUtils.get(row, "Параметр"),
+                        row -> TestDataUtils.get(row, "Значение")));
+        String requestUrl = requestParametersMap.getOrDefault("url", createPostUrl().toString());
+        List<List<String>> parameters = new ArrayList<>(dataTable.asLists());
+        String content;
+        if (requestParametersMap.containsKey("content") && !requestParametersMap.get("content").equalsIgnoreCase("null")) {
+            content = requestParametersMap.get("content");
+        } else if (requestParametersMap.containsKey("filePath")) {
+            String filePath = requestParametersMap.get("filePath");
+            String fullPath = Config.getProperty("baseResourcesDir") + "files/" + filePath;
+            parameters.add(1, Arrays.asList("requestURL", requestUrl));
+            content = eval(FileUtils.readFile(fullPath));
+        } else {
+            throw new RuntimeException("Отсутствует один из обязательных параметров шага (content или filePath)");
+        }
+        DataTable modified = DataTable.create(parameters, TextUtils.tableConverter);
+        TauLogger.attachDataTable("Параметры запроса", modified);
+        TauLogger.attach("Тело запроса", content);
+        scenarioStorage().saveStepAction(getRunnableSendPut(requestParametersMap, requestUrl, content));
+    }
+
     @Step("отправить GET-запрос '{this.name}' с параметрами:")
     public void sendGet(DataTable dataTable) {
         Map<String, String> requestParametersMap = dataTable.asMaps().stream()
@@ -91,6 +118,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         AtomicReference<TestData> testDataAtomicReference = new AtomicReference<>();
         Runnable runnable = getRunnableSendGet(uriString, responseAtomicReference, testDataAtomicReference);
         scenarioStorage().saveStepAction(runnable);
+        scenarioData().remove("httpRequestStep_" + name);
         ApiResponse response = responseAtomicReference.get();
         String statusText = response.statusText().isEmpty() ? "" : String.format("(%s)", response.statusText());
         TauLogger.report("Отправлен GET-запрос \"%s\". Статус: %d %s", name, response.status(), statusText);
@@ -131,11 +159,49 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         return runnable;
     }
 
+    private Runnable getRunnableSendPut(Map<String, String> requestParametersMap, String requestUrl, String content) {
+        AtomicReference<ApiResponse> response = new AtomicReference<>();
+        AtomicReference<TestData> testData = new AtomicReference<>();
+        Runnable runnable = () -> {
+            AtomicInteger status = new AtomicInteger();
+            try {
+                String contentType = TestDataUtils.getOptional(requestParametersMap, "contentType");
+                String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
+                String authorization = TestDataUtils.getOptional(requestParametersMap, "authorization");
+                if (contentType != null) {
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("Content-Type", contentType);
+                    headers.put("Accept", accept);
+                    headers.put("Authorization", authorization);
+                    response.set(browser().sendPut(requestUrl, headers, content));
+                } else {
+                    response.set(browser().sendPutJson(requestUrl, content));
+                }
+                String responseStatusParameterName = String.format("Статус запроса '%s'", name);
+                String parameterName = String.format("Результат запроса '%s'", name);
+                scenarioData().put(responseStatusParameterName, String.valueOf(response.get().status()));
+                scenarioData().put(parameterName, response.get().text());
+                status.set(response.get().status());
+                LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.get().text());
+                testData.set(new TestData(this.name + "_response", responseMap));
+                responseMap.forEach((key, value) -> scenarioData().put(key, testData.get().getOptional(key)));
+            } catch (Exception e) {
+                throw new HttpRequestNotSentException(e, name, "PUT", status.get());
+            }
+        };
+        runnable.run();
+        String statusText = response.get().statusText().isEmpty() ? "" : String.format("(%s)", response.get().statusText());
+        TauLogger.report("Отправлен PUT-запрос \"%s\". Статус: %d %s", name, response.get().status(), statusText);
+        TauLogger.attach("Тело ответа", response.get().text());
+        testData.get().getAttachments().forEach(TauLogger::attach);
+        return runnable;
+    }
+
     private Runnable getRunnableSendGet(String uriString, AtomicReference<ApiResponse> responseAtomicReference, AtomicReference<TestData> testDataAtomicReference) {
         Runnable runnable = () -> {
             int status = 0;
             try {
-                ApiResponse response = driver().getCurrentBrowser().sendGet(uriString);
+                ApiResponse response = driver().getCurrentBrowser().sendGet(uriString, headers);
                 responseAtomicReference.set(response);
                 String responseStatusParameterName = String.format("Статус запроса '%s'", name);
                 String responseTextParameterName = String.format("Результат запроса '%s'", name);
@@ -219,5 +285,10 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             // ignored
         }
         return new LinkedHashMap<>(resultMap);
+    }
+
+    public void createRequestHeaders(DataTable dataTable) {
+        dataTable.asMaps().forEach(row -> headers.put(
+                TestDataUtils.get(row, "Параметр"), TestDataUtils.get(row, "Значение")));
     }
 }

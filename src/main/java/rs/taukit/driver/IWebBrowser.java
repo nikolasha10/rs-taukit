@@ -6,6 +6,7 @@ import rs.taukit.page.PageObject;
 import rs.taukit.records.ApiResponse;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IWebBrowser {
     String getType();
@@ -32,9 +33,13 @@ public interface IWebBrowser {
 
     ApiResponse sendPostJson(String requestUrl, String content);
 
+    ApiResponse sendPutJson(String requestUrl, String content);
+
     ApiResponse sendPost(String requestUrl, String contentType, String accept, String content);
 
-    ApiResponse sendGet(String requestUrl);
+    ApiResponse sendPut(String requestUrl, Map<String, String> headers, String content);
+
+    ApiResponse sendGet(String requestUrl, Map<String, String> headers);
 
     void downloadByClick(PwFileDownload element, String fileName);
 
