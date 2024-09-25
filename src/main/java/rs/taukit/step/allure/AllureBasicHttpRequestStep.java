@@ -93,7 +93,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         DataTable modified = DataTable.create(parameters, TextUtils.tableConverter);
         TauLogger.attachDataTable("Параметры запроса", modified);
         TauLogger.attach("Тело запроса", content);
-        scenarioStorage().saveStepAction(getRunnableSendPut(requestParametersMap, requestUrl, content));
+        scenarioStorage().saveStepAction(getRunnableSendPut(requestUrl, content));
     }
 
     @Step("отправить GET-запрос '{this.name}' с параметрами:")
@@ -159,24 +159,13 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         return runnable;
     }
 
-    private Runnable getRunnableSendPut(Map<String, String> requestParametersMap, String requestUrl, String content) {
+    private Runnable getRunnableSendPut(String requestUrl, String content) {
         AtomicReference<ApiResponse> response = new AtomicReference<>();
         AtomicReference<TestData> testData = new AtomicReference<>();
         Runnable runnable = () -> {
             AtomicInteger status = new AtomicInteger();
             try {
-                String contentType = TestDataUtils.getOptional(requestParametersMap, "contentType");
-                String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
-                String authorization = TestDataUtils.getOptional(requestParametersMap, "authorization");
-                if (contentType != null) {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("Content-Type", contentType);
-                    headers.put("Accept", accept);
-                    headers.put("Authorization", authorization);
-                    response.set(browser().sendPut(requestUrl, headers, content));
-                } else {
-                    response.set(browser().sendPutJson(requestUrl, content));
-                }
+                response.set(browser().sendPut(requestUrl, headers, content));
                 String responseStatusParameterName = String.format("Статус запроса '%s'", name);
                 String parameterName = String.format("Результат запроса '%s'", name);
                 scenarioData().put(responseStatusParameterName, String.valueOf(response.get().status()));
