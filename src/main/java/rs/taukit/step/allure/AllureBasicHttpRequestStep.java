@@ -52,7 +52,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
                 .collect(Collectors.toMap(
                         row -> TestDataUtils.get(row, "Параметр"),
                         row -> TestDataUtils.get(row, "Значение")));
-        String requestUrl = requestParametersMap.getOrDefault("url", createPostUrl().toString());
+        String requestUrl = requestParametersMap.get("url");
         List<List<String>> parameters = new ArrayList<>(dataTable.asLists());
         String content;
         if (requestParametersMap.containsKey("content") && !requestParametersMap.get("content").equalsIgnoreCase("null")) {
