@@ -128,27 +128,30 @@ public abstract class PwBrowser implements IWebBrowser {
     }
 
     @Override
-    public ApiResponse sendPost(String requestUrl, Map<String, String> headers, String content) {
+    public ApiResponse sendPost(String requestUrl, Map<String, String> headers, Map<String, String> queryParams, String content) {
         APIRequestContext apiRequestContext = context.request();
         RequestOptions requestOptions = RequestOptions.create().setData(content);
         headers.forEach(requestOptions::setHeader);
+        queryParams.forEach(requestOptions::setQueryParam);
         APIResponse response = apiRequestContext.post(requestUrl, requestOptions);
         return new ApiResponse(response.ok(), response.status(), response.statusText(), response.text());
     }
 
     @Override
-    public ApiResponse sendPut(String requestUrl, Map<String, String> headers, String content) {
+    public ApiResponse sendPut(String requestUrl, Map<String, String> headers, Map<String, String> queryParams, String content) {
         APIRequestContext apiRequestContext = context.request();
         RequestOptions requestOptions = RequestOptions.create().setData(content);
         headers.forEach(requestOptions::setHeader);
+        queryParams.forEach(requestOptions::setQueryParam);
         APIResponse response = apiRequestContext.put(requestUrl, requestOptions);
         return new ApiResponse(response.ok(), response.status(), response.statusText(), response.text());
     }
 
     @Override
-    public ApiResponse sendGet(String requestUrl, Map<String, String> headers) {
+    public ApiResponse sendGet(String requestUrl, Map<String, String> headers, Map<String, String> queryParams) {
         RequestOptions requestOptions = RequestOptions.create();
         headers.forEach(requestOptions::setHeader);
+        queryParams.forEach(requestOptions::setQueryParam);
         APIResponse response = context.request().get(requestUrl, requestOptions);
         return new ApiResponse(response.ok(), response.status(), response.statusText(), response.text());
     }

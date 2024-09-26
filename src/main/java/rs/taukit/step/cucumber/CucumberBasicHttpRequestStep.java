@@ -38,6 +38,10 @@ public class CucumberBasicHttpRequestStep {
     public void createRequestHeaders(String name, DataTable dataTable) {
         httpRequestStep(name).createRequestHeaders(eval(dataTable));
     }
+    @И("^подготовить значения параметров запроса \"(.+)\":$")
+    public void createRequestParams(String name, DataTable dataTable) {
+        httpRequestStep(name).createRequestParams(eval(dataTable));
+    }
 
     @И("^разобрать ответ запроса \"(.+)\", сохранив значения в параметрах:$")
     public void parseResponseResult(String name, DataTable dataTable) {

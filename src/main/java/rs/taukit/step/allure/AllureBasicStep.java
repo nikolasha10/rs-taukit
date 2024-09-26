@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.BooleanSupplier;
+import java.util.stream.Collectors;
 
 /**
  * Методы класса реализуют общие шаги сценариев для всех проектов
@@ -139,7 +140,10 @@ public class AllureBasicStep extends BasicUtils {
                         objectType, objectName, objectState, expectedValue);
             }
         }
-        TauLogger.report("Условия выполнены");
+        Map<String, String> result = dataTable.asMaps().stream().collect(Collectors.toMap(
+                data -> data.get("Название"),
+                data -> new ExpectedResult(data).checkResult().getCurrentValue()));
+        TauLogger.attachMap("Условия выполнены", result);
         scenarioStorage().clearStepActions();
         scenarioStorage().stopToSaveActions();
         TauLogger.resetNotCritical();

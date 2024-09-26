@@ -31,11 +31,11 @@ public interface IWebBrowser {
 
     void navigate(String url);
 
-    ApiResponse sendPost(String requestUrl, Map<String, String> headers, String content);
+    ApiResponse sendPost(String requestUrl, Map<String, String> headers, Map<String, String> queryParams, String content);
 
-    ApiResponse sendPut(String requestUrl, Map<String, String> headers, String content);
+    ApiResponse sendPut(String requestUrl, Map<String, String> headers, Map<String, String> queryParams, String content);
 
-    ApiResponse sendGet(String requestUrl, Map<String, String> headers);
+    ApiResponse sendGet(String requestUrl, Map<String, String> headers, Map<String, String> queryParams);
 
     void downloadByClick(PwFileDownload element, String fileName);
 

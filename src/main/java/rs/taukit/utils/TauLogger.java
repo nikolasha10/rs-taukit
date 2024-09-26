@@ -14,9 +14,7 @@ import rs.taukit.testdata.TestDataFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -349,13 +347,12 @@ public final class TauLogger {
         return null;
     }
 
-    @Attachment(value = "{fileName}", type = "application/pdf")
-    public static byte[] attachJson(String fileName, String filePath) {
-        File file = new File(filePath);
+    @Attachment(value = "{fileName}", type = "application/json")
+    public static byte[] attachJson(String fileName, String content) {
         try {
-            return Files.readAllBytes(file.toPath());
-        } catch (IOException ioException) {
-            warnWOSS(ioException, "Не удалось приложить файл \"%s\" к отчету", filePath);
+            return content.getBytes();
+        } catch (Exception e) {
+            warnWOSS(e, "Не удалось приложить файл \"%s\" к отчету", fileName);
         }
         return null;
     }
@@ -373,6 +370,12 @@ public final class TauLogger {
             case null, default ->
                     throw new TestDataException("Не удалось прикрепить объект \"%s\" к отчёту. Не распознан тип вложения.", name);
         }
+    }
+
+    public static void attachMap(String name, Map<String, String> map) {
+        attachDataTable(name, DataTable.create(map.entrySet().stream()
+                    .map(entry -> Arrays.asList(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList()), TextUtils.tableConverter));
     }
 
     public static void resetNotCritical() {

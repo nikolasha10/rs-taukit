@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class AllureBasicHttpRequestStep extends BasicUtils {
     private final String name;
     private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> queryParams = new HashMap<>();
 
     public AllureBasicHttpRequestStep(String name) {
         this.name = name;
@@ -59,13 +60,21 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         } else if (requestParametersMap.containsKey("filePath")) {
             String filePath = requestParametersMap.get("filePath");
             String fullPath = Config.getProperty("baseResourcesDir") + "files/" + filePath;
-            parameters.add(1, Arrays.asList("requestURL", requestUrl));
+            if (!requestParametersMap.containsKey("url")) {
+                parameters.add(1, Arrays.asList("url", requestUrl));
+            }
             content = eval(FileUtils.readFile(fullPath));
         } else {
             throw new RuntimeException("Отсутствует один из обязательных параметров шага (content или filePath)");
         }
         DataTable modified = DataTable.create(parameters, TextUtils.tableConverter);
-        TauLogger.attachDataTable("Параметры запроса", modified);
+        TauLogger.attachDataTable("Параметры шага", modified);
+        if (!headers.isEmpty()) {
+            TauLogger.attachMap("Заголовки запроса", headers);
+        }
+        if (!queryParams.isEmpty()) {
+            TauLogger.attachMap("Параметры запроса", queryParams);
+        }
         TauLogger.attach("Тело запроса", content);
         scenarioStorage().saveStepAction(getRunnableSendPost(requestParametersMap, requestUrl, content));
         scenarioData().remove("httpRequestStep_" + name);
@@ -92,7 +101,13 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
             throw new RuntimeException("Отсутствует один из обязательных параметров шага (content или filePath)");
         }
         DataTable modified = DataTable.create(parameters, TextUtils.tableConverter);
-        TauLogger.attachDataTable("Параметры запроса", modified);
+        TauLogger.attachDataTable("Параметры шага", modified);
+        if (!headers.isEmpty()) {
+            TauLogger.attachMap("Заголовки запроса", headers);
+        }
+        if (!queryParams.isEmpty()) {
+            TauLogger.attachMap("Параметры запроса", queryParams);
+        }
         TauLogger.attach("Тело запроса", content);
         scenarioStorage().saveStepAction(getRunnableSendPut(requestUrl, content));
         scenarioData().remove("httpRequestStep_" + name);
@@ -112,10 +127,16 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         String uriString = urlString + "?" + query;
         List<List<String>> replacedParametersList = new ArrayList<>();
         replacedParametersList.add(Arrays.asList("Параметр", "Значение"));
-        replacedParametersList.add(Arrays.asList("uri", urlString));
+        replacedParametersList.add(Arrays.asList("url", urlString));
         requestParametersMap.forEach((key, value) -> replacedParametersList.add(Arrays.asList(key, value)));
         DataTable replacedParametersTable = DataTable.create(replacedParametersList, TextUtils.tableConverter);
-        TauLogger.attachDataTable("Параметры GET-запроса", replacedParametersTable);
+        TauLogger.attachDataTable("Параметры шага", replacedParametersTable);
+        if (!headers.isEmpty()) {
+            TauLogger.attachMap("Заголовки запроса", headers);
+        }
+        if (!queryParams.isEmpty()) {
+            TauLogger.attachMap("Параметры запроса", queryParams);
+        }
         AtomicReference<ApiResponse> responseAtomicReference = new AtomicReference<>();
         AtomicReference<TestData> testDataAtomicReference = new AtomicReference<>();
         Runnable runnable = getRunnableSendGet(uriString, responseAtomicReference, testDataAtomicReference);
@@ -138,7 +159,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
                 String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
                 headers.putIfAbsent("Content-Type", Optional.ofNullable(contentType).orElse("application/json; charset=utf-8"));
                 headers.putIfAbsent("Accept", Optional.ofNullable(accept).orElse("application/json"));
-                response.set(browser().sendPost(requestUrl, headers, content));
+                response.set(browser().sendPost(requestUrl, headers, queryParams, content));
                 String responseStatusParameterName = String.format("Статус запроса '%s'", name);
                 String parameterName = String.format("Результат запроса '%s'", name);
                 scenarioData().put(responseStatusParameterName, String.valueOf(response.get().status()));
@@ -154,7 +175,12 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         runnable.run();
         String statusText = response.get().statusText().isEmpty() ? "" : String.format("(%s)", response.get().statusText());
         TauLogger.report("Отправлен POST-запрос \"%s\". Статус: %d %s", name, response.get().status(), statusText);
-        TauLogger.attach("Тело ответа", response.get().text());
+        String accept = headers.get("Accept");
+        if (accept != null && accept.equals("application/json")) {
+            TauLogger.attachJson("Тело ответа", response.get().text());
+        } else {
+            TauLogger.attach("Тело ответа", response.get().text());
+        }
         testData.get().getAttachments().forEach(TauLogger::attach);
         return runnable;
     }
@@ -165,7 +191,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         Runnable runnable = () -> {
             AtomicInteger status = new AtomicInteger();
             try {
-                response.set(browser().sendPut(requestUrl, headers, content));
+                response.set(browser().sendPut(requestUrl, headers, queryParams, content));
                 String responseStatusParameterName = String.format("Статус запроса '%s'", name);
                 String parameterName = String.format("Результат запроса '%s'", name);
                 scenarioData().put(responseStatusParameterName, String.valueOf(response.get().status()));
@@ -190,7 +216,7 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
         Runnable runnable = () -> {
             int status = 0;
             try {
-                ApiResponse response = driver().getCurrentBrowser().sendGet(uriString, headers);
+                ApiResponse response = driver().getCurrentBrowser().sendGet(uriString, headers, queryParams);
                 responseAtomicReference.set(response);
                 String responseStatusParameterName = String.format("Статус запроса '%s'", name);
                 String responseTextParameterName = String.format("Результат запроса '%s'", name);
@@ -278,6 +304,11 @@ public class AllureBasicHttpRequestStep extends BasicUtils {
 
     public void createRequestHeaders(DataTable dataTable) {
         dataTable.asMaps().forEach(row -> headers.put(
+                TestDataUtils.get(row, "Параметр"), TestDataUtils.get(row, "Значение")));
+    }
+
+    public void createRequestParams(DataTable dataTable) {
+        dataTable.asMaps().forEach(row -> queryParams.put(
                 TestDataUtils.get(row, "Параметр"), TestDataUtils.get(row, "Значение")));
     }
 }

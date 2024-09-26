@@ -120,7 +120,7 @@ public class DataStorage {
             return matcher.replaceFirst(matchResult -> {
                 String workDataName = matcher.group(1);
                 if (workDataName.equals("System properties")) {
-                    return YamlParser.convert(System.getProperty(matcher.group(2)));
+                    return YamlParser.convert(Config.getProperty(matcher.group(2)));
                 }
                 TestData workData = get(matchResult.group(1));
                 Object object = workData.getDataStorage().getOptional(matchResult.group(2));
