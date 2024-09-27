@@ -140,14 +140,6 @@ public class AllureBasicStep extends BasicUtils {
                         objectType, objectName, objectState, expectedValue);
             }
         }
-        Map<String, String> result = dataTable.asMaps().stream().collect(Collectors.toMap(
-                data -> data.get("Название"),
-                data ->
-                    Optional.ofNullable(new ExpectedResult(data).checkResult().getCurrentValue())
-                            .orElse(new ExpectedResult(data).checkResult().getObjectState())
-
-        ));
-        TauLogger.attachMap("Условия выполнены", result);
         scenarioStorage().clearStepActions();
         scenarioStorage().stopToSaveActions();
         TauLogger.resetNotCritical();
