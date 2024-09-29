@@ -97,14 +97,14 @@ public class CucumberScenario {
     public void onFinish(int statusCode, long endMillis) {
         List<CucumberScenario> tempList = storage.getScenarioList().get();
         tempList.remove(this);
-        storage.getScenarioList().set(tempList);
-        scenarioStorage.getDriverManager().close();
         String testStatus = switch (statusCode) {
             case 1 -> "PASSED";
             case 3 -> "SKIPPED";
             default -> "FAILED";
         };
         Config.getDependencies().changeStatus(tagList, testStatus.toLowerCase());
+        storage.getScenarioList().set(tempList);
+        scenarioStorage.getDriverManager().close();
         TauLogger.console("TEST %s: %s %s", testStatus, functionality, name);
         AllureReport.editReports(name, functionality, testStatus.toLowerCase(), endMillis);
         TauLogger.collectLogs();
