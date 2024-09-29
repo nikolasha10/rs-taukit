@@ -5,6 +5,7 @@ import io.cucumber.testng.PickleWrapper;
 import lombok.Getter;
 import lombok.Setter;
 import rs.taukit.driver.DriverManager;
+import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.step.allure.BasicApplication;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.testdata.TestData;
@@ -30,6 +31,8 @@ public class ScenarioStorage {
     private String currentContextName;
     @Setter
     private String savedPageName;
+    @Setter
+    private IHasBlockElements savedContext;
     @Setter
     private String stepActionPageName;
     private boolean saveActions = false;

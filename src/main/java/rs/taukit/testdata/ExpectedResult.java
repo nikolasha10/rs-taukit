@@ -3,6 +3,7 @@ package rs.taukit.testdata;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementState;
+import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.PageState;
 import rs.taukit.records.CheckedElement;
@@ -79,6 +80,7 @@ public class ExpectedResult {
                 String currentPageName = page().getPageName();
                 if (!currentPageName.equals(objectName)) {
                     scenarioStorage().setSavedPageName(currentPageName);
+                    scenarioStorage().setSavedContext(page().getCurrentContext());
                 }
                 PageObject page = browser().getPage(objectName);
                 double pageTimeout = page.getPageTimeout();
@@ -87,7 +89,8 @@ public class ExpectedResult {
                 page.setPageTimeout(pageTimeout);
                 if (!result) {
                     this.thrownException = page.getThrownException();
-                    browser().getPage(scenarioStorage().getSavedPageName());
+                    IHasBlockElements currentContext = scenarioStorage().getSavedContext();
+                    browser().getPage(scenarioStorage().getSavedPageName()).setCurrentContext(currentContext);
                 }
                 return result;
             case "вкладка":
