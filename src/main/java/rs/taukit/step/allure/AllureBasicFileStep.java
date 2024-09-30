@@ -106,7 +106,7 @@ public class AllureBasicFileStep extends BasicUtils {
 
     @Step("сохранить содержимое файла '{fileName}', как '{parameterName}'")
     public void saveFileContentAs(String fileName, String parameterName) {
-        scenarioData().put(parameterName, FileUtils.readFile(filePath));
+        scenarioData().put(parameterName, eval(FileUtils.readFile(filePath)));
         TauLogger.report("Параметр '%s' содержит значение '%s'", parameterName, scenarioData().get(parameterName));
     }
 
