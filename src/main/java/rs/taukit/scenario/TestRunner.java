@@ -148,7 +148,10 @@ public class TestRunner {
         subSuiteName = subSuiteName.replaceAll("\"", "&quot;");
         scenarioName = scenarioName.replaceAll("\"", "&quot;");
         if (errorMessage != null) {
-            errorMessage = errorMessage.replaceAll("\n", "<br>");
+            errorMessage = errorMessage
+                    .replaceAll("\n", "<br>")
+                    .replaceAll("\\{", "&lbrace;")
+                    .replaceAll("}", "&rbrace;");
         }
         TestResults testResults = new TestResults(status, finished, errorMessage);
         TestParentSuiteResults testParentSuiteResults = parentSuiteResults.getOrDefault(parentSuiteName, new TestParentSuiteResults(new HashMap<>()));
