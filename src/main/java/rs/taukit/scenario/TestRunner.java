@@ -68,7 +68,10 @@ public class TestRunner {
                         String status = YamlParser.convert(result.get("status"));
                         String finished = String.valueOf(file.lastModified());
                         Map<String, String> statusDetails = YamlParser.convert(result.get("statusDetails"));
-                        String errorMessage = statusDetails.getOrDefault("message", "").replaceAll("\"", "&quot;");
+                        String errorMessage = statusDetails.getOrDefault("message", "")
+                                .replaceAll("\"", "&quot;")
+                                .replaceAll("\\{", "&lbrace;")
+                                .replaceAll("}", "&rbrace;");
                         if (!excludedScenarios.contains(String.format("%s %s %s", parentSuiteName, suiteName, scenarioName))) {
                             updateSuiteResults(
                                     parentSuiteResults,
@@ -88,7 +91,7 @@ public class TestRunner {
                 try {
                     if (!scenarios.isEmpty()) {
                         String json = mapper.writeValueAsString(parentSuiteResults);
-                        scenarios.get(0).getScenarioStorage().getScenarioData().put("scenarioData", json);
+                        scenarios.getFirst().getScenarioStorage().getScenarioData().put("scenarioData", json);
                     }
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
