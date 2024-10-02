@@ -106,7 +106,7 @@ public class AllureBasicTableStep extends BasicUtils {
             }
         };
         double elementCheckInterval = Config.getTimeProperty("element.check.interval");
-        String timeout = TestDataUtils.getOptional(dataTable.asMaps().get(0), "Ожидание");
+        String timeout = TestDataUtils.getOptional(dataTable.asMaps().getFirst(), "Ожидание");
         double elementCheckTimeout = timeout == null
                 ? Config.getTimeProperty("element.check.timeout")
                 : TimeStringParser.getTime(timeout);

@@ -45,8 +45,8 @@ public class ExpectedResult {
         this.objectName = TestDataUtils.get(data, "Название");
         this.objectState = TestDataUtils.get(data, "Состояние");
         this.expectedValue = TestDataUtils.getOptional(data, "Значение");
-        String checkTimeout = Optional.ofNullable(data.get("Ожидание")).orElse(Config.getProperty("element.check.timeout"));
-        if (checkTimeout.isEmpty()) checkTimeout = Config.getProperty("element.check.timeout");
+        String checkTimeout = Optional.ofNullable(data.get("Ожидание")).orElse(Config.getProperty("element.check.interval"));
+        if (checkTimeout.isEmpty()) checkTimeout = Config.getProperty("element.check.interval");
         this.checkTimeout = TimeStringParser.getTime(checkTimeout);
         this.condition = () -> checkCondition(objectType.toLowerCase());
     }
@@ -63,7 +63,7 @@ public class ExpectedResult {
         this.objectName = data.get(1);
         this.objectState = data.get(2);
         this.expectedValue = null;
-        String checkTimeout = data.size() > 3 ? data.get(3) : Config.getProperty("element.check.timeout");
+        String checkTimeout = data.size() > 3 ? data.get(3) : Config.getProperty("element.check.interval");
         this.checkTimeout = TimeStringParser.getTime(checkTimeout);
         this.condition = () -> checkCondition(objectType.toLowerCase());
     }
