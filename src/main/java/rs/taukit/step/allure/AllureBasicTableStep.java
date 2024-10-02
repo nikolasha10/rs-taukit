@@ -12,25 +12,31 @@ import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TimeStringParser;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 public class AllureBasicTableStep extends BasicUtils {
     private final String tableName;
-    private final IHasTableElements tableElement;
+    private IHasTableElements tableElement;
 
     public AllureBasicTableStep(String tableName) {
         this.tableName = tableName;
-        this.tableElement = (IHasTableElements) Optional.ofNullable(page().getElement(tableName))
-                .orElseThrow(() -> new TableElementNotFoundException(
-                        "Не удалось найти таблицу %s",
-                        tableName));
+        this.tableElement = waitForTable();
     }
 
     public AllureBasicTableStep(IHasTableElements tableElement) {
         this.tableName = tableElement.getElementName();
         this.tableElement = tableElement;
+    }
+
+    private IHasTableElements waitForTable() {
+        try {
+            driver().waitForCondition(() -> page().getElement(tableName) != null);
+            return page().getElement(tableName).castTo(IHasTableElements.class);
+        } catch (Exception e) {
+            throw new TableElementNotFoundException("Не удалось найти таблицу %s", tableName);
+        }
+
     }
 
     @Step("в таблице '{this.tableName}' нажать на '{elementName}' в строке, соответствующей условиям:")
@@ -57,9 +63,10 @@ public class AllureBasicTableStep extends BasicUtils {
                     return true;
                 } catch (Exception e) {
                     exceptionAtomicReference.set(e);
+                    this.tableElement = waitForTable();
                     return false;
                 }
-            },elementCheckInterval, elementCheckTimeout, scenarioStorage().getStepActions());
+            }, elementCheckInterval, elementCheckTimeout, scenarioStorage().getStepActions());
             TauLogger.report("Найдена строка %d", rowIndex.get());
             scenarioStorage().clearStepActions();
             scenarioStorage().stopToSaveActions();
