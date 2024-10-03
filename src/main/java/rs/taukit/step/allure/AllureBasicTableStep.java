@@ -112,11 +112,11 @@ public class AllureBasicTableStep extends BasicUtils {
                 return false;
             }
         };
-        double elementCheckInterval = Config.getTimeProperty("element.check.interval");
         String timeout = TestDataUtils.getOptional(dataTable.asMaps().getFirst(), "Ожидание");
-        double elementCheckTimeout = timeout == null
-                ? Config.getTimeProperty("element.check.timeout")
+        double elementCheckInterval = timeout == null
+                ? Config.getTimeProperty("element.check.interval")
                 : TimeStringParser.getTime(timeout);
+        double elementCheckTimeout = Config.getTimeProperty("element.check.timeout");
         try {
             driver().waitForCondition(conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage().getStepActions());
             scenarioStorage().clearStepActions();
