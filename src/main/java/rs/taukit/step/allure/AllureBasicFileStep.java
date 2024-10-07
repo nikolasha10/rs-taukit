@@ -94,13 +94,13 @@ public class AllureBasicFileStep extends BasicUtils {
 
     @Step("сохранить значение параметра {parameterName} в файл {fileName}")
     public void writeValueToFile(String parameterName, String fileName) {
-        FileUtils.writeFile(filePath, scenarioData().get(parameterName));
+        FileUtils.writeFile(filePath, scenarioData().get(parameterName).toString());
         TauLogger.report("Файл '%s' создан", filePath);
     }
 
     @Step("сохранить значение параметра {parameterName} в файл:")
     public void writeValueToFile(String parameterName) {
-        FileUtils.writeFile(filePath, scenarioData().get(parameterName));
+        FileUtils.writeFile(filePath, scenarioData().get(parameterName).toString());
         TauLogger.report("Файл '%s' создан", filePath);
     }
 
