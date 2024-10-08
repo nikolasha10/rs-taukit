@@ -23,7 +23,7 @@ public class TestDataDateTime implements ITestData {
     private final String formula;
     @Getter
     private final Calendar calendar;
-    private DataStorage dataStorage;
+    private final DataStorage dataStorage;
     private String fieldName;
 
     public TestDataDateTime(String fieldName, LinkedHashMap<String, ?> data) {
@@ -96,7 +96,7 @@ public class TestDataDateTime implements ITestData {
     @Override
     public String getStringValue() {
         LocalDate localDate = LocalDate.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DATE));
-        LocalTime localTime = LocalTime.of(calendar.get(Calendar.HOUR), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
+        LocalTime localTime = LocalTime.of(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
         return DateTimeFormatter.ofPattern(format).format(LocalDateTime.of(localDate, localTime));
     }
 }
