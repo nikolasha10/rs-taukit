@@ -7,13 +7,13 @@ import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.TestDataException;
 import rs.taukit.testdata.ExpectedResult;
+import rs.taukit.testdata.TestDataDateTime;
 import rs.taukit.utils.*;
 
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.BooleanSupplier;
-import java.util.stream.Collectors;
 
 /**
  * Методы класса реализуют общие шаги сценариев для всех проектов
@@ -340,5 +340,16 @@ public class AllureBasicStep extends BasicUtils {
             throw new RuntimeException(e);
         }
         TauLogger.console("дата '%s' преобразована в '%s'", dateTimeString, scenarioData().get(parameterName));
+    }
+
+    @Step("вычислить дату по формуле '{formula}' и сохранить в формате '{format}', как '{parameterName}'")
+    public static void evalDateTime(String formula, String format, String parameterName) {
+        LinkedHashMap<String, String> data = new LinkedHashMap<>();
+        data.put("тип", "дата");
+        data.put("формат", format);
+        data.put("формула", formula);
+        TestDataDateTime testDataDateTime = new TestDataDateTime(parameterName, data);
+        scenarioData().put(parameterName, testDataDateTime);
+        TauLogger.report("Значение '%s' сохранено, как '%s'", testDataDateTime.getStringValue(), parameterName);
     }
 }

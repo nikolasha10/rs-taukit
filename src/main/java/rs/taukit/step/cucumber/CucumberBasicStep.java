@@ -167,4 +167,9 @@ public class CucumberBasicStep {
         AllureBasicStep.convertDateTimeFormat(eval(dateTimeString), parameterName, eval(dataTable));
     }
 
+    @И("^вычислить дату по формуле \"(.+)\" и сохранить в формате \"(.+)\", как \"(.*)\"$")
+    public void evalDateTime(String formula, String format, String parameterName) {
+        AllureBasicStep.evalDateTime(formula, format, parameterName);
+    }
+
 }
