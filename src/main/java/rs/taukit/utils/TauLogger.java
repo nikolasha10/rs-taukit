@@ -68,6 +68,10 @@ public final class TauLogger {
         console(message);
     }
 
+    public static void console(Throwable throwable) {
+        logger.info("Ошибка", throwable);
+    }
+
     /**
      * Собирает содержимое файлов с логами по каждому сценарию, и выводит их в стандартный вывод
      */
