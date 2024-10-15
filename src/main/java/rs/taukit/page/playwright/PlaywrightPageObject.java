@@ -104,8 +104,6 @@ public class PlaywrightPageObject implements PageObject {
     public void waitForLoad() {
         try {
             waitForLoadAndContinue();
-        } catch (IllegalStateException ise){
-            throw ise;
         } catch (Exception e) {
             throw new PageNotLoadException(e, getPageNotLoadMessage());
         }
@@ -118,7 +116,15 @@ public class PlaywrightPageObject implements PageObject {
     public void waitForLoadAndContinue(double pageTimeout) {
         BooleanSupplier waitCondition = () -> isUrlCorrect() && hasPageAllExpectedElements();
         this.options = new Page.WaitForConditionOptions().setTimeout(pageTimeout);
-        page.waitForCondition(waitCondition, options);
+        BooleanSupplier condition = () -> {
+            try {
+                page.waitForCondition(waitCondition, options);
+                return true;
+            } catch (IllegalStateException ise){
+                return false;
+            }
+        };
+        BasicUtils.driver().waitForCondition(condition, pageTimeout);
         scenarioStorage().setCurrentPageName(pageName);
     }
 

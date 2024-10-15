@@ -16,6 +16,8 @@ public interface PageObject {
 
     void waitForLoad();
 
+    void waitForLoadAndContinue();
+
     void waitForLoadAndContinue(double timeout);
 
     void waitForClose();

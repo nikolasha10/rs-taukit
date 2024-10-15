@@ -166,8 +166,7 @@ public abstract class PwBrowser implements IWebBrowser {
         if (activeTabIndex == pages.size()) {
             pages.add(initPage(pageName));
         } else if (!getCurrentPage().getPageName().equals(pageName)) {
-            pages.remove(activeTabIndex);
-            pages.add(activeTabIndex, initPage(pageName));
+            pages.set(activeTabIndex, initPage(pageName));
         }
         return getCurrentPage();
     }
