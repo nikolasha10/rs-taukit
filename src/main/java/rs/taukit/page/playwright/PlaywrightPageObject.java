@@ -14,6 +14,7 @@ import rs.taukit.exceptions.PageNotClosedException;
 import rs.taukit.exceptions.PageNotLoadException;
 import rs.taukit.page.PageObject;
 import rs.taukit.utils.BasicUtils;
+import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
 import rs.taukit.utils.YamlParser;
 
@@ -79,13 +80,18 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     private boolean hasPageAllExpectedElements() {
-        List<String> notDescribed = expectedElements.stream()
-                .filter(elementName -> container.getElementByName(elementName) == null)
-                .toList();
-        if (!notDescribed.isEmpty()) {
-            throw new ElementNotDescribedException(notDescribed, pageName);
+        try {
+            List<String> notDescribed = expectedElements.stream()
+                    .filter(elementName -> container.getElementByName(elementName) == null)
+                    .toList();
+            if (!notDescribed.isEmpty()) {
+                throw new ElementNotDescribedException(notDescribed, pageName);
+            }
+            return expectedElements.stream().allMatch(elementName -> container.getElementByName(elementName).isVisible());
+        } catch (Exception e){
+            TauLogger.console(e);
+            return false;
         }
-        return expectedElements.stream().allMatch(elementName -> container.getElementByName(elementName).isVisible());
     }
 
     private List<String> getAllNotFoundElements() {

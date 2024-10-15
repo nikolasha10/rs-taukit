@@ -47,7 +47,7 @@ public abstract class PwBrowser implements IWebBrowser {
         try {
             return new PlaywrightPageObject(getPage(), pageName);
         } catch (Exception e) {
-            e.printStackTrace();
+            TauLogger.console(e);
         }
         return null;
     }

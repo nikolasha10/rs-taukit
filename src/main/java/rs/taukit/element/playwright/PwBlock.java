@@ -18,9 +18,9 @@ import java.util.stream.Stream;
 
 import static rs.taukit.utils.BasicUtils.scenarioStorage;
 
+@Setter
 @Getter
 public class PwBlock extends PwElement implements IHasBlockElements {
-    @Setter
     private int currentIndex;
 
     public PwBlock(String elementName, ElementModel model) {
@@ -46,12 +46,7 @@ public class PwBlock extends PwElement implements IHasBlockElements {
 
     @Override
     public IElement getElementByName(String elementName) {
-        try {
-            driver.waitForCondition(this::isVisible);
-        } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось дождаться блока '%s' на странице '%s'",
-                    this.elementName, scenarioStorage().getCurrentPageName());
-        }
+        driver.waitForCondition(this::isVisible);
         if (!descendants.containsKey(elementName)) {
             throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName(), this);
         }
