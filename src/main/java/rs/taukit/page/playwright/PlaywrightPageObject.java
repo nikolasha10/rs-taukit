@@ -115,16 +115,7 @@ public class PlaywrightPageObject implements PageObject {
 
     public void waitForLoadAndContinue(double pageTimeout) {
         BooleanSupplier waitCondition = () -> isUrlCorrect() && hasPageAllExpectedElements();
-        this.options = new Page.WaitForConditionOptions().setTimeout(pageTimeout);
-        BooleanSupplier condition = () -> {
-            try {
-                page.waitForCondition(waitCondition, options);
-                return true;
-            } catch (IllegalStateException ise){
-                return false;
-            }
-        };
-        BasicUtils.driver().waitForCondition(condition, pageTimeout);
+        BasicUtils.driver().waitForCondition(waitCondition, pageTimeout);
         scenarioStorage().setCurrentPageName(pageName);
     }
 
