@@ -37,7 +37,7 @@ public class PwSearchField extends PwElement implements IHasEditableValue {
     public void setValue(String value) {
         descendants.get("поле ввода").castTo(PwTextField.class).setValue(value);
         if (value.equalsIgnoreCase("заполнить вручную")) {
-            double searchValueTimeout = TimeStringParser.getTime(Config.getProperty("searchValueTimeout"));
+            double searchValueTimeout = TimeStringParser.getTime(Config.getProperty("element.check.timeout"));
             PwButton fillManually = descendants.get("заполнить вручную").castTo(PwButton.class);
             driver.waitForCondition(fillManually::isVisible, searchValueTimeout);
             fillManually.click();

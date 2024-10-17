@@ -54,7 +54,7 @@ public class AllureBasicStep extends BasicUtils {
     @Step("проверить выполнение условий '{conditionsName}':")
     public static void checkConditions(String conditionsName, DataTable dataTable) {
         TauLogger.attachDataTable("Ожидаемый результат", dataTable);
-        Map<String, String> expectedHeaders = dataTable.asMaps().get(0);
+        Map<String, String> expectedHeaders = dataTable.asMaps().getFirst();
         List<List<String>> unexpectedResultList = new ArrayList<>();
         List<String> resultsHeaders = new ArrayList<>(expectedHeaders.keySet().stream().toList());
         if (resultsHeaders.contains("Значение")) {
@@ -106,8 +106,7 @@ public class AllureBasicStep extends BasicUtils {
     }
 
     public static void waitForConditions(DataTable dataTable) {
-        double elementCheckTimeout = Config.getTimeProperty("element.check.timeout");
-        waitForConditions(elementCheckTimeout, dataTable);
+        waitForConditions(Config.getTimeProperty("conditions.wait.timeout"), dataTable);
     }
 
     public static void waitForConditions(double elementCheckTimeout, DataTable dataTable) {
@@ -116,7 +115,7 @@ public class AllureBasicStep extends BasicUtils {
         BooleanSupplier conditions = () -> dataTable.asMaps().stream()
                 .map(data -> new ExpectedResult(data).waitForResult())
                 .allMatch(ExpectedResult::isConditionMet);
-        double elementCheckInterval = Config.getTimeProperty("element.check.interval");
+        double elementCheckInterval = Config.getTimeProperty("condition.wait.timeout");
         try {
             driver().waitForCondition(conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage().getStepActions());
         } catch (Exception e) {
@@ -228,7 +227,7 @@ public class AllureBasicStep extends BasicUtils {
             try {
                 value = eval(TestDataUtils.get(data, "Значение"));
             } catch (TestDataException e) {
-                e.printStackTrace();
+                TauLogger.console(e);
                 value = "null";
             }
             resultList.add(Arrays.asList(eval(TestDataUtils.get(data, "Параметр")), value));

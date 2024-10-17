@@ -92,7 +92,7 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public void waitForCondition(BooleanSupplier condition) {
-        double timeout = TimeStringParser.getTime(Config.getProperty("element.check.timeout"));
+        double timeout = TimeStringParser.getTime(Config.getProperty("condition.wait.timeout"));
         waitForCondition(condition, timeout);
     }
 

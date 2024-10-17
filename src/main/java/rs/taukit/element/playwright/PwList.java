@@ -103,7 +103,7 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
             }
         };
         try {
-            driver.waitForCondition(condition, Config.getTimeProperty("searchValueTimeout"));
+            driver.waitForCondition(condition, Config.getTimeProperty("element.check.timeout"));
         } catch (Exception e) {
             throw valuesNotFoundException(ex.get()).get();
         }
