@@ -104,7 +104,7 @@ public class DataStorage {
                 if (get(matchResult.group(1)) instanceof ITestData iTestData) {
                     return iTestData.getStringValue();
                 } else {
-                    return get(matchResult.group(1)).toString();
+                    return get(matchResult.group(1)).toString().replaceAll("\\$", "&dollar;");
                 }
             });
         } catch (IllegalArgumentException e) {
