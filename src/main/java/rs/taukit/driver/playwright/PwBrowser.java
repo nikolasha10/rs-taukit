@@ -124,7 +124,7 @@ public abstract class PwBrowser implements IWebBrowser {
             } catch (Exception e) {
                 return false;
             }
-        });
+        }, Config.getTimeProperty("pageLoadingTimeout"));
     }
 
     @Override
