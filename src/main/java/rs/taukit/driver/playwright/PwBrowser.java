@@ -118,13 +118,14 @@ public abstract class PwBrowser implements IWebBrowser {
     @Override
     public void navigate(String url) {
         driver().waitForCondition(() -> {
-            try {
-                getPage().navigate(url);
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }, Config.getTimeProperty("pageLoadingTimeout"));
+                    try {
+                        getPage().navigate(url);
+                        return true;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }, Config.getTimeProperty("condition.wait.timeout"),
+                Config.getTimeProperty("pageLoadingTimeout"));
     }
 
     @Override

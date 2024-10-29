@@ -79,6 +79,8 @@ public class AllureReport {
             int warningFlag = checkBrokenSteps(report);
             if (testStatus.equals("passed") && warningFlag == 0) {
                 report.replace("status", "unknown");
+            } else if (warningFlag == 2){
+                report.replace("status", "broken");
             } else {
                 report.replace("status", status);
             }
@@ -119,6 +121,9 @@ public class AllureReport {
             }
             if (s.get("status").equals("failed")) {
                 json.replace("status", "failed");
+            } else if (s.get("status").equals("broken")){
+                json.replace("status", "broken");
+                resultStatus.set(2);
             }
         });
         return resultStatus.get();

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
+import static rs.taukit.utils.BasicUtils.driver;
 import static rs.taukit.utils.BasicUtils.scenarioStorage;
 
 @Getter
@@ -109,6 +110,19 @@ public class PlaywrightDriver implements IWebDriver {
     }
 
     @Override
+    public void waitForCondition(BooleanSupplier condition, double interval, double timeout) {
+        BrowserContext.WaitForConditionOptions setTimeout = new BrowserContext.WaitForConditionOptions().setTimeout(timeout);
+        getBrowserContext().waitForCondition(() -> {
+            if (condition.getAsBoolean()) {
+                return true;
+            } else {
+                driver().waitForTimeout(interval);
+                return false;
+            }
+        }, setTimeout);
+    }
+
+    @Override
     public void waitForCondition(BooleanSupplier condition, double interval, double timeout, List<Runnable> previousStepList) {
         BrowserContext.WaitForConditionOptions setTimeout = new BrowserContext.WaitForConditionOptions().setTimeout(timeout);
         getBrowserContext().waitForCondition(() -> {
@@ -141,7 +155,7 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public PwBrowser getCurrentBrowser() {
-        if (browserList.isEmpty()){
+        if (browserList.isEmpty()) {
             throw new RuntimeException("Не запущен браузер");
         }
         return browserList.get(currentBrowserIndex);
