@@ -11,7 +11,7 @@ public class DriverManager {
     private final Map<String, IWebDriver> drivers = new HashMap<>();
     private String currentDriverName;
 
-    public IWebDriver initDriver(String driverName) {
+    public void initDriver(String driverName) {
         IWebDriver driver;
         try {
             if (driverName.equals("playwright")) {
@@ -23,12 +23,13 @@ public class DriverManager {
             throw new DriverNotFoundException(e, driverName);
         }
         drivers.put(driverName, driver);
-        return driver;
     }
 
-    public IWebDriver getDriver(String driverName) {
+    public void getDriver(String driverName) {
         this.currentDriverName = driverName;
-        return drivers.containsKey(driverName) ? drivers.get(driverName) : initDriver(driverName);
+        if (!drivers.containsKey(driverName)) {
+            initDriver(driverName);
+        }
     }
 
     public IWebDriver getCurrentDriver() {
