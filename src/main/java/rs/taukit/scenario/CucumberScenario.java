@@ -9,6 +9,7 @@ import rs.taukit.config.Config;
 import rs.taukit.storage.ScenarioStorage;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.utils.AllureReport;
+import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 
 import java.util.Arrays;
@@ -78,9 +79,6 @@ public class CucumberScenario {
         return !started && !isWaitingForDependency();
     }
 
-    public boolean isPending() {
-        return isWaitingForDependency() && !started;
-    }
     public void setStarted(){
         this.started = true;
     }
@@ -94,6 +92,8 @@ public class CucumberScenario {
         System.out.println();
         TauLogger.console("TEST %s: %s %s", skipped ? "SKIPPED" : "STARTED", featureWrapper, getName());
         scenarioStorage.setScenarioData(new ScenarioData(pickleWrapper.getPickle()));
+        scenarioStorage.getScenarioData().put("SCENARIO_TEMP_DIR",
+                FileUtils.getScenarioTempDir(parentSuiteName, suiteName, subSuiteName, getName()));
         if (!skipped) {
             runner.runScenario(getPickleWrapper().getPickle());
         }
