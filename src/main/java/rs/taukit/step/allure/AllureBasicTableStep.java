@@ -34,7 +34,7 @@ public class AllureBasicTableStep extends BasicUtils {
             driver().waitForCondition(() -> page().getElement(tableName) != null);
             return page().getElement(tableName).castTo(IHasTableElements.class);
         } catch (Exception e) {
-            throw new TableElementNotFoundException("Не удалось найти таблицу %s", tableName);
+            throw new TableElementNotFoundException("Не удалось найти таблицу '%s'", tableName);
         }
 
     }
@@ -105,6 +105,9 @@ public class AllureBasicTableStep extends BasicUtils {
         AtomicReference<Exception> exceptionAtomicReference = new AtomicReference<>();
         BooleanSupplier conditions = () -> {
             try {
+                if (!tableElement.isVisible()) {
+                    return false;
+                }
                 tableElement.findRowByConditions(dataTable);
                 return true;
             } catch (Exception e) {
@@ -121,8 +124,8 @@ public class AllureBasicTableStep extends BasicUtils {
             driver().waitForCondition(conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage().getStepActions());
             scenarioStorage().clearStepActions();
             scenarioStorage().stopToSaveActions();
-        } catch (Exception e) {
-            RuntimeException runtimeException = (RuntimeException) e;
+        } catch (RuntimeException e) {
+            RuntimeException runtimeException = e;
             if (runtimeException instanceof TimeoutError) {
                 runtimeException = new RuntimeException();
             }
@@ -130,7 +133,8 @@ public class AllureBasicTableStep extends BasicUtils {
                 runtimeException.addSuppressed(exceptionAtomicReference.get());
             }
             if (runtimeException instanceof AutoTestBrokenException) throw runtimeException;
-            TauLogger.fail(runtimeException, "В таблице \"%s\" не удалось дождаться строки, соответствующей заданным условиям",
+            TauLogger.fail(runtimeException,
+                    "В таблице '%s' не удалось дождаться строки, соответствующей заданным условиям",
                     tableName);
         }
     }
