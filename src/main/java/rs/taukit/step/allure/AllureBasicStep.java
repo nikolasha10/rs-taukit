@@ -6,6 +6,7 @@ import rs.taukit.config.Config;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.TestDataException;
+import rs.taukit.scenario.ScenarioManager;
 import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.testdata.TestDataDateTime;
 import rs.taukit.utils.*;
@@ -197,6 +198,7 @@ public class AllureBasicStep extends BasicUtils {
 
     @Step("Отчёт")
     public static void createReport() {
+        scenarioData().put("scenarioData", ScenarioManager.getInstance().generateFinalReport());
         scenarioData().put("jenkinsPipelineUrl", Config.getProperty("jenkins.pipeline.url"));
         scenarioData().put("jenkinsAuth", Config.getProperty("jenkins.auth"));
         List<Map<String, ?>> standList = YamlParser.parse(Config.eval("${baseResourcesDir}/configs/stands.yaml"));
