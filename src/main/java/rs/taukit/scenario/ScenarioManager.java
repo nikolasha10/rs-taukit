@@ -44,11 +44,17 @@ public class ScenarioManager {
     public synchronized Object[][] getScenariosToStart() {
         List<CucumberScenario> readyToStartList = new ArrayList<>(
                 scenarioList.stream().filter(CucumberScenario::isReadyForStart).toList());
-        if (readyToStartList.isEmpty() && getRunningCount() == 0 && Config.getBooleanProperty("generateFinalReport")) {
-            List<CucumberScenario> finalReports = findScenariosByTags("@finalReport");
-            scenarioList.addAll(finalReports);
-            readyToStartList.addAll(finalReports);
-            finished = true;
+        if (readyToStartList.isEmpty() && getRunningCount() == 0) {
+            List<CucumberScenario> pendingList = scenarioList.stream().filter(CucumberScenario::isPending).toList();
+            if (!pendingList.isEmpty()){
+                pendingList.forEach(CucumberScenario::setSkipped);
+                readyToStartList.addAll(pendingList);
+            } else if (Config.getBooleanProperty("generateFinalReport")) {
+                List<CucumberScenario> finalReports = findScenariosByTags("@finalReport");
+                scenarioList.addAll(finalReports);
+                readyToStartList.addAll(finalReports);
+                finished = true;
+            }
         }
         readyToStartList.forEach(CucumberScenario::setStarted);
         return readyToStartList.stream().map(CucumberScenario::getWrapper).toArray(Object[][]::new);

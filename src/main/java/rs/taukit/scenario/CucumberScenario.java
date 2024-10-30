@@ -4,12 +4,10 @@ import io.cucumber.testng.FeatureWrapper;
 import io.cucumber.testng.PickleWrapper;
 import io.cucumber.testng.TestNGCucumberRunner;
 import lombok.Getter;
-import lombok.Setter;
 import rs.taukit.config.Config;
 import rs.taukit.storage.ScenarioStorage;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.utils.AllureReport;
-import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 
 import java.util.Arrays;
@@ -29,7 +27,6 @@ public class CucumberScenario {
     private final String subSuiteName;
     private boolean finished = false;
     private boolean started = false;
-    @Setter
     private boolean skipped = false;
 
     public CucumberScenario(FeatureWrapper featureWrapper, PickleWrapper pickleWrapper) {
@@ -61,7 +58,7 @@ public class CucumberScenario {
         return f.substring(1, f.length() - 1);
     }
 
-    public List<String> getTagList(){
+    public List<String> getTagList() {
         return pickleWrapper.getPickle().getTags();
     }
 
@@ -79,21 +76,28 @@ public class CucumberScenario {
         return !started && !isWaitingForDependency();
     }
 
-    public void setStarted(){
+    public boolean isPending() {
+        return isWaitingForDependency() && !started;
+    }
+
+    public void setStarted() {
         this.started = true;
     }
 
-    public Object[] getWrapper(){
+    public void setSkipped() {
+        this.skipped = true;
+    }
+
+    public Object[] getWrapper() {
         return Arrays.asList(pickleWrapper, featureWrapper).toArray(Object[]::new);
     }
+
     public void onStart(TestNGCucumberRunner runner) {
         scenarioStorage.getDriverManager().getDriver(Config.getProperty("web.driver.name"));
         TauLogger.setLogPath(getFunctionality(), getName());
         System.out.println();
         TauLogger.console("TEST %s: %s %s", skipped ? "SKIPPED" : "STARTED", featureWrapper, getName());
         scenarioStorage.setScenarioData(new ScenarioData(pickleWrapper.getPickle()));
-        scenarioStorage.getScenarioData().put("SCENARIO_TEMP_DIR",
-                FileUtils.getScenarioTempDir(parentSuiteName, suiteName, subSuiteName, getName()));
         if (!skipped) {
             runner.runScenario(getPickleWrapper().getPickle());
         }
@@ -109,10 +113,6 @@ public class CucumberScenario {
         TauLogger.collectLogs();
     }
 
-    public boolean hasEqualName(PickleWrapper pickleWrapper, FeatureWrapper featureWrapper) {
-        return getFunctionality().equals(getFunctionality()) && getName().equals(getName());
-    }
-
     @Override
     public String toString() {
         String functionality = getFunctionality();
@@ -126,7 +126,7 @@ public class CucumberScenario {
         return String.format("{tags: %s, suite: %s, name: %s}", String.join(" "), functionality, getName());
     }
 
-    public boolean equals(PickleWrapper pickleWrapper, FeatureWrapper featureWrapper){
+    public boolean equals(PickleWrapper pickleWrapper, FeatureWrapper featureWrapper) {
         return this.pickleWrapper.equals(pickleWrapper) && this.featureWrapper.equals(featureWrapper);
     }
 }
