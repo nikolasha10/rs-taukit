@@ -12,6 +12,7 @@ import rs.taukit.utils.TimeStringParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
@@ -44,7 +45,23 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public void openBrowser() {
-        openBrowser(false);
+        AtomicReference<Exception> suppressed = new AtomicReference<>();
+        BooleanSupplier condition = () -> {
+            try {
+                openBrowser(false);
+                return true;
+            } catch (Exception e) {
+                suppressed.set(e);
+                return false;
+            }
+        };
+        double interval = Config.getTimeProperty("condition.wait.timeout");
+        double timeout = Config.getTimeProperty("conditions.wait.timeout");
+        try {
+            driver().waitForCondition(condition, interval, timeout);
+        } catch (TimeoutError te) {
+            throw new RuntimeException(suppressed.get());
+        }
     }
 
     @Override
@@ -111,15 +128,10 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public void waitForCondition(BooleanSupplier condition, double interval, double timeout) {
-        BrowserContext.WaitForConditionOptions setTimeout = new BrowserContext.WaitForConditionOptions().setTimeout(timeout);
-        getBrowserContext().waitForCondition(() -> {
-            if (condition.getAsBoolean()) {
-                return true;
-            } else {
-                driver().waitForTimeout(interval);
-                return false;
-            }
-        }, setTimeout);
+        long start = new Date().getTime();
+        while (new Date().getTime() - start <= timeout && !condition.getAsBoolean()) {
+            waitForTimeout(interval);
+        }
     }
 
     @Override

@@ -136,7 +136,7 @@ public class AllureBasicBlockElementStep extends BasicUtils {
         }
     }
 
-    @Step("в блоке '{this.blockName}' установить переключатель '{fieldName}' в значение '{value}'$")
+    @Step("в блоке '{this.blockName}' установить переключатель '{fieldName}' в значение '{value}'")
     public void setRadiButton(String fieldName, String value) {
         IHasEditableValue editable = blockElements.getElementByName(fieldName).castTo(IHasEditableValue.class);
         editable.setValue(value);
