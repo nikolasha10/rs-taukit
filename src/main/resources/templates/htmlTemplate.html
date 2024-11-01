@@ -33,7 +33,7 @@
 <body>
 <div class="container-panel">
 	<div class="container-header">${testName}</div>
-	<div class="container-buttons">
+	<div id="containerButtons" class="container-buttons">
 		<div>Страница <span>${pageNumber}</span></div>
 		<div class="switch-image-button active" value=2>Результат сравнения</div>
 		<div class="switch-image-button" value=0>Тест</div>
@@ -47,6 +47,8 @@
 	const images = ["${tested}","${expected}","${differences}"];
     const ignoredZones = [${ignoredZonesData}];
     const pageNumber = ${pageNumber};
+
+    divResults.style.top = containerButtons.offsetTop + containerButtons.offsetHeight + 5 + "px";
     image.src = images[2];
     const buttons = document.getElementsByClassName("switch-image-button");
     for (let b of buttons){
