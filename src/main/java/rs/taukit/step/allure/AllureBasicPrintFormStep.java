@@ -20,8 +20,8 @@ public class AllureBasicPrintFormStep extends BasicUtils {
         TestDataFile testedFileData = scenarioData().get(testedFileParameterName);
         String standardFileParameterName = scenarioData().get(nameSpace, "эталон");
         TestDataFile standardFileData = scenarioData().get(standardFileParameterName);
-        TauLogger.attachPdfFile(testedFileData.getFileName(), testedFileData.getFilePath());
-        TauLogger.attachPdfFile(standardFileData.getFileName(), standardFileData.getFilePath());
+        TauLogger.attachPdfFile(testedFileData.getFileName() + " (тест)", testedFileData.getFilePath());
+        TauLogger.attachPdfFile(standardFileData.getFileName() + " (эталон)", standardFileData.getFilePath());
         String checkFullContent = scenarioData().getOptional(nameSpace, "сравнить графически");
         String checkTextContent = scenarioData().getOptional(nameSpace, "сравнить текст");
         boolean validateVisual = checkFullContent == null || !checkFullContent.equalsIgnoreCase("нет");
@@ -64,6 +64,7 @@ public class AllureBasicPrintFormStep extends BasicUtils {
         if (!differences.isEmpty()) {
             Set<Integer> differentPages = differences.stream().map(ImageDifferences::pageNumber).collect(Collectors.toSet());
             scenarioData().put("Проверка PDF", "Номера различающихся страниц", differentPages);
+            scenarioData().put("testName", scenario().getFunctionality() + " " + scenario().getName());
             return () -> {
                 for (ImageDifferences pageDifferences : differences) {
                     String pageNumber = String.valueOf(pageDifferences.pageNumber());

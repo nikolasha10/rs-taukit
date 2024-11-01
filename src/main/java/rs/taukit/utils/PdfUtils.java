@@ -263,7 +263,7 @@ public class PdfUtils {
                         inputStream.close();
                         pdStreamList.add(pdStream);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        TauLogger.console(e);
                     }
                 });
                 try {
@@ -315,7 +315,7 @@ public class PdfUtils {
                                                     String autoReplacingParameterName,
                                                     boolean validateVisual,
                                                     boolean validateText) {
-        Map<String, List<Map<String, Integer>>> ignoredZones = new HashMap<>();
+        Map<String, List<Map<String, String>>> ignoredZones = new HashMap<>();
         if (ignoredZonesParameterName != null) {
             TestDataFile ignoredZonesFileData = scenarioData().get(ignoredZonesParameterName);
             try {
@@ -366,7 +366,7 @@ public class PdfUtils {
                                             int standardPagesNumber,
                                             PDFRenderer testedRenderer,
                                             PDFRenderer standardRenderer,
-                                            Map<String, List<Map<String, Integer>>> ignoredZones,
+                                            Map<String, List<Map<String, String>>> ignoredZones,
                                             List<ImageDifferences> images) throws IOException {
         BufferedImage testedImage;
         BufferedImage standardImage = null;
@@ -385,16 +385,18 @@ public class PdfUtils {
         BufferedImage zonedTestedImage = ImageUtils.deepCopy(testedImage);
         BufferedImage zonedStandardImage = ImageUtils.deepCopy(standardImage);
         if (ignoredZones.containsKey("Страница " + pageNumber)) {
-            List<Map<String, Integer>> ignoredZoneList = ignoredZones.get("Страница " + pageNumber);
+            List<Map<String, String>> ignoredZoneList = ignoredZones.get("Страница " + pageNumber);
             List<String> ignoredZonesDataList = new ArrayList<>();
-            for (Map<String, Integer> zone : ignoredZoneList) {
-                int x = zone.get("x");
-                int y = zone.get("y");
-                int width = zone.get("width");
-                int height = zone.get("height");
-                ImageUtils.drawZone(zonedTestedImage, x, y, width, height);
-                ImageUtils.drawZone(zonedStandardImage, x, y, width, height);
-                ignoredZonesDataList.add(String.format("{x: %d, y: %d, w: %d, h: %d}", x, y, width, height));
+            for (Map<String, ?> zone : ignoredZoneList) {
+                int x = Integer.parseInt(zone.get("x").toString());
+                int y = Integer.parseInt(zone.get("y").toString());
+                int w = Integer.parseInt(zone.get("w").toString());
+                int h = Integer.parseInt(zone.get("h").toString());
+                int index = ignoredZoneList.indexOf(zone) + 1;
+                String d = zone.get("d") == null ? "Игнорируемая зона " + index : zone.get("d").toString();
+                ImageUtils.drawZone(zonedTestedImage, x, y, w, h);
+                ImageUtils.drawZone(zonedStandardImage, x, y, w, h);
+                ignoredZonesDataList.add(String.format("{x: %d, y: %d, w: %d, h: %d, d: '%s'}", x, y, w, h, d));
             }
             differencesImage = ImageUtils.getDifferencesImage(zonedTestedImage, zonedStandardImage);
             scenarioData().put("ignoredZonesData_" + pageNumber, String.join(", ", ignoredZonesDataList));

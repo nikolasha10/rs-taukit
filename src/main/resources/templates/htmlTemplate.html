@@ -1,305 +1,402 @@
+
+<!doctype html>
 <html lang="ru">
 <head>
 	<meta charset="utf-8">
 	<style>
-		body { text-align: center; }
-		table { margin: 0 auto; border-spacing: 10px; }
-		th { font-weight: bold; text-align: center; border-bottom: 2px solid gray; }
-		#draw {position: fixed; padding: 5px 10px; border: 1px solid gray; left: 5px; top: 50px; }
-		#show {position: fixed; top: 50px; padding: 5px 10px; border: 1px solid gray; left: 5px; top: 90px; }
-		#divResults {position: absolute; width: 97%; height: 98%; overflow: auto; left: 45px; }
-		.rectangle {position: absolute; border: 1px dashed gray; background-color: #90909050; }
-		.hidden {display: none}
+		body { text-align: center; padding: 0px; margin: 0px;}
+        .container-panel {background-color: #eee; padding: 3px}
+        .container-header {font-weight: bold; padding: 5px}
+        .container-buttons {display: grid; grid-template-columns: auto 200px 70px 70px auto; gap: 3px; }
+        .container-images {position: absolute; overflow: auto; top: 70px; bottom: 1px; left: 1px; right: 1px; padding: auto}
+        .switch-image-button {border: 1px solid #aaa; padding: 5px; background-color: white; cursor: pointer;}
+        .switch-image-button:hover {text-decoration: underline;}
+        .switch-image-button.active {background-color: #afffaf}
+        #showIgnoreZonesButton {border: 1px solid #aaa; padding: 5px; background-color: #ccc; cursor: pointer; width: fit-content; margin: auto;}
+        #showIgnoreZonesButton.active {background-color: #afffaf}
+        #zoneDetails {position: absolute; border: 1px solid gray; box-shadow: 3px 2px 2px gray; padding: 5px; display: grid; grid-template-columns: 1fr 2fr; gap: 3px; background-color: white; text-align: right}
+        #ignoredZonesDataContainer {position: absolute; border: 1px solid gray; box-shadow: 3px 2px 2px gray; padding: 5px;background-color: white; margin: auto; min-width: fit-content;max-height: 70%; min-height: fit-content; max-width: 50%;}
+        #image {border: 1px solid gray; box-shadow: 3px 2px 2px #ccc;}
+        .ignored-area {position: absolute; border: 1px dashed gray; background-color: #90909050; }
+        .corner {position: absolute;}
+        .areaTrigger {position: absolute; width: 6px; height: 6px; }
+        #leftUpCorner {border: 3px solid transparent; border-left: 3px solid orange; border-top: 3px solid orange;}
+        #leftBottomCorner {border: 3px solid transparent; border-bottom: 3px solid orange; border-left: 3px solid orange;}
+        #rightUpCorner {border: 3px solid transparent; border-top: 3px solid orange; border-right: 3px solid orange;}
+        #rightBottomCorner {border: 3px solid transparent; border-right: 3px solid orange; border-bottom: 3px solid orange;}
+        #centerTrigger {position: absolute; }
+        .hidden {display: none}
 	</style>
 	<title>Сравнение PDF</title>
 </head>
 
 <body>
-	<div id="draw"> + </div>
-	<div id="show"> S </div>
-	<div id=divResults>
-		<table id="compareResults">
-			<tr>
-				<th id="comparedFiles">Тест</th>
-				<th>Результат сравнения:</th>
-
-			</tr>
-			<tr>
-				<td><div><img id="image" src=""></div></td>
-				<td><div><div></div><img id="differences" src=""></div></td>
-			</tr>
-		</table>
+<div class="container-panel">
+	<div class="container-header">${testName}</div>
+	<div class="container-buttons">
+		<div>Страница <span>${pageNumber}</span></div>
+		<div class="switch-image-button active" value=2>Результат сравнения</div>
+		<div class="switch-image-button" value=0>Тест</div>
+		<div class="switch-image-button" value=1>Эталон</div>
+		<div><div id="showIgnoreZonesButton" state="invisible">Игнорируемые зоны</div></div>
 	</div>
-	<script type="text/javascript" defer>
-		var images = ["${tested}","${expected}","${differences}"];
-		var labels = ["Тест","Эталон"];
-		var ignoredZones = [${ignoredZonesData}];
-		const pageNumber = ${pageNumber};
-		var index = 0;
-		var drawing = 0;
-		var drawingStart = 0;
-		var areasCounter = 0;
-		image.src = images[index];
-		differences.src = images[2];
-		var switchComparedFiles = function(){
-			index = 1 - index;
-			this.src = images[index];
-			comparedFiles.innerText = labels[index];
-		}
-		image.onclick = switchComparedFiles;
-		var changeCursor = function(eventOver){
-			var x = eventOver.pageX;
-			var y = eventOver.pageY;
-			var dx = x - this.offsetLeft - this.offsetWidth;
-			var dy = y - this.offsetTop - this.offsetHeight;
-			var cursorStyle = [
-					["nwse-resize", "ns-resize", "nesw-resize"],
-					["ew-resize", "grab", "ew-resize"],
-					["nesw-resize", "ns-resize", "nwse-resize"]
-				];
-			var sy = 1;
-			var sx = 1;
-			if (dx <= 0 && dx > -5 ) sx = 2;
-			if (dx <= 5 - this.offsetWidth) sx = 0;
-			if (dy <= 0 && dy > -5) sy = 2;
-			if (dy <= 5 - this.offsetHeight) sy = 0;
-			this.style.cursor = cursorStyle[sy][sx];
-		}
-		var startReplaceZone = function(eventDown){
-			this.style.cursor = "grabbing";
-			var startX = eventDown.pageX;
-			var startY = eventDown.pageY;
-			var dx = startX - this.offsetLeft - this.offsetWidth;
-			var dy = startY - this.offsetTop - this.offsetHeight;
-			var sy = 1;
-			var sx = 1;
-			if (dx <= 0 && dx > -5 ) sx = 2;
-			if (dx <= 5 - this.offsetWidth) sx = 0;
-			if (dy <= 0 && dy > -5) sy = 2;
-			if (dy <= 5 - this.offsetHeight) sy = 0;
+</div>
+<div id="divResults" class="container-images"><img id="image" src=""></div>
 
-			let x = startX - this.offsetLeft;
-			let y = startY - this.offsetTop;
-			let left = this.offsetLeft;
-			let right = this.offsetLeft + this.offsetWidth;
-			let bottom = this.offsetTop + this.offsetHeight;
-			let top = this.offsetTop;
-			let width = this.offsetWidth;
-			let height = this.offsetHeight;
-		}
-		var changeCursor = function(eventOver){
-			var x = eventOver.pageX;
-			var y = eventOver.pageY;
-			var dx = x - this.offsetLeft - this.offsetWidth;
-			var dy = y - this.offsetTop - this.offsetHeight;
-			var cursorStyle = [
-					["nwse-resize", "ns-resize", "nesw-resize"],
-					["ew-resize", "grab", "ew-resize"],
-					["nesw-resize", "ns-resize", "nwse-resize"]
-				];
-			var sy = 1;
-			var sx = 1;
-			if (dx <= 0 && dx > -5 ) sx = 2;
-			if (dx <= 5 - this.offsetWidth) sx = 0;
-			if (dy <= 0 && dy > -5) sy = 2;
-			if (dy <= 5 - this.offsetHeight) sy = 0;
-			this.style.cursor = cursorStyle[sy][sx];
-		}
-		var startReplaceZone = function(eventDown){
-			this.style.cursor = "grabbing";
-			var startX = eventDown.pageX;
-			var startY = eventDown.pageY;
-			var dx = startX - this.offsetLeft - this.offsetWidth;
-			var dy = startY - this.offsetTop - this.offsetHeight;
-			var sy = 1;
-			var sx = 1;
-			if (dx <= 0 && dx > -5 ) sx = 2;
-			if (dx <= 5 - this.offsetWidth) sx = 0;
-			if (dy <= 0 && dy > -5) sy = 2;
-			if (dy <= 5 - this.offsetHeight) sy = 0;
+<script type="text/javascript" defer>
+	const images = ["${tested}","${expected}","${differences}"];
+    const ignoredZones = [${ignoredZonesData}];
+    const pageNumber = ${pageNumber};
+    image.src = images[2];
+    const buttons = document.getElementsByClassName("switch-image-button");
+    for (let b of buttons){
+        b.onclick = () => {
+            let index = b.getAttribute("value") - 0;
+            image.src = images[index];
+            for (let a of buttons){
+                a.className = "switch-image-button";
+            }
+            b.className = "switch-image-button active";
+        }
+    }
+    function startReplaceZone(event){
+        this.style.cursor = "grabbing";
+        var startX = event.pageX;
+        var startY = event.pageY;
+        var dx = startX - this.offsetLeft - this.offsetWidth;
+        var dy = startY - this.offsetTop - this.offsetHeight;
+        var sy = 1;
+        var sx = 1;
+        if (dx <= 0 && dx > -5 ) sx = 2;
+        if (dx <= 5 - this.offsetWidth) sx = 0;
+        if (dy <= 0 && dy > -5) sy = 2;
+        if (dy <= 5 - this.offsetHeight) sy = 0;
 
-			let x = startX - this.offsetLeft;
-			let y = startY - this.offsetTop;
-			let left = this.offsetLeft;
-			let right = this.offsetLeft + this.offsetWidth;
-			let bottom = this.offsetTop + this.offsetHeight;
-			let top = this.offsetTop;
-			let width = this.offsetWidth;
-			let height = this.offsetHeight;
+        let x = startX - this.offsetLeft;
+        let y = startY - this.offsetTop;
+        let left = this.offsetLeft;
+        let right = this.offsetLeft + this.offsetWidth;
+        let bottom = this.offsetTop + this.offsetHeight;
+        let top = this.offsetTop;
+        let width = this.offsetWidth;
+        let height = this.offsetHeight;
+    }
+    function stopMoveArea(event){
+        let trigger = event.srcElement || event.target;
+        let area = trigger.parentNode;
+        area.onmousemove = null;
+        image.onmousemove = null;
+        let index = area.getAttribute("zoneIndex") - 0;
+        let zone = ignoredZones[index];
+        zone.x = area.offsetLeft - image.offsetLeft;
+        zone.y = area.offsetTop - image.offsetTop;
+        zone.w = area.offsetWidth;
+        zone.h = area.offsetHeight;
+        deleteTriggers(index);
+        area.click();
+    }
+    function startReplaceZone(event){
+        let trigger = event.srcElement || event.target;
+        let area = trigger.parentNode;
+        trigger.style.cursor = "grabbing";
+        divResults.removeChild(document.getElementById("zoneDetails"));
+        let moveArea = function(event){
+            area.style.left = event.pageX - divResults.offsetLeft + divResults.scrollLeft - area.offsetWidth/2 + "px";
+            area.style.top = event.pageY - divResults.offsetTop + divResults.scrollTop - area.offsetHeight/2 + "px";
+        }
+        let n = 0;
+        while (area.getElementsByClassName("corner").length > 0){
+            area.removeChild(area.getElementsByClassName("corner")[0]);
+        }
+        trigger.onmousemove = moveArea;
+        area.onmousemove = moveArea;
+        image.onmousemove = moveArea;
+        trigger.onclick = stopMoveArea;
+    }
+    function moveCorner(){
+        let trigger = this;
+        let area = trigger.parentNode;
+        let corners = area.getElementsByClassName("corner");
+        for (let c of corners){
+            if (c.id.replace("Corner","") !== trigger.id.replace("Trigger","")){
+                c.className += " hidden";
+            }
+        }
+        let rx = area.offsetLeft + area.offsetWidth;
+        let by = area.offsetTop + area.offsetHeight;
+        divResults.removeChild(document.getElementById("zoneDetails"));
+        let move = function(event){
+            let x = event.pageX - divResults.offsetLeft + divResults.scrollLeft;
+            let y = event.pageY - divResults.offsetTop + divResults.scrollTop;
+            if (trigger.id.startsWith("left")){
+                area.style.left = x + "px";
+                area.style.width = rx - area.offsetLeft + "px";
+                if (trigger.id.includes("Up")){
+                    trigger.style.cursor = "nwse-resize";
+                } else {
+                    trigger.style.cursor = "nesw-resize";
+                }
+            } else if (trigger.id.startsWith("right")){
+                area.style.width = x - area.offsetLeft + "px";
+                if (trigger.id.includes("Up")){
+                    trigger.style.cursor = "nesw-resize";
+                } else {
+                    trigger.style.cursor = "nwse-resize";
+                }
+            }
+            if (trigger.id.includes("Up")){
+                area.style.top = y + "px";
+                area.style.height = by - area.offsetTop + "px";
+            } else if (trigger.id.includes("Bottom")){
+                area.style.height = y - area.offsetTop + "px";
+            }
+        }
+        area.onmousemove = move;
+        image.onmousemove = move;
+        trigger.onclick = stopMoveArea;
+    }
+    function deleteZone(zoneIndex){
+        divResults.removeChild(document.getElementById("zoneDetails"));
+        let ignoredArea = document.getElementById("ignoredArea_" + zoneIndex);
+        divResults.removeChild(ignoredArea);
+        ignoredZones.splice(zoneIndex, 1);
+    }
+    function changeIgnoredArea(){
+        const areaIndex = this.getAttribute("areaIndex") - 0;
+        const zone = ignoredZones[areaIndex];
+        zone[this.name] = this.value || this.innerText;
+        placeIgnoredArea(areaIndex);
+    }
+    function deleteTriggers(index){
+        let area = document.getElementById("ignoredArea_" + index);
+        while (area.getElementsByClassName("corner").length > 0){
+            area.removeChild(area.getElementsByClassName("corner")[0]);
+        }
+        while (area.getElementsByClassName("areaTrigger").length > 0){
+            area.removeChild(area.getElementsByClassName("areaTrigger")[0]);
+        }
+        area.removeChild(document.getElementById("centerTrigger"));
+        area.onclick = editZone;
+    }
+    function cancelEditZone(){
+        let zoneDetails = document.getElementById("zoneDetails");
+        if (!zoneDetails) return;
+        let index = zoneDetails.getAttribute("zoneIndex") - 0;
+        divResults.removeChild(zoneDetails);
+        deleteTriggers(index);
+    }
+    function editZone(){
+        cancelEditZone();
+        let area = this;
+        area.onclick = null;
+        let zoneIndex = area.getAttribute("zoneIndex") - 0;
+        let centerTrigger = document.createElement("div")
+        centerTrigger.id = "centerTrigger";
+        area.appendChild(centerTrigger);
+        centerTrigger.style.left =  3 + "px";
+        centerTrigger.style.top =  3 + "px";
+        centerTrigger.style.width =  this.offsetWidth - 6 + "px";
+        centerTrigger.style.height =  this.offsetHeight - 6 + "px";
+        centerTrigger.style.cursor = "pointer";
+        centerTrigger.onclick = startReplaceZone;
 
-			let changeRectangle = function(rect, left, right, top, bottom){
-				rect.style.left = left + "px";
-				rect.style.top = top + "px";
-				rect.style.width = (right - left) + "px";
-				rect.style.height = (bottom - top) + "px"
-				rect.setAttribute('baseX', left + divResults.scrollLeft);
-				rect.setAttribute('baseY', top + divResults.scrollTop);
-			}
-			let center = function(eventMove){
-				let left = eventMove.pageX - x;
-				let right = left + width;
-				let top = eventMove.pageY - y;
-				let bottom = top + height;
-				changeRectangle(this, left, right, top, bottom);
-			}
-			let leftUp = function(eventMove){
-				let left = eventMove.pageX - x - 15;
-				let top = eventMove.pageY - y - 15;
-				changeRectangle(this, left, right, top, bottom);
-			}
-			let leftDown = function(eventMove){
-				let left = eventMove.pageX - x - 15;
-				let bottom = eventMove.pageY + 15;
-				changeRectangle(this, left, right, top, bottom);
-			}
-			let rightUp = function(eventMove){
-				let right = eventMove.pageX + 15;
-				let top = eventMove.pageY - y - 15;
-				changeRectangle(this, left, right, top, bottom);
-			}
-			let rightDown = function(eventMove){
-				let right = eventMove.pageX + 15;
-				let bottom = eventMove.pageY + 15;
-				changeRectangle(this, left, right, top, bottom);
-			}
-			let up = function(eventMove){
-				let top = eventMove.pageY - y - 15;
-				changeRectangle(this, left, right, top, bottom);
-			}
-			let down = function(eventMove){
-				let bottom = eventMove.pageY + 15;
-				changeRectangle(this, left, right, top, bottom);
-			}
-			let leftEdge = function(eventMove){
-				let left = eventMove.pageX - x - 15;
-				changeRectangle(this, left, right, top, bottom);
-			}
-			let rightEdge = function(eventMove){
-				let right = eventMove.pageX + 15;
-				changeRectangle(this, left, right, top, bottom);
-			}
-			var onMouseMove = [
-				[leftUp, up, rightUp],
-				[leftEdge, center, rightEdge],
-				[leftDown, down, rightDown]
-			];
-			this.onmousemove = onMouseMove[sy][sx];
-		}
-		var endReplaceZone = function(event){
-			const rectangle = event.srcElement || event.target;
-			if (event.pageX < divResults.offsetLeft || rectangle.offsetLeft < 0){
-				this.remove();
-			}
-			this.onmousemove = changeCursor;
-		}
-		ignoredZones.forEach((zone) => {
-			let rectangle = document.createElement("div");
-			document.body.appendChild(rectangle);
-			rectangle.className = "rectangle";
-			let x = zone.x
-				+ divResults.offsetLeft
-				+ image.offsetLeft
-				+ image.parentNode.offsetLeft
-				+ image.parentNode.parentNode.offsetLeft
-				+ compareResults.offsetLeft;
-			let y = zone.y
-				+ divResults.offsetTop
-				+ image.offsetTop
-				+ image.parentNode.offsetTop
-				+ image.parentNode.parentNode.offsetTop
-				+ compareResults.offsetTop;
-			rectangle.style.left = x + "px";
-			rectangle.style.top = y + "px";
-			rectangle.style.width = zone.w + "px";
-			rectangle.style.height = zone.h + "px";
-			rectangle.onmousemove = changeCursor;
-			rectangle.onmousedown = startReplaceZone;
-			rectangle.onmouseup = endReplaceZone;
-			rectangle.className = "rectangle hidden";
-			rectangle.setAttribute('baseX', x);
-			rectangle.setAttribute('baseY', y);
-		});
-		var drawRectangle = function(event){
-			drawingStart = 1 - drawingStart;
-			if (drawingStart == 1){
-				var rectangle = document.createElement("div");
-				document.body.appendChild(rectangle);
-				rectangle.className = "rectangle";
-				rectangle.id = "rectangle";
-				var x = event.pageX;
-				var y = event.pageY;
-				rectangle.style.left = x + "px";
-				rectangle.style.top = y + "px";
-				image.onmousemove = function(event){
-					rectangle.style.width = (event.pageX - x) + "px";
-					rectangle.style.height = (event.pageY - y) + "px";
-				}
-				rectangle.onmousemove = image.onmousemove;
-				rectangle.onclick = this.onclick;
-				rectangle.setAttribute('baseX', x);
-				rectangle.setAttribute('baseY', y);
-			} else {
-				image.style.cursor = "default";
-				image.onmousemove = null;
-				var rectangle = document.getElementById("rectangle")
-				rectangle.onmousemove = null;
-				rectangle.onclick = null;
-				rectangle.id = "rectangle_" + (++areasCounter);
-				rectangle.onmousemove = changeCursor;
-				rectangle.onmousedown = startReplaceZone;
-				rectangle.onmouseup = endReplaceZone;
-			}
-		}
-		draw.onclick = function(){
-			drawing = 1 - drawing;
-			image.onclick = drawing == 1 ? drawRectangle : switchComparedFiles;
-			this.style.backgroundColor = drawing == 1 ? "#afffaf" : "transparent";
-			image.style.cursor = drawing == 1 ? "crosshair" : "default";
-			var areas = document.getElementsByClassName("rectangle");
-			for (let i=0; i<areas.length; i++){
-				let element = areas[i];
-				if (drawing == 1){
-					element.className = element.className.replace("hidden", "");
-				} else {
-					element.className = element.className + " hidden";
-				}
-			}
-		}
-		show.onclick = function(){
-			var areas = document.getElementsByClassName("rectangle");
-			var lines = ["Страница " + pageNumber + ":"];
-			for (let i=0; i<areas.length; i++){
-				let element = areas[i];
-				let leftUpX = element.offsetLeft
-					- divResults.offsetLeft
-					- image.offsetLeft
-					- image.parentNode.offsetLeft
-					- image.parentNode.parentNode.offsetLeft
-					- compareResults.offsetLeft;
-				let leftUpY = element.offsetTop
-					- divResults.offsetTop
-					- image.offsetTop
-					- image.parentNode.offsetTop
-					- image.parentNode.parentNode.offsetTop
-					- compareResults.offsetTop
-					+ divResults.scrollTop;
-				let width = element.offsetWidth;
-				let height = element.offsetHeight;
-				lines.push("  - x: " + leftUpX);
-				lines.push("    y: " + leftUpY);
-				lines.push("    width: " + width);
-				lines.push("    height: " + height);
-			}
-			window.prompt("Координаты игнорируемых зон:", lines.join("\n"));
-		}
-		divResults.onscroll = function(event){
-			var areas = document.getElementsByClassName("rectangle");
-			for (let i=0; i<areas.length; i++){
-				let area = areas[i];
-				area.style.left = area.getAttribute('baseX') - this.scrollLeft + 'px';
-				area.style.top = area.getAttribute('baseY') - this.scrollTop + 'px';
-			}
-		}
-	</script>
+        let leftUpCorner = document.createElement("div")
+        leftUpCorner.id = "leftUpCorner";
+        leftUpCorner.className = "corner";
+        this.appendChild(leftUpCorner);
+        leftUpCorner.style.left =  -3 + "px";
+        leftUpCorner.style.top =  -3 + "px";
+
+        let leftUpTrigger = document.createElement("div")
+        leftUpTrigger.id = "leftUpTrigger";
+        leftUpTrigger.className = "areaTrigger";
+        this.appendChild(leftUpTrigger);
+        leftUpTrigger.style.left =  -3 + "px";
+        leftUpTrigger.style.top =  -3 + "px";
+
+        let leftBottomCorner = document.createElement("div")
+        leftBottomCorner.id = "leftBottomCorner";
+        leftBottomCorner.className = "corner";
+        this.appendChild(leftBottomCorner);
+        leftBottomCorner.style.left =  -3 + "px";
+        leftBottomCorner.style.bottom =  -3 + "px";
+
+        let leftBottomTrigger = document.createElement("div")
+        leftBottomTrigger.id = "leftBottomTrigger";
+        leftBottomTrigger.className = "areaTrigger";
+        this.appendChild(leftBottomTrigger);
+        leftBottomTrigger.style.left =  -3 + "px";
+        leftBottomTrigger.style.bottom =  -3 + "px";
+
+        let rightUpCorner = document.createElement("div")
+        rightUpCorner.id = "rightUpCorner";
+        rightUpCorner.className = "corner";
+        this.appendChild(rightUpCorner);
+        rightUpCorner.style.right =  -3 + "px";
+        rightUpCorner.style.top =  -3 + "px";
+
+        let rightUpTrigger = document.createElement("div")
+        rightUpTrigger.id = "rightUpTrigger";
+        rightUpTrigger.className = "areaTrigger";
+        this.appendChild(rightUpTrigger);
+        rightUpTrigger.style.right =  -3 + "px";
+        rightUpTrigger.style.top =  -3 + "px";
+
+        let rightBottomCorner = document.createElement("div")
+        rightBottomCorner.id = "rightBottomCorner";
+        rightBottomCorner.className = "corner";
+        this.appendChild(rightBottomCorner);
+        rightBottomCorner.style.right =  -3 + "px";
+        rightBottomCorner.style.bottom =  -3 + "px";
+
+        let rightBottomTrigger = document.createElement("div")
+        rightBottomTrigger.id = "rightBottomTrigger";
+        rightBottomTrigger.className = "areaTrigger";
+        this.appendChild(rightBottomTrigger);
+        rightBottomTrigger.style.right =  -3 + "px";
+        rightBottomTrigger.style.bottom =  -3 + "px";
+
+        let corners = this.getElementsByClassName("areaTrigger");
+        for(corner of corners){
+            corner.style.cursor = "pointer";
+            corner.onclick = moveCorner;
+        }
+        zoneDetails = document.createElement("div");
+        zoneDetails.id = "zoneDetails";
+        divResults.appendChild(zoneDetails);
+
+        let zone = ignoredZones[zoneIndex];
+        zoneDetails.innerHTML = "<div>x:</div><div><input name=\"x\" value=\"" + zone.x + "\"></div>"
+            + "<div>y:</div><div><input name=\"y\" value=\"" + zone.y + "\"></div>"
+            + "<div>w:</div><div><input name=\"w\" value=\"" + zone.w + "\"></div>"
+            + "<div>h:</div><div><input name=\"h\" value=\"" + zone.h + "\"></div>"
+            + "<div>d:</div><div><textarea name=\"d\">" + zone.d + "</textarea></div>"
+            + "<div></div><div><button onclick=\"cancelEditZone()\">Ok</button><button onclick=deleteZone(" + zoneIndex + ")>Удалить</button></div>";
+        let fields = zoneDetails.getElementsByTagName("input");
+        for (let field of fields){
+            field.setAttribute("areaIndex", zoneIndex);
+            field.onchange = changeIgnoredArea;
+        }
+        let description = zoneDetails.getElementsByTagName("textarea")[0];
+        description.setAttribute("areaIndex", zoneIndex);
+        description.onchange = changeIgnoredArea;
+        zoneDetails.style.left = this.offsetLeft + "px";
+        zoneDetails.style.top = this.offsetTop + this.offsetHeight + 10 + "px";
+        zoneDetails.setAttribute("zoneIndex", zoneIndex);
+    }
+    function placeIgnoredArea(index){
+        let zone = ignoredZones[index];
+        let id = "ignoredArea_" + index;
+        let area = document.getElementById(id);
+        if (area) divResults.removeChild(area);
+        area = document.createElement("div");
+        divResults.appendChild(area);
+        area.className = "ignored-area";
+        let x = zone.x - 0 + image.offsetLeft;
+        let y = zone.y - 0 + image.offsetTop;
+        area.style.left = x + "px";
+        area.style.top = y + "px";
+        area.style.width = zone.w + "px";
+        area.style.height = zone.h + "px";
+        area.onclick = editZone;
+        area.setAttribute('zoneIndex', index);
+        area.id = id;
+        return area;
+    }
+    image.onload = function(){
+        for (let index in ignoredZones){
+            placeIgnoredArea(index).className += " hidden";
+        };
+        image.onload = null;
+    }
+    function drawRectangle(event){
+        drawingStart = 1 - drawingStart;
+        if (drawingStart == 1){
+            let ignoredAreaDetails = document.getElementById("zoneDetails");
+            if (ignoredAreaDetails){
+                divResults.removeChild(ignoredAreaDetails);
+            }
+            var rectangle = document.createElement("div");
+            divResults.appendChild(rectangle);
+            rectangle.className = "ignored-area";
+            let x = event.pageX - divResults.offsetLeft + divResults.scrollLeft;
+            let y = event.pageY - divResults.offsetTop + divResults.scrollTop;
+            let index = ignoredZones.push({
+                x: x - image.offsetLeft,
+                y: y - image.offsetTop,
+                d: "Игнорируемая зона " + (ignoredZones.length + 1)
+            }) - 1;
+            rectangle.id = "ignoredArea_" + index;
+            rectangle.style.left = x + "px";
+            rectangle.style.top = y + "px";
+            image.onmousemove = function(event){
+                let w = event.pageX - divResults.offsetLeft - x + divResults.scrollLeft;
+                let h = event.pageY - divResults.offsetTop - y + divResults.scrollTop;
+                ignoredZones[index].w = w;
+                ignoredZones[index].h = h;
+                rectangle.style.width = w + "px";
+                rectangle.style.height = h + "px";
+            }
+            rectangle.onmousemove = image.onmousemove;
+            rectangle.onclick = this.onclick;
+            rectangle.setAttribute('zoneIndex', index);
+        } else {
+            image.onmousemove = null;
+            const index = ignoredZones.length - 1;
+            const rectangle = document.getElementById("ignoredArea_" + index);
+            rectangle.onmousemove = null;
+            rectangle.onclick = editZone;
+            rectangle.click();
+        }
+    }
+    function showIgnoredZones(){
+        this.setAttribute("state", "visible");
+        this.className+= "active";
+        image.style.cursor = "crosshair";
+        image.onclick = drawRectangle;
+        var areas = document.getElementsByClassName("ignored-area");
+        for (area of areas){
+            area.className = area.className.replace("hidden", "").trim();
+        }
+        this.onclick = showIgnoredZonesData;
+    }
+    function showIgnoredZonesData(){
+        showIgnoreZonesButton.onclick = null;
+        image.style.cursor = "default";
+        image.onclick = null;
+        var areas = document.getElementsByClassName("ignored-area");
+        for (area of areas){
+            area.className += " hidden";
+        }
+        let ignoredZonesDataContainer = document.createElement("div");
+        ignoredZonesDataContainer.id = "ignoredZonesDataContainer";
+        document.body.appendChild(ignoredZonesDataContainer);
+        let textarea = document.createElement("textarea");
+        ignoredZonesDataContainer.appendChild(textarea);
+        textarea.rows = ignoredZones.length * 6;
+        textarea.cols = 100;
+        textarea.innerHTML = "Страница " + pageNumber + ":\n";
+        for (zone of ignoredZones){
+            textarea.innerHTML += "  - d: " + zone.d + "\n"
+                + "    x: " + zone.x + "\n"
+                + "    y: " + zone.y + "\n"
+                + "    w: " + zone.w + "\n"
+                + "    h: " + zone.h + "\n"
+        }
+        textarea.select();
+        let div = document.createElement("div");
+        ignoredZonesDataContainer.appendChild(div);
+        let button = document.createElement("button");
+        button.innerHTML = "Закрыть";
+        div.appendChild(button);
+        button.onclick = function(){
+            document.body.removeChild(ignoredZonesDataContainer);
+            showIgnoreZonesButton.className = showIgnoreZonesButton.className.replace("active","").trim();
+            showIgnoreZonesButton.onclick = showIgnoredZones;
+        }
+        ignoredZonesDataContainer.style.left = divResults.offsetWidth / 2 - ignoredZonesDataContainer.offsetWidth / 2 + "px";
+    }
+    showIgnoreZonesButton.onclick = showIgnoredZones;
+</script>
 </body>
 </html>
