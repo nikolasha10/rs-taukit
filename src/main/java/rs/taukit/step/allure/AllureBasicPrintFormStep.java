@@ -22,19 +22,11 @@ public class AllureBasicPrintFormStep extends BasicUtils {
         TestDataFile standardFileData = scenarioData().get(standardFileParameterName);
         TauLogger.attachPdfFile(testedFileData.getFileName() + " (тест)", testedFileData.getFilePath());
         TauLogger.attachPdfFile(standardFileData.getFileName() + " (эталон)", standardFileData.getFilePath());
-        String checkFullContent = scenarioData().getOptional(nameSpace, "сравнить графически");
-        String checkTextContent = scenarioData().getOptional(nameSpace, "сравнить текст");
-        boolean validateVisual = checkFullContent == null || !checkFullContent.equalsIgnoreCase("нет");
-        boolean validateText = checkTextContent == null || !checkTextContent.equalsIgnoreCase("нет");
         String ignoredZonesParameterName = scenarioData().getOptional(nameSpace, "игнорируемые зоны");
-        String autoReplacingParameterName = scenarioData().getOptional(nameSpace, "автозамена текста");
         Runnable validationResult = validatePdfFullContent(
                 testedFileData,
                 standardFileData,
-                ignoredZonesParameterName,
-                autoReplacingParameterName,
-                validateVisual,
-                validateText);
+                ignoredZonesParameterName);
         if (validationResult != null) {
             String errorMessage = scenarioData().getOptional("Проверка PDF", "Ошибки при сравнении PDF");
             String message = Optional.ofNullable(errorMessage).orElse("");
@@ -50,17 +42,11 @@ public class AllureBasicPrintFormStep extends BasicUtils {
     //    @Step("проверить содержимое файла '{this.testedFileName}' на соответствие эталону")
     public Runnable validatePdfFullContent(TestDataFile testedFileData,
                                            TestDataFile standardFileData,
-                                           String ignoredZonesParameterName,
-                                           String autoReplacingParameterName,
-                                           boolean validateVisual,
-                                           boolean validateText) {
+                                           String ignoredZonesParameterName) {
         List<ImageDifferences> differences = PdfUtils.comparePdf(
                 testedFileData.getFilePath(),
                 standardFileData.getFilePath(),
-                ignoredZonesParameterName,
-                autoReplacingParameterName,
-                validateVisual,
-                validateText);
+                ignoredZonesParameterName);
         if (!differences.isEmpty()) {
             Set<Integer> differentPages = differences.stream().map(ImageDifferences::pageNumber).collect(Collectors.toSet());
             scenarioData().put("Проверка PDF", "Номера различающихся страниц", differentPages);

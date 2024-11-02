@@ -311,10 +311,7 @@ public class PdfUtils {
 
     public static List<ImageDifferences> comparePdf(String testedFilePath,
                                                     String standardFilePath,
-                                                    String ignoredZonesParameterName,
-                                                    String autoReplacingParameterName,
-                                                    boolean validateVisual,
-                                                    boolean validateText) {
+                                                    String ignoredZonesParameterName) {
         Map<String, List<Map<String, String>>> ignoredZones = new HashMap<>();
         if (ignoredZonesParameterName != null) {
             TestDataFile ignoredZonesFileData = scenarioData().get(ignoredZonesParameterName);
@@ -341,18 +338,10 @@ public class PdfUtils {
                 scenarioData().put("Проверка PDF", "Ошибки при сравнении PDF", errorMessage);
             }
             for (int pageNumber = 1; pageNumber <= Math.max(testedPagesNumber, standardPagesNumber); pageNumber++) {
-                if (validateVisual) {
-                    addVisualDifference(
-                            pageNumber,
-                            testedPagesNumber, standardPagesNumber,
-                            testedRenderer, standardRenderer, ignoredZones, images);
-                }
-                if (validateText) {
-                    addTextDifference(
-                            pageNumber,
-                            testedPagesNumber, standardPagesNumber,
-                            testedFilePath, standardFilePath, autoReplacingParameterName, images);
-                }
+                addVisualDifference(
+                        pageNumber,
+                        testedPagesNumber, standardPagesNumber,
+                        testedRenderer, standardRenderer, ignoredZones, images);
             }
             testedDocument.close();
             standardDocument.close();
