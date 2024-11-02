@@ -47,6 +47,7 @@
 	const images = ["${tested}","${expected}","${differences}"];
     const ignoredZones = [${ignoredZonesData}];
     const pageNumber = ${pageNumber};
+    let drawingStart = 0;
 
     divResults.style.top = containerButtons.offsetTop + containerButtons.offsetHeight + 5 + "px";
     image.src = images[2];
@@ -133,18 +134,8 @@
             if (trigger.id.startsWith("left")){
                 area.style.left = x + "px";
                 area.style.width = rx - area.offsetLeft + "px";
-                if (trigger.id.includes("Up")){
-                    trigger.style.cursor = "nwse-resize";
-                } else {
-                    trigger.style.cursor = "nesw-resize";
-                }
             } else if (trigger.id.startsWith("right")){
                 area.style.width = x - area.offsetLeft + "px";
-                if (trigger.id.includes("Up")){
-                    trigger.style.cursor = "nesw-resize";
-                } else {
-                    trigger.style.cursor = "nwse-resize";
-                }
             }
             if (trigger.id.includes("Up")){
                 area.style.top = y + "px";
@@ -363,6 +354,13 @@
         this.onclick = showIgnoredZonesData;
     }
     function showIgnoredZonesData(){
+    	cancelEditZone();
+    	if (ignoredZones.length == 0){
+    		image.onclick = null;
+            showIgnoreZonesButton.className = showIgnoreZonesButton.className.replace("active","").trim();
+            showIgnoreZonesButton.onclick = showIgnoredZones;
+            return;
+		}
         showIgnoreZonesButton.onclick = null;
         image.style.cursor = "default";
         image.onclick = null;
