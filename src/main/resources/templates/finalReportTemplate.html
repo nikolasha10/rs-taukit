@@ -1,79 +1,207 @@
+<!doctype html>
 <html lang="ru">
 <head>
     <meta charset="utf-8">
     <style>
-        select {padding: 5px}
-        input {padding: 5px }
-        #restart {margin: 20px; padding: 10px;}
-        .expand {
-            border: 1px solid gray;
-            border-radius: 10px;
-            width: 15px;
-            height: 12px;
-            text-align: center;
-            padding: 0px 0px 3px 0px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        .grid2 {
-            display: grid;
-            grid-template-columns: 25px auto;
-            grid-auto-rows: minmax(20px, auto);
-        }
-        .grid3 {
-            display: grid;
-            grid-template-columns: 20px 20px auto;
-            grid-auto-rows: minmax(20px, auto);
-            margin-top: 5px;
-        }
-        .grid-row { display: grid; grid-row: 1}
-        .error {
-                background-color: #ffe7e6;
-                border-color: #fd5a3e;
-                padding: 15px;
-        }
+        body {margin: 0px; padding: 0px}
+        .active {color: #ffd050;}
+        #button_run {margin: 20px; padding: 10px;}
+        .expander {padding: 3px 15px 3px 3px;}
         .passed{
-            background-color: #97cc64;
-            color: white;
-            border-color: #97cc64;
-        }
-        .broken{
-            background-color: #ffd050;
-            color: white;
-            border-color: #ffd050;
-        }
-        .unknown{
-            background-color: #d35ebe;
-            color: white;
-            border-color: #d35ebe;
+            position: absolute;
+            color: #008f00;
+            font-size: 17px;
+            transform: translate(-4px, -12px);
         }
         .skipped{
-            background-color: #aaa;
-            color: white;
-            border-color: #aaa;
+            position: absolute;
+            color: gray;
+            font-size: 17px;
+            font-weight: bold;
+            transform: translate(-1px, -10px);
         }
-        .failed{
-            background-color: #fd5a3e;
-            color: white;
-            border-color: #fd5a3e;
+        .toggle {
+            position: absolute;
+            border: 7px solid transparent;
+            filter: drop-shadow(0px 0px 1px #284358);
+            cursor: pointer;
+        }
+
+        .shrink.failed{
+            border-top: 10px solid #cf0000;
+            transform: translate(-3px, -5px);
+        }
+        .shrink.broken{
+            border-top: 10px solid #ffd050;
+            transform: translate(-3px, -5px);
+        }
+        .shrink.unknown{
+            border-top: 10px solid #d35ebe;
+            transform: translate(-3px, -5px);
+        }
+        .shrink.successful {
+            border-top: 10px solid #00cf00;
+            transform: translate(-3px, -5px);
+        }
+        .shrink.warning {
+            border-top: 10px solid #F0e084;
+            transform: translate(-3px, -5px);
+        }
+
+        .expand.successful{
+            border-left: 10px solid #00cf00;
+            filter: drop-shadow(0px 0px 1px #284358);
+            transform: translate(0px, -7px);
+        }
+        .expand.warning{
+            border-left: 10px solid #F0e084;
+            filter: drop-shadow(0px 0px 1px #284358);
+            transform: translate(0px, -7px);
+        }
+        .expand.failed{
+            border-left: 10px solid #cf0000;
+            transform: translate(0px, -7px);
+        }
+        .expand.broken{
+            border-left: 10px solid #ffd050;
+            transform: translate(0px, -7px);
+        }
+        .expand.unknown{
+            border-left: 10px solid #d35ebe;
+            transform: translate(0px, -7px);
+        }
+        .error {
+                background-color: #FFF2C2;
+                padding: 5px;
+                color: black;
+                box-shadow: inset 1px 1px 1px #284358;
+                margin: 0 0 5px 0;
         }
         .hidden {display: none}
+
+        #container_main { display: grid; grid-template-columns: max-content auto;}
+        #container_menu_main { position: absolute; background: #284358; padding-right: 15px;  width: 150px; height: 100%; overflow-y: auto; overflow-x: hidden; z-index: 2}
+        .check::before {
+            content: "✓";
+            color: yellow;
+        }
+        #container_content { position: absolute; right: 0px; top: 0px; bottom: 0px; overflow: hidden; background-color: #BFCbCe; padding: 5px 10px 5px 10px; z-index: 1;}
+        #scenarioTreeContainer { position: absolute; overflow: auto; padding-top: 0px;}
+        .test-counters {
+            font-weight: bold;
+        }
+        .test-counters span{
+            margin-right: 15px;
+            padding: 3px 5px 3px 3px;
+            color: white;
+            text-shadow: 1px 1px 1px black;
+        }
+        #count_total {
+            background-color: #6f98aa;
+        }
+        #count_successful {
+            background-color: #008f00;
+        }
+        #count_with_errors {
+            background-color: #d35ebe;
+        }
+        #count_failed {
+            background-color: #cf0000;
+        }
+        #count_skipped {
+            background-color: gray;
+        }
+
+        .test-tree-header {
+            display: grid;
+            grid-template-columns: max-content max-content max-content;
+            align-items: center;
+        }
+        .test-tree-header.hidden {
+            display: none;
+        }
+        .test-tree-container { padding: 5px 0px 0px 22px }
+        .parent-suite-header {
+            padding: 3px;
+            background-color: #6f98aa;
+            font-weight: bold;
+            color: #eFdecf;
+            text-shadow: 1px 1px 1px black;
+        }
+        .parent-suite-container {
+            background-color: #6f98aa;
+            padding-bottom: 1px;
+            padding-right: 5px;
+            margin-bottom: 3px;
+        }
+        .suite-header {
+            font-weight: bold;
+            color: #eFdecf;
+            text-shadow: 1px 1px 1px black;
+
+        }
+        .test-list-container {
+            background-color: #cFbeaf;
+            box-shadow: 1px 1px #284358;
+            font-size: 14px;
+            padding-bottom: 2px;
+            margin-bottom: 5px;
+            display: grid; grid-template-columns: 99%;
+        }
+        .test-list-container.hidden{
+            display: none;
+        }
+        .container-menu {
+            width: fit-content;
+            background-color: #284358;
+        }
+        .menu-item {
+            margin: 3px 15px;
+            color: #8fb8ca;
+        }
+        .menu-item .label {
+            cursor: pointer;
+        }
+        .menu-item .label:hover {
+            text-decoration: underline;
+        }
+        .selected {
+            display: grid;
+            grid-template-columns: max-content auto;
+            align-items: center;
+        }
+        .selected div {
+            padding-right: 5px;
+        }
+        #container_run{
+            display: grid;
+            grid-template-columns: repeat(3,max-content);
+            align-items: center;
+        }
+        #container_run div {
+            padding: 10px;
+        }
+        #container_tag_list {
+            grid-row: span 8;
+        }
     </style>
     <title>Отчёт</title>
 </head>
 
 <body>
-<table>
-    <tr>
-        <td><select id="standSelect" title="Тестовый стенд"></select></td>
-        <td><select id="branchSelect" title="Ветка автотестов"></select></td>
-        <td><input id="customBranch" title="Произвольная ветка автотестов"></td>
-        <td><select id="filter" title="Фильтр"></select></td>
-    </tr>
-</table>
-<div id="scenarioTreeContainer" class="grid3"></div>
-<div id="buttons">
-    <button id="restart">Перезапустить</button>
+<div id="container_main">
+    <div id="container_menu_main">
+        <div class="menu-item">
+            <div class="label">ТЕСТЫ</div>
+            <div class="container-menu">
+                <div class="menu-item"><div class="label" view="filter">Фильтр</div></div>
+                <div class="menu-item"><div class="label" view="run">Запуск</div></div>
+            </div>
+        </div>
+    </div>
+    <div id="container_content">
+        <div id="container_tests"></div>
+    </div>
 </div>
 
 <script type="text/javascript">
@@ -84,100 +212,348 @@
     const branches = '${branches}'.replaceAll(' ','').split(',');
     const defaultBranch = '${defaultBranch}';
     const scenarioData = ${scenarioData};
+    const filterOptionsValues = {"Все": true};
 
-    function expandFunction(ev){
-        var container = this.parentNode.getElementsByTagName('div')[2];
-        var children = container.childNodes;
-        for (child of children){
-            var currentClass = child.className;
-            if (!currentClass) continue;
-            if (this.innerText === '+'){
-                child.className = currentClass.replaceAll(' hidden', '');
-            } else {
-                child.className = currentClass.trim() + ' hidden';
+    function createTree(parentContainer, data){
+        for (let name in data){
+            const content = data[name];
+            const containers = createContainers(parentContainer, name);
+            containers.header.querySelector("input").value = name;
+            if (Object.keys(content).length > 0){
+                createTree(containers.container, content);
             }
         }
-        let checkbox = this.parentNode.getElementsByTagName('input')[0];
-        if (this.innerText === '+'){
-                this.innerHTML = '&ndash;';
-                checkbox.disabled = false;
-        } else {
-                this.innerHTML = '+';
-                if (!children[1] || children[1].className.includes('error')){
-                    return;
+    }
+    const generator = {
+        filter: function(label, view){
+            const options = {
+                "Все": {
+                    "Успешные": {},
+                    "Неуспешные": {
+                        "Проваленные": {
+                            "С прогнозируемой ошибкой": {},
+                            "С необработанным исключением": {}},
+                        "Пропущенные" : {}}},
+                "Содержат в названии": {"<textarea name='name_contains'></textarea>": {}},
+                "Не содержат в названии": {"<textarea name='name_not_contains'></textarea>": {}}
+            };
+            view.innerHTML = "<h3>Настройки фильтра</h3>";
+            createTree(view, options);
+            const checkboxes = view.querySelectorAll("input");
+            for (let checkbox of checkboxes){
+                if (filterOptionsValues[checkbox.value]){
+                    checkbox.click();
                 }
-                checkbox.checked = false;
-                checkbox.onchange();
-                checkbox.disabled = true;
+                if (checkbox.value.includes("textarea")){
+                    hide(checkbox);
+                }
+            }
+            const apply = document.createElement("button");
+            apply.innerHTML = "Применить";
+            view.appendChild(apply);
+            apply.onclick = filterApply.bind(apply, label, null);
+        },
+        run: function(label, view){
+            view.innerHTML = "<div>Тестовый стенд</div><div><select id='test_stand'></select></div>"
+                           + "<div id='container_tag_list'>Теги тестов:<br><textarea id='tag_list' rows=20></textarea></div>"
+                           + "<div>Тег стенда</div><div><input id='stand_tag'></div>"
+                           + "<div>Ветка фреймворка</div><div><select id='framework_branch'></select></div>"
+                           + "<div>Ветка автотестов</div><div><select id='autotest_branch'></select></div>"
+                           + "<div>Очистить историю</div><div><input name='clean' type='radio' value='Да'> Да <br><input name='clean' type='radio' value='Нет' checked> Нет</div>"
+                           + "<div>Отправить email</div><div><input name='email' type='radio' value='Да'> Да <br><input name='email' type='radio' value='Нет' checked> Нет</div>"
+                           + "<div><button id='button_run'>Запустить</button></div><div id='buildInfo'></div>";
+            const testStand = document.getElementById("test_stand");
+            for (let stand of stands){
+                let selected = stand === currentStand;
+                let option = new Option(stand, stand, selected, selected);
+                testStand.add(option);
+            }
+            const autotestBranch = document.getElementById("autotest_branch");
+            for (let branch of branches){
+                let selected = branch === defaultBranch;
+                let option = new Option(branch, branch, selected, selected);
+                autotestBranch.add(option);
+            }
+            const scenarioTreeContainer = document.getElementById("scenarioTreeContainer");
+            const checkbox = scenarioTreeContainer.querySelector("input");
+            const tags = getSelectedTags(checkbox);
+            const tagList = checkbox.checked && !tags.hasHidden ? [checkbox.value] : tags.tagList;
+            const textarea = document.getElementById("tag_list");
+            textarea.innerHTML = tagList.join("\n");
+            const buttonRun = document.getElementById("button_run");
+            buttonRun.onclick = function(){
+                checkBuildStatus((data) => {
+                    let startConfirm = true;
+                    if (data.inProgress){
+                        startConfirm = window.confirm('Тесты уже выполняются. Вы уверены, что хотите запустить выбранные тесты параллельно?')
+                    }
+                    if (startConfirm){
+                        startNewBuild(data.id, tags.tagList, testStand.value, autotestBranch.value);
+                    }
+                });
+            }
+
         }
     }
-    function expandAll(){
-        let expandButtons = scenarioTreeContainer.getElementsByTagName('div')[2].getElementsByClassName('expand');
-        for (expand of expandButtons){
-            if (expand !== this && expand.parentNode.parentNode.parentNode === scenarioTreeContainer){
-                expand.innerHTML = this.innerHTML;
-                expand.onclick();
+    function getSelectedTags(checkbox){
+        const tags = {hasHidden: false, tagList: []};
+        const header = checkbox.parentNode.parentNode;
+        if (!header.className.includes('hidden')){
+            const container = header.nextSibling;
+            if (container && container.className.includes("test-tree-container") && container.querySelector("input")){
+                const childCheckbox = container.querySelector("input");
+                const childTags = getSelectedTags(childCheckbox);
+                if (childTags.hasHidden) tags.hasHidden = true;
+                if (childTags.hasHidden || !checkbox.checked){
+                    tags.tagList = tags.tagList.concat(childTags.tagList);
+                } else {
+                    tags.tagList.push(checkbox.value);
+                }
+            } else {
+                if (checkbox.checked){
+                    tags.tagList.push(checkbox.value);
+                }
             }
-        }
-        let checkbox = this.parentNode.getElementsByTagName('input')[0];
-        if (this.innerText === '+'){
-                this.innerHTML = '&ndash;';
-                checkbox.disabled = false;
         } else {
-                this.innerHTML = '+';
-                checkbox.checked = false;
-                checkbox.onchange();
-                checkbox.disabled = true;
+            tags.hasHidden = true;
         }
-    }
-    function isHidden(el){ return (el.offsetParent === null) }
-    function checkAll(){
-        let checkboxes = this.parentNode.parentNode.getElementsByTagName('input');
-        for (let checkbox of checkboxes){
-            if (!checkbox.disabled) checkbox.checked = this.checked;
-        }
-    }
-    function setFilter(){
-        if (this.value === 'Неуспешные'){
-            let expandButtons = scenarioTreeContainer.getElementsByClassName('expand passed');
-            for (let expand of expandButtons){
-                expand.parentNode.className += ' hidden';
+        const container = header.nextSibling;
+        let nextHeader = null;
+        if (container){
+            if (container.className.includes("test-tree-header")){
+                nextHeader = container;
+            } else {
+                nextHeader = container.nextSibling;
             }
-            let ready = false;
-            for (let i=0; i<2; i++){
-                let containers = scenarioTreeContainer.getElementsByClassName('grid3');
-                for (let container of containers){
-                    if (!container.className.includes('hidden')){
-                        let children = container.getElementsByClassName('grid3');
-                        let hiddenChildren = container.getElementsByClassName('grid3 hidden');
-                        if (children.length > 0 && children.length == hiddenChildren.length){
-                            container.className += ' hidden';
+            if (nextHeader && nextHeader.className.includes("test-tree-header")){
+                const nextCheckbox = nextHeader.querySelector("input");
+                const nextTags = getSelectedTags(nextCheckbox);
+                if (nextTags.hasHidden) tags.hasHidden = true;
+                tags.tagList = tags.tagList.concat(nextTags.tagList);
+            }
+        }
+        return tags;
+    }
+    const labels = document.querySelectorAll('.label');
+    for(let label of labels){
+        label.onclick = toggleMenu;
+    }
+    function filterApply(label, target){
+        const header = target || this.parentNode.querySelector(".test-tree-header");
+        const checkbox = header.querySelector("input");
+        if (!checkbox) return;
+        if (checkbox.checked){
+            filterOptionsValues[checkbox.value] = true;
+        } else {
+            delete filterOptionsValues[checkbox.value];
+            const childHeader = header.nextSibling ? header.nextSibling.querySelector(".test-tree-header") : null;
+            if (childHeader){
+                filterApply(label,childHeader);
+            }
+
+        }
+        const nextHeader = header.nextSibling ? header.nextSibling.nextSibling : null;
+        if (nextHeader){
+            if (nextHeader.tagName.toLowerCase() !== "button"){
+                filterApply(label, nextHeader);
+            } else {
+                label.click();
+                const statuses = {
+                    passed: "Все" in filterOptionsValues || "Успешные" in filterOptionsValues,
+                    successful: "Все" in filterOptionsValues || "Успешные" in filterOptionsValues,
+                    failed: "Все" in filterOptionsValues
+                            || "Неуспешные" in filterOptionsValues
+                            || "Проваленные" in filterOptionsValues
+                            || "С прогнозируемой ошибкой" in filterOptionsValues,
+                    broken: "Все" in filterOptionsValues
+                            || "Неуспешные" in filterOptionsValues
+                            || "Проваленные" in filterOptionsValues
+                            || "С необработанным исключением" in filterOptionsValues,
+                    skipped: "Все" in filterOptionsValues
+                            || "Неуспешные" in filterOptionsValues
+                            || "Пропущенные" in filterOptionsValues
+                }
+                const containerTests = document.getElementById("container_tests");
+                const expanders = containerTests.querySelectorAll(".expander");
+                for (const expander of expanders){
+                    const child = expander.firstElementChild;
+                    const header = expander.parentNode;
+                    if (header.className.includes("test-counters")) continue
+                    const container = header.nextSibling;
+                    for (const status in statuses){
+                        if (child.className.includes(status)){
+                            let change = statuses[status] ? show : hide;
+                            change(header);
+                            if (container && container.className.includes("test-tree-container")){
+                                change(container);
+                            }
                         }
                     }
                 }
-             }
-        } else {
-            let containers = scenarioTreeContainer.getElementsByClassName('grid3');
-            for (container of containers){
-                container.className = container.className.replace(' hidden', '');
+                const warnings = containerTests.querySelectorAll(".warning");
+                checkEmpty(warnings);
             }
         }
     }
-    function createContainers(parentContainer, text){
+    function checkEmpty(containers){
+        for (const toggle of containers){
+            const header = toggle.parentNode.parentNode;
+            if (header.className.includes("test-counters")) continue;
+            show(header);
+            const container = header.nextSibling;
+            if (container.className.includes("test-tree-container")){
+                show(container);
+                const warnings = container.querySelectorAll(".warning");
+                checkEmpty(warnings);
+                const headers = container.querySelectorAll(".test-tree-header");
+                let displayed = 0;
+                for (const h of headers){
+                    if (!h.className.includes("hidden")){
+                        displayed++;
+                        break;
+                    }
+                }
+                if (displayed == 0){
+                    hide(container);
+                    hide(header);
+                }
+            }
+        }
+
+    }
+    function toggleMenu(){
+        const label = this;
+        const viewName = label.getAttribute("view");
+        const id = "container_" + viewName;
+        const containerTests = document.getElementById("container_tests");
+        const containerContent = document.getElementById("container_content");
+        if (label.className.includes("active")){
+            document.getElementById(id).remove();
+            show(containerTests);
+            removeClass(label, "active");
+        } else {
+            hide(containerTests);
+            const labels = container_menu_main.querySelectorAll(".label");
+            const labelsView = {};
+            for (let l of labels){
+                labelsView[l.getAttribute("view")] = l;
+            }
+            for (let viewName in generator){
+                let old = document.getElementById("container_" + viewName);
+                if (old) containerContent.removeChild(old);
+                removeClass(labelsView[viewName], "active");
+            }
+            addClass(label, "active");
+            const view = document.createElement("div");
+            view.id = id;
+            containerContent.appendChild(view);
+            generator[viewName](label, view);
+        }
+    }
+    function getParentNode(e, c){
+        let p = e.parentNode;
+        while (!p.className.includes(c)){
+            p = getParentNode(p, c);
+        }
+        return p;
+    }
+    function show(e){
+        removeClass(e, 'hidden');
+    }
+    function hide(e){
+        show(e);
+        addClass(e, 'hidden');
+    }
+    function replaceClass(e, c, n){
+        e.className = e.className.replace(c, n);
+    }
+    function addClass(e, c){
+        e.className+= ' ' + c;
+    }
+    function removeClass(e, c){
+        e.className = e.className.replace(c,'').trim();
+    }
+    function filterOptions(){
+        const filter = this;
+        if (filter.getAttribute('open') == 'true'){
+            filter.setAttribute('open', false);
+            hide(menu_tests_filter);
+        } else {
+            filter.setAttribute('open', true);
+            show(menu_tests_filter);
+        }
+    }
+
+    function changeState(toggle, state){
+        const header = toggle.parentNode.parentNode;
+        const container = header.nextSibling;
+        if (!container || !container.className.startsWith("test-tree-container")){
+            return;
+        }
+        var expanders = container.getElementsByClassName('expander');
+        for (let expander of expanders){
+            changeState(expander.firstElementChild, state);
+        }
+        if (state === 'shrink'){
+            if (toggle.id !== "toggleAllButton" && !container.className.includes('hidden')){
+                hide(container);
+            }
+            replaceClass(toggle, 'shrink', 'expand');
+        } else if (state === 'expand') {
+            show(container);
+            replaceClass(toggle, 'expand', 'shrink');
+        }
+    }
+    function changeContainerState(){
+        const expectedStatus = this.className.includes("shrink") ? "shrink" : "expand";
+        changeState(this, expectedStatus);
+    }
+    function isHidden(el){ return (el.offsetParent === null) }
+    function checkAll(){
+        const container = this.parentNode.parentNode.nextSibling;
+        if (container && container.className.includes('test-tree-container')){
+            let checkboxes = container.getElementsByTagName('input');
+            for (let checkbox of checkboxes){
+                checkbox.checked = this.checked;
+            }
+        }
+        const header = this.parentNode.parentNode;
+        if (!header.className.includes('test-counters') && !this.checked && header.parentNode.id !== 'container_filter'){
+            uncheckParent(header.parentNode.previousSibling);
+        }
+    }
+    function uncheckParent(header) {
+        header.querySelector('input').checked = false;
+        const previousHeader = header.parentNode ? header.parentNode.previousSibling : null;
+        if (previousHeader && previousHeader.tagName && previousHeader.tagName.toLowerCase() === "div"){
+            uncheckParent(previousHeader);
+        }
+    }
+    function createContainers(parentContainer, headerContent){
+        const header = document.createElement('div');
+        header.className = "test-tree-header";
+        parentContainer.appendChild(header);
+        const container = document.createElement('div');
+        container.className = "test-tree-container";
+        parentContainer.appendChild(container);
+
         let expand = document.createElement('div');
-        expand.className = 'expand';
-        expand.innerHTML = '&ndash;';
-        parentContainer.appendChild(expand);
+        header.appendChild(expand);
+        expand.className = "expander";
+        expand.innerHTML = " ";
+        let triangle = document.createElement('div');
+        triangle.className = 'toggle shrink';
+        expand.appendChild(triangle);
         let checkboxContainer = document.createElement('div');
-        parentContainer.appendChild(checkboxContainer);
+        header.appendChild(checkboxContainer);
         let checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkboxContainer.appendChild(checkbox);
         checkbox.onchange = checkAll;
-        let container = document.createElement('div');
-        container.innerHTML = text;
-        parentContainer.appendChild(container);
-        return container;
+        let headerText = document.createElement('div');
+        header.appendChild(headerText);
+        headerText.innerHTML = headerContent;
+        return {header: header, container: container};
     }
     function checkBuildStatus(callback, lastBuildId){
         fetch(pipelineUrl + '/lastBuild/api/json', {
@@ -195,17 +571,11 @@
             callback(data, lastBuildId);
         });
     }
-    function startNewBuild(lastBuildId){
-        const checkboxes = document.body.getElementsByTagName('input');
-        const tags = [];
-        for (let checkbox of checkboxes){
-            if (isHidden(checkbox) || !checkbox.checked || checkbox.value[0] != '@') continue;
-            tags.push(checkbox.value);
-        }
-        let scenarioTags = tags.join(',');
+    function startNewBuild(lastBuildId, tagList, stand, branch, ){
+        let scenarioTags = tagList.join(',');
         let formData = new FormData();
-        formData.append('standName', standSelect.value);
-        formData.append('branch', customBranch.value || branchSelect.value);
+        formData.append('standName', stand);
+        formData.append('branch', branch);
         formData.append('mavenGoal', 'test');
         formData.append('scenarioTags', scenarioTags);
         formData.append('trackDependencies', 'true');
@@ -226,10 +596,11 @@
             switch (response.status) {
                 case 201:
                     let buildLink = document.getElementById('buildLink');
+                    const buildInfo = document.getElementById('buildInfo');
                     buildLink && buildLink.remove();
                     let currentStatus = document.createElement('span');
                     currentStatus.innerText = 'Запрос отправлен. Ожидается запуск тестов...';
-                    buttons.appendChild(currentStatus);
+                    buildInfo.appendChild(currentStatus);
                     let waitNewBuild = (lastBuildId) => {
                         checkBuildStatus((data, lastBuildId) => {
                             if (lastBuildId == data.id){
@@ -239,9 +610,8 @@
                             currentStatus.remove();
                             let link = document.createElement('a');
                             link.id = 'buildLink';
-                            buttons.appendChild(link);
+                            buildInfo.appendChild(link);
                             link.href = data.url;
-                            link.target = '_blank';
                             link.innerHTML = data.fullDisplayName;
                         }, lastBuildId);
                     }
@@ -254,104 +624,152 @@
         });
     }
 
-    for (let stand of stands){
-        let selected = stand === currentStand;
-        let option = new Option(stand, stand, selected, selected);
-        standSelect.add(option);
-    }
-    for (let branch of branches){
-        let selected = branch === defaultBranch;
-        let option = new Option(branch, branch, selected, selected);
-        branchSelect.add(option);
-    }
-    let filters = ['Все', 'Неуспешные'];
-    for (let filterValue of filters){
-        let selected = filterValue === 'Все';
-        filter.add(new Option(filterValue, filterValue, selected, selected));
-    }
-    filter.onchange = setFilter;
+    const counters = 'Всего: <span id="count_total"> </span>'
+                   + 'Успешных: <span id="count_successful"> </span>'
+                   + 'С некритическими ошибками: <span id="count_with_errors"> </span>'
+                   + 'Проваленных: <span id="count_failed"> </span>'
+                   + 'Пропущенных: <span id="count_skipped"> </span>';
+    const containerTests = document.getElementById("container_tests");
+    const containers = createContainers(containerTests, counters);
+    const treeHeader = containers.header;
+    addClass(treeHeader, 'test-counters');
+    const treeContainer = containers.container;
+    treeContainer.id = 'scenarioTreeContainer';
+    treeContainer.style.top = treeHeader.offsetTop + treeHeader.offsetHeight + 5 + 'px';
+    treeContainer.style.bottom = '2px';
+    treeContainer.style.left = treeContainer.offsetLeft + 'px';
+    treeContainer.style.right = '2px';
+    const countersValues = {total: 0, successful: 0, withErroros: 0, failed: 0, skipped: 0};
 
-    let commonContainer = createContainers(scenarioTreeContainer, ' *** Результаты автотестов');
-    let expandAllButton = scenarioTreeContainer.getElementsByClassName('expand')[0];
+    let toggleAllButton = container_content.getElementsByClassName('shrink')[0];
+    toggleAllButton.id = "toggleAllButton";
     let parentSuiteNames = Object.keys(scenarioData);
     parentSuiteNames.sort();
+    let countParentSuiteUnsuccessful = 0;
     for (let parentSuiteName of parentSuiteNames){
-        let parentSuiteTag = parentSuiteName.split('.')[0];
-        let scenarioParentSuiteContainer = document.createElement('div');
-        scenarioParentSuiteContainer.className = 'grid3';
-        commonContainer.appendChild(scenarioParentSuiteContainer);
-        let parentSuiteContainer = createContainers(scenarioParentSuiteContainer, parentSuiteName);
+        let parentSuiteContainer = createContainers(containers.container, parentSuiteName);
+        addClass(parentSuiteContainer.header, 'parent-suite-header');
+        addClass(parentSuiteContainer.container, 'parent-suite-container');
         let testSuiteResults = scenarioData[parentSuiteName].testSuiteResults;
+        var checkbox = parentSuiteContainer.header.querySelector("input");
+        let parentSuiteTag = '@' + parentSuiteName.split('.')[0];
+        checkbox.value = parentSuiteTag;
         let suiteNames = Object.keys(testSuiteResults);
         suiteNames.sort();
+        let countSuiteUnsuccessful = 0;
         for (let suiteName of suiteNames){
-         	let suiteTag = '';
-         	let suiteContainer = parentSuiteContainer;
+            let suiteContainer;
+            let suiteTag = parentSuiteTag;
          	if (suiteName !== '-'){
 	            suiteTag = suiteName.split('.')[0];
-	            let scenarioSuiteContainer = document.createElement('div');
-	            scenarioSuiteContainer.className = 'grid3';
-	            parentSuiteContainer.appendChild(scenarioSuiteContainer);
-	            suiteContainer = createContainers(scenarioSuiteContainer, suiteName);
+	            suiteContainer = createContainers(parentSuiteContainer.container, suiteName)
+                addClass(suiteContainer.header, 'suite-header');
+                checkbox = suiteContainer.header.querySelector("input");
+                suiteTag = parentSuiteTag + '.' + suiteName.split('.')[0];
+                checkbox.value = suiteTag;
+            } else {
+                suiteContainer = parentSuiteContainer;
             }
             let subSuiteResults = testSuiteResults[suiteName].testSubSuiteResults;
             let subSuiteNames = Object.keys(subSuiteResults);
             subSuiteNames.sort();
+            let countSubSuiteUnsuccessful = 0;
+            let subSuiteTag = suiteTag;
             for (let subSuiteName of subSuiteNames){
-            	let subSuiteTag = '';
-            	let subSuiteContainer = suiteContainer;
-            	if (subSuiteName !== '-'){
-					subSuiteTag = subSuiteName.split('.')[0];
-                	let scenarioSubSuiteContainer = document.createElement('div');
-                	scenarioSubSuiteContainer.className = 'grid3';
-                	suiteContainer.appendChild(scenarioSubSuiteContainer);
-                	subSuiteContainer = createContainers(scenarioSubSuiteContainer, subSuiteName);
-               }
+                let subSuiteContainer;
+                if (subSuiteName !== '-'){
+                    subSuiteTag = subSuiteName.split('.')[0];
+                    subSuiteContainer = createContainers(suiteContainer.container, subSuiteName);
+                    addClass(subSuiteContainer.header, 'suite-header');
+                    checkbox = subSuiteContainer.header.querySelector("input");
+                    subSuiteTag = suiteTag + '.' + subSuiteName.split('.')[0];
+                    checkbox.value = subSuiteTag;
+                } else {
+                    subSuiteContainer = suiteContainer;
+                }
                 let testResults = subSuiteResults[subSuiteName].testResults;
                 let scenarioNames = Object.keys(testResults);
                 scenarioNames.sort();
+                addClass(subSuiteContainer.container, 'test-list-container');
+                let countTestUnsuccessful = 0;
                 for (let scenarioName of scenarioNames){
+                    countersValues.total++;
                     let scenarioTag = scenarioName.split('.')[0];
-                    let scenarioContainer = document.createElement('div');
-                    scenarioContainer.className = 'grid3';
-                    subSuiteContainer.appendChild(scenarioContainer);
-                    let scenarioNameContainer = createContainers(scenarioContainer, scenarioName);
-                    let expand = scenarioContainer.getElementsByClassName('expand')[0];
+                    let scenarioNameContainer = createContainers(subSuiteContainer.container, scenarioName);
+                    let expand = scenarioNameContainer.header.getElementsByClassName('shrink')[0];
                     let status = testResults[scenarioName].status;
-                    if (status) expand.className+= ' ' + status;
-                    let checkbox = scenarioContainer.getElementsByTagName('input')[0];
-                    let tags = [parentSuiteTag];
-                    if (suiteTag !== '') tags.push(suiteTag);
-                    if (subSuiteTag !== '') tags.push(subSuiteTag);
-                    tags.push(scenarioTag);
-                    checkbox.value = '@' + tags.join('.');
+                    if (status === "passed"){
+                        countersValues.successful++;
+                        expand.className = status;
+                        expand.innerHTML = "&starf;";
+                        subSuiteContainer.container.removeChild(scenarioNameContainer.container);
+                    } else if (!status || status === "skipped"){
+                        countersValues.skipped++;
+                        expand.className = status || "skipped";
+                        expand.innerHTML = "&times;";
+                        subSuiteContainer.container.removeChild(scenarioNameContainer.container);
+                        countTestUnsuccessful++;
+                    } else {
+                        if (status === "unknown"){
+                            countersValues.withErroros++;
+                        } else {
+                            countersValues.failed++;
+                        }
+                        expand.className+= ' ' + status;
+                        countTestUnsuccessful++;
+                    }
+                    checkbox = scenarioNameContainer.header.querySelector("input");
+                    let testTag = subSuiteTag + '.' + scenarioName.split('.')[0];
+                    checkbox.value = testTag;
                     let errorMessage = testResults[scenarioName].errorMessage;
                     if (errorMessage){
                         let errorContainer = document.createElement('div');
                         errorContainer.className = 'error';
                         errorContainer.innerHTML = errorMessage;
-                        scenarioNameContainer.appendChild(errorContainer);
+                        scenarioNameContainer.container.appendChild(errorContainer);
                     }
                 }
+                let subSuiteStatus;
+                if (countTestUnsuccessful == 0){
+                    subSuiteStatus = ' successful';
+                } else {
+                    subSuiteStatus = ' warning';
+                    countSubSuiteUnsuccessful++;
+                }
+                subSuiteContainer.header.querySelector('div.shrink').className+= subSuiteStatus;
             }
+            let suiteStatus;
+            if (countSubSuiteUnsuccessful == 0){
+                suiteStatus = ' successful';
+            } else {
+                suiteStatus = ' warning';
+                countSuiteUnsuccessful++;
+            }
+            suiteContainer.header.querySelector('div.shrink').className+= suiteStatus;
         }
+        let parentSuiteStatus;
+        if (countSuiteUnsuccessful == 0){
+            parentSuiteStatus = ' successful';
+        } else {
+            parentSuiteStatus = ' warning';
+            countParentSuiteUnsuccessful++;
+        }
+        parentSuiteContainer.header.querySelector('div.shrink').className+= parentSuiteStatus;
     }
-    var expandButtons = document.getElementsByClassName('expand');
-    for (let button of expandButtons){
-        button.onclick = expandFunction;
+    addClass(toggleAllButton, countParentSuiteUnsuccessful == 0 ? 'successful' :'warning');
+
+    count_total.innerHTML = countersValues.total;
+    count_successful.innerHTML = countersValues.successful;
+    count_with_errors.innerHTML = countersValues.withErroros;
+    count_failed.innerHTML = countersValues.failed;
+    count_skipped.innerHTML = countersValues.skipped;
+
+    var toggleButtons = document.getElementsByClassName('toggle');
+    for (let button of toggleButtons){
+        button.onclick = changeContainerState;
     }
-    expandAllButton.onclick = expandAll;
-    restart.onclick = function(){
-        checkBuildStatus((data) => {
-            let startConfirm = true;
-            if (data.inProgress){
-                startConfirm = window.confirm('Тесты уже выполняются. Вы уверены, что хотите запустить выбранные тесты параллельно?')
-            }
-            if (startConfirm){
-                startNewBuild(data.id);
-            }
-        });
-    }
+    container_content.style.left = container_menu_main.offsetWidth + "px";
+
 </script>
 </body>
 </html>
