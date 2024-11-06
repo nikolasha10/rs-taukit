@@ -613,6 +613,7 @@
                             buildInfo.appendChild(link);
                             link.href = data.url;
                             link.innerHTML = data.fullDisplayName;
+                            link.target = '_blank';
                         }, lastBuildId);
                     }
                     waitNewBuild(lastBuildId);
