@@ -5,14 +5,12 @@ import io.qameta.allure.Step;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.element.interfaces.IHasEditableValue;
-import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.page.PageObject;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static rs.taukit.utils.BasicUtils.driver;
 
@@ -33,22 +31,19 @@ public class AllureBasicFormDataStep {
     public void fillForm() {
         TauLogger.attachDataTable("Значения полей формы", dataTable);
         data.forEach((row) -> {
-            String type = Optional.ofNullable(row.get("Тип"))
-                    .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Тип'"));
-            String blockName = row.get("Блок");
+            String type = TestDataUtils.get(row, "Тип");
+            String name = TestDataUtils.get(row, "Название");
+            String value = TestDataUtils.get(row, "Значение");
+            String blockName = TestDataUtils.getOptional(row, "Блок");
+            String control = TestDataUtils.getOptional(row, "Контроль");
             IHasBlockElements block = blockName == null
                     ? null
                     : pageObject.getElement(blockName).castTo(IHasBlockElements.class);
-            String name = Optional.ofNullable(row.get("Название"))
-                    .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Название'"));
-            String value = Optional.ofNullable(row.get("Значение"))
-                    .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле 'Значение'"));
-            String control = row.getOrDefault("Контроль", "");
-            IHasEditableValue element = block == null
-                    ? pageObject.getElement(name).castTo(IHasEditableValue.class)
-                    : block.getElementByName(name).castTo(IHasEditableValue.class);
             try {
-                if (control.isEmpty()) {
+                IHasEditableValue element = block == null
+                        ? pageObject.getElement(name).castTo(IHasEditableValue.class)
+                        : block.getElementByName(name).castTo(IHasEditableValue.class);
+                if (control == null) {
                     element.setValue(value);
                 } else {
                     element.setValue(value, control);
