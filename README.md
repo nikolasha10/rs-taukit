@@ -5,23 +5,30 @@ KIT)
 
 <h3>Перед началом работы</h3>
 <ol>
-<li>Клонировать проект фреймворка с репозитория GitLab: <p> git clone http://git.dos.softlab.ru/autotest/rs-taukit.git </p></li>
-<li>Открыть проект в IntelliJ Idea</li>
-<li>Открыть в терминале папку src</li>
-<li>Клонировать проект автотестов в папку test (например, с репозитория GitLab: <p> git clone http://git.dos.softlab.ru/autotest/efr-at.git test</p></li>
+<li>В IntelliJ Idea создать проект из исходников в репозитории GitLab: https://git.dos.softlab.ru/autotest/rs-taukit.git/</li>
+<li>Клонировать нужный проект автотестов в папку src/test, выполнив в терминале команду 
+    <p> git clone <ссылка на проект> src/test</p></li>
 <li>Открыть File -> Setting -> Plugins и проверить, установлены ли плагины:
     <ul>
         <li>Cucumber for Java</li>
         <li>Gherkin</li>
         <li>Lombok</li>
     </ul>
+    Если нет - установить.
 </li>
-<li>Открыть любой сценарий, например, src/efr-at/resources/scenarios/000. Подготовка тестовых условий/001. Установка настроек.feature</li>
+<li>Открыть любой сценарий из папки src/efr-at/resources/scenarios</li>
 <li>Убедиться в том, что
     <ul>
        <li>файлы *.feature ассоциированы с Cucumber (если автоматически не ассоциировались, это можно исправить в настройках File -> Settings -> Editor -> File Types)</li>
        <li>ключевые слова (Функционал, Сценарий) подсвечиваются;</li>
        <li>шаги не подсвечиваются (если выделены желтым, какая-то проблема с плагином cucumber for java);</li>
+       <li>шаги не подчеркнуты и при наведении не всплывает уведомление, что шаг не описан. Если всплывает, открыть файл 
+
+[TestRunner](src/test/java/TestRunner.java)
+
+Если класс ScenarioManager не импортирован, в контекстном меню папки /src/main/java выбрать Mark directory as -> Unmark as Source root,
+а затем Mark directory as -> Source root
+</li>
        <li>русские слова не подчеркнуты (можно отключить проверку в настройках File -> Settings -> Editor -> Inspections -> Internationalization -> Non-ASCII characters);</li>
     </ul>
 </li>
@@ -65,8 +72,7 @@ KIT)
 <h3>Результаты автотестов</h3>
 В результате выполнения автотестов в папке target/allure-results формируются отчеты Allure.
 При локальном запуске тестов посмотреть отчеты можно из меню Maven - Plugins - allure - allure:serve
-Также, можно установить Allure Report следуя инструкциям
-с [официального сайта](https://allurereport.org/docs/gettingstarted-installation/), и открывать отчеты из терминала
-командой allure serve target/allure-results
+Также, можно добавить путь к папке .allure/allure-2.25.0/bin, которая появится после первого выполнения команды allure:serve,
+в переменную среды Path и открывать отчеты из терминала командой allure serve target/allure-results.
 После каждого нового выполнения тестов отчеты необходимо переоткрывать заново с помощью той же команды, т. к. содержимое
 уже сгенерированных не обновляется.
