@@ -25,20 +25,22 @@ public class AllureBasicPageStep extends BasicUtils {
 
     @Step("дождаться отображения страницы \"{this.pageName}\"")
     public void waitForPageLoad() {
-        try {
+        run(() -> {
+            browser().getPage(pageName);
             page.waitForLoad();
-        } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось дождаться отображения страницы \"%s\"", page.getPageName());
-        }
-        scenarioStorage().saveStepAction(page::waitForLoad);
-        TauLogger.report("Отображается страница \"%s\"", pageName);
+        });
+        TauLogger.report("Отображается страница '%s'", pageName);
     }
+
 
     @Step("дождаться отображения всплывающего окна \"{this.pageName}\"")
     public void waitForPopupWindow() {
-        scenarioStorage().setSavedPageName(scenarioStorage().getCurrentPageName());
-        page.waitForLoad();
-        TauLogger.report("Отображается всплывающее окно \"%s\"", pageName);
+        run(() -> {
+            scenarioStorage().setSavedPageName(scenarioStorage().getCurrentPageName());
+            browser().getPage(pageName);
+            page.waitForLoad();
+        });
+        TauLogger.report("Отображается всплывающее окно '%s'", pageName);
     }
 
     @Step("дождаться закрытия всплывающего окна \"{this.pageName}\"")
@@ -49,5 +51,4 @@ public class AllureBasicPageStep extends BasicUtils {
         browser().getPage(currentPageName).waitForLoad();
         TauLogger.report("Отображается страница \"%s\"", currentPageName);
     }
-
 }

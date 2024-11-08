@@ -11,7 +11,7 @@ import static rs.taukit.utils.BasicUtils.scenarioStorage;
 public class CucumberBasicStep {
 
     @И("^нажать на (элемент|поле|кнопку) \"(.+)\"$")
-    public static void click(String elementType, String elementName) {
+    public void click(String elementType, String elementName) {
         AllureBasicStep.clickElement(elementType, elementName);
     }
 

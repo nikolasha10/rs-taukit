@@ -28,13 +28,8 @@ public class AllureBasicStep extends BasicUtils {
 
     @Step("нажать на {elementType} '{elementName}'")
     public static void clickElement(String elementType, String elementName) {
-        try {
-            element(elementName).click();
-        } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось нажать на кнопку \"%s\"", elementName);
-        }
-        scenarioStorage().saveStepAction(() -> element(elementName).click());
-        TauLogger.report("Нажали на %s \"%s\"", elementType, elementName);
+        run(() -> element(elementName).click(), "Не удалось нажать на %s '%s'", elementType, elementName);
+        TauLogger.report("Нажали на %s '%s'", elementType, elementName);
     }
 
     @Step("снимок: {screenshotName}")

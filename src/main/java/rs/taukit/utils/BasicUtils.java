@@ -15,6 +15,7 @@ import rs.taukit.testdata.ScenarioData;
 import rs.taukit.testdata.TestData;
 import rs.taukit.testdata.TestDataFile;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -114,5 +115,34 @@ public class BasicUtils {
                         .map(eval)
                         .collect(Collectors.toList()))
                 .collect(Collectors.toList()), TextUtils.tableConverter);
+    }
+
+    public static boolean skipped() {
+        Boolean skipActions = scenarioData().getOptional("SKIP_ACTIONS");
+        return Optional.ofNullable(skipActions).orElse(false);
+    }
+
+    public static void run(Runnable action) {
+        Runnable runnable = () -> {
+            if (!skipped()) {
+                action.run();
+            }
+        };
+        runnable.run();
+        scenarioStorage().saveStepAction(runnable);
+    }
+
+    public static void run(Runnable action, String format, Object... args) {
+        Runnable runnable = () -> {
+            if (!skipped()) {
+                try {
+                    action.run();
+                } catch (Exception e) {
+                    TauLogger.fail(e, format, args);
+                }
+            }
+        };
+        runnable.run();
+        scenarioStorage().saveStepAction(runnable);
     }
 }

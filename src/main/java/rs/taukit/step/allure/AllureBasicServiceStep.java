@@ -9,13 +9,17 @@ import java.util.function.Predicate;
 
 public class AllureBasicServiceStep extends BasicUtils {
     public void skipActionsIfTrue(DataTable dataTable) {
-        Predicate<Map<String, String>> predicate = condition -> new ExpectedResult(condition).checkResult().isConditionMet();
-        if (dataTable.asMaps().stream().allMatch(predicate)) {
-            scenarioData().put("SKIP_ACTIONS", true);
-        }
+        run(() -> {
+            Predicate<Map<String, String>> predicate = condition -> new ExpectedResult(condition).checkResult().isConditionMet();
+            if (dataTable.asMaps().stream().allMatch(predicate)) {
+                scenarioData().put("SKIP_ACTIONS", true);
+            }
+        });
     }
 
     public void stopSkipActions() {
-        scenarioData().remove("SKIP_ACTIONS");
+        Runnable runnable = () -> scenarioData().remove("SKIP_ACTIONS");
+        scenarioStorage().saveStepAction(runnable);
+        runnable.run();
     }
 }

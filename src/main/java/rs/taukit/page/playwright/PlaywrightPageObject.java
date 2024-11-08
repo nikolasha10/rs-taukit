@@ -72,9 +72,10 @@ public class PlaywrightPageObject implements PageObject {
                 .setFullPage(true);
     }
 
-    public String getCurrentUrl(){
+    public String getCurrentUrl() {
         return page.url();
     }
+
     public boolean isUrlCorrect() {
         return page.url().contains(pageControlUrl);
     }
@@ -88,7 +89,7 @@ public class PlaywrightPageObject implements PageObject {
                 throw new ElementNotDescribedException(notDescribed, pageName);
             }
             return expectedElements.stream().allMatch(elementName -> container.getElementByName(elementName).isVisible());
-        } catch (Exception e){
+        } catch (Exception e) {
             TauLogger.console(e);
             return false;
         }
@@ -170,10 +171,10 @@ public class PlaywrightPageObject implements PageObject {
     @Override
     public boolean isPageClosed() {
         try {
-            waitForClose();
-            return true;
-        } catch (Exception e) {
+            waitForLoadAndContinue(1000);
             return false;
+        } catch (Exception e) {
+            return true;
         }
     }
 
@@ -226,7 +227,7 @@ public class PlaywrightPageObject implements PageObject {
         List<String> notFoundElements = getAllNotFoundElements();
         String elementsNotFound = notFoundElements.isEmpty() ? "" : String.format(
                 ". Не найдены ожидаемые элементы: %s", String.join(", ", notFoundElements));
-        return String.format("Не удалось дождаться отображения страницы \"%s\"%s%s",
+        return String.format("Не удалось дождаться отображения страницы '%s'%s%s",
                 pageName, urlNotContainsExpected, elementsNotFound);
     }
 
