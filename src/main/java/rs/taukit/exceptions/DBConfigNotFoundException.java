@@ -11,7 +11,7 @@ public class DBConfigNotFoundException extends AutoTestBrokenException {
      * @param dbName название базы данных
      */
     public DBConfigNotFoundException(String dbName) {
-        super(String.format("Отсутствует конфигурация для базы данных \"%s\"", dbName));
+        super(String.format("Отсутствует конфигурация для базы данных '%s'", dbName));
     }
 
     /**
@@ -21,6 +21,6 @@ public class DBConfigNotFoundException extends AutoTestBrokenException {
      * @param cause  исключение
      */
     public DBConfigNotFoundException(Throwable cause, String dbName) {
-        super(String.format("Отсутствует конфигурация для базы данных \"%s\"", dbName), cause);
+        super(String.format("Отсутствует конфигурация для базы данных '%s'", dbName), cause);
     }
 }

@@ -10,7 +10,7 @@ public class PageFileNotFoundException extends AutoTestBrokenException {
      * @param name название страницы
      */
     public PageFileNotFoundException(String name) {
-        super("Страница с именем \"%s\" не найдена", name);
+        super("Страница с именем '%s' не найдена", name);
     }
 
     /**
@@ -19,6 +19,6 @@ public class PageFileNotFoundException extends AutoTestBrokenException {
      * @param cause исключение
      */
     public PageFileNotFoundException(Throwable cause, String name) {
-        super(cause, "Не удалось найти или обработать файл страницы \"%s\"", name);
+        super(cause, "Не удалось найти или обработать файл страницы '%s'", name);
     }
 }

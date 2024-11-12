@@ -5,7 +5,7 @@ import rs.taukit.driver.DriverManager;
 import rs.taukit.driver.IWebBrowser;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasBlockElements;
+import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.PageStorage;
 import rs.taukit.scenario.CucumberScenario;
@@ -57,7 +57,7 @@ public class BasicUtils {
         return driver().getCurrentBrowser().getCurrentPage();
     }
 
-    public static IHasBlockElements context() {
+    public static IContainer context() {
         return page().getCurrentContext();
     }
 
@@ -93,10 +93,7 @@ public class BasicUtils {
      * @return таблица данных с вычисленными значениями параметров
      */
     public static DataTable eval(DataTable dataTable) {
-        if (scenarioStorage().getScenarioData() == null) {
-            scenarioStorage().setScenarioData(new ScenarioData(scenarioStorage().getPickle()));
-        }
-        Function<String, String> eval = (template) -> {
+        Function<String, String> evaluate = (template) -> {
             if (template == null) return null;
             String format = "\\$\\{(.+?)} -> (.+)";
             Matcher matcher = Pattern.compile(format).matcher(template);
@@ -112,7 +109,7 @@ public class BasicUtils {
         };
         return DataTable.create(dataTable.asLists().stream()
                 .map(dataRow -> dataRow.stream()
-                        .map(eval)
+                        .map(evaluate)
                         .collect(Collectors.toList()))
                 .collect(Collectors.toList()), TextUtils.tableConverter);
     }

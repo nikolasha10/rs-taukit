@@ -22,7 +22,7 @@ public enum TDDateTime {
     public static int unit(String units) {
         return Arrays.stream(values()).filter(value -> units.matches(value.format))
                 .findFirst().orElseThrow(() -> new TestDataException(
-                        "Не найдено соответствий для единиц измерения времени \"%s\"", units))
+                        "Не найдено соответствий для единиц измерения времени '%s'", units))
                 .calendarUnit;
     }
 }

@@ -11,7 +11,7 @@ public class DBSuiteConfigNotFoundException extends AutoTestBrokenException {
      * @param dbSuiteName название набора параметров
      */
     public DBSuiteConfigNotFoundException(String dbSuiteName) {
-        super(String.format("Отсутствует набор параметров конфигурации баз данных с названием \"%s\"", dbSuiteName));
+        super(String.format("Отсутствует набор параметров конфигурации баз данных с названием '%s'", dbSuiteName));
     }
 
     /**
@@ -21,6 +21,6 @@ public class DBSuiteConfigNotFoundException extends AutoTestBrokenException {
      * @param cause       исключение
      */
     public DBSuiteConfigNotFoundException(Throwable cause, String dbSuiteName) {
-        super(String.format("Отсутствует набор параметров конфигурации баз данных с названием \"%s\"", dbSuiteName), cause);
+        super(String.format("Отсутствует набор параметров конфигурации баз данных с названием '%s'", dbSuiteName), cause);
     }
 }

@@ -35,7 +35,7 @@ public class TestData implements ITestData {
         }
         filePath = Config.eval(filePath);
         Map<String, String> searchBy = YamlParser.convert(parameters.get("поиск по полям"));
-        this.searchValue = searchBy.values().stream().toList().get(0);
+        this.searchValue = searchBy.values().stream().toList().getFirst();
         File file = new File(filePath);
         if (!file.exists()) {
             filePath = dirPath + File.separator + filePath;
@@ -53,7 +53,7 @@ public class TestData implements ITestData {
                 return dataFieldValue != null && dataFieldValue.toString().equalsIgnoreCase(expectedValue);
             }
         });
-        Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля \"%s\". %s",
+        Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля '%s'. %s",
                 fieldName, filePathTmp);
         dataStorage = new DataStorage(filePath, dataList.stream().filter(condition).findFirst().orElseThrow(exception));
     }

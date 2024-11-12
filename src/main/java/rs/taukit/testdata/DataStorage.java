@@ -108,7 +108,7 @@ public class DataStorage {
                 }
             });
         } catch (IllegalArgumentException e) {
-            String message = String.format("Не удалось вычислить значение параметра \"%s\"", template);
+            String message = String.format("Не удалось вычислить значение параметра '%s'", template);
             throw new TestDataException(e, message);
         }
     }
@@ -130,7 +130,7 @@ public class DataStorage {
                 } else return object.toString();
             });
         } catch (Exception e) {
-            String message = String.format("Не удалось вычислить значение параметра \"%s\"", template);
+            String message = String.format("Не удалось вычислить значение параметра '%s'", template);
             throw new TestDataException(e, message);
         }
     }
@@ -140,7 +140,7 @@ public class DataStorage {
         Matcher matcher = Pattern.compile(format).matcher(template);
         try {
             if (!matcher.matches()) {
-                throw new TestDataException("Ключ \"%s\" не соответствует формату \"%s\"", template, format);
+                throw new TestDataException("Ключ '%s' не соответствует формату '%s'", template, format);
             }
             String workDataName = matcher.group(1);
             if (workDataName.equals("System properties")) {
@@ -149,7 +149,7 @@ public class DataStorage {
             TestData workData = get(workDataName);
             return workData.getDataStorage().get(matcher.group(2));
         } catch (Exception e) {
-            String message = String.format("Не удалось вычислить значение параметра \"%s\"", template);
+            String message = String.format("Не удалось вычислить значение параметра '%s'", template);
             throw new TestDataException(e, message);
         }
     }

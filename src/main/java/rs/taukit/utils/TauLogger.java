@@ -319,7 +319,7 @@ public final class TauLogger {
                     .map(row -> String.join("\t", row))
                     .collect(Collectors.joining("\r\n")).getBytes();
         } catch (Exception e) {
-            e.printStackTrace();
+            console(e);
             return new byte[0];
         }
     }
@@ -335,7 +335,7 @@ public final class TauLogger {
         try {
             return Files.readAllBytes(file.toPath());
         } catch (IOException ioException) {
-            warnWOSS(ioException, "Не удалось приложить файл \"%s\" к отчету", filePath);
+            warnWOSS(ioException, "Не удалось приложить файл '%s' к отчету", filePath);
         }
         return null;
     }
@@ -346,7 +346,7 @@ public final class TauLogger {
         try {
             return Files.readAllBytes(file.toPath());
         } catch (IOException ioException) {
-            warnWOSS(ioException, "Не удалось приложить файл \"%s\" к отчету", filePath);
+            warnWOSS(ioException, "Не удалось приложить файл '%s' к отчету", filePath);
         }
         return null;
     }
@@ -356,7 +356,7 @@ public final class TauLogger {
         try {
             return content.getBytes();
         } catch (Exception e) {
-            warnWOSS(e, "Не удалось приложить файл \"%s\" к отчету", fileName);
+            warnWOSS(e, "Не удалось приложить файл '%s' к отчету", fileName);
         }
         return null;
     }
@@ -372,7 +372,7 @@ public final class TauLogger {
             case TestDataFile file -> attachFile(name, file.getFilePath());
             case String text -> attachFile(name, text.getBytes());
             case null, default ->
-                    throw new TestDataException("Не удалось прикрепить объект \"%s\" к отчёту. Не распознан тип вложения.", name);
+                    throw new TestDataException("Не удалось прикрепить объект '%s' к отчёту. Не распознан тип вложения.", name);
         }
     }
 

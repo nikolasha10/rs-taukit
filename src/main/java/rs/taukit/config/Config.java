@@ -53,7 +53,7 @@ public class Config {
             InputStream configInputStream = new FileInputStream(filePath);
             properties.load(configInputStream);
             if (!required) {
-                TauLogger.console("[примечание] установлены значения параметров из файла \"%s\"", filePath);
+                TauLogger.console("[примечание] установлены значения параметров из файла '%s'", filePath);
             }
         } catch (IOException e) {
             if (required) {
@@ -81,7 +81,7 @@ public class Config {
             }
             return matcher.replaceAll(matchResult -> getProperty(matchResult.group(1)));
         } catch (IllegalArgumentException e) {
-            String message = String.format("Не удалось вычислить значение свойства \"%s\"", template);
+            String message = String.format("Не удалось вычислить значение свойства '%s'", template);
             throw new TestDataException(e, message);
         }
     }

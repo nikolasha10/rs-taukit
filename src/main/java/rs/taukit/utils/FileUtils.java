@@ -32,10 +32,10 @@ public class FileUtils {
         File destinationFile = new File(filePath);
         try {
             Files.move(file.toPath(), destinationFile.toPath(), REPLACE_EXISTING);
-            TauLogger.report("Файл сохранен в \"%s\"", destinationFile.getPath());
+            TauLogger.report("Файл сохранен в '%s'", destinationFile.getPath());
             TauLogger.attachPdfFile(newFileName, destinationFile.getPath());
         } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось сохранить файл \"%s\", как \"%s\"", fileName, newFileName);
+            TauLogger.fail(e, "Не удалось сохранить файл '%s', как '%s'", fileName, newFileName);
         }
     }
 

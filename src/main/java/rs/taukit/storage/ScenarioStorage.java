@@ -5,8 +5,8 @@ import io.cucumber.testng.PickleWrapper;
 import lombok.Getter;
 import lombok.Setter;
 import rs.taukit.driver.DriverManager;
-import rs.taukit.element.interfaces.IHasBlockElements;
-import rs.taukit.step.allure.BasicApplication;
+import rs.taukit.element.interfaces.IContainer;
+import rs.taukit.step.manager.ApplicationManager;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.testdata.TestData;
 
@@ -17,7 +17,7 @@ import java.util.List;
 @Getter
 public class ScenarioStorage {
     private final DriverManager driverManager = new DriverManager();
-    private final HashMap<String, BasicApplication> application = new HashMap<>();
+    private final HashMap<String, ApplicationManager> application = new HashMap<>();
     private final List<Runnable> stepActions = new ArrayList<>();
     private Pickle pickle;
     private String scenarioName;
@@ -32,7 +32,7 @@ public class ScenarioStorage {
     @Setter
     private String savedPageName;
     @Setter
-    private IHasBlockElements savedContext;
+    private IContainer savedContext;
     @Setter
     private String stepActionPageName;
     private boolean saveActions = false;
@@ -56,11 +56,11 @@ public class ScenarioStorage {
         this.stepActions.clear();
     }
 
-    public BasicApplication getApplication(String appName) {
+    public ApplicationManager getApplication(String appName) {
         return application.get(appName);
     }
 
-    public void putApplication(String appName, BasicApplication app) {
+    public void putApplication(String appName, ApplicationManager app) {
         application.putIfAbsent(appName, app);
     }
 

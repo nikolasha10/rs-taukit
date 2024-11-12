@@ -200,14 +200,14 @@ public abstract class PwBrowser implements IWebBrowser {
             String dirName = FileUtils.getDownloadFilePath();
             File file = new File(dirName, fileName);
             pwDownload.saveAs(file.toPath());
-            TauLogger.report("Загружен файл \"%s\" в папку \"%s\"", fileName, dirName);
+            TauLogger.report("Загружен файл '%s' в папку '%s'", fileName, dirName);
             isDownloaded.set(true);
         };
         getPage().onDownload(download);
         double fileDownloadTimeout = Config.getTimeProperty("file.download.timeout");
         getPage().waitForDownload(new Page.WaitForDownloadOptions().setTimeout(fileDownloadTimeout), () -> {
             element.getElementPwLocator().click();
-            TauLogger.report("Нажали на кнопку \"%s\"", element.getElementName());
+            TauLogger.report("Нажали на кнопку '%s'", element.getElementName());
         });
     }
 
@@ -228,7 +228,7 @@ public abstract class PwBrowser implements IWebBrowser {
             waitTimes.getAndAdd(1);
             File file = filesMap.get(pwDownload.suggestedFilename());
             pwDownload.saveAs(file.toPath());
-            TauLogger.report("Загружен файл \"%s\" в папку \"%s\"", file.getName(), dirName);
+            TauLogger.report("Загружен файл '%s' в папку '%s'", file.getName(), dirName);
             try {
                 driver().waitForCondition(() -> waitTimes.get() == filesMap.size());
             } catch (TimeoutError te) {
@@ -238,7 +238,7 @@ public abstract class PwBrowser implements IWebBrowser {
         getPage().onDownload(download);
         getPage().waitForDownload(options, () -> {
             element.getElementPwLocator().click();
-            TauLogger.report("Нажали на кнопку \"%s\"", element.getElementName());
+            TauLogger.report("Нажали на кнопку '%s'", element.getElementName());
         });
     }
 
