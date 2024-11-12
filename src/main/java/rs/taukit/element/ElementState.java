@@ -22,6 +22,8 @@ public enum ElementState {
     HAS_COLOR("имеет цвет", checked -> checked.element().hasBgColor(checked.expectedValue().toString()), "имеет другой цвет"),
     IS_DOWNLOADED("загружен", checked -> !checked.element().isVisible(), "не загружен"),
     IS_OPENED("открыта", checked -> checked.element().castTo(PwBrowserTab.class).isOpened(), "не открыта"),
+    IS_NOT_EMPTY("заполнено", checked -> !checked.element().getText().isEmpty(), "не заполнено"),
+    IS_EMPTY("не заполнено", checked -> checked.element().getText().isEmpty(), "заполнено"),
     CONTENT_TEXT("содержит", checked -> {
         String elementText = checked.element().getText();
         return elementText.contains(checked.expectedValue().toString());
