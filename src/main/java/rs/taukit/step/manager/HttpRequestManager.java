@@ -319,10 +319,12 @@ public class HttpRequestManager extends StepManager {
     public void createRequestHeaders(DataTable dataTable) {
         dataTable.asMaps().forEach(row -> headers.put(
                 TestDataUtils.get(row, "Параметр"), TestDataUtils.get(row, "Значение")));
+        scenarioData.put(headersParameterName, headers);
     }
 
     public void createRequestParams(DataTable dataTable) {
         dataTable.asMaps().forEach(row -> queryParams.put(
                 TestDataUtils.get(row, "Параметр"), TestDataUtils.get(row, "Значение")));
+        scenarioData.put(queryParameterName, queryParams);
     }
 }
