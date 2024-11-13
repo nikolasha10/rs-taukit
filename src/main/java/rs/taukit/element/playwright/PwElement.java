@@ -88,8 +88,13 @@ public class PwElement extends Element {
     }
 
     @Override
+    public boolean isDisabled() {
+        return elementPwLocator.isDisabled() || elementPwLocator.getAttribute("class").contains("disabled");
+    }
+
+    @Override
     public boolean isEnabled() {
-        return elementPwLocator.isEnabled();
+        return elementPwLocator.isEnabled() && !isDisabled();
     }
 
     @Override
@@ -101,7 +106,7 @@ public class PwElement extends Element {
     public String getText() {
         try {
             return elementPwLocator.innerText();
-        } catch (Exception e){
+        } catch (Exception e) {
             String message = String.format("Не удалось получить значение элемента '%s'", elementName);
             throw new RuntimeException(message, e);
         }

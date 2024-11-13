@@ -17,6 +17,8 @@ public interface IElement {
 
     ElementModel getModel();
 
+    boolean isDisabled();
+
     boolean isEnabled();
 
     String getBgColor();
