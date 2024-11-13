@@ -21,10 +21,6 @@ public class DataStorage {
     public DataStorage(String featureFilePath, Map<String, ?> data) {
         File featureFile = new File(featureFilePath);
         String featureDirPath = featureFile.getParent();
-        if (featureDirPath != null) {
-            String featureDir = featureDirPath.replaceAll("\\\\", "/");
-            dataStorage.putIfAbsent("FEATURE_DIR", YamlParser.convert(featureDir));
-        }
 
         data.forEach((fieldName, fieldValue) -> {
             if (fieldValue instanceof Map) {
@@ -101,6 +97,8 @@ public class DataStorage {
                 result.put(fieldName, testDataDateTime.getStringValue());
             } else if (fieldValue instanceof ITestData testData) {
                 result.put(fieldName, testData.getAttachment());
+            } else if (fieldValue instanceof List<?> list) {
+                result.put(fieldName, list);
             } else if (fieldValue instanceof String) {
                 String value = evalString(YamlParser.convert(fieldValue));
                 result.put(fieldName, value);

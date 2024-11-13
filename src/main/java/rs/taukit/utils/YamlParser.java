@@ -27,6 +27,7 @@ public class YamlParser {
         YAMLFactory yamlFactory = new YAMLFactory();
         yamlFactory.disable(YAMLGenerator.Feature.SPLIT_LINES);
         ObjectMapper mapper = new ObjectMapper(yamlFactory);
+//        mapper.enable(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED);
         try {
             return mapper.writeValueAsBytes(object);
         } catch (IOException e) {
