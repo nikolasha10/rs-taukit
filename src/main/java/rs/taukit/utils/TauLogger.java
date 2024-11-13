@@ -361,6 +361,16 @@ public final class TauLogger {
         return null;
     }
 
+    @Attachment(value = "{fileName}", type = "application/yaml", fileExtension = ".yaml")
+    public static byte[] attachYaml(String fileName, byte[] content) {
+        try {
+            return content;
+        } catch (Exception e) {
+            warnWOSS(e, "Не удалось приложить файл '%s' к отчету", fileName);
+        }
+        return null;
+    }
+
     @Attachment(value = "{fileName}")
     public static byte[] attachFile(String fileName, byte[] file) {
         return file;

@@ -3,7 +3,6 @@ package rs.taukit.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 
 import java.io.File;
@@ -25,7 +24,7 @@ public class YamlParser {
 
     public static byte[] write(Object object) {
         YAMLFactory yamlFactory = new YAMLFactory();
-        yamlFactory.disable(YAMLGenerator.Feature.SPLIT_LINES);
+//        yamlFactory.disable(YAMLGenerator.Feature.SPLIT_LINES);
         ObjectMapper mapper = new ObjectMapper(yamlFactory);
 //        mapper.enable(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED);
         try {

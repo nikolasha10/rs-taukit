@@ -21,6 +21,6 @@ public class ConfigFileNotFoundException extends AutoTestBrokenException {
      * @param cause    исключение
      */
     public ConfigFileNotFoundException(Throwable cause, String filePath) {
-        super(String.format("Не удалось найти или обработать файл '%s'", filePath), cause);
+        super(cause, "Не удалось найти или обработать файл '%s'", filePath);
     }
 }
