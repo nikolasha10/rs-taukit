@@ -12,6 +12,6 @@ public class DriverNotFoundException extends AutoTestBrokenException {
      * @param driverName описание пользователя в файле Пользователи.yaml
      */
     public DriverNotFoundException(Throwable cause, String driverName) {
-        super(String.format("Драйвер \"%s\" не найден", driverName), cause);
+        super(String.format("Драйвер '%s' не найден", driverName), cause);
     }
 }

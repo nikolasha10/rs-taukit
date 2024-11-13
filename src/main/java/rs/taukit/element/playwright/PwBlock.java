@@ -4,8 +4,8 @@ import com.microsoft.playwright.Locator;
 import lombok.Getter;
 import lombok.Setter;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.element.interfaces.IHasText;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.page.playwright.ElementBuilder;
@@ -20,7 +20,7 @@ import static rs.taukit.utils.BasicUtils.scenarioStorage;
 
 @Setter
 @Getter
-public class PwBlock extends PwElement implements IHasBlockElements {
+public class PwBlock extends PwElement implements IContainer {
     private int currentIndex;
 
     public PwBlock(String elementName, ElementModel model) {
@@ -79,9 +79,9 @@ public class PwBlock extends PwElement implements IHasBlockElements {
     }
 
     @Override
-    public Stream<IHasBlockElements> getStream() {
+    public Stream<IContainer> getStream() {
         return elementPwLocator.all().stream()
                 .map(locator -> ElementBuilder.buildElement(elementName, this, locator))
-                .map(locator -> locator.castTo(IHasBlockElements.class));
+                .map(locator -> locator.castTo(IContainer.class));
     }
 }

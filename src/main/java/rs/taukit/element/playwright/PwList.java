@@ -5,8 +5,8 @@ import io.cucumber.datatable.DataTable;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.ElementState;
+import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasBlockElements;
 import rs.taukit.element.interfaces.IHasEditableValue;
 import rs.taukit.element.interfaces.IHasListItems;
 import rs.taukit.exceptions.AutoTestBrokenException;
@@ -119,7 +119,7 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
         PwBlock foundItem = null;
         int foundIndex = IntStream.range(0, getItemList().size()).boxed()
                 .filter(index -> dataTable.asMaps().stream().allMatch(data -> {
-                    IHasBlockElements item = getItemList().get(index);
+                    IContainer item = getItemList().get(index);
                     String objectName = TestDataUtils.get(data, "Название");
                     String objectState = TestDataUtils.get(data, "Состояние");
                     String expectedValue = TestDataUtils.getOptional(data, "Значение");

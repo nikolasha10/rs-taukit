@@ -10,7 +10,7 @@ import java.util.function.Supplier;
  */
 public class ElementNotBuiltException extends AutoTestBrokenException {
     public ElementNotBuiltException(Throwable cause, String elementName, String className, String structure) {
-        super(cause, String.format("Ошибка при создании элемента \"%s\" класса \"%s\" по данным %s. " +
+        super(cause, String.format("Ошибка при создании элемента '%s' класса '%s' по данным %s. " +
                         "Возможно, элемент не описан в yaml-файле текущей страницы " +
                         "или описание имеет неправильную структуру, " +
                         "или его название совпадает с названием другого элемента, найденного в текущем контексте " +

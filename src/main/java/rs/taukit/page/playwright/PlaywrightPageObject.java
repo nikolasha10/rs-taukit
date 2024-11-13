@@ -6,7 +6,7 @@ import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasBlockElements;
+import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.playwright.PwBlock;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.PageFragmentNotFoundException;
@@ -34,9 +34,9 @@ public class PlaywrightPageObject implements PageObject {
     private final PwBlock container;
     private final List<String> expectedElements;
     private final Page.ScreenshotOptions screenshotOptions;
-    private final Deque<IHasBlockElements> currentContext = new LinkedList<>();
+    private final Deque<IContainer> currentContext = new LinkedList<>();
     private PlaywrightPageObject popup;
-    private Page.WaitForConditionOptions options;
+    private final Page.WaitForConditionOptions options;
     private double pageTimeout;
     private Exception thrownException;
 
@@ -125,14 +125,14 @@ public class PlaywrightPageObject implements PageObject {
             BooleanSupplier waitCondition = () -> !isUrlCorrect() || !hasPageAllExpectedElements();
             page.waitForCondition(waitCondition, options);
         } catch (Exception e) {
-            throw new PageNotClosedException(e, String.format("Не удалось дождаться закрытия страницы \"%s\"", pageName));
+            throw new PageNotClosedException(e, String.format("Не удалось дождаться закрытия страницы '%s'", pageName));
         }
 
     }
 
     @Override
     public void waitForElement(String elementName, boolean isVisible) {
-        IHasBlockElements context = getCurrentContext();
+        IContainer context = getCurrentContext();
         IElement expectedElement = context.getElementByName(elementName);
         IElement element = Optional.ofNullable(expectedElement)
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName));
@@ -179,7 +179,7 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     @Override
-    public IHasBlockElements getCurrentContext() {
+    public IContainer getCurrentContext() {
         return this.currentContext.peekLast();
     }
 
@@ -193,14 +193,14 @@ public class PlaywrightPageObject implements PageObject {
             }
             case String blockName -> {
                 try {
-                    this.currentContext.add(getElement(blockName).castTo(IHasBlockElements.class));
+                    this.currentContext.add(getElement(blockName).castTo(IContainer.class));
                 } catch (Exception e) {
                     String message = String.format("Не удалось установить элемент '%s' (%s) в качестве текущего контекста",
                             blockName, getElement(blockName).getModel().getType());
                     throw new RuntimeException(message, e);
                 }
             }
-            case IHasBlockElements iHasBlockElements -> this.currentContext.add(iHasBlockElements);
+            case IContainer iContainer -> this.currentContext.add(iContainer);
             default -> {
             }
         }
@@ -208,13 +208,13 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     @Override
-    public void replaceCurrentContext(IHasBlockElements blockElements) {
+    public void replaceCurrentContext(IContainer blockElements) {
         dropCurrentContext();
         this.currentContext.add(blockElements);
     }
 
     @Override
-    public IHasBlockElements dropCurrentContext() {
+    public IContainer dropCurrentContext() {
         this.currentContext.pollLast();
         return this.currentContext.peekLast();
     }
@@ -263,21 +263,21 @@ public class PlaywrightPageObject implements PageObject {
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName, getCurrentContext()));
     }
 
-    private IElement findElement(IHasBlockElements context, String elementName) {
+    private IElement findElement(IContainer context, String elementName) {
         List<IElement> elementList;
         if (context.containsElement(elementName)) {
             return context.getElementByName(elementName);
         }
         elementList = context.getElementList();
-        List<IHasBlockElements> blockElementsList = elementList.stream()
+        List<IContainer> blockElementsList = elementList.stream()
                 .filter(element -> element.getModel().getType().equalsIgnoreCase("блок элементов"))
-                .map(element -> element.castTo(IHasBlockElements.class))
+                .map(element -> element.castTo(IContainer.class))
                 .toList();
-        for (IHasBlockElements blockElement : blockElementsList) {
+        for (IContainer blockElement : blockElementsList) {
             if (context.containsElement(blockElement.getElementName())) {
                 return null;
             }
-            IHasBlockElements newContext = context.getElementByName(blockElement.getElementName()).castTo(IHasBlockElements.class);
+            IContainer newContext = context.getElementByName(blockElement.getElementName()).castTo(IContainer.class);
             IElement foundElement = findElement(newContext, elementName);
             if (foundElement != null) return foundElement;
         }

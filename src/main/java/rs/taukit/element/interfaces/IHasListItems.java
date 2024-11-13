@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface IHasListItems {
     List<? extends IElement> getItemList();
-    IHasBlockElements findItemByConditions(DataTable dataTable);
+    IContainer findItemByConditions(DataTable dataTable);
 }

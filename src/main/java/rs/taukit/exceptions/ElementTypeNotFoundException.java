@@ -6,7 +6,7 @@ package rs.taukit.exceptions;
 public class ElementTypeNotFoundException extends AutoTestBrokenException {
 
     public ElementTypeNotFoundException(String typeName) {
-        super(String.format("Тип элемента \"%s\" не найден", typeName));
+        super(String.format("Тип элемента '%s' не найден", typeName));
     }
 
 }

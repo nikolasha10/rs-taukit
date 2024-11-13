@@ -3,7 +3,8 @@ package rs.taukit.testdata;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementState;
-import rs.taukit.element.interfaces.IHasBlockElements;
+import rs.taukit.element.interfaces.IContainer;
+import rs.taukit.element.interfaces.IHasText;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.PageState;
 import rs.taukit.records.CheckedElement;
@@ -46,7 +47,6 @@ public class ExpectedResult {
         this.objectState = TestDataUtils.get(data, "Состояние");
         this.expectedValue = TestDataUtils.getOptional(data, "Значение");
         String checkTimeout = Optional.ofNullable(data.get("Ожидание")).orElse(Config.getProperty("element.check.interval"));
-        if (checkTimeout.isEmpty()) checkTimeout = Config.getProperty("element.check.interval");
         this.checkTimeout = TimeStringParser.getTime(checkTimeout);
         this.condition = () -> checkCondition(objectType.toLowerCase());
     }
@@ -89,7 +89,7 @@ public class ExpectedResult {
                 page.setPageTimeout(pageTimeout);
                 if (!result) {
                     this.thrownException = page.getThrownException();
-                    IHasBlockElements currentContext = scenarioStorage().getSavedContext();
+                    IContainer currentContext = scenarioStorage().getSavedContext();
                     browser().getPage(scenarioStorage().getSavedPageName()).setCurrentContext(currentContext);
                 }
                 return result;
@@ -100,18 +100,29 @@ public class ExpectedResult {
                 return new File(dirName, objectName).exists();
             case "параметр":
                 this.currentValue = Optional.ofNullable(scenarioData().getOptional(objectName)).orElse("<отсутствует>").toString();
-                switch (objectState){
-                    case "равен": return currentValue.equals(expectedValue);
-                    case "равен без учета регистра": return currentValue.equalsIgnoreCase(expectedValue);
-                    case "не равен": return !currentValue.equals(expectedValue);
-                    case "содержит": return currentValue.contains(expectedValue);
-                    case "не содержит": return !currentValue.contains(expectedValue);
-                    case "пуст": return currentValue.isEmpty();
-                    case "не пуст": return !currentValue.isEmpty();
-                    default: this.thrownException = new RuntimeException(String.format(
-                            "Проверка состояния '%s' для объекта '%s' не реализована", objectState, objectType));
+                switch (objectState) {
+                    case "равен":
+                        return currentValue.equals(expectedValue);
+                    case "равен без учета регистра":
+                        return currentValue.equalsIgnoreCase(expectedValue);
+                    case "не равен":
+                        return !currentValue.equals(expectedValue);
+                    case "содержит":
+                        return currentValue.contains(expectedValue);
+                    case "не содержит":
+                        return !currentValue.contains(expectedValue);
+                    case "пуст":
+                        return currentValue.isEmpty();
+                    case "не пуст":
+                        return !currentValue.isEmpty();
+                    default:
+                        this.thrownException = new RuntimeException(String.format(
+                                "Проверка состояния '%s' для объекта '%s' не реализована", objectState, objectType));
                 }
             default:
+                if (element(objectName) instanceof IHasText hasText) {
+                    this.currentValue = hasText.getText();
+                }
                 return ElementState.getState(objectState).apply(new CheckedElement(element(objectName), expectedValue));
         }
     }
@@ -133,7 +144,7 @@ public class ExpectedResult {
         return this;
     }
 
-    public ExpectedResult checkResult(){
+    public ExpectedResult checkResult() {
         this.conditionMet = condition.getAsBoolean();
         return this;
     }
