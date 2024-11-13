@@ -36,6 +36,9 @@ public class TestDataFile implements ITestData {
     public LinkedHashMap<String, Object> getAttachments() {
         return dataStorage.getAttachments(fileName);
     }
+    public LinkedHashMap<String, Object> getAttachment() {
+        return dataStorage.getAttachment();
+    }
 
     @Override
     public <T> T get(String fieldName) {

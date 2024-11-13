@@ -82,6 +82,9 @@ public class TestDataDateTime implements ITestData {
     public LinkedHashMap<String, Object> getAttachments() {
         return dataStorage.getAttachments(toString());
     }
+    public LinkedHashMap<String, Object> getAttachment() {
+        return dataStorage.getAttachment();
+    }
 
     @Override
     public <T> T get(String fieldName) {

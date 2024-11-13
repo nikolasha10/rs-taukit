@@ -64,6 +64,11 @@ public class TestData implements ITestData {
     }
 
     @Override
+    public LinkedHashMap<String, Object> getAttachment() {
+        return dataStorage.getAttachment();
+    }
+
+    @Override
     public <T> T get(String fieldName) {
         return dataStorage.get(fieldName);
     }

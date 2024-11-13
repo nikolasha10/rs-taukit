@@ -1,6 +1,7 @@
 package rs.taukit.testdata;
 
 import io.cucumber.datatable.DataTable;
+import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.TestDataException;
 import rs.taukit.testdata.constant.TestDataField;
@@ -13,6 +14,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Getter
 public class DataStorage {
     private final Map<String, ?> dataStorage = new LinkedHashMap<>();
 
@@ -87,6 +89,27 @@ public class DataStorage {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         result.put(tableName, DataTable.create(dataTable, TextUtils.tableConverter));
         result.putAll(linkTableMap);
+        return result;
+    }
+
+    public LinkedHashMap<String, Object> getAttachment() {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        dataStorage.forEach((fieldName, fieldValue) -> {
+            if (fieldValue instanceof TestDataFile testDataFile) {
+                result.put(fieldName, testDataFile.getFilePath());
+            } else if (fieldValue instanceof TestDataDateTime testDataDateTime) {
+                result.put(fieldName, testDataDateTime.getStringValue());
+            } else if (fieldValue instanceof ITestData testData) {
+                result.put(fieldName, testData.getAttachment());
+            } else if (fieldValue instanceof String) {
+                String value = evalString(YamlParser.convert(fieldValue));
+                result.put(fieldName, value);
+            } else if (fieldValue instanceof Integer) {
+                result.put(fieldName, YamlParser.convert(fieldValue));
+            } else {
+                result.put(fieldName, fieldValue.toString());
+            }
+        });
         return result;
     }
 

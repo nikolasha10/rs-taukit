@@ -32,6 +32,10 @@ public class TestDataInstruction implements ITestData {
         attachments.put(fieldName, getDataTable());
         return attachments;
     }
+    @Override
+    public LinkedHashMap<String, Object> getAttachment() {
+        return dataStorage.getAttachment();
+    }
 
     @Override
     public <T> T get(String fieldName) {
