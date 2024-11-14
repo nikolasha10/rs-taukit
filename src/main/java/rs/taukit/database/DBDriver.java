@@ -4,12 +4,10 @@ import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.config.DBConfig;
 import rs.taukit.exceptions.DBExecuteSqlException;
-import rs.taukit.utils.FileUtils;
-import rs.taukit.utils.TauLogger;
 
 import java.sql.*;
+import java.util.Map;
 
-import static rs.taukit.utils.BasicUtils.eval;
 import static rs.taukit.utils.BasicUtils.scenarioData;
 
 public class DBDriver {
@@ -28,10 +26,14 @@ public class DBDriver {
     }
 
     private String getJdbcUrl(String dbType) {
-        String postgresqlJdbcUrlFormat = "jdbc:postgresql://%s:%s/%s?currentSchema=%s";
-        String oracleJdbcUrlFormat = "jdbc:oracle:thin:@(description=(address=(host=%s)(protocol=tcp)(port=%s))" +
-                "(connect_data=(service_name=%s)(server=DEDICATED)))";
-        return String.format(postgresqlJdbcUrlFormat, dbConfig.host(), dbConfig.port(), dbConfig.name(), dbConfig.scheme());
+        Map<String, String> jdbcUrlFormatMap = Map.of(
+                "postgresql", "jdbc:postgresql://%s:%s/%s?currentSchema=%s",
+                "oracle", """
+                        jdbc:oracle:thin:@(description=(address=(host=%s)(protocol=tcp)(port=%s))
+                        (connect_data=(service_name=%s)(server=DEDICATED)))"""
+        );
+        return String.format(jdbcUrlFormatMap.get(dbType),
+                dbConfig.host(), dbConfig.port(), dbConfig.name(), dbConfig.scheme());
     }
 
     private Connection open() throws SQLException {
@@ -55,9 +57,7 @@ public class DBDriver {
         return uploadCount;
     }
 
-    public int executeFile(String sqlFileName) {
-        String sqlScript = eval(FileUtils.readFile(Config.getProperty("sql.files.dir") + sqlFileName));
-        TauLogger.attach("sql-скрипт", sqlScript);
+    public int executeFile(String sqlFileName, String sqlScript) {
         try {
             return execute(sqlScript);
         } catch (SQLException e) {

@@ -2,7 +2,9 @@ package rs.taukit.step.manager;
 
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
+import rs.taukit.config.Config;
 import rs.taukit.database.DBDriver;
+import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
@@ -16,6 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static rs.taukit.utils.BasicUtils.eval;
+
 public class DBManager extends StepManager {
 
     private DBDriver getDbDriver(String dbName) {
@@ -28,8 +32,10 @@ public class DBManager extends StepManager {
 
     @Step("в базе данных '{dbName}' выполнить sql-скрипт из файла '{sqlFileName}'")
     public void executeScriptFromFile(String dbName, String sqlFileName) {
+        String sqlScript = eval(FileUtils.readFile(Config.getProperty("sql.files.dir") + sqlFileName));
+        TauLogger.attach("sql-скрипт", sqlScript);
         AtomicInteger count = new AtomicInteger(0);
-        run(() -> count.set(getDbDriver(dbName).executeFile(sqlFileName)));
+        run(() -> count.set(getDbDriver(dbName).executeFile(sqlFileName, sqlScript)));
         String rowsUpdated = count.get() > 0 ? " Обновлено строк: " + count.get() : "";
         TauLogger.report("В базе данных '%s' выполнен sql-скрипт из файла '%s'.%s", dbName, sqlFileName, rowsUpdated);
     }
