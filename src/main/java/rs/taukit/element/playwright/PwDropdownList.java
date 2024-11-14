@@ -45,10 +45,17 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
         } catch (Exception ignored) {
             // ignored
         }
-        driver.waitForCondition(() -> {
-            click();
-            return options.isVisible();
-        });
+        try {
+            driver.waitForCondition(() -> {
+                click();
+                return options.isVisible();
+            });
+        } catch (Exception e){
+            String message = String.format("Не удалось дождаться значений выпадающего списка '%s' по локатору: %s",
+                    elementName, options.elementPwLocator);
+            e.addSuppressed(new RuntimeException(message));
+            throw e;
+        }
         options.setValue(value);
     }
 
