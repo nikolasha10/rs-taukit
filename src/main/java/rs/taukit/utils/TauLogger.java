@@ -340,7 +340,7 @@ public final class TauLogger {
         return null;
     }
 
-    @Attachment(value = "{fileName}", type = "application/pdf")
+    @Attachment(value = "{fileName}", type = "application/pdf", fileExtension = ".pdf")
     public static byte[] attachPdfFile(String fileName, String filePath) {
         File file = new File(filePath);
         try {
@@ -351,7 +351,7 @@ public final class TauLogger {
         return null;
     }
 
-    @Attachment(value = "{fileName}", type = "application/json")
+    @Attachment(value = "{fileName}", type = "application/json", fileExtension = ".json")
     public static byte[] attachJson(String fileName, String content) {
         try {
             return content.getBytes();
