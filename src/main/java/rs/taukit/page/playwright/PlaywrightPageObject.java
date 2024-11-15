@@ -5,15 +5,14 @@ import com.microsoft.playwright.Page;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
-import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IContainer;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.playwright.PwBlock;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.PageFragmentNotFoundException;
 import rs.taukit.exceptions.PageNotClosedException;
 import rs.taukit.exceptions.PageNotLoadException;
 import rs.taukit.page.PageObject;
-import rs.taukit.utils.BasicUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
 import rs.taukit.utils.YamlParser;
@@ -22,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 
+import static rs.taukit.utils.BasicUtils.driver;
 import static rs.taukit.utils.BasicUtils.scenarioStorage;
 import static rs.taukit.utils.TestDataUtils.loadPageConfig;
 
@@ -35,8 +35,8 @@ public class PlaywrightPageObject implements PageObject {
     private final List<String> expectedElements;
     private final Page.ScreenshotOptions screenshotOptions;
     private final Deque<IContainer> currentContext = new LinkedList<>();
-    private PlaywrightPageObject popup;
     private final Page.WaitForConditionOptions options;
+    private PlaywrightPageObject popup;
     private double pageTimeout;
     private Exception thrownException;
 
@@ -116,7 +116,7 @@ public class PlaywrightPageObject implements PageObject {
 
     public void waitForLoadAndContinue(double pageTimeout) {
         BooleanSupplier waitCondition = () -> isUrlCorrect() && hasPageAllExpectedElements();
-        BasicUtils.driver().waitForCondition(waitCondition, pageTimeout);
+        driver().waitForCondition(waitCondition, pageTimeout);
         scenarioStorage().setCurrentPageName(pageName);
     }
 
@@ -254,8 +254,9 @@ public class PlaywrightPageObject implements PageObject {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends IElement> T getElement(String elementName) {
+        double timeout = Config.getTimeProperty("element.check.timeout");
         try {
-            BasicUtils.driver().waitForCondition(() -> findElement(getCurrentContext(), elementName) != null);
+            driver().waitForCondition(() -> findElement(getCurrentContext(), elementName) != null, timeout);
         } catch (Exception ignored) {
             // ignored
         }

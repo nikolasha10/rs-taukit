@@ -20,7 +20,13 @@ public class FormDataManager extends StepManager {
             String value = Optional.ofNullable(TestDataUtils.getOptional(row, "Значение")).orElse("");
             String containerName = TestDataUtils.getOptional(row, "Блок");
             String control = TestDataUtils.getOptional(row, "Контроль");
-            IContainer container = containerName == null ? null : getElement(containerName);
+            IContainer container = null;
+            try {
+                container = containerName == null ? null : getElement(containerName);
+            } catch (Exception e){
+                TauLogger.fail("Не удалось дождаться контейнера '%s' на странице '%s'",
+                        containerName, getPage().getPageName());
+            }
             try {
                 IHasEditableValue element = container == null
                         ? getElement(name)
