@@ -42,22 +42,27 @@ public class PwTable extends PwElement implements IHasTableElements {
         super(elementName, model);
     }
 
-    private int headerIndex(String headerName) {
-        PwList headers = getDescendant("Заголовки");
-        List<String> headerNames = headers.getItemList().stream()
-                .map(PwElement::getText)
-                .toList();
-        if (!headers.contains(headerName)) {
+    public int getHeaderIndex(String headerName) {
+        List<String> headerNames = getHeadersList();
+        if (!headerNames.contains(headerName)) {
             throw TableElementNotFoundException.header(elementName, headerName, headerNames).get();
         }
         return headerNames.indexOf(headerName);
+    }
+
+    @Override
+    public List<String> getHeadersList() {
+        PwList headers = getDescendant("Заголовки");
+        return headers.getItemList().stream()
+                .map(PwElement::getText)
+                .toList();
     }
 
     private Predicate<Map<String, String>> condition(PwList cells) {
         return (searchCondition) -> {
             String headerName = searchCondition.get("Столбец");
             String expectedValue = searchCondition.get("Значение");
-            String cellContent = cells.get(headerIndex(headerName)).getText();
+            String cellContent = cells.get(getHeaderIndex(headerName)).getText();
             return cellContent.contains(expectedValue);
         };
     }
@@ -140,7 +145,7 @@ public class PwTable extends PwElement implements IHasTableElements {
             String elementText;
             if (tableElement.equalsIgnoreCase("столбец")) {
                 elementText = activeRow.getElementByName("Столбцы").castTo(PwList.class)
-                        .get(headerIndex(elementName)).getText();
+                        .get(getHeaderIndex(elementName)).getText();
                 scenarioData().put(parameterName, elementText);
             } else {
                 PwElement expectedElement = descendants.get(elementName).castTo(PwElement.class);
@@ -154,11 +159,19 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     @Override
-    @Step("в строке ({rowName}) нажать на '{elementName}'")
     public void tableRowElementClick(String rowName, String elementName) {
         PwElement expectedElement = descendants.get(elementName).castTo(PwElement.class);
         Locator expectedLocator = activeRow.elementPwLocator.locator(expectedElement.getElementPwLocator());
         ElementBuilder.buildElement(elementName, expectedElement, expectedLocator).click();
+    }
+
+    @Override
+    public boolean checkHeader(String name) {
+        try {
+            return getHeaderIndex(name) > -1;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
     private void clickOnElementByConditions(String elementName, DataTable conditions, boolean needToSave, String parameterName) {
@@ -182,7 +195,7 @@ public class PwTable extends PwElement implements IHasTableElements {
         if (activeRow.containsElement(elementName)) {
             activeRow.getElementByName(elementName).click();
         } else if (headers.contains(elementName)) {
-            activeRow.getElementByName("Столбцы").castTo(PwList.class).get(headerIndex(elementName)).click();
+            activeRow.getElementByName("Столбцы").castTo(PwList.class).get(getHeaderIndex(elementName)).click();
         } else {
             throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName(), this);
         }

@@ -7,8 +7,13 @@ import rs.taukit.element.interfaces.IHasTableElements;
 import rs.taukit.exceptions.TableElementNotFoundException;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
+import rs.taukit.utils.TextUtils;
 import rs.taukit.utils.TimeStringParser;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
@@ -30,7 +35,7 @@ public class TableManager extends StepManager {
             IHasTableElements table = waitForTable(tableName);
             table.clickOnElementByConditions(elementName, conditions);
         };
-        run(runnable,"Не удалось нажать на элемент '%s' в таблице '%s'", elementName, tableName);
+        run(runnable, "Не удалось нажать на элемент '%s' в таблице '%s'", elementName, tableName);
     }
 
     @Step("в таблице '{tableName}' найти строку, соответствующую условиям:")
@@ -99,5 +104,38 @@ public class TableManager extends StepManager {
                 "В таблице '%s' не удалось дождаться строки, соответствующей заданным условиям", tableName);
         scenarioStorage.clearStepActions();
         scenarioStorage.stopToSaveActions();
+    }
+
+    @Step("в таблице '{tableName}' проверить наличие столбцов:")
+    protected void tableHeadersCheck(String tableName, DataTable dataTable) {
+        TauLogger.attachDataTable("Список столбцов", dataTable);
+        IHasTableElements table = getElement(tableName);
+        List<List<String>> notFoundList = new ArrayList<>();
+        notFoundList.add(Arrays.asList("Номер", "Название", "Фактический номер"));
+        dataTable.asMaps().forEach(row -> {
+            String number = TestDataUtils.getOptional(row, "Номер");
+            String name = TestDataUtils.get(row, "Название");
+            if (!table.checkHeader(name)) {
+                notFoundList.add(Arrays.asList(Optional.ofNullable(number).orElse(""), name, ""));
+            } else if (number != null && table.getHeaderIndex(name) != Integer.parseInt(number) - 1) {
+                notFoundList.add(Arrays.asList(number, name, String.valueOf(table.getHeaderIndex(name) + 1)));
+            }
+        });
+        if (notFoundList.size() > 1) {
+            List<String> headersList = table.getHeadersList();
+            List<List<String>> headers = new ArrayList<>();
+            headers.add(Arrays.asList("Номер", "Название"));
+            headersList.forEach(name -> headers.add(Arrays.asList(String.valueOf(headersList.indexOf(name) + 1), name)));
+            DataTable headersTable = DataTable.create(headers, TextUtils.tableConverter);
+            DataTable result = DataTable.create(notFoundList, TextUtils.tableConverter);
+            Runnable runnable = () -> {
+                TauLogger.attach("Столбцы, не прошедшие проверку", result);
+                TauLogger.attach("Столбцы таблицы", headersTable);
+            };
+            TauLogger.fail(runnable, "Набор столбцов таблицы '%s' на странице '%s' отличается от ожидаемого",
+                    tableName, getPage().getPageName());
+        } else {
+            TauLogger.report("Столбцы таблицы '%s' соответствуют ожидаемым", tableName);
+        }
     }
 }

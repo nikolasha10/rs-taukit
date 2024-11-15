@@ -10,6 +10,20 @@ import static rs.taukit.utils.BasicUtils.*;
 
 public class TableStep extends TableManager {
 
+    /**
+     * Проверяет таблицы на наличие и порядок столбцов
+     * @param tableName название таблицы
+     * @param dataTable таблица вида <table>
+     *                  <tr><th>| Номер |</th><th>Название |</th></tr>
+     * </table>, где <br><b>Номер</b> - порядковый номер столбца начинается с 1 (не обязательный столбец).
+     *                  Если не указан - не будет проверяться.<br>
+     *                  <b>Название</b> - название столбца.
+     */
+    @И("^в таблице \"(.+)\" проверить наличие столбцов:$")
+    public void tableHeadersCheck(String tableName, DataTable dataTable) {
+        super.tableHeadersCheck(tableName, eval(dataTable));
+    }
+
     @И("^в таблице \"(.+)\" нажать на \"(.+)\" в строке, соответствующей условиям:$")
     public void tableValueClick(String tableName, String elementName, DataTable dataTable) {
         element(tableName).castTo(PwTable.class).clickOnElementByConditions(elementName, eval(dataTable));

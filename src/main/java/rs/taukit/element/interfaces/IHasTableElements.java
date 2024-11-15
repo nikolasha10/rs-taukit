@@ -2,6 +2,8 @@ package rs.taukit.element.interfaces;
 
 import io.cucumber.datatable.DataTable;
 
+import java.util.List;
+
 public interface IHasTableElements extends IElement {
     int findRowByConditions(DataTable dataTable);
 
@@ -16,4 +18,10 @@ public interface IHasTableElements extends IElement {
     DataTable tableRowSaveElementValues(DataTable dataTable);
 
     void tableRowElementClick(String rowName, String elementName);
+
+    boolean checkHeader(String name);
+
+    int getHeaderIndex(String name);
+
+    List<String> getHeadersList();
 }
