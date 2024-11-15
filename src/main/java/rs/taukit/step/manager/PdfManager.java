@@ -30,7 +30,7 @@ public class PdfManager extends StepManager {
         if (validationResult != null) {
             String errorMessage = scenarioData.getOptional("Проверка PDF", "Ошибки при сравнении PDF");
             String message = Optional.ofNullable(errorMessage).orElse("");
-            Set<String> differentPages = scenarioData.get(nameSpace, "Номера различающихся страниц");
+            List<String> differentPages = scenarioData.get(nameSpace, "Номера различающихся страниц");
             TauLogger.fail(validationResult, "%sСтраницы %s файла '%s' не соответствуют эталону",
                     message, differentPages, testedFileData.getFileName());
         } else {
@@ -48,7 +48,7 @@ public class PdfManager extends StepManager {
                 standardFileData.getFilePath(),
                 ignoredZonesParameterName);
         if (!differences.isEmpty()) {
-            Set<Integer> differentPages = differences.stream().map(ImageDifferences::pageNumber).collect(Collectors.toSet());
+            List<Integer> differentPages = differences.stream().map(ImageDifferences::pageNumber).sorted().collect(Collectors.toList());
             scenarioData.put("Проверка PDF", "Номера различающихся страниц", differentPages);
             scenarioData.put("testName", scenario.getFunctionality() + " " + scenario.getName());
             return () -> {
