@@ -50,7 +50,7 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
                 click();
                 return options.isVisible();
             });
-        } catch (Exception e){
+        } catch (Exception e) {
             String message = String.format("Не удалось дождаться значений выпадающего списка '%s' по локатору: %s",
                     elementName, options.elementPwLocator);
             e.addSuppressed(new RuntimeException(message));
@@ -70,7 +70,7 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
 
     @Override
     public String getText() {
-        return selectedValue.getText();
+        return selectedValue.isVisible() ? selectedValue.getText() : "";
     }
 
 }
