@@ -5,6 +5,7 @@ import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.utils.TimeStringParser;
 
 import java.util.LinkedHashMap;
@@ -58,7 +59,14 @@ public class PwSearchField extends PwElement implements IHasEditableValue {
 
     @Override
     public String getText() {
-        return elementPwLocator.inputValue();
+        PwElement inputField = descendants.get("поле ввода").castTo(PwElement.class);
+        try {
+            return inputField.castTo(IHasEditableValue.class).getText();
+        } catch (Exception e) {
+            throw new AutoTestBrokenException("""
+                    Не удалось получить значение элемента '%s'. Тип: %s. Потомок: поле ввода. Локатор: %s""",
+                    elementName, model.getType(), inputField.getElementPwLocator());
+        }
     }
 
 
