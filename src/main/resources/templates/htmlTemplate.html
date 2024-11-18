@@ -149,10 +149,10 @@
         trigger.onclick = stopMoveArea;
     }
     function deleteZone(zoneIndex){
-        divResults.removeChild(document.getElementById("zoneDetails"));
+        cancelEditZone();
         let ignoredArea = document.getElementById("ignoredArea_" + zoneIndex);
         divResults.removeChild(ignoredArea);
-        ignoredZones.splice(zoneIndex, 1);
+        ignoredZones[zoneIndex] = null;
     }
     function changeIgnoredArea(){
         const areaIndex = this.getAttribute("areaIndex") - 0;
@@ -168,7 +168,6 @@
         while (area.getElementsByClassName("areaTrigger").length > 0){
             area.removeChild(area.getElementsByClassName("areaTrigger")[0]);
         }
-        area.removeChild(document.getElementById("centerTrigger"));
         area.onclick = editZone;
     }
     function cancelEditZone(){
@@ -377,6 +376,7 @@
         textarea.cols = 100;
         textarea.innerHTML = "Страница " + pageNumber + ":\n";
         for (zone of ignoredZones){
+            if (!zone) continue;
             textarea.innerHTML += "  - d: " + zone.d + "\n"
                 + "    x: " + zone.x + "\n"
                 + "    y: " + zone.y + "\n"
