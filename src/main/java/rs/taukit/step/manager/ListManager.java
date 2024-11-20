@@ -2,10 +2,7 @@ package rs.taukit.step.manager;
 
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
-import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IContainer;
-import rs.taukit.element.interfaces.IHasEditableValue;
-import rs.taukit.element.interfaces.IHasListItems;
+import rs.taukit.element.interfaces.*;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
@@ -20,7 +17,7 @@ public class ListManager extends StepManager {
     @Step("в списке '{listName}' выбрать '{listValue}'")
     public void listValueClick(String listName, String listValue) {
         run(() -> {
-            IHasEditableValue list = getElement(listName);
+            Editable list = getElement(listName);
             list.setValue(listValue);
         }, "Не удалось выбрать значение '%s' в списке '%s' на странице '%s'", 
                 listValue, listName, getPage().getPageName());
@@ -54,7 +51,7 @@ public class ListManager extends StepManager {
         IHasListItems list = getElement(listName);
         Map<String, String> expected = new HashMap<>();
         Map<String, IElement> items = list.getItemList().stream()
-                .collect(Collectors.toMap(IElement::getText, item -> item));
+                .collect(Collectors.toMap(item -> item.castTo(HasText.class).getText(), item -> item));
         List<List<String>> resultList = new ArrayList<>();
         resultList.add(Arrays.asList("Элемент", "Состояние", "Ожидалось"));
         dataTable.asMaps().forEach(row -> {

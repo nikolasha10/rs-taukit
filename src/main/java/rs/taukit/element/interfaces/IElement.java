@@ -2,28 +2,13 @@ package rs.taukit.element.interfaces;
 
 import rs.taukit.element.ElementModel;
 
-public interface IElement {
+public interface IElement extends Clickable, CanBeVisible, CanBeEnabled, HasColor {
     <T> T castTo(Class<T> elementType);
 
     String getSelector();
-
-    boolean isVisible();
-
-    void click();
-
-    String getText();
 
     String getElementName();
 
     ElementModel getModel();
 
-    boolean isDisabled();
-
-    boolean isEnabled();
-
-    String getBgColor();
-
-    boolean hasBgColor(String colorRGB);
-
-    boolean hasText(String value);
 }

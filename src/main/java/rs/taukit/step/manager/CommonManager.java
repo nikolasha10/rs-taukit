@@ -7,14 +7,13 @@ import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.TestDataException;
 import rs.taukit.scenario.ScenarioManager;
-import rs.taukit.testdata.ExpectedResult;
 import rs.taukit.testdata.TestDataDateTime;
+import rs.taukit.testobject.TestCondition;
 import rs.taukit.utils.*;
 
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.BooleanSupplier;
 
 import static rs.taukit.utils.BasicUtils.eval;
 
@@ -31,7 +30,7 @@ public class CommonManager extends StepManager {
 
     @Step("нажать на {elementType} '{elementName}'")
     public void clickElement(String elementType, String elementName) {
-        run(() -> getPage().getElement(elementName).click(), 
+        run(() -> getPage().getElement(elementName).click(),
                 "Не удалось нажать на %s '%s'", elementType, elementName);
         TauLogger.report("Нажали на %s '%s'", elementType, elementName);
     }
@@ -44,106 +43,6 @@ public class CommonManager extends StepManager {
     public void waitForTimeout(String timeValue, String timeUnit) {
         TauLogger.console("Ждём %s %s", timeValue, timeUnit);
         getDriver().waitForTimeout(TimeStringParser.getTime(timeValue + " " + timeUnit));
-    }
-
-    @Step("дождаться выполнения условий \"{conditionsName}\":")
-    public void waitForConditions(String conditionsName, DataTable dataTable) {
-        waitForConditions(dataTable);
-    }
-
-    @Step("проверить выполнение условий '{conditionsName}':")
-    public void checkConditions(String conditionsName, DataTable dataTable) {
-        TauLogger.attachDataTable("Ожидаемый результат", dataTable);
-        Map<String, String> expectedHeaders = dataTable.asMaps().getFirst();
-        List<List<String>> unexpectedResultList = new ArrayList<>();
-        List<String> resultsHeaders = new ArrayList<>(expectedHeaders.keySet().stream().toList());
-        if (resultsHeaders.contains("Значение")) {
-            resultsHeaders.add("Текущее значение");
-        }
-        unexpectedResultList.add(resultsHeaders);
-        dataTable.asMaps().stream()
-                .map(data -> new ExpectedResult(data).checkResult())
-                .filter(result -> !result.isConditionMet())
-                .forEach(result -> {
-                            List<String> unexpected = new ArrayList<>();
-                            unexpected.add(result.getObjectType());
-                            unexpected.add(result.getObjectName());
-                            unexpected.add(result.getObjectState());
-                            if (resultsHeaders.contains("Значение")) {
-                                unexpected.add(result.getExpectedValue());
-                                unexpected.add(result.getCurrentValue());
-                            }
-                            unexpectedResultList.add(unexpected);
-                        }
-                );
-        if (unexpectedResultList.size() > 1) {
-            Runnable runnable = () -> {
-                DataTable unexpectedResultsTable = DataTable.create(unexpectedResultList, TextUtils.tableConverter);
-                TauLogger.console("Результаты неуспешных проверок", unexpectedResultsTable);
-                TauLogger.attachDataTable("Результаты неуспешных проверок", unexpectedResultsTable);
-            };
-
-            TauLogger.fail(runnable, "Результаты проверки условий '%s' не соответствуют ожидаемым", conditionsName);
-        } else {
-            TauLogger.report("Условия '%s' выполнены", conditionsName);
-        }
-        TauLogger.resetNotCritical();
-    }
-
-    @Step("дождаться выполнения условий:")
-    public void waitForConditionsNoName(DataTable dataTable) {
-        waitForConditions(dataTable);
-    }
-
-    @Step("дождаться выполнения условий в течение {timeoutString}:")
-    public void waitForConditionsWithinTimeIntervalNoName(String timeoutString, DataTable dataTable) {
-        waitForConditions(TimeStringParser.getTime(timeoutString), dataTable);
-    }
-
-    @Step("дождаться выполнения условий '{conditionsName}' в течение {timeoutString}:")
-    public void waitForConditionsWithinTimeIntervalNoName(String conditionsName, String timeoutString, DataTable dataTable) {
-        waitForConditions(TimeStringParser.getTime(timeoutString), dataTable);
-    }
-
-    private void waitForConditions(DataTable dataTable) {
-        waitForConditions(Config.getTimeProperty("conditions.wait.timeout"), dataTable);
-    }
-
-    private void waitForConditions(double conditionsWaitTimeout, DataTable dataTable) {
-        TauLogger.attachDataTable("Ожидаемый результат", dataTable);
-        TauLogger.console("Ожидается выполнение условий", dataTable);
-        BooleanSupplier conditions = () -> dataTable.asMaps().stream()
-                .map(data -> new ExpectedResult(data).waitForResult())
-                .allMatch(ExpectedResult::isConditionMet);
-        double conditionWaitTimeout = Config.getTimeProperty("condition.wait.timeout");
-        try {
-            getDriver().waitForCondition(conditions, conditionWaitTimeout, conditionsWaitTimeout, scenarioStorage.getStepActions());
-        } catch (Exception e) {
-            System.out.println(dataTable);
-            TauLogger.console(e);
-            if (e instanceof AutoTestBrokenException) throw e;
-            ExpectedResult firstUnexpectedResult = dataTable.asMaps().stream()
-                    .map(data -> new ExpectedResult(data).waitForResult())
-                    .filter(result -> !result.isConditionMet())
-                    .findFirst().orElse(null);
-            if (firstUnexpectedResult != null) {
-                if (firstUnexpectedResult.getThrownException() != null) {
-                    e.addSuppressed(firstUnexpectedResult.getThrownException());
-                }
-                String objectType = firstUnexpectedResult.getObjectType();
-                String objectName = firstUnexpectedResult.getObjectName();
-                String objectState = firstUnexpectedResult.getObjectState();
-                String currentValue = firstUnexpectedResult.getCurrentValue();
-                String expectedValue = firstUnexpectedResult.getExpectedValue() == null
-                        ? ""
-                        : String.format(" '%s'. Текущее значение: %s", firstUnexpectedResult.getExpectedValue(), currentValue);
-                TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s '%s' %s %s",
-                        objectType, objectName, objectState, expectedValue);
-            }
-        }
-        scenarioStorage.clearStepActions();
-        scenarioStorage.stopToSaveActions();
-        TauLogger.resetNotCritical();
     }
 
     @Step("[примечание] текущий контекст: контейнер '{containerName}'")
@@ -292,10 +191,10 @@ public class CommonManager extends StepManager {
     }
 
     public void chooseValueByConditions(DataTable dataTable, String parameterName) {
-        Map<String, String> result = dataTable.asMaps().stream().filter(map -> {
-            ExpectedResult expectedResult = new ExpectedResult(map);
-            return expectedResult.checkResult().isConditionMet();
-        }).findFirst().orElseThrow(() -> new RuntimeException("Не найден результат, соответствующий хотя бы одному условию"));
+        Map<String, String> result = dataTable.asMaps().stream()
+                .filter(map -> new TestCondition(map).checkResult().isConditionMet())
+                .findFirst().orElseThrow(AutoTestBrokenException.get("""
+                        Не найден результат, соответствующий хотя бы одному условию"""));
         String resultValue = TestDataUtils.get(result, "Результат");
         scenarioData.put(parameterName, resultValue);
         TauLogger.console("Параметр '%s' содержит '%s'", parameterName, scenarioData.get(parameterName));

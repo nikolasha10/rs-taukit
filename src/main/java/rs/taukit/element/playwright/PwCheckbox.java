@@ -2,13 +2,14 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.Clickable;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasCheckbox;
-import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.element.interfaces.Editable;
 
 import java.util.LinkedHashMap;
 
-public class PwCheckbox extends PwElement implements IHasEditableValue, IHasCheckbox {
+public class PwCheckbox extends PwElement implements Editable, IHasCheckbox {
     private final PwElement checked;
 
     public PwCheckbox(String elementName, LinkedHashMap<String, Object> elementData) {
@@ -29,20 +30,20 @@ public class PwCheckbox extends PwElement implements IHasEditableValue, IHasChec
     public void setValue(String value, String controlValue) {
         driver.waitForCondition(() -> {
             setValue(value);
-            return value.equalsIgnoreCase("да") == getValue();
+            return value.equalsIgnoreCase("да") == isChecked();
         });
     }
 
-    public boolean getValue() {
-        return elementPwLocator.isVisible();
+    @Override
+    public boolean isChecked() {
+        return this.checked.isVisible();
     }
 
     @Override
     public void setValue(String value) {
-        IElement clickable = getDescendant("Чекбокс");
-        boolean isTurnedOn = getDescendant("Установлен").isVisible();
+        Clickable clickable = getDescendant("Чекбокс");
         boolean switchOn = value.equalsIgnoreCase("да");
-        if (switchOn != isTurnedOn) {
+        if (switchOn != isChecked()) {
             clickable.click();
         }
     }
@@ -55,5 +56,20 @@ public class PwCheckbox extends PwElement implements IHasEditableValue, IHasChec
     @Override
     public void unsetCheckbox() {
         setValue("нет");
+    }
+
+    @Override
+    public String getText() {
+        return isChecked() ? "да" : "нет";
+    }
+
+    @Override
+    public boolean hasText(String expectedValue) {
+        return getText().equals(expectedValue);
+    }
+
+    @Override
+    public Boolean containsText(String expectedText) {
+        return null;
     }
 }

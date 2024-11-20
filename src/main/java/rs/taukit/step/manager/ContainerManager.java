@@ -5,7 +5,7 @@ import io.qameta.allure.Step;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.*;
-import rs.taukit.testdata.ExpectedResult;
+import rs.taukit.testobject.TestCondition;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 
@@ -34,7 +34,7 @@ public class ContainerManager extends StepManager {
     public void setValue(String containerName, String fieldName, String value) {
         run(() -> {
             IContainer container = getContainer(containerName);
-            IHasEditableValue editableValue = container.getElementByName(fieldName).castTo(IHasEditableValue.class);
+            Editable editableValue = container.getElementByName(fieldName).castTo(Editable.class);
             editableValue.setValue(value);
         }, "Не удалось заполнить поле '%s' в контейнере '%s' значением '%s'", fieldName, containerName, value);
         TauLogger.report("Поле '%s' в контейнере '%s' заполнено значением '%s'", fieldName, containerName, value);
@@ -44,7 +44,7 @@ public class ContainerManager extends StepManager {
     public void setValue(String containerName, String fieldName, String value, String controlValue) {
         run(() -> {
             IContainer container = getContainer(containerName);
-            IHasEditableValue editableValue = container.getElementByName(fieldName).castTo(IHasEditableValue.class);
+            Editable editableValue = container.getElementByName(fieldName).castTo(Editable.class);
             editableValue.setValue(value, controlValue);
         }, "Не удалось заполнить поле '%s' в контейнере '%s' значением '%s'", fieldName, containerName, value);
         TauLogger.report("Поле '%s' в контейнере '%s' заполнено значением '%s'", fieldName, containerName, value);
@@ -54,7 +54,7 @@ public class ContainerManager extends StepManager {
     public void saveElementValue(String fieldName, String containerName, String parameterName) {
         run(() -> {
                     IContainer container = getContainer(containerName);
-                    IHasEditableValue editableValue = container.getElementByName(fieldName).castTo(IHasEditableValue.class);
+                    Editable editableValue = container.getElementByName(fieldName).castTo(Editable.class);
                     String value = editableValue.getText();
                     scenarioData.put(parameterName, value);
                 }, "Не удалось сохранить значение поля '%s' в контейнере '%s', как '%s'",
@@ -90,7 +90,7 @@ public class ContainerManager extends StepManager {
     public void listValueClick(String containerName, String listName, String itemName) {
         run(() -> {
                     IContainer container = getContainer(containerName);
-                    IHasEditableValue editable = container.getElementByName(listName).castTo(IHasEditableValue.class);
+                    Editable editable = container.getElementByName(listName).castTo(Editable.class);
                     editable.setValue(itemName);
                 }, "Не удалось выбрать '%s' в списке '%s' в контейнере '%s' на странице '%s'",
                 itemName, listName, containerName, getPage().getPageName());
@@ -101,8 +101,8 @@ public class ContainerManager extends StepManager {
     public void downloadFile(String containerName, String buttonName, String fileName) {
         run(() -> {
                     IContainer container = getContainer(containerName);
-                    IHasDownloadableFile downloadable = container.getElementByName(buttonName)
-                            .castTo(IHasDownloadableFile.class);
+                    Downloadable downloadable = container.getElementByName(buttonName)
+                            .castTo(Downloadable.class);
                     downloadable.click(fileName);
                 }, "Не удалось скачать файл '%s' по нажатию на '%s' в контейнере '%s' на странице '%s'",
                 fileName, buttonName, containerName, getPage().getPageName());
@@ -140,14 +140,14 @@ public class ContainerManager extends StepManager {
 
     private IContainer getContainerByCondition(IContainer container, DataTable dataTable,
                                                AtomicInteger index, AtomicReference<Exception> e) {
-        AtomicReference<ExpectedResult> result = new AtomicReference<>();
+        AtomicReference<TestCondition> result = new AtomicReference<>();
         IContainer found = container.getStream().filter(element -> {
             getPage().replaceCurrentContext(element);
             element.setCurrentIndex(index.getAndAdd(1));
             return dataTable.asMaps().stream()
-                    .map(data -> new ExpectedResult(data).waitForResult())
+                    .map(data -> new TestCondition(data).waitForResult())
                     .peek(result::set)
-                    .allMatch(ExpectedResult::isConditionMet);
+                    .allMatch(TestCondition::isConditionMet);
         }).findFirst().orElse(null);
         if (result.get().getThrownException() != null) {
             e.set(result.get().getThrownException());
@@ -177,7 +177,7 @@ public class ContainerManager extends StepManager {
     public void setRadiButton(String containerName, String fieldName, String value) {
         run(() -> {
             IContainer container = getContainer(containerName);
-            IHasEditableValue editable = container.getElementByName(fieldName).castTo(IHasEditableValue.class);
+            Editable editable = container.getElementByName(fieldName).castTo(Editable.class);
             editable.setValue(value);
         }, "Не удалось установить переключатель '%s' в контейнере '%s' в значение '%s'", fieldName, containerName, value);
 

@@ -4,28 +4,24 @@ import com.microsoft.playwright.Locator;
 import io.cucumber.datatable.DataTable;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
-import rs.taukit.element.ElementState;
-import rs.taukit.element.interfaces.IContainer;
-import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasEditableValue;
-import rs.taukit.element.interfaces.IHasListItems;
+import rs.taukit.element.interfaces.*;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.page.playwright.ElementBuilder;
-import rs.taukit.records.CheckedElement;
+import rs.taukit.testobject.TestCondition;
 import rs.taukit.utils.TauLogger;
-import rs.taukit.utils.TestDataUtils;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static rs.taukit.utils.BasicUtils.page;
 
-public class PwList extends PwElement implements IHasListItems, IHasEditableValue {
+public class PwList extends PwElement implements IHasListItems {
     public PwList(String elementName, LinkedHashMap<String, Object> elementData) {
         this(elementName, new ElementModel(elementData));
     }
@@ -61,28 +57,17 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
         }
         getItemList().stream()
                 .filter(PwElement::isVisible)
-                .filter(item -> item.getText().contains(value) || item.getElementByText(value) != null)
+                .filter(containsElementWithText(value))
                 .findFirst().orElseThrow(valueNotFoundException(value))
                 .click();
     }
 
-    @Override
-    public void setValue(String value, String controlValue) {
-
-    }
-
-    @Override
-    public String getText() {
-        return null;
-    }
-
-    @Override
-    public void click() {
-
+    private Predicate<IContainer> containsElementWithText(String text) {
+        return item -> item.containsText(text) || item.getElementByText(text) != null;
     }
 
     public boolean contains(String value) {
-        return getItemList().stream().anyMatch(item -> item.getText().equals(value));
+        return getItemList().stream().anyMatch(containsElementWithText(value));
     }
 
     public List<String> getValues() {
@@ -91,13 +76,14 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
         BooleanSupplier condition = () -> {
             try {
                 List<String> itemsText = getItemList().stream()
-                        .filter(PwElement::isVisible)
-                        .map(PwElement::getText)
+                        .filter(CanBeVisible::isVisible)
+                        .map(HasText::getText)
                         .toList();
                 values.set(itemsText);
                 return true;
             } catch (Exception e) {
-                TauLogger.console("values: %s. Exception: %s", values.get(), e.getMessage());
+                TauLogger.console("values: %s", values.get());
+                TauLogger.console(e);
                 ex.set(e);
                 return false;
             }
@@ -117,20 +103,14 @@ public class PwList extends PwElement implements IHasListItems, IHasEditableValu
     @Override
     public PwBlock findItemByConditions(DataTable dataTable) {
         PwBlock foundItem = null;
+        IContainer originalContext = page().getCurrentContext();
         int foundIndex = IntStream.range(0, getItemList().size()).boxed()
                 .filter(index -> dataTable.asMaps().stream().allMatch(data -> {
                     IContainer item = getItemList().get(index);
-                    String objectName = TestDataUtils.get(data, "Название");
-                    String objectState = TestDataUtils.get(data, "Состояние");
-                    String expectedValue = TestDataUtils.getOptional(data, "Значение");
-                    boolean isConditionsMet = false;
-                    if (item.containsElement(objectName)) {
-                        IElement element = item.getElementByName(objectName);
-                        isConditionsMet = ElementState.getState(objectState)
-                                .apply(new CheckedElement(element, expectedValue));
-                    }
-                    return isConditionsMet;
+                    page().setCurrentContext(item);
+                    return new TestCondition(data).isConditionMet();
                 })).findFirst().orElse(-1);
+        page().setCurrentContext(originalContext);
         if (foundIndex > -1) {
             foundItem = getItemList().get(foundIndex);
             foundItem.setCurrentIndex(foundIndex);

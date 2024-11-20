@@ -3,11 +3,11 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.element.interfaces.Editable;
 
 import java.util.LinkedHashMap;
 
-public class PwToggle extends PwElement implements IHasEditableValue {
+public class PwToggle extends PwElement implements Editable {
     public PwToggle(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
     }
@@ -37,5 +37,24 @@ public class PwToggle extends PwElement implements IHasEditableValue {
             setValue(value);
             return descendants.get("включен").isVisible() == switchOn;
         });
+    }
+
+    public boolean isToggledOn(){
+        return getDescendant("Включен").isVisible();
+    }
+
+    @Override
+    public String getText() {
+        return isToggledOn() ? "да" : "нет";
+    }
+
+    @Override
+    public boolean hasText(String expectedValue) {
+        return getText().equals(expectedValue);
+    }
+
+    @Override
+    public Boolean containsText(String expectedText) {
+        return getText().contains(expectedText);
     }
 }

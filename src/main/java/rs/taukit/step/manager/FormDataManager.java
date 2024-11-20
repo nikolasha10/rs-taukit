@@ -3,7 +3,7 @@ package rs.taukit.step.manager;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.element.interfaces.IContainer;
-import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.element.interfaces.Editable;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 
@@ -28,9 +28,9 @@ public class FormDataManager extends StepManager {
                         containerName, getPage().getPageName());
             }
             try {
-                IHasEditableValue element = container == null
+                Editable element = container == null
                         ? getElement(name)
-                        : container.getElementByName(name).castTo(IHasEditableValue.class);
+                        : container.getElementByName(name).castTo(Editable.class);
                 if (control == null) {
                     element.setValue(value);
                 } else {
@@ -65,7 +65,7 @@ public class FormDataManager extends StepManager {
             String name = TestDataUtils.get(row, "Название");
             String value = TestDataUtils.get(row, "Значение");
             String control = TestDataUtils.getOptional(row, "Контроль");
-            IHasEditableValue editableElement = block.getElementByName(name).castTo(IHasEditableValue.class);
+            Editable editableElement = block.getElementByName(name).castTo(Editable.class);
             try {
                 if (control == null) {
                     editableElement.setValue(value);

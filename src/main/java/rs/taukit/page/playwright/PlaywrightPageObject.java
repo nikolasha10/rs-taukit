@@ -7,6 +7,7 @@ import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.interfaces.IElement;
+import rs.taukit.element.interfaces.CanBeVisible;
 import rs.taukit.element.playwright.PwBlock;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.PageFragmentNotFoundException;
@@ -26,7 +27,7 @@ import static rs.taukit.utils.BasicUtils.scenarioStorage;
 import static rs.taukit.utils.TestDataUtils.loadPageConfig;
 
 @Getter
-public class PlaywrightPageObject implements PageObject {
+public class PlaywrightPageObject implements PageObject, CanBeVisible {
     private final Page page;
     private final String pageName;
     private final String pageUrl;
@@ -322,5 +323,15 @@ public class PlaywrightPageObject implements PageObject {
 
     public Locator getByTestId(String testId) {
         return page.getByTestId(testId);
+    }
+
+    @Override
+    public boolean isVisible() {
+        return isPageLoaded();
+    }
+
+    @Override
+    public boolean isInvisible() {
+        return !isVisible();
     }
 }

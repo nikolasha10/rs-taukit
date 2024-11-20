@@ -1,7 +1,7 @@
 package rs.taukit.page;
 
-import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IContainer;
+import rs.taukit.element.interfaces.IElement;
 
 public interface PageObject {
     String getPageUrl();

@@ -3,14 +3,14 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.element.interfaces.Editable;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import static rs.taukit.utils.BasicUtils.page;
 
-public class PwDropdownList extends PwElement implements IHasEditableValue {
+public class PwDropdownList extends PwElement implements Editable {
     protected PwList options;
     protected PwText selectedValue;
 
@@ -71,6 +71,16 @@ public class PwDropdownList extends PwElement implements IHasEditableValue {
     @Override
     public String getText() {
         return selectedValue.isVisible() ? selectedValue.getText() : "";
+    }
+
+    @Override
+    public boolean hasText(String expectedValue) {
+        return getText().equals(expectedValue);
+    }
+
+    @Override
+    public Boolean containsText(String expectedText) {
+        return getText().contains(expectedText);
     }
 
 }

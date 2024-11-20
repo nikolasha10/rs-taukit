@@ -6,7 +6,8 @@ import lombok.Setter;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasText;
+import rs.taukit.element.interfaces.HasText;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.page.playwright.ElementBuilder;
 import rs.taukit.utils.TauLogger;
@@ -63,11 +64,11 @@ public class PwBlock extends PwElement implements IContainer {
                 } else {
                     PwElement pwElement = iElement.castTo(PwElement.class);
                     Locator pwLocator = getElementPwLocator().locator(pwElement.elementPwLocator);
-                    IHasText iHasText = ElementBuilder.buildElement(iElement.getElementName(), pwElement, pwLocator).castTo(IHasText.class);
-                    return iHasText.getText().equals(text) ? iHasText : null;
+                    PwText pwText = ElementBuilder.buildElement(iElement.getElementName(), pwElement, pwLocator).castTo(PwText.class);
+                    return pwText.getText().equals(text) ? pwText : null;
                 }
             } catch (Exception e) {
-                TauLogger.fail(e, "какая-то фигня");
+                TauLogger.fail(e, "Не удалось найти элемент в контейнере '%s' по тексту '%s'", elementName, text);
             }
             return null;
         }).filter(Objects::nonNull).findFirst().orElse(null);
@@ -83,5 +84,20 @@ public class PwBlock extends PwElement implements IContainer {
         return elementPwLocator.all().stream()
                 .map(locator -> ElementBuilder.buildElement(elementName, this, locator))
                 .map(locator -> locator.castTo(IContainer.class));
+    }
+
+    @Override
+    public String getText() {
+        return elementPwLocator.innerText();
+    }
+
+    @Override
+    public boolean hasText(String expectedValue) {
+        return getText().equals(expectedValue);
+    }
+
+    @Override
+    public Boolean containsText(String expectedText) {
+        return getText().contains(expectedText);
     }
 }

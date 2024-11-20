@@ -5,6 +5,6 @@ public interface IHasCheckbox extends IElement {
 
     void unsetCheckbox();
 
-    boolean getValue();
+    boolean isChecked();
 
 }

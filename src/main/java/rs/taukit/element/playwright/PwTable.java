@@ -7,7 +7,7 @@ import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasTableElements;
-import rs.taukit.element.interfaces.IHasText;
+import rs.taukit.element.interfaces.HasText;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.TableElementNotFoundException;
 import rs.taukit.page.playwright.ElementBuilder;
@@ -54,7 +54,7 @@ public class PwTable extends PwElement implements IHasTableElements {
     public List<String> getHeadersList() {
         PwList headers = getDescendant("Заголовки");
         return headers.getItemList().stream()
-                .map(PwElement::getText)
+                .map(HasText::getText)
                 .toList();
     }
 
@@ -62,7 +62,7 @@ public class PwTable extends PwElement implements IHasTableElements {
         return (searchCondition) -> {
             String headerName = searchCondition.get("Столбец");
             String expectedValue = searchCondition.get("Значение");
-            String cellContent = cells.get(getHeaderIndex(headerName)).getText();
+            String cellContent = cells.get(getHeaderIndex(headerName)).castTo(HasText.class).getText();
             return cellContent.contains(expectedValue);
         };
     }
@@ -145,12 +145,13 @@ public class PwTable extends PwElement implements IHasTableElements {
             String elementText;
             if (tableElement.equalsIgnoreCase("столбец")) {
                 elementText = activeRow.getElementByName("Столбцы").castTo(PwList.class)
-                        .get(getHeaderIndex(elementName)).getText();
+                        .get(getHeaderIndex(elementName)).castTo(HasText.class).getText();
                 scenarioData().put(parameterName, elementText);
             } else {
                 PwElement expectedElement = descendants.get(elementName).castTo(PwElement.class);
                 Locator expectedLocator = activeRow.elementPwLocator.locator(expectedElement.getElementPwLocator());
-                elementText = ElementBuilder.buildElement(elementName, expectedElement, expectedLocator).getText();
+                elementText = ElementBuilder.buildElement(elementName, expectedElement, expectedLocator)
+                        .castTo(HasText.class).getText();
                 scenarioData().put(parameterName, elementText);
             }
             resultList.add(Arrays.asList(tableElement, elementName, elementText));
@@ -182,7 +183,7 @@ public class PwTable extends PwElement implements IHasTableElements {
                 if (parameterName == null) {
                     parameterName = elementName;
                 }
-                scenarioData().put(parameterName, foundElement.castTo(IHasText.class).getText());
+                scenarioData().put(parameterName, foundElement.castTo(HasText.class).getText());
             }
             foundElement.click();
         } catch (Exception e) {

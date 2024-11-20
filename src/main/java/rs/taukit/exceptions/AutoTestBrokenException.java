@@ -1,5 +1,7 @@
 package rs.taukit.exceptions;
 
+import java.util.function.Supplier;
+
 public class AutoTestBrokenException extends RuntimeException {
     public AutoTestBrokenException() {
         super();
@@ -20,5 +22,7 @@ public class AutoTestBrokenException extends RuntimeException {
         super(String.format(format, args), cause);
     }
 
-
+    public static Supplier<AutoTestBrokenException> get(String format, Object... args){
+        return () -> new AutoTestBrokenException(format, args);
+    }
 }
