@@ -1,6 +1,6 @@
 package rs.taukit.element.interfaces;
 
-public interface IHasCheckbox extends IElement {
+public interface CanBeChecked extends IElement {
     void setCheckbox();
 
     void unsetCheckbox();

@@ -79,7 +79,7 @@ public class ContainerManager extends StepManager {
     public void setCheckbox(String containerName, String fieldName) {
         run(() -> {
                     IContainer container = getContainer(containerName);
-                    IHasCheckbox checkbox = container.getElementByName(fieldName).castTo(IHasCheckbox.class);
+                    CanBeChecked checkbox = container.getElementByName(fieldName).castTo(CanBeChecked.class);
                     checkbox.setCheckbox();
                 }, "Не удалось установить чекбокс '%s' в контейнере '%s' на странице '%s'",
                 fieldName, containerName, getPage().getPageName());

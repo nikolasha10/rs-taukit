@@ -11,4 +11,5 @@ public interface IElement extends Clickable, CanBeVisible, CanBeEnabled, HasColo
 
     ElementModel getModel();
 
+    void hover();
 }

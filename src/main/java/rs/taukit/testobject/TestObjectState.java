@@ -15,10 +15,16 @@ public enum TestObjectState {
             t -> canBeVisible(t).isVisible() ? "отображается" : "не отображается"),
     IS_ENABLED("активен",
             t -> canBeEnabled(t).isEnabled(),
-            t -> canBeEnabled(t).isEnabled() ? "активен" : "не активен"),
+            t -> canBeEnabled(t).isEnabled() ? "активен" : "неактивен"),
     IS_DISABLED("неактивен",
             t -> canBeEnabled(t).isDisabled(),
-            t -> canBeEnabled(t).isEnabled() ? "активен" : "не активен"),
+            t -> canBeEnabled(t).isEnabled() ? "активен" : "неактивен"),
+    IS_CHECKED("отмечен",
+            t -> canBeChecked(t).isChecked(),
+            t -> canBeChecked(t).isChecked() ? "отмечен" : "не отмечен"),
+    IS_NOT_CHECKED("не отмечен",
+            t -> !canBeChecked(t).isChecked(),
+            t -> canBeChecked(t).isChecked() ? "отмечен" : "не отмечен"),
     HAS_COLOR("имеет цвет",
             t -> hasColor(t).hasColor(t.expectedValue()),
             t -> hasColor(t).getColor()),
@@ -64,6 +70,10 @@ public enum TestObjectState {
 
     private static CanBeEnabled canBeEnabled(TestObject t) {
         return (CanBeEnabled) t.object();
+    }
+
+    private static CanBeChecked canBeChecked(TestObject t) {
+        return (CanBeChecked) t.object();
     }
 
     private static HasColor hasColor(TestObject t) {

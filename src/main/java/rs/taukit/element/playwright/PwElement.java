@@ -8,6 +8,7 @@ import rs.taukit.element.Element;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.HasText;
 import rs.taukit.element.interfaces.IElement;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.ElementNotBuiltException;
 import rs.taukit.page.playwright.ElementBuilder;
 
@@ -131,16 +132,31 @@ public class PwElement extends Element implements HasText {
 
     @Override
     public String getText() {
-        return elementPwLocator.innerText();
+        try {
+            return elementPwLocator.innerText();
+        } catch (Exception e) {
+            String cause = "";
+            if (this.isInvisible()) {
+                cause = String.format(" - элемент не отображается. Тип: %s. Селектор: %s. Локатор: %s",
+                        this.getModel().getType(), this.getSelector(), elementPwLocator);
+            }
+            String message = String.format("Не удалось получить значение элемента '%s'%s", elementName, cause);
+            throw new AutoTestBrokenException(e, message);
+        }
     }
 
     @Override
-    public boolean hasText(String expectedValue) {
-        return getText().equals(expectedValue);
+    public boolean hasText(String value) {
+        return getText().equals(value);
     }
 
     @Override
     public Boolean containsText(String expectedText) {
         return getText().contains(expectedText);
+    }
+
+    @Override
+    public void hover() {
+        elementPwLocator.hover();
     }
 }

@@ -19,9 +19,12 @@ public enum TestObjectType {
     RADIO_BUTTON ("радио-кнопка", name -> element(name).castTo(IElement.class)),
     LINK ("ссылка", name -> element(name).castTo(IElement.class)),
     DATE ("дата", name -> element(name).castTo(IElement.class)),
-    CHECKBOX ("чекбокс", name -> element(name).castTo(IHasCheckbox.class)),
+    CHECKBOX ("чекбокс", name -> element(name).castTo(CanBeChecked.class)),
+    TOGGLE ("переключатель", name -> element(name).castTo(Editable.class)),
     DROPDOWN_LIST ("выпадающий список", name -> element(name).castTo(IElement.class)),
     CONTAINER ("контейнер", name -> element(name).castTo(IContainer.class)),
+    TABLE ("таблица", name -> element(name).castTo(IHasTableElements.class)),
+    SEARCH_FIELD ("поиск по значению", name -> element(name).castTo(Editable.class)),
     PARAMETER ("параметр", name -> new TestData(scenarioData().getOptional(name))),
     ;
 
@@ -35,6 +38,6 @@ public enum TestObjectType {
 
     public static TestObjectType get(String title){
         return Arrays.stream(values()).filter(type -> type.title.equalsIgnoreCase(title)).findFirst()
-                .orElseThrow(() -> new AutoTestBrokenException("Отсутствует описание типа тестового объекта"));
+                .orElseThrow(() -> new AutoTestBrokenException("Отсутствует описание типа тестового объекта: %s", title));
     }
 }

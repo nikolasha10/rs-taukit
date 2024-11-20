@@ -3,13 +3,12 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.Clickable;
-import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasCheckbox;
+import rs.taukit.element.interfaces.CanBeChecked;
 import rs.taukit.element.interfaces.Editable;
 
 import java.util.LinkedHashMap;
 
-public class PwCheckbox extends PwElement implements Editable, IHasCheckbox {
+public class PwCheckbox extends PwElement implements Editable, CanBeChecked {
     private final PwElement checked;
 
     public PwCheckbox(String elementName, LinkedHashMap<String, Object> elementData) {
