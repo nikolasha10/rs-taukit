@@ -29,5 +29,8 @@ public class PageManager extends StepManager {
         run(() -> getPage().waitForPopupClose(pageName),
                 "Не удалось дождаться закрытия всплывающего окна '%s'", pageName);
         TauLogger.report("Закрыто всплывающее окно '%s'", pageName);
+        TauLogger.report("[примечание] открыта страница: %s", getPage().getPageName());
+        TauLogger.report("[примечание] текущий контекст: %s '%s'",
+                getPage().getCurrentContext().getModel().getType(), getPage().getCurrentContext().getElementName());
     }
 }

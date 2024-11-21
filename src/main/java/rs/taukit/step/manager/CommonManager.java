@@ -71,10 +71,10 @@ public class CommonManager extends StepManager {
         IElement currentBlock = getPage().dropCurrentContext();
         String currentContext = currentBlock == null
                 ? String.format("страница '%s'", scenarioStorage.getCurrentPageName())
-                : String.format("блок '%s'", currentBlock.getElementName());
+                : String.format("контейнер '%s'", currentBlock.getElementName());
         scenarioStorage.setCurrentContextName(currentContext);
         if (haveToReport) {
-            TauLogger.report("* текущий контекст: %s", currentContext);
+            TauLogger.report("[примечание] текущий контекст: %s", currentContext);
         }
     }
 
