@@ -28,6 +28,8 @@ public interface PageObject {
 
     void waitForPopup(String pageName);
 
+    PageObject getPopup(String popupName);
+
     void waitForTimeout(double time);
 
     boolean isPageLoaded();

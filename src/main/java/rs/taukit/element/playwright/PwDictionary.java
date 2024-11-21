@@ -46,7 +46,7 @@ public class PwDictionary extends PwElement implements Editable {
         page().getElement(model.get("поле поиска").toString()).castTo(PwTextField.class).setValue(value);
         page().getElement(model.get("кнопка поиска").toString()).castTo(PwButton.class).click();
         driver.waitForTimeout(2000);
-        page().getElement("Значения справочника").castTo(PwList.class).setValue(value);
+        page().getElement("Значения справочника").castTo(PwList.class).selectItem(value);
         page().waitForPopupClose(model.get("страница"));
         browser().getPage(initialPage.getPageName()).waitForLoad();
     }

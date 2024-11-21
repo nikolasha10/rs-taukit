@@ -11,7 +11,7 @@ import static rs.taukit.utils.BasicUtils.*;
 
 public enum TestObjectType {
     PAGE ("страница", name -> browser().getPage(name)),
-    POPUP ("всплывающее окно", name -> browser().getPage(name)),
+    POPUP ("всплывающее окно", name -> page().getPopup(name)),
     ELEMENT ("элемент", name -> element(name).castTo(IElement.class)),
     INPUT ("поле", name -> element(name).castTo(Editable.class)),
     TEXT ("текст", name -> element(name).castTo(HasText.class)),

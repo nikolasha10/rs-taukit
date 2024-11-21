@@ -5,9 +5,9 @@ import com.microsoft.playwright.Page;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.CanBeVisible;
 import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.CanBeVisible;
 import rs.taukit.element.playwright.PwBlock;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.PageFragmentNotFoundException;
@@ -115,9 +115,12 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
         waitForLoadAndContinue(pageTimeout);
     }
 
+    private BooleanSupplier getPageLoadCondition() {
+        return () -> isUrlCorrect() && hasPageAllExpectedElements();
+    }
+
     public void waitForLoadAndContinue(double pageTimeout) {
-        BooleanSupplier waitCondition = () -> isUrlCorrect() && hasPageAllExpectedElements();
-        driver().waitForCondition(waitCondition, pageTimeout);
+        driver().waitForCondition(getPageLoadCondition(), pageTimeout);
         scenarioStorage().setCurrentPageName(pageName);
     }
 
@@ -141,6 +144,14 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
     }
 
     @Override
+    public PlaywrightPageObject getPopup(String popupName) {
+        if (popup == null || !popup.pageName.equals(popupName)) {
+            waitForPopup(popupName);
+        }
+        return popup;
+    }
+
+    @Override
     public void waitForPopup(String pageName) {
         this.popup = new PlaywrightPageObject(page, pageName);
         popup.waitForLoad();
@@ -150,6 +161,7 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
     @Override
     public void waitForPopupClose(String pageName) {
         popup.waitForClose();
+        popup = null;
         dropCurrentContext();
     }
 
@@ -205,7 +217,6 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
             default -> {
             }
         }
-
     }
 
     @Override
@@ -272,7 +283,7 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
         }
         elementList = context.getElementList();
         List<IContainer> blockElementsList = elementList.stream()
-                .filter(element -> element.getModel().getType().equalsIgnoreCase("блок элементов"))
+                .filter(element -> element.getModel().getType().equalsIgnoreCase("контейнер"))
                 .map(element -> element.castTo(IContainer.class))
                 .toList();
         for (IContainer blockElement : blockElementsList) {
@@ -327,7 +338,7 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
 
     @Override
     public boolean isVisible() {
-        return isPageLoaded();
+        return getPageLoadCondition().getAsBoolean();
     }
 
     @Override

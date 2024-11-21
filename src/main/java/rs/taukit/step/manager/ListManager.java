@@ -14,14 +14,14 @@ import java.util.stream.Collectors;
 
 public class ListManager extends StepManager {
 
-    @Step("в списке '{listName}' выбрать '{listValue}'")
-    public void listValueClick(String listName, String listValue) {
+    @Step("в списке '{listName}' выбрать '{itemName}'")
+    public void selectItem(String listName, String itemName) {
         run(() -> {
-            Editable list = getElement(listName);
-            list.setValue(listValue);
+            HasListItems list = getElement(listName);
+            list.selectItem(itemName);
         }, "Не удалось выбрать значение '%s' в списке '%s' на странице '%s'", 
-                listValue, listName, getPage().getPageName());
-        TauLogger.report("в списке '%s' выбран '%s'", listName, listValue);
+                itemName, listName, getPage().getPageName());
+        TauLogger.report("в списке '%s' выбран '%s'", listName, itemName);
     }
 
     @Step("в списке '{listName}' найти {itemType}, соответствующий условиям:")
@@ -29,7 +29,7 @@ public class ListManager extends StepManager {
         TauLogger.attachDataTable("Условия поиска элемента", dataTable);
         AtomicReference<IContainer> foundItem = new AtomicReference<>();
         BooleanSupplier condition = () -> {
-            IHasListItems list = getElement(listName);
+            HasListItems list = getElement(listName);
             foundItem.set(list.findItemByConditions(dataTable));
             return foundItem.get() != null;
         };
@@ -48,7 +48,7 @@ public class ListManager extends StepManager {
     @Step("проверить состав элементов списка:")
     public void validateElements(String listName, DataTable dataTable) {
         TauLogger.attachDataTable("Элементы списка", dataTable);
-        IHasListItems list = getElement(listName);
+        HasListItems list = getElement(listName);
         Map<String, String> expected = new HashMap<>();
         Map<String, IElement> items = list.getItemList().stream()
                 .collect(Collectors.toMap(item -> item.castTo(HasText.class).getText(), item -> item));

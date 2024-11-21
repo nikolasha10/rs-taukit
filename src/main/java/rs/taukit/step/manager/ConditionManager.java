@@ -125,9 +125,8 @@ public class ConditionManager extends StepManager {
         BooleanSupplier conditions = () -> dataTable.asMaps().stream()
                 .map(data -> new TestCondition(data).waitForResult())
                 .allMatch(TestCondition::isConditionMet);
-        double conditionWaitTimeout = Config.getTimeProperty("condition.wait.timeout");
         try {
-            getDriver().waitForCondition(conditions, conditionWaitTimeout, conditionsWaitTimeout, scenarioStorage.getStepActions());
+            getDriver().waitForCondition(conditions, conditionsWaitTimeout, scenarioStorage.getStepActions());
         } catch (Exception e) {
             TestCondition firstUnexpectedResult = dataTable.asMaps().stream()
                     .map(row -> new TestCondition(row).waitForResult())

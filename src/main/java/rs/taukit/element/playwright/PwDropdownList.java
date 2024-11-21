@@ -56,7 +56,7 @@ public class PwDropdownList extends PwElement implements Editable {
             e.addSuppressed(new RuntimeException(message));
             throw e;
         }
-        options.setValue(value);
+        options.selectItem(value);
     }
 
     @Override

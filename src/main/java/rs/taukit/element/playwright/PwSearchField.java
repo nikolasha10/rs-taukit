@@ -44,7 +44,7 @@ public class PwSearchField extends PwElement implements Editable {
             driver.waitForCondition(fillManually::isVisible, searchValueTimeout);
             fillManually.click();
         } else {
-            descendants.get("список значений").castTo(PwList.class).setValue(value);
+            descendants.get("список значений").castTo(PwList.class).selectItem(value);
         }
     }
 

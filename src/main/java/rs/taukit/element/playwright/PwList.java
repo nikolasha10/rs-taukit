@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 
 import static rs.taukit.utils.BasicUtils.page;
 
-public class PwList extends PwElement implements IHasListItems {
+public class PwList extends PwElement implements HasListItems {
     public PwList(String elementName, LinkedHashMap<String, Object> elementData) {
         this(elementName, new ElementModel(elementData));
     }
@@ -47,18 +47,18 @@ public class PwList extends PwElement implements IHasListItems {
     }
 
     @Override
-    public void setValue(String value) {
+    public void selectItem(String itemName) {
         double timeout = Config.getTimeProperty("element.check.interval");
-        BooleanSupplier condition = () -> getValues().stream().anyMatch(itemValue -> itemValue.contains(value));
+        BooleanSupplier condition = () -> getValues().stream().anyMatch(itemValue -> itemValue.contains(itemName));
         try {
             driver.waitForCondition(condition, timeout);
         } catch (Exception e) {
-            throw valueNotFoundException(value).get();
+            throw valueNotFoundException(itemName).get();
         }
         getItemList().stream()
                 .filter(PwElement::isVisible)
-                .filter(containsElementWithText(value))
-                .findFirst().orElseThrow(valueNotFoundException(value))
+                .filter(containsElementWithText(itemName))
+                .findFirst().orElseThrow(valueNotFoundException(itemName))
                 .click();
     }
 
@@ -107,10 +107,10 @@ public class PwList extends PwElement implements IHasListItems {
         int foundIndex = IntStream.range(0, getItemList().size()).boxed()
                 .filter(index -> dataTable.asMaps().stream().allMatch(data -> {
                     IContainer item = getItemList().get(index);
-                    page().setCurrentContext(item);
-                    return new TestCondition(data).isConditionMet();
+                    page().replaceCurrentContext(item);
+                    return new TestCondition(data).checkResult().isConditionMet();
                 })).findFirst().orElse(-1);
-        page().setCurrentContext(originalContext);
+        page().replaceCurrentContext(originalContext);
         if (foundIndex > -1) {
             foundItem = getItemList().get(foundIndex);
             foundItem.setCurrentIndex(foundIndex);

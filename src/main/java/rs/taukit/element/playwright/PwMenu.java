@@ -35,13 +35,13 @@ public class PwMenu extends PwElement implements IHasMenu {
         List<String> additionalValues = new ArrayList<>();
         try {
             if (itemList.getItemList().stream().anyMatch(item -> item.getText().equals(itemName))) {
-                itemList.setValue(itemName);
+                itemList.selectItem(itemName);
             } else {
                 PwButton item = getDescendant("Дополнительные пункты");
                 item.click();
                 PwList additionalItemList = getDescendant("Выпадающий список");
                 additionalValues = additionalItemList.getValues();
-                additionalItemList.setValue(itemName);
+                additionalItemList.selectItem(itemName);
             }
         } catch (Exception e) {
             String message = String.format("""

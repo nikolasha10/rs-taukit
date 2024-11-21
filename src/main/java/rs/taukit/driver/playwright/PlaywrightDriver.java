@@ -7,6 +7,7 @@ import com.microsoft.playwright.TimeoutError;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebDriver;
+import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
 
@@ -17,8 +18,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
-import static rs.taukit.utils.BasicUtils.driver;
-import static rs.taukit.utils.BasicUtils.scenarioStorage;
+import static rs.taukit.utils.BasicUtils.*;
 
 @Getter
 public class PlaywrightDriver implements IWebDriver {
@@ -132,6 +132,27 @@ public class PlaywrightDriver implements IWebDriver {
         while (new Date().getTime() - start <= timeout && !condition.getAsBoolean()) {
             waitForTimeout(interval);
         }
+    }
+
+    @Override
+    public void waitForCondition(BooleanSupplier condition, double timeout, List<Runnable> previousStepList) {
+        String originalPageName = page().getPageName();
+        IContainer originalContext = page().getCurrentContext();
+        BrowserContext.WaitForConditionOptions setTimeout = new BrowserContext.WaitForConditionOptions().setTimeout(timeout);
+        getBrowserContext().waitForCondition(() -> {
+            try {
+                if (!condition.getAsBoolean()) {
+                    throw new RuntimeException();
+                }
+                return true;
+            } catch (Exception e) {
+                browser().getPage(originalPageName);
+                page().dropCurrentContext();
+                page().setCurrentContext(originalContext);
+                previousStepList.forEach(Runnable::run);
+                return false;
+            }
+        }, setTimeout);
     }
 
     @Override

@@ -28,6 +28,8 @@ public interface IWebDriver {
 
     void waitForCondition(BooleanSupplier condition, double interval, double timeout);
 
+    void waitForCondition(BooleanSupplier condition, double timeout, List<Runnable> previousStep);
+
     void waitForCondition(BooleanSupplier condition, double interval, double timeout, List<Runnable> previousStep);
 
     <T> T castTo();
