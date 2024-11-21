@@ -2,6 +2,7 @@ package rs.taukit.step.manager;
 
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
+import rs.taukit.config.Config;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.*;
 import rs.taukit.testdata.ExpectedResult;
@@ -10,20 +11,22 @@ import rs.taukit.utils.TauLogger;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 
 public class ContainerManager extends StepManager {
 
     private IContainer getContainer(String containerName) {
+        double timeout = Config.getTimeProperty("element.check.timeout");
         String[] blockHierarchy = containerName.split(" -> ");
         IContainer currentContext = getPage().getCurrentContext();
         IWebDriver driver = getDriver();
-        driver.waitForCondition(currentContext::isVisible);
+        driver.waitForCondition(currentContext::isVisible, timeout);
         IContainer container = getPage().getElement(blockHierarchy[0]).castTo(IContainer.class);
         for (int i = 1; i < blockHierarchy.length; i++) {
-            driver.waitForCondition(container::isVisible);
+            driver.waitForCondition(container::isVisible, timeout);
             container = container.getElementByName(blockHierarchy[i]).castTo(IContainer.class);
         }
-        driver.waitForCondition(container::isVisible);
+        driver.waitForCondition(container::isVisible, timeout);
         return container;
     }
 
@@ -123,8 +126,14 @@ public class ContainerManager extends StepManager {
 
     @Step("дождаться отображения контейнера '{containerName}'")
     public void waitForDisplayed(String containerName) {
-        waitForCondition(getContainer(containerName)::isVisible,
-                "Не удалось дождаться отображения контейнера '%s' на странице '%s'",
+        BooleanSupplier condition = () -> {
+            try {
+                return getContainer(containerName).isVisible();
+            } catch (Exception e) {
+                return false;
+            }
+        };
+        waitForCondition(condition, "Не удалось дождаться отображения контейнера '%s' на странице '%s'",
                 containerName, getPage().getPageName());
         TauLogger.report("Контейнер '%s' отображается", containerName);
     }
