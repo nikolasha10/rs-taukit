@@ -276,6 +276,11 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName, getCurrentContext()));
     }
 
+    @Override
+    public Locator getByCss(String selector) {
+        return page.locator(selector);
+    }
+
     private IElement findElement(IContainer context, String elementName) {
         List<IElement> elementList;
         if (context.containsElement(elementName)) {

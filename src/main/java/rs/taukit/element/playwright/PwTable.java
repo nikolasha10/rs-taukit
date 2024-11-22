@@ -5,9 +5,10 @@ import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.HasListItems;
+import rs.taukit.element.interfaces.HasText;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasTableElements;
-import rs.taukit.element.interfaces.HasText;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.TableElementNotFoundException;
 import rs.taukit.page.playwright.ElementBuilder;
@@ -43,7 +44,7 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     public int getHeaderIndex(String headerName) {
-        List<String> headerNames = getHeadersList();
+        List<String> headerNames = getHeaderNamesList();
         if (!headerNames.contains(headerName)) {
             throw TableElementNotFoundException.header(elementName, headerName, headerNames).get();
         }
@@ -51,7 +52,12 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     @Override
-    public List<String> getHeadersList() {
+    public HasListItems getHeadersList() {
+        return getDescendant("Заголовки");
+    }
+
+    @Override
+    public List<String> getHeaderNamesList() {
         PwList headers = getDescendant("Заголовки");
         return headers.getItemList().stream()
                 .map(HasText::getText)

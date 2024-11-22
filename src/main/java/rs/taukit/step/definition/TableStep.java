@@ -12,16 +12,22 @@ public class TableStep extends TableManager {
 
     /**
      * Проверяет таблицы на наличие и порядок столбцов
+     *
      * @param tableName название таблицы
      * @param dataTable таблица вида <table>
      *                  <tr><th>| Номер |</th><th>Название |</th></tr>
-     * </table>, где <br><b>Номер</b> - порядковый номер столбца начинается с 1 (не обязательный столбец).
+     *                  </table>, где <br><b>Номер</b> - порядковый номер столбца начинается с 1 (не обязательный столбец).
      *                  Если не указан - не будет проверяться.<br>
      *                  <b>Название</b> - название столбца.
      */
     @И("^в таблице \"(.+)\" проверить наличие столбцов:$")
     public void tableHeadersCheck(String tableName, DataTable dataTable) {
         super.tableHeadersCheck(tableName, eval(dataTable));
+    }
+
+    @И("^в таблице \"(.+)\" для каждого заголовка столбца проверить выполнение условий:$")
+    public void tableHeadersCheckConditions(String tableName, DataTable dataTable) {
+        super.tableHeadersCheckConditions(tableName, eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" нажать на \"(.+)\" в строке, соответствующей условиям:$")

@@ -3,17 +3,18 @@ package rs.taukit.step.manager;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.config.Config;
+import rs.taukit.element.interfaces.HasListItems;
+import rs.taukit.element.interfaces.HasText;
+import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.interfaces.IHasTableElements;
 import rs.taukit.exceptions.TableElementNotFoundException;
+import rs.taukit.testobject.TestCondition;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
 import rs.taukit.utils.TimeStringParser;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
@@ -122,7 +123,7 @@ public class TableManager extends StepManager {
             }
         });
         if (notFoundList.size() > 1) {
-            List<String> headersList = table.getHeadersList();
+            List<String> headersList = table.getHeaderNamesList();
             List<List<String>> headers = new ArrayList<>();
             headers.add(Arrays.asList("Номер", "Название"));
             headersList.forEach(name -> headers.add(Arrays.asList(String.valueOf(headersList.indexOf(name) + 1), name)));
@@ -137,5 +138,41 @@ public class TableManager extends StepManager {
         } else {
             TauLogger.report("Столбцы таблицы '%s' соответствуют ожидаемым", tableName);
         }
+    }
+
+    @Step("в таблице '{tableName}' для каждого заголовка столбца проверить выполнение условий:")
+    protected void tableHeadersCheckConditions(String tableName, DataTable dataTable) {
+        TauLogger.attachDataTable("Условия проверки заголовков таблицы", dataTable);
+        IHasTableElements table = getElement(tableName);
+        HasListItems headers = table.getHeadersList();
+        Map<String, DataTable> failedHeaders = new LinkedHashMap<>();
+        IContainer original = getContext();
+        headers.getItemList().forEach(item -> {
+            getPage().replaceCurrentContext(item.castTo(IContainer.class));
+            List<List<String>> notMetConditionList = new ArrayList<>();
+            notMetConditionList.add(Arrays.asList("Объект", "Название", "Состояние", "Значение", "Текущее значение"));
+            dataTable.asMaps().forEach(conditionData -> {
+                TestCondition testCondition = new TestCondition(conditionData).checkResult();
+                if (!testCondition.isConditionMet()) {
+                    notMetConditionList.add(Arrays.asList(
+                            testCondition.getObjectType(),
+                            testCondition.getObjectName(),
+                            testCondition.getObjectState(),
+                            testCondition.getExpectedValue(),
+                            testCondition.getCurrentValue()));
+                }
+            });
+            if (notMetConditionList.size() > 1) {
+                DataTable notMetConditionTable = DataTable.create(notMetConditionList, TextUtils.tableConverter);
+                failedHeaders.put(item.castTo(HasText.class).getText(), notMetConditionTable);
+            }
+        });
+        if (!failedHeaders.isEmpty()) {
+            Runnable runnable = () -> failedHeaders.forEach(TauLogger::attachDataTable);
+            TauLogger.fail(runnable, "Заголовки таблицы '%s' %s не соответствуют требованиям",
+                    tableName, failedHeaders.keySet());
+
+        }
+        getPage().replaceCurrentContext(original);
     }
 }
