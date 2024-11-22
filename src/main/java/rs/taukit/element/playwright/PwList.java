@@ -62,6 +62,11 @@ public class PwList extends PwElement implements HasListItems {
                 .click();
     }
 
+    @Override
+    public int getSize() {
+        return getItemList().size();
+    }
+
     private Predicate<IContainer> containsElementWithText(String text) {
         return item -> item.containsText(text) || item.getElementByText(text) != null;
     }

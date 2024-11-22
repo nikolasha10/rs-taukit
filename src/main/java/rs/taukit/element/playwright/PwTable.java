@@ -3,26 +3,21 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
-import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
-import rs.taukit.element.interfaces.HasListItems;
-import rs.taukit.element.interfaces.HasText;
-import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasTableElements;
+import rs.taukit.element.interfaces.*;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.TableElementNotFoundException;
 import rs.taukit.page.playwright.ElementBuilder;
+import rs.taukit.testobject.TestCondition;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
-import static rs.taukit.utils.BasicUtils.scenarioData;
-import static rs.taukit.utils.BasicUtils.scenarioStorage;
+import static rs.taukit.utils.BasicUtils.*;
 
 public class PwTable extends PwElement implements IHasTableElements {
     private PwBlock activeRow;
@@ -79,36 +74,21 @@ public class PwTable extends PwElement implements IHasTableElements {
 
     @Override
     public int findRowByConditions(DataTable dataTable) {
+        scenarioData().put("контекст таблицы", this);
         PwList rowList = getDescendant("Строки");
-        AtomicReference<List<PwBlock>> itemList = new AtomicReference<>(rowList.getItemList());
-        AtomicReference<Exception> exceptionAtomicReference = new AtomicReference<>();
-        double checkInterval = Config.getTimeProperty("element.check.interval");
-        try {
-            driver.waitForCondition(() -> rowList.getItemList().stream().allMatch(PwElement::isVisible), checkInterval);
-            driver.waitForCondition(() -> {
-                try {
-                    itemList.set(rowList.getItemList());
-                    return itemList.get().stream()
-                            .anyMatch(item -> conditions(dataTable)
-                                    .test(item.getElementByName("Столбцы").castTo(PwList.class)));
-                } catch (Exception e) {
-                    exceptionAtomicReference.set(e);
-                    return false;
-                }
-            }, checkInterval);
-            int rowIndex = IntStream.range(0, itemList.get().size())
-                    .filter(index -> conditions(dataTable)
-                            .test(itemList.get().get(index).getElementByName("Столбцы").castTo(PwList.class)))
-                    .findFirst().orElseThrow(TableElementNotFoundException.row(elementName));
-            activeRow = itemList.get().get(rowIndex);
-            scenarioData().put("контекст таблицы", this);
-            return rowIndex;
-        } catch (Exception e) {
-            if (exceptionAtomicReference.get() != null) {
-                e.addSuppressed(exceptionAtomicReference.get());
-            }
-            throw e;
-        }
+        int foundRowIndex = IntStream.range(0, rowList.getSize()).boxed().filter(index -> {
+            activeRow = rowList.getItemList().get(index);
+            return dataTable.asMaps().stream()
+                    .allMatch(conditionData -> new TestCondition(conditionData).checkResult().isConditionMet());
+        }).findFirst().orElseThrow();
+        activeRow = rowList.getItemList().get(foundRowIndex);
+        return foundRowIndex;
+    }
+
+    @Override
+    public IElement getActiveCell(String headerName) {
+        return activeRow.getElementByName("Столбцы").castTo(PwList.class).getItemList()
+                .get(getHeaderIndex(headerName));
     }
 
     @Override
@@ -170,6 +150,13 @@ public class PwTable extends PwElement implements IHasTableElements {
         PwElement expectedElement = descendants.get(elementName).castTo(PwElement.class);
         Locator expectedLocator = activeRow.elementPwLocator.locator(expectedElement.getElementPwLocator());
         ElementBuilder.buildElement(elementName, expectedElement, expectedLocator).click();
+    }
+
+    @Override
+    public void setContext(String headerName) {
+        PwList cells = activeRow.getElementByName("Столбцы").castTo(PwList.class);
+        IContainer cell = cells.getItemList().get(getHeaderIndex(headerName)).castTo(IContainer.class);
+        page().setCurrentContext(cell);
     }
 
     @Override

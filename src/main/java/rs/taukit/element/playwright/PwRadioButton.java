@@ -2,9 +2,9 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.Editable;
 import rs.taukit.element.interfaces.HasText;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.Editable;
 import rs.taukit.exceptions.AutoTestBrokenException;
 
 import java.util.LinkedHashMap;
@@ -58,7 +58,11 @@ public class PwRadioButton extends PwElement implements Editable {
 
     @Override
     public String getText() {
-        return descendants.get("Выбрана").castTo(HasText.class).getText();
+        PwBlock active = getButtonList().stream().filter(button -> button.getElementByName("Выбрана").isVisible())
+                .findFirst().orElseThrow(AutoTestBrokenException.get("""
+                                Не найдено выбранное значение радио-кнопки '%s' на странице '%s'""",
+                        elementName, page().getPageName()));
+        return active.getElementByName("Значение").castTo(HasText.class).getText();
     }
 
     @Override

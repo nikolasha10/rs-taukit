@@ -60,6 +60,11 @@ public class TableStep extends TableManager {
         super.clickOnElement(elementName);
     }
 
+    @И("^в найденной строке перейти к столбцу \"(.+)\"$")
+    public void tableRowSetContext(String headerName) {
+        super.tableRowSetContext(headerName);
+    }
+
     @И("^в строке \\((.+)\\) нажать на \"(.+)\"$")
     public void tableRowElementClick(String rowName, String elementName) {
         ((IHasTableElements) scenarioData().get(rowName)).tableRowElementClick(rowName, elementName);

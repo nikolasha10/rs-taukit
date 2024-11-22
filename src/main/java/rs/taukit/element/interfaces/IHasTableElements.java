@@ -26,4 +26,8 @@ public interface IHasTableElements extends IElement {
     List<String> getHeaderNamesList();
 
     HasListItems getHeadersList();
+
+    void setContext(String headerName);
+
+    IElement getActiveCell(String headerName);
 }

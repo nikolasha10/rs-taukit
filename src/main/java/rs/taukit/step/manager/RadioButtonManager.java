@@ -6,7 +6,7 @@ import rs.taukit.utils.TauLogger;
 
 public class RadioButtonManager extends StepManager {
 
-    @Step("установить переключатель '{elementName}' в значение '{value}'$")
+    @Step("установить переключатель '{elementName}' в значение '{value}'")
     public void switchRadio(String elementName, String value) {
         run(() -> {
                     Editable radio = getElement(elementName);

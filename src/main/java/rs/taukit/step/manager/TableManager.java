@@ -42,23 +42,13 @@ public class TableManager extends StepManager {
     @Step("в таблице '{tableName}' найти строку, соответствующую условиям:")
     public void findRowByConditions(String tableName, DataTable dataTable) {
         TauLogger.attach("Условия поиска строки", dataTable);
-        double elementCheckInterval = Config.getTimeProperty("element.check.interval");
-        double elementCheckTimeout = Config.getTimeProperty("element.check.timeout");
-        AtomicReference<Integer> rowIndex = new AtomicReference<>();
-        AtomicReference<Exception> exception = new AtomicReference<>();
-        Runnable runnable = () -> getDriver().waitForCondition(() -> {
-            try {
-                IHasTableElements table = waitForTable(tableName);
-                rowIndex.set(table.findRowByConditions(dataTable) + 1);
-                return true;
-            } catch (Exception e) {
-                exception.set(e);
-                return false;
-            }
-        }, elementCheckInterval, elementCheckTimeout, scenarioStorage.getStepActions());
-        run(runnable, exception.get(),
-                "В таблице '%s' не удалось найти строку, соответствующую заданным условиям", tableName);
-        TauLogger.report("Найдена строка %d", rowIndex.get());
+        AtomicReference<Integer> rowNumber = new AtomicReference<>();
+        Runnable runnable = () -> {
+            IHasTableElements table = waitForTable(tableName);
+            rowNumber.set(table.findRowByConditions(dataTable) + 1);
+        };
+        run(runnable, "В таблице '%s' не удалось найти строку, соответствующую заданным условиям", tableName);
+        TauLogger.report("Найдена строка %d", rowNumber.get());
         scenarioStorage.clearStepActions();
         scenarioStorage.stopToSaveActions();
     }
@@ -174,5 +164,16 @@ public class TableManager extends StepManager {
 
         }
         getPage().replaceCurrentContext(original);
+        TauLogger.console("Заголовки таблицы '%s' соответствуют условиям проверки");
+    }
+
+    @Step("в найденной строке перейти к столбцу '{headerName}'")
+    protected void tableRowSetContext(String headerName) {
+        IHasTableElements table = scenarioData.get("контекст таблицы");
+        run(() -> table.setContext(headerName),
+                "Не удалось переключить контекст на столбец '%s' в найденной строке таблицы '%s' на странице '%s'",
+                headerName, table.getElementName(), getPage().getPageName());
+        TauLogger.report("[примечание] текущий контекст: столбец '%s' в найденной строке таблицы '%s'",
+                headerName, table.getElementName());
     }
 }

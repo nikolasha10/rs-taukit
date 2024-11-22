@@ -6,6 +6,10 @@ import java.util.List;
 
 public interface HasListItems {
     List<? extends IElement> getItemList();
+
     IContainer findItemByConditions(DataTable dataTable);
+
     void selectItem(String itemName);
+
+    int getSize();
 }
