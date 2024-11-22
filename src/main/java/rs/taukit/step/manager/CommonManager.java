@@ -56,8 +56,8 @@ public class CommonManager extends StepManager {
     public void setCurrentPageContext() {
         getPage().setCurrentContext(null);
         scenarioStorage.saveStepAction(() -> getPage().setCurrentContext(null));
-        scenarioStorage.setCurrentContextName("страница '%s'", scenarioStorage.getCurrentPageName());
-        TauLogger.report("[примечание] текущий контекст: страница '%s'", scenarioStorage.getCurrentPageName());
+        scenarioStorage.setCurrentContextName("страница '%s'", getPage().getPageName());
+        TauLogger.report("[примечание] текущий контекст: страница '%s'", getPage().getPageName());
     }
 
     @Step("[примечание] текущий контекст: контейнер '{containerName}'")
