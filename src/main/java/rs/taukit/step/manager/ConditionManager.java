@@ -150,5 +150,6 @@ public class ConditionManager extends StepManager {
         scenarioStorage.clearStepActions();
         scenarioStorage.stopToSaveActions();
         TauLogger.resetNotCritical();
+        TauLogger.console("Условия выполнены");
     }
 }

@@ -42,7 +42,8 @@ public class TestCondition {
         this.expectedValue = Optional.ofNullable(TestDataUtils.getOptional(data, "Значение")).orElse("");
         String checkTimeout = Optional.ofNullable(data.get("Ожидание")).orElse(Config.getProperty("element.check.interval"));
         this.checkTimeout = TimeStringParser.getTime(checkTimeout);
-        TestObject testObject = new TestObject(TestObjectType.get(objectType).testObject.apply(objectName), expectedValue);
+        Object object = TestObjectType.get(objectType).testObject.apply(objectName);
+        TestObject testObject = new TestObject(object, expectedValue);
         this.condition = () -> TestObjectState.get(objectState).check.apply(testObject);
         this.currentValue = TestObjectState.get(objectState).value.apply(testObject).toString();
     }
