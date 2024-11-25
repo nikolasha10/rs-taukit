@@ -136,8 +136,8 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public void waitForCondition(BooleanSupplier condition, double timeout, List<Runnable> previousStepList) {
-        String originalPageName = page().getPageName();
-        IContainer originalContext = page().getCurrentContext();
+        String originalPageName = page() == null ? null : page().getPageName();
+        IContainer originalContext = page() == null ? null : page().getCurrentContext();
         BrowserContext.WaitForConditionOptions setTimeout = new BrowserContext.WaitForConditionOptions().setTimeout(timeout);
         getBrowserContext().waitForCondition(() -> {
             try {
@@ -146,9 +146,10 @@ public class PlaywrightDriver implements IWebDriver {
                 }
                 return true;
             } catch (Exception e) {
-                browser().getPage(originalPageName);
-                page().dropCurrentContext();
-                page().setCurrentContext(originalContext);
+                if (originalPageName != null) {
+                    browser().getPage(originalPageName);
+                    page().replaceCurrentContext(originalContext);
+                }
                 previousStepList.forEach(Runnable::run);
                 return false;
             }
