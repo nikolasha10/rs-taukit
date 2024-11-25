@@ -164,7 +164,7 @@ public class TableManager extends StepManager {
 
         }
         getPage().replaceCurrentContext(original);
-        TauLogger.console("Заголовки таблицы '%s' соответствуют условиям проверки");
+        TauLogger.console("Заголовки таблицы '%s' соответствуют условиям проверки", tableName);
     }
 
     @Step("в найденной строке перейти к столбцу '{headerName}'")
