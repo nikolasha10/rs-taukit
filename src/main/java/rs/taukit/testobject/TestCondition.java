@@ -24,7 +24,7 @@ public class TestCondition {
     private final String expectedValue;
     private final double checkTimeout;
     private final BooleanSupplier condition;
-    private final String currentValue;
+    private String currentValue;
     private Exception thrownException;
     private boolean conditionMet;
 
@@ -45,7 +45,6 @@ public class TestCondition {
         Object object = TestObjectType.get(objectType).testObject.apply(objectName);
         TestObject testObject = new TestObject(object, expectedValue);
         this.condition = () -> TestObjectState.get(objectState).check.apply(testObject);
-        this.currentValue = TestObjectState.get(objectState).value.apply(testObject).toString();
     }
 
     /**
@@ -66,7 +65,16 @@ public class TestCondition {
     }
 
     public TestCondition checkResult() {
-        this.conditionMet = condition.getAsBoolean();
+        Object object = TestObjectType.get(objectType).testObject.apply(objectName);
+        TestObject testObject = new TestObject(object, expectedValue);
+        try {
+            this.conditionMet = condition.getAsBoolean();
+            this.currentValue = TestObjectState.get(objectState).value.apply(testObject).toString();
+        } catch (Exception e) {
+            this.thrownException = e;
+            conditionMet = false;
+            this.currentValue = "<не определено>";
+        }
         return this;
     }
 }

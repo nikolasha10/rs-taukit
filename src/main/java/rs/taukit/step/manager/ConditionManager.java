@@ -12,6 +12,7 @@ import rs.taukit.utils.TimeStringParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 public class ConditionManager extends StepManager {
@@ -31,6 +32,7 @@ public class ConditionManager extends StepManager {
             resultsHeaders.add("Текущее значение");
         }
         unexpectedResultList.add(resultsHeaders);
+        AtomicReference<Exception> exception = new AtomicReference<>();
         dataTable.asMaps().stream()
                 .map(data -> new TestCondition(data).checkResult())
                 .filter(result -> !result.isConditionMet())
@@ -44,6 +46,14 @@ public class ConditionManager extends StepManager {
                                 unexpected.add(result.getCurrentValue());
                             }
                             unexpectedResultList.add(unexpected);
+                            if (result.getThrownException() != null) {
+                                if (exception.get() == null) {
+                                    exception.set(result.getThrownException());
+                                } else {
+                                    exception.get().addSuppressed(result.getThrownException());
+                                }
+
+                            }
                         }
                 );
         if (unexpectedResultList.size() > 1) {
@@ -52,8 +62,7 @@ public class ConditionManager extends StepManager {
                 TauLogger.console("Результаты неуспешных проверок", unexpectedResultsTable);
                 TauLogger.attachDataTable("Результаты неуспешных проверок", unexpectedResultsTable);
             };
-
-            TauLogger.fail(runnable, "Результаты проверки условий '%s' не соответствуют ожидаемым", conditionsName);
+            TauLogger.fail(runnable, exception.get(), "Результаты проверки условий '%s' не соответствуют ожидаемым", conditionsName);
         } else {
             TauLogger.report("Условия '%s' выполнены", conditionsName);
         }
