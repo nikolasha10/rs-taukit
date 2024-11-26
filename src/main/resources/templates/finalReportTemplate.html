@@ -624,7 +624,9 @@
             }
         });
     }
-
+    if (!branches.includes(defaultBranch)){
+        branches.push(defaultBranch);
+    }
     const counters = 'Всего: <span id="count_total"> </span>'
                    + 'Успешных: <span id="count_successful"> </span>'
                    + 'С некритическими ошибками: <span id="count_with_errors"> </span>'
