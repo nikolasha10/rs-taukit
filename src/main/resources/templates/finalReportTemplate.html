@@ -205,7 +205,7 @@
 </div>
 
 <script type="text/javascript">
-    const pipelineUrl = window.location.origin + '${jenkinsPipelineUrl}';
+    const pipelineUrl = '${jenkinsPipelineUrl}'.replace('qatar', window.location.hostname);
     const authorization = 'Basic ${jenkinsAuth}';
     const stands = ${stands};
     const currentStand = '${currentStand}';
