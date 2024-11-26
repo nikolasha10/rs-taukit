@@ -59,6 +59,17 @@ public class PwTable extends PwElement implements IHasTableElements {
                 .toList();
     }
 
+    @Override
+    public IContainer getHeaderByName(String headerName) {
+        return getHeadersList().getItemList().get(getHeaderIndex(headerName)).castTo(IContainer.class);
+    }
+
+    @Override
+    public List<IContainer> getRowList() {
+        PwList rowList = getDescendant("Строки");
+        return rowList.getItemList().stream().map(row -> row.castTo(IContainer.class)).toList();
+    }
+
     private Predicate<Map<String, String>> condition(PwList cells) {
         return (searchCondition) -> {
             String headerName = searchCondition.get("Столбец");

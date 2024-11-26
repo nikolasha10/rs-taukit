@@ -28,9 +28,7 @@ public class ConditionManager extends StepManager {
         Map<String, String> expectedHeaders = dataTable.asMaps().getFirst();
         List<List<String>> unexpectedResultList = new ArrayList<>();
         List<String> resultsHeaders = new ArrayList<>(expectedHeaders.keySet().stream().toList());
-        if (resultsHeaders.contains("Значение")) {
-            resultsHeaders.add("Текущее значение");
-        }
+        resultsHeaders.add("Текущее значение");
         unexpectedResultList.add(resultsHeaders);
         AtomicReference<Exception> exception = new AtomicReference<>();
         dataTable.asMaps().stream()
@@ -43,8 +41,8 @@ public class ConditionManager extends StepManager {
                             unexpected.add(result.getObjectState());
                             if (resultsHeaders.contains("Значение")) {
                                 unexpected.add(result.getExpectedValue());
-                                unexpected.add(result.getCurrentValue());
                             }
+                            unexpected.add(result.getCurrentValue());
                             unexpectedResultList.add(unexpected);
                             if (result.getThrownException() != null) {
                                 if (exception.get() == null) {

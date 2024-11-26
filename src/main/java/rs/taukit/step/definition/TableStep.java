@@ -30,6 +30,38 @@ public class TableStep extends TableManager {
         super.tableHeadersCheckConditions(tableName, eval(dataTable));
     }
 
+    @И("^в таблице \"(.+)\" для каждой ячейки в столбце № (\\d+) проверить выполнение условий:$")
+    public void tableColumnCellsCheckConditions(String tableName, int columnNumber, DataTable dataTable) {
+        super.tableColumnCellsCheckConditions(tableName, columnNumber, eval(dataTable));
+    }
+
+    /**
+     * Устанавливает заголовок столбца таблицы в качестве текущего контекста
+     *
+     * @param tableName    название таблицы
+     * @param headerNumber номер столбца
+     */
+    @И("^в таблице \"(.+)\" перейти к заголовку столбца № (\\d+)$")
+    public void tableHeaderSetContext(String tableName, int headerNumber) {
+        super.tableHeaderSetContext(tableName, headerNumber);
+    }
+
+    /**
+     * Устанавливает заголовок столбца таблицы в качестве текущего контекста
+     *
+     * @param tableName  название таблицы
+     * @param headerName название столбца
+     */
+    @И("^в таблице \"(.+)\" перейти к заголовку столбца \"(.+)\"$")
+    public void tableHeaderSetContext(String tableName, String headerName) {
+        super.tableHeaderSetContext(tableName, headerName);
+    }
+
+    @И("^в таблице \"(.+)\" для заголовков столбцов \"([\\d\\,\\-]+)\" проверить выполнение условий:$")
+    public void tableHeadersCheckConditions(String tableName, String headersNumbers, DataTable dataTable) {
+        super.tableHeadersCheckConditions(tableName, eval(headersNumbers), eval(dataTable));
+    }
+
     @И("^в таблице \"(.+)\" нажать на \"(.+)\" в строке, соответствующей условиям:$")
     public void tableValueClick(String tableName, String elementName, DataTable dataTable) {
         element(tableName).castTo(PwTable.class).clickOnElementByConditions(elementName, eval(dataTable));
