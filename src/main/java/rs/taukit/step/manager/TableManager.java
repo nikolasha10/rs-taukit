@@ -206,7 +206,7 @@ public class TableManager extends StepManager {
         IHasTableElements table = getElement(tableName);
         List<IContainer> rows = table.getRowList();
         Map<String, DataTable> failedRows = new LinkedHashMap<>();
-        IntStream.range(1, rows.size()).boxed().forEach(index -> {
+        IntStream.range(0, rows.size()).boxed().forEach(index -> {
             IContainer row = rows.get(index);
             HasListItems cells = row.getElementByName("Столбцы").castTo(HasListItems.class);
             IContainer cell = cells.getItemList().get(columnNumber - 1).castTo(IContainer.class);
@@ -227,7 +227,7 @@ public class TableManager extends StepManager {
             });
             if (notMetConditionList.size() > 1) {
                 DataTable notMetConditionTable = DataTable.create(notMetConditionList, TextUtils.tableConverter);
-                failedRows.put("Строка " + index, notMetConditionTable);
+                failedRows.put("Строка " + (index + 1), notMetConditionTable);
             }
         });
         if (!failedRows.isEmpty()) {

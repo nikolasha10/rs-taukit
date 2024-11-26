@@ -6,8 +6,6 @@ import lombok.Setter;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.HasText;
-import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.page.playwright.ElementBuilder;
 import rs.taukit.utils.TauLogger;
@@ -61,7 +59,7 @@ public class PwBlock extends PwElement implements IContainer {
             try {
                 if (iElement instanceof PwBlock pwBlock) {
                     return pwBlock.getElementByText(text);
-                } else {
+                } else if (iElement instanceof PwText) {
                     PwElement pwElement = iElement.castTo(PwElement.class);
                     Locator pwLocator = getElementPwLocator().locator(pwElement.elementPwLocator);
                     PwText pwText = ElementBuilder.buildElement(iElement.getElementName(), pwElement, pwLocator).castTo(PwText.class);
