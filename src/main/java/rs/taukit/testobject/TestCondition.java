@@ -24,6 +24,7 @@ public class TestCondition {
     private final String expectedValue;
     private final double checkTimeout;
     private final BooleanSupplier condition;
+    private final TestObject testObject;
     private String currentValue;
     private Exception thrownException;
     private boolean conditionMet;
@@ -43,7 +44,7 @@ public class TestCondition {
         String checkTimeout = Optional.ofNullable(data.get("Ожидание")).orElse(Config.getProperty("element.check.interval"));
         this.checkTimeout = TimeStringParser.getTime(checkTimeout);
         Object object = TestObjectType.get(objectType).testObject.apply(objectName);
-        TestObject testObject = new TestObject(object, expectedValue);
+        this.testObject = new TestObject(object, expectedValue);
         this.condition = () -> TestObjectState.get(objectState).check.apply(testObject);
     }
 
@@ -57,16 +58,16 @@ public class TestCondition {
         try {
             driver().waitForCondition(condition, checkTimeout);
             this.conditionMet = true;
+            this.currentValue = TestObjectState.get(objectState).value.apply(testObject).toString();
         } catch (Exception e) {
             this.thrownException = e;
             conditionMet = false;
+            this.currentValue = "<не определено>";
         }
         return this;
     }
 
     public TestCondition checkResult() {
-        Object object = TestObjectType.get(objectType).testObject.apply(objectName);
-        TestObject testObject = new TestObject(object, expectedValue);
         try {
             this.conditionMet = condition.getAsBoolean();
             this.currentValue = TestObjectState.get(objectState).value.apply(testObject).toString();
