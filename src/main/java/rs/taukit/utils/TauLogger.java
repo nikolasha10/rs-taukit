@@ -172,7 +172,8 @@ public final class TauLogger {
     @Step("{0}")
     public static void fail(String message) {
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
-        throw new AssertionError(message);
+        throw new RuntimeException(message);
+//        throw new AssertionError(message);
     }
 
     /**
@@ -182,7 +183,8 @@ public final class TauLogger {
     public static void fail(String message, Throwable e) {
 //        attachPageSource();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
-        throw new AssertionError(message, e);
+        throw new RuntimeException(message, e);
+//        throw new AssertionError(message, e);
     }
 
     @Step("{message}")
@@ -193,7 +195,8 @@ public final class TauLogger {
             logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
             scenarioData().put("WARNING", "PASSED with ERRORS");
         } else {
-            throw new AssertionError(message);
+                throw new RuntimeException(message);
+//            throw new AssertionError(message);
         }
     }
 
@@ -205,7 +208,8 @@ public final class TauLogger {
             logger.warn("ОШИБКА: {}", message.replaceAll("\n", "↵"), throwable);
             scenarioData().put("WARNING", "PASSED with ERRORS");
         } else {
-            throw new AssertionError(message, throwable);
+            throw new RuntimeException(message);
+//            throw new AssertionError(message, throwable);
         }
     }
 
