@@ -214,7 +214,8 @@ public final class TauLogger {
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
             warn(message, e);
         } else {
-            fail(message, e);
+            throw new RuntimeException(message, e);
+//            fail(message, e);
         }
     }
 
@@ -222,7 +223,9 @@ public final class TauLogger {
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
             warn(format, args);
         } else {
-            fail(String.format(format, args));
+            String message = String.format(format, args);
+            throw new RuntimeException(message);
+//            fail(String.format(format, args));
         }
     }
 

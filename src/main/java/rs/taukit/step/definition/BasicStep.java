@@ -134,4 +134,9 @@ public class BasicStep extends CommonManager {
         super.evalDateTime(formula, format, parameterName);
     }
 
+    @И("^увеличить значение параметра \"(.+)\" на \"(\\d+)\"$")
+    public void increaseParameterValue(String parameterName, String increment){
+        super.increaseParameterValue(parameterName, increment);
+    }
+
 }
