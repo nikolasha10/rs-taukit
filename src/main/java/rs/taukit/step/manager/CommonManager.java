@@ -112,12 +112,17 @@ public class CommonManager extends StepManager {
         TauLogger.attachFile("Отчёт", "target/temp/finalReport.html");
     }
 
-    @Step("сохранить '{value}', как '{parameterName}'")
+    @Step("сохранить значение в '{parameterName}'")
     public void saveValueAs(String value, String parameterName) {
         Runnable runnable = () -> scenarioData.put(parameterName, value);
         scenarioStorage.saveStepAction(runnable);
         runnable.run();
-        TauLogger.report("Значение '%s' сохранено, как '%s'", value, parameterName);
+        if (value.length() < 50) {
+            TauLogger.report("Значение '%s' сохранено, как '%s'", value, parameterName);
+        } else {
+            TauLogger.console("Значение '%s...' сохранено в параметр '%s'", value.substring(0, 50), parameterName);
+            TauLogger.attachFile(parameterName, value.getBytes());
+        }
     }
 
     @Step("сохранить значения в параметры:")
