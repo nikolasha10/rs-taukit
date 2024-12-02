@@ -58,11 +58,15 @@ public class TestCondition {
         try {
             driver().waitForCondition(condition, checkTimeout);
             this.conditionMet = true;
-            this.currentValue = TestObjectState.get(objectState).value.apply(testObject).toString();
         } catch (Exception e) {
+            try {
+                this.currentValue = TestObjectState.get(objectState).value.apply(testObject).toString();
+            } catch (Exception cve){
+                e.addSuppressed(cve);
+                this.currentValue = "<не определено>";
+            }
             this.thrownException = e;
             conditionMet = false;
-            this.currentValue = "<не определено>";
         }
         return this;
     }
