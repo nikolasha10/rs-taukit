@@ -14,6 +14,7 @@ import rs.taukit.utils.*;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static rs.taukit.utils.BasicUtils.eval;
 
@@ -129,20 +130,25 @@ public class CommonManager extends StepManager {
     public void saveValues(DataTable dataTable) {
         List<List<String>> resultList = new ArrayList<>();
         resultList.add(Arrays.asList("Параметр", "Значение"));
-        dataTable.asMaps().forEach(data -> {
-            String value;
-            try {
-                value = eval(TestDataUtils.get(data, "Значение"));
-            } catch (TestDataException e) {
-                TauLogger.console(e);
-                value = "null";
-            }
-            resultList.add(Arrays.asList(eval(TestDataUtils.get(data, "Параметр")), value));
-        });
-        DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
-        scenarioData.put(resultTable);
-        TauLogger.attachDataTable("Значения параметров", resultTable);
-        TauLogger.console("Значения сохранены в параметры", resultTable);
+        AtomicReference<DataTable> atomicReference = new AtomicReference<>();
+        Runnable runnable = () -> {
+            dataTable.asMaps().forEach(data -> {
+                String value;
+                try {
+                    value = eval(TestDataUtils.get(data, "Значение"));
+                } catch (TestDataException e) {
+                    TauLogger.console(e);
+                    value = "null";
+                }
+                resultList.add(Arrays.asList(eval(TestDataUtils.get(data, "Параметр")), value));
+            });
+            DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
+            atomicReference.set(resultTable);
+            scenarioData.put(resultTable);
+        };
+        run(runnable);
+        TauLogger.attachDataTable("Значения параметров", atomicReference.get());
+        TauLogger.console("Значения сохранены в параметры", atomicReference.get());
     }
 
     @Step("сгенерировать guid и сохранить его, как '{parameterName}'")
