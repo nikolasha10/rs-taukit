@@ -199,6 +199,7 @@ public class FileManager extends StepManager {
     public void validate(DataTable dataTable) {
         String nameSpace = "Проверка содержимого файла";
         scenarioData.put(dataTable, nameSpace);
+        scenarioData.put("testName", scenario.getFunctionality() + " " + scenario.getName());
         String standardFileRelativePath = scenarioData.get(nameSpace, "эталон");
         String standardFilePath = FileUtils.getTestFilePath(standardFileRelativePath);
         File standardFile = new File(standardFilePath);

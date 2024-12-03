@@ -29,7 +29,11 @@ public enum TestObjectType {
         return table.getActiveCell(name);
     }),
     SEARCH_FIELD("поиск по значению", name -> element(name).castTo(Editable.class)),
-    PARAMETER("параметр", name -> new TestData(scenarioData().getOptional(name))),
+    PARAMETER("параметр", name -> {
+        Object object = scenarioData().getOptional(name);
+        String value = object == null ? null : object.toString();
+        return new TestData(value);
+    }),
     ;
 
     public final Function<String, ?> testObject;
