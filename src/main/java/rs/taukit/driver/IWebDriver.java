@@ -6,8 +6,6 @@ import java.util.function.BooleanSupplier;
 public interface IWebDriver {
     void openBrowser();
 
-    void openBrowser(boolean viewPdf);
-
     void reopenBrowser();
 
     void switchBrowser(int browserIndex);

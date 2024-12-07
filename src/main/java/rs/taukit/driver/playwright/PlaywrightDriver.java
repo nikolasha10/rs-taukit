@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
@@ -48,7 +49,10 @@ public class PlaywrightDriver implements IWebDriver {
         AtomicReference<Exception> suppressed = new AtomicReference<>();
         BooleanSupplier condition = () -> {
             try {
-                openBrowser(false);
+                BrowserType browserType = getBrowserType(Objects.requireNonNull(Config.getProperty("browser.type")));
+                Chromium chromium = new Chromium(browserType, browserList.size());
+                browserList.add(chromium);
+                currentBrowserIndex = browserList.size() - 1;
                 return true;
             } catch (Exception e) {
                 suppressed.set(e);
@@ -62,14 +66,6 @@ public class PlaywrightDriver implements IWebDriver {
         } catch (TimeoutError te) {
             throw new RuntimeException(suppressed.get());
         }
-    }
-
-    @Override
-    public void openBrowser(boolean openPdf) {
-        BrowserType browserType = getBrowserType(Config.getProperty("browser.type"));
-        Chromium chromium = new Chromium(browserType, browserList.size(), openPdf);
-        browserList.add(chromium);
-        currentBrowserIndex = browserList.size() - 1;
     }
 
     @Override
@@ -110,7 +106,7 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public void waitForCondition(BooleanSupplier condition) {
-        double timeout = TimeStringParser.getTime(Config.getProperty("condition.wait.timeout"));
+        double timeout = TimeStringParser.getTime(Objects.requireNonNull(Config.getProperty("condition.wait.timeout")));
         waitForCondition(condition, timeout);
     }
 
