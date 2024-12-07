@@ -19,19 +19,18 @@ public class PageManager extends StepManager {
 
     @Step("дождаться отображения всплывающего окна '{pageName}'")
     public void waitForPopupWindow(String pageName) {
-        run(() -> {
-            scenarioStorage.setSavedPageName(getPage().getPageName());
-            getBrowser().getPage(pageName).waitForLoad();
-        });
+        run(() -> getPage().waitForPopup(pageName),
+                "Не удалось дождаться отображения всплывающего окна '%s'", pageName);
         TauLogger.report("Отображается всплывающее окно '%s'", pageName);
     }
 
     @Step("дождаться закрытия всплывающего окна '{pageName}'")
     public void waitForPopupClose(String pageName) {
-        run(() -> {
-            getBrowser().getPage(pageName).waitForClose();
-            getBrowser().getPage(scenarioStorage.getSavedPageName());
-        });
+        run(() -> getPage().waitForPopupClose(pageName),
+                "Не удалось дождаться закрытия всплывающего окна '%s'", pageName);
         TauLogger.report("Закрыто всплывающее окно '%s'", pageName);
+        TauLogger.report("[примечание] открыта страница: %s", getPage().getPageName());
+        TauLogger.report("[примечание] текущий контекст: %s '%s'",
+                getPage().getCurrentContext().getModel().getType(), getPage().getCurrentContext().getElementName());
     }
 }

@@ -12,16 +12,54 @@ public class TableStep extends TableManager {
 
     /**
      * Проверяет таблицы на наличие и порядок столбцов
+     *
      * @param tableName название таблицы
      * @param dataTable таблица вида <table>
      *                  <tr><th>| Номер |</th><th>Название |</th></tr>
-     * </table>, где <br><b>Номер</b> - порядковый номер столбца начинается с 1 (не обязательный столбец).
+     *                  </table>, где <br><b>Номер</b> - порядковый номер столбца начинается с 1 (не обязательный столбец).
      *                  Если не указан - не будет проверяться.<br>
      *                  <b>Название</b> - название столбца.
      */
     @И("^в таблице \"(.+)\" проверить наличие столбцов:$")
     public void tableHeadersCheck(String tableName, DataTable dataTable) {
         super.tableHeadersCheck(tableName, eval(dataTable));
+    }
+
+    @И("^в таблице \"(.+)\" для каждого заголовка столбца проверить выполнение условий:$")
+    public void tableHeadersCheckConditions(String tableName, DataTable dataTable) {
+        super.tableHeadersCheckConditions(tableName, eval(dataTable));
+    }
+
+    @И("^в таблице \"(.+)\" для каждой ячейки в столбце № (\\d+) проверить выполнение условий:$")
+    public void tableColumnCellsCheckConditions(String tableName, int columnNumber, DataTable dataTable) {
+        super.tableColumnCellsCheckConditions(tableName, columnNumber, eval(dataTable));
+    }
+
+    /**
+     * Устанавливает заголовок столбца таблицы в качестве текущего контекста
+     *
+     * @param tableName    название таблицы
+     * @param headerNumber номер столбца
+     */
+    @И("^в таблице \"(.+)\" перейти к заголовку столбца № (\\d+)$")
+    public void tableHeaderSetContext(String tableName, int headerNumber) {
+        super.tableHeaderSetContext(tableName, headerNumber);
+    }
+
+    /**
+     * Устанавливает заголовок столбца таблицы в качестве текущего контекста
+     *
+     * @param tableName  название таблицы
+     * @param headerName название столбца
+     */
+    @И("^в таблице \"(.+)\" перейти к заголовку столбца \"(.+)\"$")
+    public void tableHeaderSetContext(String tableName, String headerName) {
+        super.tableHeaderSetContext(tableName, headerName);
+    }
+
+    @И("^в таблице \"(.+)\" для заголовков столбцов \"([\\d\\,\\-]+)\" проверить выполнение условий:$")
+    public void tableHeadersCheckConditions(String tableName, String headersNumbers, DataTable dataTable) {
+        super.tableHeadersCheckConditions(tableName, eval(headersNumbers), eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" нажать на \"(.+)\" в строке, соответствующей условиям:$")
@@ -52,6 +90,11 @@ public class TableStep extends TableManager {
     @И("^в найденной строке нажать на \"(.+)\"$")
     public void tableRowElementClick(String elementName) {
         super.clickOnElement(elementName);
+    }
+
+    @И("^в найденной строке перейти к столбцу \"(.+)\"$")
+    public void tableRowSetContext(String headerName) {
+        super.tableRowSetContext(headerName);
     }
 
     @И("^в строке \\((.+)\\) нажать на \"(.+)\"$")

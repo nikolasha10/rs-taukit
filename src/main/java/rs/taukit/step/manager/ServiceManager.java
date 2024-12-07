@@ -1,7 +1,7 @@
 package rs.taukit.step.manager;
 
 import io.cucumber.datatable.DataTable;
-import rs.taukit.testdata.ExpectedResult;
+import rs.taukit.testobject.TestCondition;
 
 import java.util.Map;
 import java.util.function.Predicate;
@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 public class ServiceManager extends StepManager {
     public void skipActionsIfTrue(DataTable dataTable) {
         run(() -> {
-            Predicate<Map<String, String>> predicate = condition -> new ExpectedResult(condition).checkResult().isConditionMet();
+            Predicate<Map<String, String>> predicate = condition -> new TestCondition(condition).checkResult().isConditionMet();
             if (dataTable.asMaps().stream().allMatch(predicate)) {
                 scenarioData.put("SKIP_ACTIONS", true);
             }

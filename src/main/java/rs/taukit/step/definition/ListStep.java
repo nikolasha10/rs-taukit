@@ -12,8 +12,8 @@ import static rs.taukit.utils.BasicUtils.eval;
 public class ListStep extends ListManager{
 
     @И("^в списке \"(.+)\" выбрать \"(.+)\"$")
-    public void listValueClick(String listName, String listValue) {
-        super.listValueClick(listName, eval(listValue));
+    public void selectItem(String listName, String itemName) {
+        super.selectItem(listName, eval(itemName));
     }
 
     @И("^в списке \"(.+)\" найти (элемент|блок), соответствующий условиям:$")

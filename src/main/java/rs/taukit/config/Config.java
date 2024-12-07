@@ -76,7 +76,7 @@ public class Config {
         String format = "\\$\\{(.+?)}";
         Matcher matcher = Pattern.compile(format).matcher(template);
         try {
-            if (matcher.matches() && getProperty(matcher.group(1)).startsWith("$")) {
+            if (matcher.matches() && Objects.requireNonNull(getProperty(matcher.group(1))).startsWith("$")) {
                 return getProperty(matcher.group(1));
             }
             return matcher.replaceAll(matchResult -> getProperty(matchResult.group(1)));
@@ -87,9 +87,13 @@ public class Config {
     }
 
     public static String getProperty(String propertyName) {
-        return eval(Optional.ofNullable(Optional.ofNullable(System.getProperty(propertyName))
-                        .orElse(RUNTIME_PROPERTIES.getProperty(propertyName)))
-                .orElse(CONFIG_PROPERTIES.getProperty(propertyName)));
+        try {
+            return eval(Optional.ofNullable(Optional.ofNullable(System.getProperty(propertyName))
+                            .orElse(RUNTIME_PROPERTIES.getProperty(propertyName)))
+                    .orElse(CONFIG_PROPERTIES.getProperty(propertyName)));
+        } catch (Exception ignored){
+            return null;
+        }
     }
 
     public static Boolean getBooleanProperty(String propertyName) {
@@ -97,11 +101,11 @@ public class Config {
     }
 
     public static int getIntegerProperty(String propertyName) {
-        return Integer.parseInt(getProperty(propertyName));
+        return Integer.parseInt(Objects.requireNonNull(getProperty(propertyName)));
     }
 
     public static double getTimeProperty(String propertyName) {
-        return TimeStringParser.getTime(getProperty(propertyName));
+        return TimeStringParser.getTime(Objects.requireNonNull(getProperty(propertyName)));
     }
 
     public static String getPageFilePath(String pageName) {

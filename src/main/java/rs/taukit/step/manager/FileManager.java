@@ -5,7 +5,7 @@ import io.qameta.allure.Step;
 import org.xml.sax.SAXException;
 import rs.taukit.config.Config;
 import rs.taukit.element.interfaces.IHasAttachment;
-import rs.taukit.element.interfaces.IHasDownloadableFile;
+import rs.taukit.element.interfaces.Downloadable;
 import rs.taukit.testdata.TestDataFile;
 import rs.taukit.utils.*;
 
@@ -69,14 +69,14 @@ public class FileManager extends StepManager {
 
     @Step("нажать на '{buttonName}' и скачать файл '{this.fileName}'")
     public void downloadFile(String buttonName) {
-        IHasDownloadableFile downloadable = getElement(buttonName);
+        Downloadable downloadable = getElement(buttonName);
         downloadable.click(this.fileName);
     }
 
     @Step("нажать на '{buttonName}' и скачать файлы:")
     public void downloadFiles(String buttonName) {
         TauLogger.attachDataTable("Список загружаемых файлов", this.dataTable);
-        IHasDownloadableFile downloadable = getElement(buttonName);
+        Downloadable downloadable = getElement(buttonName);
         downloadable.click(this.dataTable);
     }
 

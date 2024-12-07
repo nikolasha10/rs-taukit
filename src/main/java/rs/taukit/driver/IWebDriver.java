@@ -6,8 +6,6 @@ import java.util.function.BooleanSupplier;
 public interface IWebDriver {
     void openBrowser();
 
-    void openBrowser(boolean viewPdf);
-
     void reopenBrowser();
 
     void switchBrowser(int browserIndex);
@@ -27,6 +25,8 @@ public interface IWebDriver {
     void waitForCondition(BooleanSupplier condition, double searchValueTimeout);
 
     void waitForCondition(BooleanSupplier condition, double interval, double timeout);
+
+    void waitForCondition(BooleanSupplier condition, double timeout, List<Runnable> previousStep);
 
     void waitForCondition(BooleanSupplier condition, double interval, double timeout, List<Runnable> previousStep);
 

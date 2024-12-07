@@ -38,43 +38,6 @@ public class BasicStep extends CommonManager {
         super.waitForTimeout(timeValue, timeUnit);
     }
 
-    @И("^проверить выполнение условий \"(.+)\":$")
-    public void checkConditions(String conditionsName, DataTable datatable) {
-        super.checkConditions(conditionsName, eval(datatable));
-    }
-
-    @И("^дождаться выполнения условий:$")
-    public void waitForConditions(DataTable datatable) {
-        super.waitForConditionsNoName(eval(datatable));
-    }
-
-    @И("^дождаться выполнения условий в течение \"(.+)\":$")
-    public void expectedResultCheckWithinTimeInterval(String timeoutString, DataTable datatable) {
-        super.waitForConditionsWithinTimeIntervalNoName(timeoutString, eval(datatable));
-    }
-
-    @И("^дождаться выполнения условий \"(.+)\" в течение \"(.+)\":$")
-    public void expectedResultCheckWithinTimeInterval(String conditionsName, String timeoutString, DataTable datatable) {
-        super.waitForConditionsWithinTimeIntervalNoName(conditionsName, timeoutString, eval(datatable));
-    }
-
-    /**
-     * Ожидает выполнение условий, перечисленных в таблице datatable
-     *
-     * @param conditionsName название контейнера условий, на которое ссылается служебный шаг повторения действий
-     * @param datatable      таблица условий. Формат:<br>
-     *                       <nobr>| Объект | Название | Состояние | Значение | Ожидание |</nobr>
-     *                       <br><br>Объект:
-     *                       <ul>
-     *                           <li>вкладка</li>
-     *                           <li>страница</li>
-     *                           <li>[любой тип элемента]</li>
-     *                       </ul>
-     */
-    @И("^дождаться выполнения условий \"([а-яА-Я\\w\\d\\s':/]+)\":$")
-    public void waitForConditions(String conditionsName, DataTable datatable) {
-        super.waitForConditions(conditionsName, eval(datatable));
-    }
 
     @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы) \"(.+)\"$")
     public void waitForElement(String elementType, String elementName) {

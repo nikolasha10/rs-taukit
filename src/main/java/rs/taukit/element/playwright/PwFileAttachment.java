@@ -4,12 +4,12 @@ import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IHasAttachment;
-import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.element.interfaces.Editable;
 
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 
-public class PwFileAttachment extends PwElement implements IHasAttachment, IHasEditableValue {
+public class PwFileAttachment extends PwElement implements IHasAttachment, Editable {
 
     public PwFileAttachment(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
@@ -44,6 +44,16 @@ public class PwFileAttachment extends PwElement implements IHasAttachment, IHasE
 
     @Override
     public String getText() {
+        return null;
+    }
+
+    @Override
+    public boolean hasText(String expectedValue) {
+        return false;
+    }
+
+    @Override
+    public Boolean containsText(String expectedText) {
         return null;
     }
 

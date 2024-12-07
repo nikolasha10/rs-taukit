@@ -14,7 +14,10 @@ import rs.taukit.testdata.TestDataFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -194,6 +197,18 @@ public final class TauLogger {
         }
     }
 
+    @Step("{message}")
+    public static void fail(Throwable throwable, Runnable runnable, String message) {
+        runnable.run();
+        if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
+        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            logger.warn("ОШИБКА: {}", message.replaceAll("\n", "↵"), throwable);
+            scenarioData().put("WARNING", "PASSED with ERRORS");
+        } else {
+            throw new AssertionError(message, throwable);
+        }
+    }
+
     public static void fail(Throwable e, String format, Object... args) {
         String message = String.format(format, args);
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
@@ -217,6 +232,17 @@ public final class TauLogger {
             warn(runnable, format, args);
         } else {
             fail(runnable, message);
+        }
+    }
+
+    public static void fail(Runnable runnable, Throwable throwable, String format, Object... args) {
+        String message = String.format(format, args);
+        if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            warn(runnable, format, args);
+        } else if (throwable == null) {
+            fail(runnable, message);
+        } else {
+            fail(throwable, runnable, message);
         }
     }
 
@@ -388,8 +414,8 @@ public final class TauLogger {
 
     public static void attachMap(String name, Map<String, String> map) {
         attachDataTable(name, DataTable.create(map.entrySet().stream()
-                    .map(entry -> Arrays.asList(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toList()), TextUtils.tableConverter));
+                .map(entry -> Arrays.asList(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList()), TextUtils.tableConverter));
     }
 
     public static void resetNotCritical() {

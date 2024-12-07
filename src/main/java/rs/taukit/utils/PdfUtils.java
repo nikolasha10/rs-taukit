@@ -71,7 +71,7 @@ public class PdfUtils {
 
     public static void comparePdfFiles(String testedFilePath, String standardFilePath) {
         PlaywrightDriver driver = driver().castTo();
-        driver.openBrowser(true);
+        driver.openBrowser();
         PlaywrightPageObject pageObject = driver.getCurrentBrowser().getCurrentPage();
         Page pageTested = pageObject.getPage();
         page().waitForTimeout(2000);
