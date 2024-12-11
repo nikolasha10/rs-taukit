@@ -3,11 +3,11 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasText;
+import rs.taukit.element.interfaces.HasText;
 
 import java.util.LinkedHashMap;
 
-public class PwButton extends PwElement implements IHasText {
+public class PwButton extends PwElement implements HasText {
 
     public PwButton(String elementName, Locator locator) {
         super(elementName, locator);
@@ -29,4 +29,18 @@ public class PwButton extends PwElement implements IHasText {
         this(elementName, element.getModel());
     }
 
+    @Override
+    public String getText() {
+        return elementPwLocator.innerText();
+    }
+
+    @Override
+    public boolean hasText(String expectedText) {
+        return getText().equals(expectedText);
+    }
+
+    @Override
+    public Boolean containsText(String expectedText) {
+        return getText().contains(expectedText);
+    }
 }

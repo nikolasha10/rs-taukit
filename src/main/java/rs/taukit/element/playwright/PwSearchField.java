@@ -4,7 +4,8 @@ import com.microsoft.playwright.Locator;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.element.interfaces.Editable;
+import rs.taukit.element.interfaces.HasText;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.utils.TimeStringParser;
 
@@ -13,7 +14,7 @@ import java.util.Map;
 
 import static rs.taukit.utils.BasicUtils.page;
 
-public class PwSearchField extends PwElement implements IHasEditableValue {
+public class PwSearchField extends PwElement implements Editable {
     public PwSearchField(String elementName, String locator) {
         this(elementName, new LinkedHashMap<>(Map.of("Локатор", locator)));
     }
@@ -43,7 +44,7 @@ public class PwSearchField extends PwElement implements IHasEditableValue {
             driver.waitForCondition(fillManually::isVisible, searchValueTimeout);
             fillManually.click();
         } else {
-            descendants.get("список значений").castTo(PwList.class).setValue(value);
+            descendants.get("список значений").castTo(PwList.class).selectItem(value);
         }
     }
 
@@ -59,14 +60,25 @@ public class PwSearchField extends PwElement implements IHasEditableValue {
 
     @Override
     public String getText() {
-        PwElement inputField = descendants.get("поле ввода").castTo(PwElement.class);
+        String currentValueElementName = "текущее значение";
+        PwElement value = descendants.get(currentValueElementName).castTo(PwElement.class);
         try {
-            return inputField.castTo(IHasEditableValue.class).getText();
+            return value.castTo(HasText.class).getText();
         } catch (Exception e) {
             throw new AutoTestBrokenException("""
-                    Не удалось получить значение элемента '%s'. Тип: %s. Потомок: поле ввода. Локатор: %s""",
-                    elementName, model.getType(), inputField.getElementPwLocator());
+                    Не удалось получить значение элемента '%s'. Тип: %s. Потомок: %s. Локатор: %s""",
+                    elementName, model.getType(), currentValueElementName, value.getElementPwLocator());
         }
+    }
+
+    @Override
+    public boolean hasText(String expectedValue) {
+        return getText().equals(expectedValue);
+    }
+
+    @Override
+    public Boolean containsText(String expectedText) {
+        return getText().contains(expectedText);
     }
 
 

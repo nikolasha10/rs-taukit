@@ -1,30 +1,17 @@
 package rs.taukit.element.playwright;
 
 import rs.taukit.element.ElementModel;
-import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.element.interfaces.CanBeOpened;
+import rs.taukit.element.interfaces.Editable;
 
 import java.util.LinkedHashMap;
 
-public class PwBrowserTab extends PwElement implements IHasEditableValue {
-    public PwBrowserTab(String elementName, LinkedHashMap<String, Object> elementData) {
-        super(elementName, elementData);
-    }
+import static rs.taukit.utils.BasicUtils.browser;
 
-    public PwBrowserTab(String elementName, ElementModel model) {
-        super(elementName, model);
-    }
-
+public class PwBrowserTab implements CanBeOpened {
     @Override
-    public void setValue(String value, String controlValue) {
-
-    }
-
-    @Override
-    public String getText() {
-        return null;
-    }
-
-    public boolean isOpened() {
-        return true;
+    public boolean isOpened(String number) {
+        int index = Integer.parseInt(number) - 1;
+        return browser().setActiveTab(index);
     }
 }

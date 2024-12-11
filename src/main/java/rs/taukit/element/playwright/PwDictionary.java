@@ -4,7 +4,7 @@ import com.microsoft.playwright.Locator;
 import lombok.Getter;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.element.interfaces.Editable;
 import rs.taukit.page.PageObject;
 
 import java.util.LinkedHashMap;
@@ -14,7 +14,7 @@ import static rs.taukit.utils.BasicUtils.browser;
 import static rs.taukit.utils.BasicUtils.page;
 
 @Getter
-public class PwDictionary extends PwElement implements IHasEditableValue {
+public class PwDictionary extends PwElement implements Editable {
     public PwDictionary(String elementName, Locator locator) {
         super(elementName, "");
     }
@@ -46,7 +46,7 @@ public class PwDictionary extends PwElement implements IHasEditableValue {
         page().getElement(model.get("поле поиска").toString()).castTo(PwTextField.class).setValue(value);
         page().getElement(model.get("кнопка поиска").toString()).castTo(PwButton.class).click();
         driver.waitForTimeout(2000);
-        page().getElement("Значения справочника").castTo(PwList.class).setValue(value);
+        page().getElement("Значения справочника").castTo(PwList.class).selectItem(value);
         page().waitForPopupClose(model.get("страница"));
         browser().getPage(initialPage.getPageName()).waitForLoad();
     }
@@ -69,5 +69,15 @@ public class PwDictionary extends PwElement implements IHasEditableValue {
     @Override
     public String getText() {
         return elementPwLocator.innerText();
+    }
+
+    @Override
+    public boolean hasText(String expectedValue) {
+        return false;
+    }
+
+    @Override
+    public Boolean containsText(String expectedText) {
+        return null;
     }
 }

@@ -105,7 +105,7 @@ public class DataStorage {
             } else if (fieldValue instanceof Integer) {
                 result.put(fieldName, YamlParser.convert(fieldValue));
             } else {
-                result.put(fieldName, fieldValue.toString());
+                result.put(fieldName, fieldValue == null ? "null" : fieldValue.toString());
             }
         });
         return result;

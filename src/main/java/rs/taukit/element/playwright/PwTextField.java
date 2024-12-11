@@ -3,14 +3,14 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.element.interfaces.Editable;
 import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 
 import static rs.taukit.utils.BasicUtils.page;
 
-public class PwTextField extends PwElement implements IHasEditableValue {
+public class PwTextField extends PwElement implements Editable {
     public PwTextField(String elementName, String selector) {
         super(elementName, selector);
     }
@@ -55,5 +55,14 @@ public class PwTextField extends PwElement implements IHasEditableValue {
         return elementPwLocator.inputValue();
     }
 
+    @Override
+    public boolean hasText(String expectedValue) {
+        return getText().equals(expectedValue);
+    }
+
+    @Override
+    public Boolean containsText(String expectedText) {
+        return getText().contains(expectedText);
+    }
 
 }

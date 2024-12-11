@@ -7,6 +7,7 @@ import com.microsoft.playwright.TimeoutError;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebDriver;
+import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
 
@@ -14,11 +15,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
-import static rs.taukit.utils.BasicUtils.driver;
-import static rs.taukit.utils.BasicUtils.scenarioStorage;
+import static rs.taukit.utils.BasicUtils.*;
 
 @Getter
 public class PlaywrightDriver implements IWebDriver {
@@ -48,7 +49,10 @@ public class PlaywrightDriver implements IWebDriver {
         AtomicReference<Exception> suppressed = new AtomicReference<>();
         BooleanSupplier condition = () -> {
             try {
-                openBrowser(false);
+                BrowserType browserType = getBrowserType(Objects.requireNonNull(Config.getProperty("browser.type")));
+                Chromium chromium = new Chromium(browserType, browserList.size());
+                browserList.add(chromium);
+                currentBrowserIndex = browserList.size() - 1;
                 return true;
             } catch (Exception e) {
                 suppressed.set(e);
@@ -62,14 +66,6 @@ public class PlaywrightDriver implements IWebDriver {
         } catch (TimeoutError te) {
             throw new RuntimeException(suppressed.get());
         }
-    }
-
-    @Override
-    public void openBrowser(boolean openPdf) {
-        BrowserType browserType = getBrowserType(Config.getProperty("browser.type"));
-        Chromium chromium = new Chromium(browserType, browserList.size(), openPdf);
-        browserList.add(chromium);
-        currentBrowserIndex = browserList.size() - 1;
     }
 
     @Override
@@ -110,7 +106,7 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public void waitForCondition(BooleanSupplier condition) {
-        double timeout = TimeStringParser.getTime(Config.getProperty("condition.wait.timeout"));
+        double timeout = TimeStringParser.getTime(Objects.requireNonNull(Config.getProperty("condition.wait.timeout")));
         waitForCondition(condition, timeout);
     }
 
@@ -132,6 +128,28 @@ public class PlaywrightDriver implements IWebDriver {
         while (new Date().getTime() - start <= timeout && !condition.getAsBoolean()) {
             waitForTimeout(interval);
         }
+    }
+
+    @Override
+    public void waitForCondition(BooleanSupplier condition, double timeout, List<Runnable> previousStepList) {
+        String originalPageName = page() == null ? null : page().getPageName();
+        IContainer originalContext = page() == null ? null : page().getCurrentContext();
+        BrowserContext.WaitForConditionOptions setTimeout = new BrowserContext.WaitForConditionOptions().setTimeout(timeout);
+        getBrowserContext().waitForCondition(() -> {
+            try {
+                if (!condition.getAsBoolean()) {
+                    throw new RuntimeException();
+                }
+                return true;
+            } catch (Exception e) {
+                if (originalPageName != null) {
+                    browser().getPage(originalPageName);
+                    page().replaceCurrentContext(originalContext);
+                }
+                previousStepList.forEach(Runnable::run);
+                return false;
+            }
+        }, setTimeout);
     }
 
     @Override

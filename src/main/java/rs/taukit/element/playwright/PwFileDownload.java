@@ -3,8 +3,9 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.TimeoutError;
 import io.cucumber.datatable.DataTable;
+import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
-import rs.taukit.element.interfaces.IHasDownloadableFile;
+import rs.taukit.element.interfaces.Downloadable;
 import rs.taukit.testdata.TestDataFile;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
@@ -12,9 +13,10 @@ import rs.taukit.utils.TauLogger;
 import java.io.File;
 import java.util.LinkedHashMap;
 
+import static rs.taukit.utils.BasicUtils.scenario;
 import static rs.taukit.utils.BasicUtils.scenarioData;
 
-public class PwFileDownload extends PwElement implements IHasDownloadableFile {
+public class PwFileDownload extends PwElement implements Downloadable {
 
     public PwFileDownload(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
@@ -49,5 +51,11 @@ public class PwFileDownload extends PwElement implements IHasDownloadableFile {
     @Override
     public void click(DataTable dataTable) {
         driver.getCurrentBrowser().downloadByClick(this, dataTable);
+    }
+
+    @Override
+    public boolean isDownloaded(String fileName) {
+        String dirName = String.format("%s/%s", Config.getProperty("downloads.dir"), scenario().getName());
+        return new File(dirName, fileName).exists();
     }
 }

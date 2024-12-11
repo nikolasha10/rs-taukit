@@ -1,7 +1,8 @@
 package rs.taukit.page;
 
-import rs.taukit.element.interfaces.IElement;
+import com.microsoft.playwright.Locator;
 import rs.taukit.element.interfaces.IContainer;
+import rs.taukit.element.interfaces.IElement;
 
 public interface PageObject {
     String getPageUrl();
@@ -27,6 +28,10 @@ public interface PageObject {
     void waitForElement(String elementName, boolean isVisible);
 
     void waitForPopup(String pageName);
+
+    void waitForPopupClose(String pageName);
+
+    PageObject getPopup(String popupName);
 
     void waitForTimeout(double time);
 
@@ -54,7 +59,7 @@ public interface PageObject {
 
     void setActive();
 
-    void waitForPopupClose(String pageName);
-
     String getCurrentUrl();
+
+    Locator getByCss(String selector);
 }

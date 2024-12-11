@@ -4,7 +4,12 @@ import io.cucumber.datatable.DataTable;
 
 import java.util.List;
 
-public interface IHasListItems {
+public interface HasListItems {
     List<? extends IElement> getItemList();
+
     IContainer findItemByConditions(DataTable dataTable);
+
+    void selectItem(String itemName);
+
+    int getSize();
 }

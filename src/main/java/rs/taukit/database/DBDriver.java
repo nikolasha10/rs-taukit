@@ -3,6 +3,7 @@ package rs.taukit.database;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.config.DBConfig;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.DBExecuteSqlException;
 
 import java.sql.*;
@@ -37,7 +38,15 @@ public class DBDriver {
     }
 
     private Connection open() throws SQLException {
-        return DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
+        try {
+            return DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
+        } catch (SQLException e) {
+            AutoTestBrokenException exception = new AutoTestBrokenException("""
+                    Не удалось подключиться к БД %s (host: %s, port: %s, scheme: %s)""",
+                    dbName, dbConfig.host(), dbConfig.port(), dbConfig.scheme());
+            e.addSuppressed(exception);
+            throw e;
+        }
     }
 
     public int execute(String sql) throws SQLException {

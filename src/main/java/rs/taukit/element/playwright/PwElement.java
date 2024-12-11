@@ -6,7 +6,9 @@ import lombok.Getter;
 import rs.taukit.driver.playwright.PlaywrightDriver;
 import rs.taukit.element.Element;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.HasText;
 import rs.taukit.element.interfaces.IElement;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.ElementNotBuiltException;
 import rs.taukit.page.playwright.ElementBuilder;
 
@@ -18,7 +20,7 @@ import static rs.taukit.utils.BasicUtils.driver;
 import static rs.taukit.utils.TextUtils.hexToRGB;
 
 @Getter
-public class PwElement extends Element {
+public class PwElement extends Element implements HasText {
     protected Locator elementPwLocator;
     protected PlaywrightDriver driver = driver().castTo();
 
@@ -82,9 +84,12 @@ public class PwElement extends Element {
 
     @Override
     public boolean isVisible() {
-        return elementPwLocator.count() < 2
-                ? elementPwLocator.isVisible()
-                : elementPwLocator.all().stream().anyMatch(Locator::isVisible);
+        return elementPwLocator.first().isVisible();
+    }
+
+    @Override
+    public boolean isInvisible() {
+        return !isVisible();
     }
 
     @Override
@@ -103,13 +108,15 @@ public class PwElement extends Element {
     }
 
     @Override
-    public String getText() {
-        try {
-            return elementPwLocator.innerText();
-        } catch (Exception e) {
-            String message = String.format("Не удалось получить значение элемента '%s'", elementName);
-            throw new RuntimeException(message, e);
-        }
+    public String getColor() {
+        String jsExpression = "(element) => window.getComputedStyle(element).getPropertyValue('color')";
+        return elementPwLocator.evaluate(jsExpression).toString();
+
+    }
+
+    @Override
+    public boolean hasColor(String colorRGB) {
+        return getColor().equalsIgnoreCase(hexToRGB(colorRGB));
     }
 
     @Override
@@ -124,7 +131,32 @@ public class PwElement extends Element {
     }
 
     @Override
+    public String getText() {
+        try {
+            return elementPwLocator.innerText();
+        } catch (Exception e) {
+            String cause = "";
+            if (this.isInvisible()) {
+                cause = String.format(" - элемент не отображается. Тип: %s. Селектор: %s. Локатор: %s",
+                        this.getModel().getType(), this.getSelector(), elementPwLocator);
+            }
+            String message = String.format("Не удалось получить значение элемента '%s'%s", elementName, cause);
+            throw new AutoTestBrokenException(e, message);
+        }
+    }
+
+    @Override
     public boolean hasText(String value) {
         return getText().equals(value);
+    }
+
+    @Override
+    public Boolean containsText(String expectedText) {
+        return getText().contains(expectedText);
+    }
+
+    @Override
+    public void hover() {
+        elementPwLocator.hover();
     }
 }

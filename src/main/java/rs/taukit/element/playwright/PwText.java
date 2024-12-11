@@ -2,12 +2,12 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.HasText;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasText;
 
 import java.util.LinkedHashMap;
 
-public class PwText extends PwElement implements IHasText {
+public class PwText extends PwElement implements HasText {
     public PwText(String elementName, Locator locator) {
         super(elementName, locator);
     }

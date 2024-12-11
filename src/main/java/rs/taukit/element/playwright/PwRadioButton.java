@@ -2,8 +2,10 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.Editable;
+import rs.taukit.element.interfaces.HasText;
 import rs.taukit.element.interfaces.IElement;
-import rs.taukit.element.interfaces.IHasEditableValue;
+import rs.taukit.exceptions.AutoTestBrokenException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,7 +13,7 @@ import java.util.function.Supplier;
 
 import static rs.taukit.utils.BasicUtils.page;
 
-public class PwRadioButton extends PwElement implements IHasEditableValue {
+public class PwRadioButton extends PwElement implements Editable {
     public PwRadioButton(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
     }
@@ -35,7 +37,7 @@ public class PwRadioButton extends PwElement implements IHasEditableValue {
     @Override
     public void setValue(String value) {
         getButtonList().stream()
-                .filter(item -> item.getElementByName("Значение").hasText(value))
+                .filter(item -> item.getElementByName("Значение").castTo(HasText.class).hasText(value))
                 .findFirst().orElseThrow(valueNotFoundException(value))
                 .click();
     }
@@ -45,13 +47,31 @@ public class PwRadioButton extends PwElement implements IHasEditableValue {
 
     }
 
-    private Supplier<RuntimeException> valueNotFoundException(String value) {
+    private Supplier<AutoTestBrokenException> valueNotFoundException(String value) {
         List<String> availableValues = getButtonList().stream()
-                .map(item -> item.getElementByName("Значение").getText()).toList();
-        String message = String.format("""
+                .map(item -> item.getElementByName("Значение").castTo(HasText.class).getText()).toList();
+        return AutoTestBrokenException.get("""
                         Не удалось найти значение '%s' среди значений радио-кнопки '%s' на странице '%s'
                         Доступны значения: %s""",
                 value, elementName, page().getPageName(), availableValues);
-        return () -> new RuntimeException(message);
+    }
+
+    @Override
+    public String getText() {
+        PwBlock active = getButtonList().stream().filter(button -> button.getElementByName("Выбрана").isVisible())
+                .findFirst().orElseThrow(AutoTestBrokenException.get("""
+                                Не найдено выбранное значение радио-кнопки '%s' на странице '%s'""",
+                        elementName, page().getPageName()));
+        return active.getElementByName("Значение").castTo(HasText.class).getText();
+    }
+
+    @Override
+    public boolean hasText(String expectedValue) {
+        return getText().equals(expectedValue);
+    }
+
+    @Override
+    public Boolean containsText(String expectedText) {
+        return getText().contains(expectedText);
     }
 }

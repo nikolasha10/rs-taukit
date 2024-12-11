@@ -5,6 +5,7 @@ import com.microsoft.playwright.Page;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.CanBeVisible;
 import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.playwright.PwBlock;
@@ -26,7 +27,7 @@ import static rs.taukit.utils.BasicUtils.scenarioStorage;
 import static rs.taukit.utils.TestDataUtils.loadPageConfig;
 
 @Getter
-public class PlaywrightPageObject implements PageObject {
+public class PlaywrightPageObject implements PageObject, CanBeVisible {
     private final Page page;
     private final String pageName;
     private final String pageUrl;
@@ -114,9 +115,12 @@ public class PlaywrightPageObject implements PageObject {
         waitForLoadAndContinue(pageTimeout);
     }
 
+    private BooleanSupplier getPageLoadCondition() {
+        return () -> isUrlCorrect() && hasPageAllExpectedElements();
+    }
+
     public void waitForLoadAndContinue(double pageTimeout) {
-        BooleanSupplier waitCondition = () -> isUrlCorrect() && hasPageAllExpectedElements();
-        driver().waitForCondition(waitCondition, pageTimeout);
+        driver().waitForCondition(getPageLoadCondition(), pageTimeout);
         scenarioStorage().setCurrentPageName(pageName);
     }
 
@@ -140,15 +144,23 @@ public class PlaywrightPageObject implements PageObject {
     }
 
     @Override
-    public void waitForPopup(String pageName) {
-        this.popup = new PlaywrightPageObject(page, pageName);
-        popup.waitForLoad();
+    public PlaywrightPageObject getPopup(String popupName) {
+        if (popup == null || !popup.pageName.equals(popupName)) {
+            this.popup = new PlaywrightPageObject(page, popupName);
+        }
+        return popup;
+    }
+
+    @Override
+    public void waitForPopup(String popupName) {
+        getPopup(popupName).waitForLoad();
         this.currentContext.add(popup.getCurrentContext());
     }
 
     @Override
     public void waitForPopupClose(String pageName) {
         popup.waitForClose();
+        popup = null;
         dropCurrentContext();
     }
 
@@ -204,7 +216,6 @@ public class PlaywrightPageObject implements PageObject {
             default -> {
             }
         }
-
     }
 
     @Override
@@ -264,6 +275,11 @@ public class PlaywrightPageObject implements PageObject {
                 .orElseThrow(() -> new ElementNotDescribedException(elementName, pageName, getCurrentContext()));
     }
 
+    @Override
+    public Locator getByCss(String selector) {
+        return page.locator(selector);
+    }
+
     private IElement findElement(IContainer context, String elementName) {
         List<IElement> elementList;
         if (context.containsElement(elementName)) {
@@ -271,7 +287,7 @@ public class PlaywrightPageObject implements PageObject {
         }
         elementList = context.getElementList();
         List<IContainer> blockElementsList = elementList.stream()
-                .filter(element -> element.getModel().getType().equalsIgnoreCase("блок элементов"))
+                .filter(element -> element.getModel().getType().equalsIgnoreCase("контейнер"))
                 .map(element -> element.castTo(IContainer.class))
                 .toList();
         for (IContainer blockElement : blockElementsList) {
@@ -322,5 +338,15 @@ public class PlaywrightPageObject implements PageObject {
 
     public Locator getByTestId(String testId) {
         return page.getByTestId(testId);
+    }
+
+    @Override
+    public boolean isVisible() {
+        return getPageLoadCondition().getAsBoolean();
+    }
+
+    @Override
+    public boolean isInvisible() {
+        return !isVisible();
     }
 }
