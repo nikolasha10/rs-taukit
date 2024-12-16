@@ -35,7 +35,7 @@ public class DataStorage {
             } else if (fieldValue instanceof String) {
                 String value = evalString(Config.eval(YamlParser.convert(fieldValue)));
                 this.dataStorage.put(fieldName, YamlParser.convert(value));
-            } else if (fieldValue instanceof Integer || fieldValue instanceof Boolean) {
+            } else if (fieldValue instanceof Integer || fieldValue instanceof Double || fieldValue instanceof Boolean) {
                 this.dataStorage.put(fieldName, YamlParser.convert(fieldValue));
             }
         });
@@ -76,8 +76,8 @@ public class DataStorage {
             } else if (fieldValue instanceof String) {
                 String value = evalString(YamlParser.convert(fieldValue));
                 dataTable.add(Arrays.asList(fieldName, value));
-            } else if (fieldValue instanceof Integer) {
-                dataTable.add(Arrays.asList(fieldName, YamlParser.convert(fieldValue)));
+            } else if (fieldValue instanceof Integer || fieldValue instanceof Double || fieldValue instanceof Boolean) {
+                dataTable.add(Arrays.asList(fieldName, String.valueOf(fieldValue)));
             } else {
                 dataTable.add(Arrays.asList(fieldName, fieldValue.toString()));
             }
