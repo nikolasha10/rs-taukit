@@ -16,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static rs.taukit.utils.BasicUtils.eval;
+import static rs.taukit.utils.BasicUtils.scenarioData;
 
 /**
  * Методы класса реализуют общие шаги сценариев для всех проектов
@@ -30,7 +31,13 @@ public class CommonManager extends StepManager {
 
     @Step("нажать на {elementType} '{elementName}'")
     public void clickElement(String elementType, String elementName) {
-        run(() -> getPage().getElement(elementName).click(),
+        run(() -> {
+                    String debug = scenarioData().getOptional("debug");
+                    if ( debug != null && debug.equals("debug")) {
+                        TauLogger.report("Нажимаем на %s '%s'", elementType, elementName);
+                    }
+                    getPage().getElement(elementName).click();
+                },
                 "Не удалось нажать на %s '%s'", elementType, elementName);
         TauLogger.report("Нажали на %s '%s'", elementType, elementName);
     }
