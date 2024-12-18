@@ -11,7 +11,6 @@ import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.ElementNotBuiltException;
 import rs.taukit.page.playwright.ElementBuilder;
-import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -69,10 +68,6 @@ public class PwElement extends Element implements HasText {
         };
     }
 
-    private Locator getPwLocator(){
-        return getPwLocator(searchMethodName, selector);
-    }
-
     private void buildDescendants() {
         this.descendants = this.descendants.entrySet().stream().map(entry -> {
             String name = entry.getKey();
@@ -89,7 +84,7 @@ public class PwElement extends Element implements HasText {
 
     @Override
     public boolean isVisible() {
-        return getPwLocator().first().isVisible();
+        return getPwLocator(searchMethodName, selector).first().isVisible();
     }
 
     @Override
@@ -99,12 +94,14 @@ public class PwElement extends Element implements HasText {
 
     @Override
     public boolean isDisabled() {
-        return getPwLocator().isDisabled() || getPwLocator().getAttribute("class").contains("disabled");
+        Locator pwLocator = getPwLocator(searchMethodName, selector).first();
+        return pwLocator.isDisabled() || pwLocator.getAttribute("class").contains("disabled");
     }
 
     @Override
     public boolean isEnabled() {
-        return getPwLocator().isEnabled() && !isDisabled();
+        Locator pwLocator = getPwLocator(searchMethodName, selector).first();
+        return pwLocator.isEnabled() && !isDisabled();
     }
 
     @Override
@@ -138,12 +135,12 @@ public class PwElement extends Element implements HasText {
     @Override
     public String getText() {
         try {
-            return getPwLocator().innerText();
+            return elementPwLocator.innerText();
         } catch (Exception e) {
             String cause = "";
             if (this.isInvisible()) {
                 cause = String.format(" - элемент не отображается. Тип: %s. Селектор: %s. Локатор: %s",
-                        this.getModel().getType(), this.getSelector(), getPwLocator());
+                        this.getModel().getType(), this.getSelector(), elementPwLocator);
             }
             String message = String.format("Не удалось получить значение элемента '%s'%s", elementName, cause);
             throw new AutoTestBrokenException(e, message);
@@ -162,6 +159,6 @@ public class PwElement extends Element implements HasText {
 
     @Override
     public void hover() {
-        getPwLocator().hover();
+        elementPwLocator.hover();
     }
 }
