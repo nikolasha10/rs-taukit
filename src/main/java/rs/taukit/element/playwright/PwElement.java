@@ -84,7 +84,7 @@ public class PwElement extends Element implements HasText {
 
     @Override
     public boolean isVisible() {
-        return getPwLocator(searchMethodName, selector).first().isVisible();
+        return elementPwLocator.first().isVisible();
     }
 
     @Override
@@ -94,14 +94,12 @@ public class PwElement extends Element implements HasText {
 
     @Override
     public boolean isDisabled() {
-        Locator pwLocator = getPwLocator(searchMethodName, selector).first();
-        return pwLocator.isDisabled() || pwLocator.getAttribute("class").contains("disabled");
+        return elementPwLocator.isDisabled() || elementPwLocator.getAttribute("class").contains("disabled");
     }
 
     @Override
     public boolean isEnabled() {
-        Locator pwLocator = getPwLocator(searchMethodName, selector).first();
-        return pwLocator.isEnabled() && !isDisabled();
+        return elementPwLocator.isEnabled() && !isDisabled();
     }
 
     @Override
