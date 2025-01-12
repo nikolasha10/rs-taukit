@@ -11,7 +11,6 @@ public class Stand {
     private final String name;
     private final String host;
     private final String port;
-    private final String stubPort;
     private final String dbSuite;
 
     private final String url;
@@ -29,9 +28,8 @@ public class Stand {
                 });
         host = standData.get("hostApplication").toString();
         port = standData.get("portApplication").toString();
-        stubPort = standData.get("portApplicationStub").toString();
         url = String.format("%s://%s:%s", standData.get("protocol"), host, port);
-        stubUrl = String.format("%s://%s:%s", standData.get("protocol"), host, stubPort);
+        stubUrl = standData.get("stubUrl").toString();
         dbSuite = standData.get("dbSuite").toString();
     }
 
