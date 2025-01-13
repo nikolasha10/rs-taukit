@@ -29,7 +29,7 @@ public class Stand {
         host = standData.get("hostApplication").toString();
         port = standData.get("portApplication").toString();
         url = String.format("%s://%s:%s", standData.get("protocol"), host, port);
-        stubUrl = standData.get("stubUrl").toString();
+        stubUrl = standData.containsKey("stubUrl") ? standData.get("stubUrl").toString() : null;
         dbSuite = standData.get("dbSuite").toString();
     }
 
