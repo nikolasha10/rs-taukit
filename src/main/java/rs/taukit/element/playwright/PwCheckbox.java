@@ -29,7 +29,7 @@ public class PwCheckbox extends PwElement implements Editable, CanBeChecked {
     public void setValue(String value, String controlValue) {
         driver.waitForCondition(() -> {
             setValue(value);
-            return value.equalsIgnoreCase("да") == isChecked();
+            return getText().equalsIgnoreCase("да") == isChecked();
         });
     }
 

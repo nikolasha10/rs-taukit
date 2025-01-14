@@ -14,8 +14,10 @@ import rs.taukit.utils.*;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static rs.taukit.utils.BasicUtils.eval;
+import static rs.taukit.utils.BasicUtils.scenarioData;
 
 /**
  * Методы класса реализуют общие шаги сценариев для всех проектов
@@ -30,7 +32,13 @@ public class CommonManager extends StepManager {
 
     @Step("нажать на {elementType} '{elementName}'")
     public void clickElement(String elementType, String elementName) {
-        run(() -> getPage().getElement(elementName).click(),
+        run(() -> {
+                    String debug = scenarioData().getOptional("debug");
+                    if ( debug != null && debug.equals("debug")) {
+                        TauLogger.report("Нажимаем на %s '%s'", elementType, elementName);
+                    }
+                    getPage().getElement(elementName).click();
+                },
                 "Не удалось нажать на %s '%s'", elementType, elementName);
         TauLogger.report("Нажали на %s '%s'", elementType, elementName);
     }
@@ -112,32 +120,42 @@ public class CommonManager extends StepManager {
         TauLogger.attachFile("Отчёт", "target/temp/finalReport.html");
     }
 
-    @Step("сохранить '{value}', как '{parameterName}'")
+    @Step("сохранить значение в '{parameterName}'")
     public void saveValueAs(String value, String parameterName) {
         Runnable runnable = () -> scenarioData.put(parameterName, value);
         scenarioStorage.saveStepAction(runnable);
         runnable.run();
-        TauLogger.report("Значение '%s' сохранено, как '%s'", value, parameterName);
+        if (value.length() < 50) {
+            TauLogger.report("Значение '%s' сохранено, как '%s'", value, parameterName);
+        } else {
+            TauLogger.console("Значение '%s...' сохранено в параметр '%s'", value.substring(0, 50), parameterName);
+            TauLogger.attachFile(parameterName, value.getBytes());
+        }
     }
 
     @Step("сохранить значения в параметры:")
     public void saveValues(DataTable dataTable) {
         List<List<String>> resultList = new ArrayList<>();
         resultList.add(Arrays.asList("Параметр", "Значение"));
-        dataTable.asMaps().forEach(data -> {
-            String value;
-            try {
-                value = eval(TestDataUtils.get(data, "Значение"));
-            } catch (TestDataException e) {
-                TauLogger.console(e);
-                value = "null";
-            }
-            resultList.add(Arrays.asList(eval(TestDataUtils.get(data, "Параметр")), value));
-        });
-        DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
-        scenarioData.put(resultTable);
-        TauLogger.attachDataTable("Значения параметров", resultTable);
-        TauLogger.console("Значения сохранены в параметры", resultTable);
+        AtomicReference<DataTable> atomicReference = new AtomicReference<>();
+        Runnable runnable = () -> {
+            dataTable.asMaps().forEach(data -> {
+                String value;
+                try {
+                    value = eval(TestDataUtils.get(data, "Значение"));
+                } catch (TestDataException e) {
+                    TauLogger.console(e);
+                    value = "null";
+                }
+                resultList.add(Arrays.asList(eval(TestDataUtils.get(data, "Параметр")), value));
+            });
+            DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
+            atomicReference.set(resultTable);
+            scenarioData.put(resultTable);
+        };
+        run(runnable);
+        TauLogger.attachDataTable("Значения параметров", atomicReference.get());
+        TauLogger.console("Значения сохранены в параметры", atomicReference.get());
     }
 
     @Step("сгенерировать guid и сохранить его, как '{parameterName}'")
@@ -246,5 +264,12 @@ public class CommonManager extends StepManager {
         TestDataDateTime testDataDateTime = new TestDataDateTime(parameterName, data);
         scenarioData.put(parameterName, testDataDateTime);
         TauLogger.report("Значение '%s' сохранено, как '%s'", testDataDateTime.getStringValue(), parameterName);
+    }
+
+    protected void increaseParameterValue(String parameterName, String increment) {
+        int value = Integer.parseInt(scenarioData.get(parameterName));
+        int currentValue = value + Integer.parseInt(increment);
+        scenarioData.put(parameterName, String.valueOf(currentValue));
+        TauLogger.console("Счетчик: %d", currentValue);
     }
 }

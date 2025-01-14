@@ -2,6 +2,7 @@ package rs.taukit.testobject;
 
 import lombok.Getter;
 import rs.taukit.config.Config;
+import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TimeStringParser;
 
@@ -10,6 +11,7 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import static rs.taukit.utils.BasicUtils.driver;
+import static rs.taukit.utils.BasicUtils.scenarioData;
 
 /**
  * Класс, описывающий ожидаемый результат проверки объекта тестирования.
@@ -61,12 +63,19 @@ public class TestCondition {
         } catch (Exception e) {
             try {
                 this.currentValue = TestObjectState.get(objectState).value.apply(testObject).toString();
-            } catch (Exception cve){
+            } catch (Exception cve) {
                 e.addSuppressed(cve);
                 this.currentValue = "<не определено>";
             }
             this.thrownException = e;
             conditionMet = false;
+        }
+        String debug = scenarioData().getOptional("debug");
+        if ( debug != null && debug.equals("debug")) {
+            TauLogger.report("Текущее значение: %s, Условие выполнено: %s", this.currentValue, this.isConditionMet());
+            if (this.thrownException != null){
+                TauLogger.console(this.thrownException);
+            }
         }
         return this;
     }

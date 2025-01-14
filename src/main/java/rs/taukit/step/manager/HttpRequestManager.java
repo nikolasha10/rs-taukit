@@ -30,19 +30,6 @@ public class HttpRequestManager extends StepManager {
     private Map<String, String> headers;
     private Map<String, String> queryParams;
 
-    protected void init(String name) {
-        this.name = name;
-        this.headersParameterName = "httpRequest_headers_" + name;
-        this.queryParameterName = "httpRequest_queryParams_" + name;
-        Map<String, String> headers = scenarioData.getOptional(headersParameterName);
-        Map<String, String> queryParams = scenarioData.getOptional(queryParameterName);
-        this.headers = Optional.ofNullable(headers).orElse(new HashMap<>());
-        this.queryParams = Optional.ofNullable(queryParams).orElse(new HashMap<>());
-        scenarioData().put(headersParameterName, this.headers);
-        scenarioData().put(queryParameterName, this.queryParams);
-    }
-    
-
     private static Runnable getRunnableParseResponse(DataTable dataTable, List<List<String>> parsedValues, String responseParameterName) {
         Runnable runnable = () -> {
             String responseBody = scenarioData().get(responseParameterName);
@@ -57,6 +44,18 @@ public class HttpRequestManager extends StepManager {
         };
         runnable.run();
         return runnable;
+    }
+
+    protected void init(String name) {
+        this.name = name;
+        this.headersParameterName = "httpRequest_headers_" + name;
+        this.queryParameterName = "httpRequest_queryParams_" + name;
+        Map<String, String> headers = scenarioData.getOptional(headersParameterName);
+        Map<String, String> queryParams = scenarioData.getOptional(queryParameterName);
+        this.headers = Optional.ofNullable(headers).orElse(new HashMap<>());
+        this.queryParams = Optional.ofNullable(queryParams).orElse(new HashMap<>());
+        scenarioData().put(headersParameterName, this.headers);
+        scenarioData().put(queryParameterName, this.queryParams);
     }
 
     @Step("отправить POST-запрос '{this.name}' с параметрами")
@@ -255,10 +254,7 @@ public class HttpRequestManager extends StepManager {
     }
 
     public URL createPostUrl() {
-        String urlString = String.format("%s%s%s",
-                Config.getSTAND().getStubUrl(),
-                Config.getProperty("stub.api.uri"),
-                name);
+        String urlString = String.format("%s/%s", Config.getSTAND().getStubUrl(), name);
         return createURL(urlString);
     }
 
