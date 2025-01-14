@@ -135,6 +135,7 @@ public class PwTable extends PwElement implements IHasTableElements {
     @Override
     public DataTable tableRowSaveElementValues(DataTable dataTable) {
         List<List<String>> resultList = new ArrayList<>(dataTable.asLists().subList(0, 1));
+        resultList.getFirst().add("Значение");
         dataTable.asMaps().forEach(data -> {
             String tableElement = TestDataUtils.get(data, "Объект");
             String elementName = TestDataUtils.get(data, "Название");
@@ -151,7 +152,7 @@ public class PwTable extends PwElement implements IHasTableElements {
                         .castTo(HasText.class).getText();
                 scenarioData().put(parameterName, elementText);
             }
-            resultList.add(Arrays.asList(tableElement, elementName, elementText));
+            resultList.add(Arrays.asList(tableElement, elementName, parameterName, elementText));
         });
         return DataTable.create(resultList, TextUtils.tableConverter);
     }
