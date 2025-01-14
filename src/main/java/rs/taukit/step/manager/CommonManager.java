@@ -265,4 +265,11 @@ public class CommonManager extends StepManager {
         scenarioData.put(parameterName, testDataDateTime);
         TauLogger.report("Значение '%s' сохранено, как '%s'", testDataDateTime.getStringValue(), parameterName);
     }
+
+    protected void increaseParameterValue(String parameterName, String increment) {
+        int value = Integer.parseInt(scenarioData.get(parameterName));
+        int currentValue = value + Integer.parseInt(increment);
+        scenarioData.put(parameterName, String.valueOf(currentValue));
+        TauLogger.console("Счетчик: %d", currentValue);
+    }
 }
