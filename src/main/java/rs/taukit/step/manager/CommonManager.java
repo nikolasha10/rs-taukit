@@ -34,7 +34,7 @@ public class CommonManager extends StepManager {
     public void clickElement(String elementType, String elementName) {
         run(() -> {
                     String debug = scenarioData().getOptional("debug");
-                    if ( debug != null && debug.equals("debug")) {
+                    if (debug != null && debug.equals("debug")) {
                         TauLogger.report("Нажимаем на %s '%s'", elementType, elementName);
                     }
                     getPage().getElement(elementName).click();
@@ -197,13 +197,12 @@ public class CommonManager extends StepManager {
         TauLogger.attachDataTable("Результаты декодирования", resultTable);
     }
 
-    @Step("сгенерировать строку длиной {length} символа из набора символов '{charSet}' и сохранить, как '{parameterName}'")
-    public void generateString(int length, String charSet, String parameterName) {
+    @Step("сгенерировать строку длиной {length} символ{ending} из набора символов '{charSet}' и сохранить, как '{parameterName}'")
+    public void generateString(int length, String ending, String charSet, String parameterName) {
         Random random = new Random();
-        byte[] chars = charSet.getBytes();
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            builder.append((char) chars[random.nextInt(charSet.length() - 1)]);
+            builder.append(charSet.charAt(random.nextInt(charSet.length() - 1)));
         }
         scenarioData.put(parameterName, builder.toString());
     }

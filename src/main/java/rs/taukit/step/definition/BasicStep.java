@@ -5,6 +5,8 @@ import io.cucumber.java.ru.И;
 import rs.taukit.step.manager.CommonManager;
 import rs.taukit.utils.FileUtils;
 
+import java.util.Optional;
+
 import static rs.taukit.utils.BasicUtils.eval;
 
 public class BasicStep extends CommonManager {
@@ -94,9 +96,9 @@ public class BasicStep extends CommonManager {
         super.generateGuid(parameterName);
     }
 
-    @И("^сгенерировать строку длиной (\\d+) символа из набора символов \"(.+)\" и сохранить, как \"(.+)\"$")
-    public void generateString(int length, String charSet, String parameterName) {
-        super.generateString(length, charSet, parameterName);
+    @И("^сгенерировать строку длиной (\\d+) символ((а|ов)?) из набора символов \"(.+)\" и сохранить, как \"(.+)\"$")
+    public void generateString(int length, String ending, String charSet, String parameterName) {
+        super.generateString(length, Optional.ofNullable(ending).orElse(""), charSet, parameterName);
     }
 
     @И("^кодировать значение \"(.+)\" в base64 и сохранить, как \"(.+)\"$")
@@ -135,7 +137,7 @@ public class BasicStep extends CommonManager {
     }
 
     @И("^увеличить значение параметра \"(.+)\" на \"(\\d+)\"$")
-    public void increaseParameterValue(String parameterName, String increment){
+    public void increaseParameterValue(String parameterName, String increment) {
         super.increaseParameterValue(parameterName, increment);
     }
 
