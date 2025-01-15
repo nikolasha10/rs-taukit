@@ -101,7 +101,7 @@ public class HttpRequestManager extends StepManager {
                 .collect(Collectors.toMap(
                         row -> TestDataUtils.get(row, "Параметр"),
                         row -> TestDataUtils.get(row, "Значение")));
-        String requestUrl = requestParametersMap.getOrDefault("url", createPostUrl().toString());
+        String requestUrl = requestParametersMap.containsKey("url") ? requestParametersMap.get("url") : createPostUrl().toString();
         List<List<String>> parameters = new ArrayList<>(dataTable.asLists());
         String content;
         if (requestParametersMap.containsKey("content") && !requestParametersMap.get("content").equalsIgnoreCase("null")) {
@@ -255,6 +255,7 @@ public class HttpRequestManager extends StepManager {
 
     public URL createPostUrl() {
         String urlString = String.format("%s/%s", Config.getSTAND().getStubUrl(), name);
+        TauLogger.console("urlString: %s", urlString);
         return createURL(urlString);
     }
 
