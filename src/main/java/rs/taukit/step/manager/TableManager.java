@@ -252,7 +252,7 @@ public class TableManager extends StepManager {
                 headerName, table.getElementName());
     }
 
-    @Step("в таблице '%s' перейти к столбцу № {headerNumber}")
+    @Step("в таблице '{tableName}' перейти к заголовку столбца № {headerNumber}")
     protected void tableHeaderSetContext(String tableName, int headerNumber) {
         IHasTableElements table = getElement(tableName);
         IContainer cell = table.getHeadersList().getItemList().get(headerNumber - 1).castTo(IContainer.class);
@@ -260,7 +260,7 @@ public class TableManager extends StepManager {
         TauLogger.report("[примечание] текущий контекст заголовок № %d таблицы '%s'", headerNumber, tableName);
     }
 
-    @Step("в таблице '%s' перейти к столбцу '{headerName}'")
+    @Step("в таблице '{tableName}' перейти к заголовку столбца '{headerName}'")
     protected void tableHeaderSetContext(String tableName, String headerName) {
         IHasTableElements table = getElement(tableName);
         IContainer cell = table.getHeaderByName(headerName);
