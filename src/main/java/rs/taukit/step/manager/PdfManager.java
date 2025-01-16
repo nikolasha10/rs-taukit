@@ -39,6 +39,32 @@ public class PdfManager extends StepManager {
         TauLogger.resetNotCritical();
     }
 
+    @Step("сравнить количество страниц в PDF-файле '{testedFileParameterName}' с ожидаемым значением '{expectedPageCount}'")
+    public void validatePdfPageCount(String testedFileParameterName, int expectedPageCount) {
+        String nameSpace = "Проверка страниц PDF";
+        TauLogger.console("Начата проверка количества страниц в файле: '%s'", testedFileParameterName);
+        TestDataFile testedFileData = scenarioData.get(testedFileParameterName);
+        TauLogger.attachPdfFile(testedFileData.getFileName(), testedFileData.getFilePath());
+        String testedFilePath = testedFileData.getFilePath();
+        try {
+            int actualPageCount = FileUtils.getPdfPageCount(testedFilePath);
+            TauLogger.console("Количество страниц в файле '%s': %d", testedFileData.getFileName(), actualPageCount);
+            if (actualPageCount != expectedPageCount) {
+                TauLogger.fail(
+                        "Количество страниц не совпадает. Ожидалось: %d, фактически: %d",
+                        expectedPageCount, actualPageCount
+                );
+            } else {
+                TauLogger.report(
+                        "Количество страниц в файле '%s' соответствует ожидаемому значению: %d",
+                        testedFileData.getFileName(), expectedPageCount
+                );
+            }
+        } catch (Exception e) {
+            TauLogger.fail("Произошла ошибка при обработке PDF-файла '%s': %s", testedFileParameterName, e.getMessage());
+        }
+    }
+
     //    @Step("проверить содержимое файла '{this.testedFileName}' на соответствие эталону")
     public Runnable validatePdfFullContent(TestDataFile testedFileData,
                                            TestDataFile standardFileData,

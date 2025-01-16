@@ -36,4 +36,9 @@ public class PdfStep extends PdfManager {
     public void validateDocument(String fileParameterName, DataTable dataTable) {
         validate(fileParameterName, eval(dataTable));
     }
+
+    @И("^сравнить количество страниц в PDF-файле \"(.+)\" с ожидаемым значением \"(.+)\"$")
+    public void validatePageCount(String testedFileParameterName, int expectedPageCount){
+        validatePdfPageCount(testedFileParameterName, expectedPageCount);
+    }
 }
