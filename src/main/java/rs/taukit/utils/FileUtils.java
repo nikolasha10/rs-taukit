@@ -1,6 +1,7 @@
 package rs.taukit.utils;
 
 import io.qameta.allure.Step;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.FileNotCreatedException;
 
@@ -226,4 +227,15 @@ public class FileUtils {
         File file = new File(tempDirPath);
         return file.getAbsolutePath().replaceAll("\\\\", "/");
     }
+
+    public static int getPdfPageCount(String filePath) {
+        File file = new File(filePath);
+
+        try (PDDocument pdfDocument = PDDocument.load(file)) {
+            return pdfDocument.getNumberOfPages();
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Ошибка при обработке PDF-файла '%s': %s", filePath, e.getMessage()));
+        }
+    }
+
 }
