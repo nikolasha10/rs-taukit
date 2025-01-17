@@ -40,28 +40,29 @@ public class PdfManager extends StepManager {
     }
 
     @Step("сравнить количество страниц в PDF-файле '{testedFileParameterName}' с ожидаемым значением '{expectedPageCount}'")
-    public void validatePdfPageCount(String testedFileParameterName, int expectedPageCount) {
+    public void validatePdfPageCount(String testedFileParameterName, String expectedPageCount) {
         String nameSpace = "Проверка страниц PDF";
         TauLogger.console("Начата проверка количества страниц в файле: '%s'", testedFileParameterName);
         TestDataFile testedFileData = scenarioData.get(testedFileParameterName);
         TauLogger.attachPdfFile(testedFileData.getFileName(), testedFileData.getFilePath());
         String testedFilePath = testedFileData.getFilePath();
         try {
+            int expectedPageCountInt = Integer.parseInt(expectedPageCount);
             int actualPageCount = FileUtils.getPdfPageCount(testedFilePath);
             TauLogger.console("Количество страниц в файле '%s': %d", testedFileData.getFileName(), actualPageCount);
-            if (actualPageCount != expectedPageCount) {
+            if (actualPageCount != expectedPageCountInt) {
                 TauLogger.fail(
                         "Количество страниц не совпадает. Ожидалось: %d, фактически: %d",
                         expectedPageCount, actualPageCount
                 );
             } else {
                 TauLogger.report(
-                        "Количество страниц в файле '%s' соответствует ожидаемому значению: %d",
+                        "Количество страниц в файле '%s' соответствует ожидаемому значению: %s",
                         testedFileData.getFileName(), expectedPageCount
                 );
             }
         } catch (Exception e) {
-            TauLogger.fail("Произошла ошибка при обработке PDF-файла '%s': %s", testedFileParameterName, e.getMessage());
+            TauLogger.fail(e,"Произошла ошибка при обработке PDF-файла '%s'", testedFileParameterName);
         }
     }
 
