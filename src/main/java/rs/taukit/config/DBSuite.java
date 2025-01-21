@@ -11,6 +11,7 @@ import java.util.Optional;
 public record DBSuite(String name, Map<String, DBConfig> dbMap) {
     public DBSuite(String filePath, String suiteName) {
         this(suiteName, new HashMap<>());
+        if (suiteName == null) return;
         Map<String, ?> dbSuiteConfigs = YamlParser.parse(filePath);
         Object configData = Optional.ofNullable(dbSuiteConfigs.get(suiteName))
                 .orElseThrow(() -> new DBSuiteConfigNotFoundException(suiteName));

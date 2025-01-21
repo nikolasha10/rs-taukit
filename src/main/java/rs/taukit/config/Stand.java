@@ -30,7 +30,7 @@ public class Stand {
         port = standData.get("portApplication").toString();
         url = String.format("%s://%s:%s", standData.get("protocol"), host, port);
         stubUrl = standData.containsKey("stubUrl") ? standData.get("stubUrl").toString() : null;
-        dbSuite = standData.get("dbSuite").toString();
+        dbSuite = standData.containsKey("dbSuite") ? standData.get("dbSuite").toString() : null;
     }
 
     private boolean isNameEquals(Map<String, ?> standMap) {

@@ -89,8 +89,11 @@ public class PwTable extends PwElement implements IHasTableElements {
         PwList rowList = getDescendant("Строки");
         int foundRowIndex = IntStream.range(0, rowList.getSize()).boxed().filter(index -> {
             activeRow = rowList.getItemList().get(index);
-            return dataTable.asMaps().stream()
+            page().setCurrentContext(activeRow);
+            boolean conditionsMet = dataTable.asMaps().stream()
                     .allMatch(conditionData -> new TestCondition(conditionData).checkResult().isConditionMet());
+            page().dropCurrentContext();
+            return conditionsMet;
         }).findFirst().orElseThrow();
         activeRow = rowList.getItemList().get(foundRowIndex);
         return foundRowIndex;
