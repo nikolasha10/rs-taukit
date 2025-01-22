@@ -332,7 +332,7 @@ public final class TauLogger {
                     .forEach(index -> {
                         browser().setActiveTab(index);
                         attachScreenshot(
-                                String.format("Снимок: Вкладка %d. %s", index + 1, page().getPageName()),
+                                String.format("Снимок: Вкладка %d. %s", index + 1, page() != null ? page().getPageName() : "Без названия"),
                                 screenshotList.get(index));
                     });
         }
