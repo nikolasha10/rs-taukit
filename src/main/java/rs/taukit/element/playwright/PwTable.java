@@ -175,6 +175,12 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     @Override
+    public void setContainerContext(String containerName) {
+        IContainer container = activeRow.getElementByName(containerName).castTo(IContainer.class);
+        page().setCurrentContext(container);
+    }
+
+    @Override
     public boolean checkHeader(String name) {
         try {
             return getHeaderIndex(name) > -1;

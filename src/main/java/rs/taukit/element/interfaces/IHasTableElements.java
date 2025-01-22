@@ -29,9 +29,13 @@ public interface IHasTableElements extends IElement {
 
     void setContext(String headerName);
 
+    void setContainerContext(String containerName);
+
     IElement getActiveCell(String headerName);
 
     IContainer getHeaderByName(String headerName);
 
     List<IContainer> getRowList();
+
+
 }

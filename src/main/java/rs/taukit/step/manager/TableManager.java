@@ -252,6 +252,16 @@ public class TableManager extends StepManager {
                 headerName, table.getElementName());
     }
 
+    @Step("в найденной строке перейти к контейнеру '{containerName}'")
+    protected void tableRowSetContainerContext(String containerName) {
+        IHasTableElements table = scenarioData.get("контекст таблицы");
+        run(() -> table.setContainerContext(containerName),
+                "Не удалось переключить контекст на контейнер '%s' в найденной строке таблицы '%s' на странице '%s'",
+                containerName, table.getElementName(), getPage().getPageName());
+        TauLogger.report("[примечание] текущий контекст: контейнер '%s' в найденной строке таблицы '%s'",
+                containerName, table.getElementName());
+    }
+
     @Step("в таблице '{tableName}' перейти к заголовку столбца № {headerNumber}")
     protected void tableHeaderSetContext(String tableName, int headerNumber) {
         IHasTableElements table = getElement(tableName);

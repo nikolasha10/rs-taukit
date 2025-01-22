@@ -97,6 +97,11 @@ public class TableStep extends TableManager {
         super.tableRowSetContext(headerName);
     }
 
+    @И("^в найденной строке перейти к контейнеру \"(.+)\"$")
+    public void tableRowSetContainerContext(String containerName) {
+        super.tableRowSetContainerContext(containerName);
+    }
+
     @И("^в строке \\((.+)\\) нажать на \"(.+)\"$")
     public void tableRowElementClick(String rowName, String elementName) {
         ((IHasTableElements) scenarioData().get(rowName)).tableRowElementClick(rowName, elementName);
