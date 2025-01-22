@@ -12,13 +12,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
 public class Chromium extends PwBrowser {
 
-    public Chromium(BrowserType browserType, int index) {
-        super(browserType, index);
+    public Chromium(BrowserType browserType, int index, List<String> args) {
+        super(browserType, index, args);
     }
 
     @Override
@@ -30,7 +31,7 @@ public class Chromium extends PwBrowser {
     }
 
     @Override
-    protected BrowserContext createContext(int index) {
+    protected BrowserContext createContext(int index, List<String> args) {
         long threadId = Thread.currentThread().threadId();
         File chromeDirExternally = new File(String.format("target/chromium/%d_%d/open_pdf_externally", threadId, index));
         File defaultDirExternally = new File(chromeDirExternally.getPath(), "Default");
@@ -53,7 +54,8 @@ public class Chromium extends PwBrowser {
                         Config.getIntegerProperty("window.height"))
                 .setHeadless(Config.getBooleanProperty("browser.headless"))
                 .setDownloadsPath(downloadDir.toPath())
-                .setIgnoreHTTPSErrors(true);
+                .setIgnoreHTTPSErrors(true)
+                .setArgs(args);
         String proxyServer = Config.getProperty("proxy.server");
         if (proxyServer != null) {
             Proxy proxy = new Proxy(proxyServer);

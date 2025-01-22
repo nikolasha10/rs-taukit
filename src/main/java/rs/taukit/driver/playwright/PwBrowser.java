@@ -33,15 +33,15 @@ public abstract class PwBrowser implements IWebBrowser {
     protected int activeTabIndex;
     private String userLogin;
 
-    protected PwBrowser(BrowserType browserType, int index) {
+    protected PwBrowser(BrowserType browserType, int index, List<String> args) {
         this.browser = launch(browserType);
-        this.context = createContext(index);
+        this.context = createContext(index, args);
         setDefaultTimeout(Config.getTimeProperty("defaultTimeout"));
     }
 
     protected abstract Browser launch(BrowserType browserType);
 
-    protected abstract BrowserContext createContext(int index);
+    protected abstract BrowserContext createContext(int index, List<String> args);
 
     private PlaywrightPageObject initPage(String pageName) {
         try {

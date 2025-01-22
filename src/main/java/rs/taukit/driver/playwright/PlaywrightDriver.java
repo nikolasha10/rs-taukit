@@ -46,11 +46,16 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public void openBrowser() {
+        openBrowser(new ArrayList<>());
+    }
+
+    @Override
+    public void openBrowser(List<String> args) {
         AtomicReference<Exception> suppressed = new AtomicReference<>();
         BooleanSupplier condition = () -> {
             try {
                 BrowserType browserType = getBrowserType(Objects.requireNonNull(Config.getProperty("browser.type")));
-                Chromium chromium = new Chromium(browserType, browserList.size());
+                Chromium chromium = new Chromium(browserType, browserList.size(), args);
                 browserList.add(chromium);
                 currentBrowserIndex = browserList.size() - 1;
                 return true;

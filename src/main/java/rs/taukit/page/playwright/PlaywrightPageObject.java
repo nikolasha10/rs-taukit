@@ -14,7 +14,6 @@ import rs.taukit.exceptions.PageFragmentNotFoundException;
 import rs.taukit.exceptions.PageNotClosedException;
 import rs.taukit.exceptions.PageNotLoadException;
 import rs.taukit.page.PageObject;
-import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
 import rs.taukit.utils.YamlParser;
 
@@ -91,7 +90,6 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
             }
             return expectedElements.stream().allMatch(elementName -> container.getElementByName(elementName).isVisible());
         } catch (Exception e) {
-            TauLogger.console(e);
             return false;
         }
     }
