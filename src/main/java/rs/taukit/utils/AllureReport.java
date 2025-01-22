@@ -39,7 +39,6 @@ public class AllureReport {
 
     public static synchronized void editReports(String scenarioName, String functionality, String status, long testEndTime) {
         List<File> fileList = getFileList(functionality, scenarioName, testEndTime - 1000);
-        TauLogger.console("%s %s %s", functionality, scenarioName, fileList.stream().map(File::getName).toList());
         fileList.forEach(file -> replaceReport(file, scenarioName, functionality, status));
     }
 
