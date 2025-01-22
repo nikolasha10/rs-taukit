@@ -1,5 +1,6 @@
 package rs.taukit.step.manager;
 
+import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.driver.IWebBrowser;
 import rs.taukit.driver.IWebDriver;
@@ -20,6 +21,15 @@ public class BrowserManager extends StepManager {
     public void openBrowser() {
         if (!driver.isBrowserOpen()) {
             driver.openBrowser();
+            this.browser = getBrowser();
+        }
+        TauLogger.report("Открыт браузер '%s'", driver.getBrowserType());
+    }
+
+    @Step("открыть браузер с параметрами:")
+    public void openBrowser(DataTable dataTable) {
+        if (!driver.isBrowserOpen()) {
+            driver.openBrowser(dataTable.asList());
             this.browser = getBrowser();
         }
         TauLogger.report("Открыт браузер '%s'", driver.getBrowserType());

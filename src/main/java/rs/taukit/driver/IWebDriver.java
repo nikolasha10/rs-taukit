@@ -6,6 +6,8 @@ import java.util.function.BooleanSupplier;
 public interface IWebDriver {
     void openBrowser();
 
+    void openBrowser(List<String> args);
+
     void reopenBrowser();
 
     void switchBrowser(int browserIndex);

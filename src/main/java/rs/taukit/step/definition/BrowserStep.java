@@ -1,5 +1,6 @@
 package rs.taukit.step.definition;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ru.И;
 import rs.taukit.step.manager.BrowserManager;
 
@@ -10,6 +11,11 @@ public class BrowserStep extends BrowserManager {
     @И("^открыть браузер$")
     public void openBrowser() {
         super.openBrowser();
+    }
+
+    @И("^открыть браузер с параметрами:$")
+    public void openBrowser(DataTable dataTable) {
+        super.openBrowser(eval(dataTable));
     }
 
     @И("^открыть ещё один браузер$")
