@@ -35,15 +35,8 @@ public class ConditionManager extends StepManager {
                 .map(data -> new TestCondition(data).checkResult())
                 .filter(result -> !result.isConditionMet())
                 .forEach(result -> {
-                            List<String> unexpected = new ArrayList<>();
-                            unexpected.add(result.getObjectType());
-                            unexpected.add(result.getObjectName());
-                            unexpected.add(result.getObjectState());
-                            if (resultsHeaders.contains("Значение")) {
-                                unexpected.add(result.getExpectedValue());
-                            }
-                            unexpected.add(result.getCurrentValue());
-                            unexpectedResultList.add(unexpected);
+                    List<String> unexpected = getUnexpectedResults(result, expectedHeaders, resultsHeaders);
+                    unexpectedResultList.add(unexpected);
                             if (result.getThrownException() != null) {
                                 if (exception.get() == null) {
                                     exception.set(result.getThrownException());
@@ -65,6 +58,21 @@ public class ConditionManager extends StepManager {
             TauLogger.report("Условия '%s' выполнены", conditionsName);
         }
         TauLogger.resetNotCritical();
+    }
+
+    private static List<String> getUnexpectedResults(TestCondition result, Map<String, String> expectedHeaders, List<String> resultsHeaders) {
+        List<String> unexpected = new ArrayList<>();
+        unexpected.add(result.getObjectType());
+        unexpected.add(result.getObjectName());
+        if (expectedHeaders.containsKey("В блоке")){
+            unexpected.add(result.getParentNodeName());
+        }
+        unexpected.add(result.getObjectState());
+        if (resultsHeaders.contains("Значение")) {
+            unexpected.add(result.getExpectedValue());
+        }
+        unexpected.add(result.getCurrentValue());
+        return unexpected;
     }
 
     @Step("дождаться выполнения условий:")
