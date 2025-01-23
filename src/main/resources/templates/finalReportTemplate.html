@@ -611,7 +611,7 @@
                             let link = document.createElement('a');
                             link.id = 'buildLink';
                             buildInfo.appendChild(link);
-                            link.href = data.url.replace('qatar', window.location.hostname);
+                            link.href = data.url;
                             link.innerHTML = data.fullDisplayName;
                             link.target = '_blank';
                         }, lastBuildId);
