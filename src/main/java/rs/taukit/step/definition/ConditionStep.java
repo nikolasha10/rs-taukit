@@ -40,7 +40,7 @@ public class ConditionStep extends ConditionManager {
      *                           <li>[любой тип элемента]</li>
      *                       </ul>
      */
-    @И("^дождаться выполнения условий \"([а-яА-Я\\w\\d\\s':/\\-]+)\":$")
+    @И("^дождаться выполнения условий \"([а-яА-Я\\w\\d\\s'\\,:/\\-]+)\":$")
     public void waitForConditions(String conditionsName, DataTable datatable) {
         super.waitForConditions(conditionsName, eval(datatable));
     }
