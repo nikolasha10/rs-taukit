@@ -45,11 +45,24 @@ public class PwBlock extends PwElement implements IContainer {
 
     @Override
     public IElement getElementByName(String elementName) {
-        driver.waitForCondition(this::isVisible);
-        if (!descendants.containsKey(elementName)) {
-            throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName(), this);
+        IContainer currentBlock = this;
+        driver.waitForCondition(currentBlock::isVisible);
+        String[] blockNames = elementName.split(" -> ");
+        if (blockNames.length > 1) {
+            for (String blockName : blockNames) {
+                if (!currentBlock.containsElement(blockName)) {
+                    throw new ElementNotDescribedException(blockName, scenarioStorage().getCurrentPageName(), this);
+                }
+                currentBlock = currentBlock.getElementByName(blockName).castTo(IContainer.class);
+                getDriver().waitForCondition(currentBlock::isVisible);
+            }
+            return currentBlock;
+        } else {
+            if (!descendants.containsKey(elementName)) {
+                throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName(), this);
+            }
+            return descendants.get(elementName);
         }
-        return descendants.get(elementName);
     }
 
     @Override
