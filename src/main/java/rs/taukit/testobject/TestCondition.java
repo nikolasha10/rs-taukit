@@ -41,19 +41,20 @@ public class TestCondition {
         this.objectType = TestDataUtils.get(data, "Объект");
         this.objectName = TestDataUtils.get(data, "Название");
         this.parentNodeName = TestDataUtils.getOptional(data, "В блоке");
-        IContainer currentContext = page().getCurrentContext();
-        if (parentNodeName != null) {
+        IContainer currentContext = page() == null ? null : page().getCurrentContext();
+        if (currentContext != null && parentNodeName != null) {
             IContainer container = currentContext.getElementByName(parentNodeName).castTo(IContainer.class);
             page().setCurrentContext(container);
         }
         this.objectState = TestDataUtils.get(data, "Состояние");
         this.expectedValue = Optional.ofNullable(TestDataUtils.getOptional(data, "Значение")).orElse("");
         String checkTimeout = Optional.ofNullable(data.get("Ожидание")).orElse(Config.getProperty("element.check.interval"));
+        assert checkTimeout != null;
         this.checkTimeout = TimeStringParser.getTime(checkTimeout);
         Object object = TestObjectType.get(objectType).testObject.apply(objectName);
         this.testObject = new TestObject(object, expectedValue);
         this.condition = () -> TestObjectState.get(objectState).check.apply(testObject);
-        page().replaceCurrentContext(currentContext);
+        if (currentContext != null) page().replaceCurrentContext(currentContext);
     }
 
     /**
