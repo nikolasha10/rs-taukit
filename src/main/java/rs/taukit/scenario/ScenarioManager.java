@@ -38,7 +38,7 @@ public class ScenarioManager {
         if (this.isStarted) return;
         this.isStarted = true;
         this.runner = runner;
-        scenarioList.addAll(findScenariosByTags(Config.getProperty("scenario.tags")));
+        scenarioList.addAll(findScenariosByTags(Objects.requireNonNull(Config.getProperty("scenario.tags"))));
     }
 
     public synchronized Object[][] getScenariosToStart() {
@@ -47,6 +47,7 @@ public class ScenarioManager {
         if (readyToStartList.isEmpty() && getRunningCount() == 0) {
             List<CucumberScenario> pendingList = scenarioList.stream().filter(CucumberScenario::isPending).toList();
             if (!pendingList.isEmpty()){
+                pendingList.forEach(CucumberScenario::setSkipped);
                 pendingList.forEach(CucumberScenario::setSkipped);
                 readyToStartList.addAll(pendingList);
             } else if (Config.getBooleanProperty("generateFinalReport")) {
