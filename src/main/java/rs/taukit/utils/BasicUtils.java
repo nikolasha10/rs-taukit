@@ -15,6 +15,7 @@ import rs.taukit.testdata.ScenarioData;
 import rs.taukit.testdata.TestData;
 import rs.taukit.testdata.TestDataFile;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -54,11 +55,12 @@ public class BasicUtils {
     }
 
     public static PageObject page() {
-        return driver().getCurrentBrowser().getCurrentPage();
+        IWebBrowser browser = driver().getCurrentBrowser();
+        return browser == null ? null : browser.getCurrentPage();
     }
 
     public static IContainer context() {
-        return page().getCurrentContext();
+        return Objects.requireNonNull(page()).getCurrentContext();
     }
 
     /**
@@ -68,7 +70,7 @@ public class BasicUtils {
      * @return экземпляр класса, имплементирующего интерфейс IElement
      */
     public static <T extends IElement> T element(String elementName) {
-        return page().getElement(elementName);
+        return Objects.requireNonNull(page()).getElement(elementName);
     }
 
     public static TestData getCurrentUser() {

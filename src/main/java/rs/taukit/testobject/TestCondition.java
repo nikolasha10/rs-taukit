@@ -8,6 +8,7 @@ import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TimeStringParser;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
@@ -41,10 +42,11 @@ public class TestCondition {
         this.objectType = TestDataUtils.get(data, "Объект");
         this.objectName = TestDataUtils.get(data, "Название");
         this.parentNodeName = TestDataUtils.getOptional(data, "В блоке");
-        IContainer currentContext = page() == null ? null : page().getCurrentContext();
-        if (currentContext != null && parentNodeName != null) {
+        IContainer currentContext = null;
+        if (parentNodeName != null) {
+            currentContext = Objects.requireNonNull(page()).getCurrentContext();
             IContainer container = currentContext.getElementByName(parentNodeName).castTo(IContainer.class);
-            page().setCurrentContext(container);
+            Objects.requireNonNull(page()).setCurrentContext(container);
         }
         this.objectState = TestDataUtils.get(data, "Состояние");
         this.expectedValue = Optional.ofNullable(TestDataUtils.getOptional(data, "Значение")).orElse("");
@@ -54,7 +56,7 @@ public class TestCondition {
         Object object = TestObjectType.get(objectType).testObject.apply(objectName);
         this.testObject = new TestObject(object, expectedValue);
         this.condition = () -> TestObjectState.get(objectState).check.apply(testObject);
-        if (currentContext != null) page().replaceCurrentContext(currentContext);
+        if (currentContext != null) Objects.requireNonNull(page()).replaceCurrentContext(currentContext);
     }
 
     /**
