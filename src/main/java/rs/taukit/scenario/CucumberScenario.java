@@ -86,7 +86,12 @@ public class CucumberScenario {
     }
 
     public void setSkipped() {
-        this.skipped = true;
+        if (!isReadyForStart()) {
+            this.skipped = true;
+            Config.getDependencies().changeStatus(getTagList(), "skipped");
+        } else {
+            this.skipped = false;
+        }
     }
 
     public Object[] getWrapper() {

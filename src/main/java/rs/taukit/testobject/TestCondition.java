@@ -2,16 +2,17 @@ package rs.taukit.testobject;
 
 import lombok.Getter;
 import rs.taukit.config.Config;
+import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TimeStringParser;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
-import static rs.taukit.utils.BasicUtils.driver;
-import static rs.taukit.utils.BasicUtils.scenarioData;
+import static rs.taukit.utils.BasicUtils.*;
 
 /**
  * Класс, описывающий ожидаемый результат проверки объекта тестирования.
@@ -41,13 +42,21 @@ public class TestCondition {
         this.objectType = TestDataUtils.get(data, "Объект");
         this.objectName = TestDataUtils.get(data, "Название");
         this.parentNodeName = TestDataUtils.getOptional(data, "В блоке");
+        IContainer currentContext = null;
+        if (parentNodeName != null) {
+            currentContext = Objects.requireNonNull(page()).getCurrentContext();
+            IContainer container = currentContext.getElementByName(parentNodeName).castTo(IContainer.class);
+            Objects.requireNonNull(page()).setCurrentContext(container);
+        }
         this.objectState = TestDataUtils.get(data, "Состояние");
         this.expectedValue = Optional.ofNullable(TestDataUtils.getOptional(data, "Значение")).orElse("");
         String checkTimeout = Optional.ofNullable(data.get("Ожидание")).orElse(Config.getProperty("element.check.interval"));
+        assert checkTimeout != null;
         this.checkTimeout = TimeStringParser.getTime(checkTimeout);
         Object object = TestObjectType.get(objectType).testObject.apply(objectName);
         this.testObject = new TestObject(object, expectedValue);
         this.condition = () -> TestObjectState.get(objectState).check.apply(testObject);
+        if (currentContext != null) Objects.requireNonNull(page()).replaceCurrentContext(currentContext);
     }
 
     /**
@@ -71,9 +80,9 @@ public class TestCondition {
             conditionMet = false;
         }
         String debug = scenarioData().getOptional("debug");
-        if ( debug != null && debug.equals("debug")) {
+        if (debug != null && debug.equals("debug")) {
             TauLogger.report("Текущее значение: %s, Условие выполнено: %s", this.currentValue, this.isConditionMet());
-            if (this.thrownException != null){
+            if (this.thrownException != null) {
                 TauLogger.console(this.thrownException);
             }
         }
