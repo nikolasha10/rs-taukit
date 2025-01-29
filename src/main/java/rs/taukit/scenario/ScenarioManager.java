@@ -25,6 +25,8 @@ import static rs.taukit.utils.BasicUtils.storage;
 
 public class ScenarioManager {
     private static final List<CucumberScenario> scenarioList = new ArrayList<>();
+    @Getter
+    private static final List<CucumberScenario> requestedScenarioList = new ArrayList<>();
     private TestNGCucumberRunner runner;
     private boolean isStarted = false;
     @Getter
@@ -38,7 +40,12 @@ public class ScenarioManager {
         if (this.isStarted) return;
         this.isStarted = true;
         this.runner = runner;
-        scenarioList.addAll(findScenariosByTags(Objects.requireNonNull(Config.getProperty("scenario.tags"))));
+        String requestedTags = Objects.requireNonNull(Config.getProperty("scenario.tags"));
+        String tags = Config.getBooleanProperty("testIT.autotest.create")
+                ? "@createTestItAutotest"
+                : requestedTags;
+        scenarioList.addAll(findScenariosByTags(tags));
+        requestedScenarioList.addAll(findScenariosByTags(requestedTags));
     }
 
     public synchronized Object[][] getScenariosToStart() {
@@ -46,7 +53,7 @@ public class ScenarioManager {
                 scenarioList.stream().filter(CucumberScenario::isReadyForStart).toList());
         if (readyToStartList.isEmpty() && getRunningCount() == 0) {
             List<CucumberScenario> pendingList = scenarioList.stream().filter(CucumberScenario::isPending).toList();
-            if (!pendingList.isEmpty()){
+            if (!pendingList.isEmpty()) {
                 pendingList.forEach(CucumberScenario::setSkipped);
                 pendingList.forEach(CucumberScenario::setSkipped);
                 readyToStartList.addAll(pendingList);

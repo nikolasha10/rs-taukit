@@ -34,4 +34,13 @@ public class ServiceStep extends ServiceManager {
         super.stopSkipActions();
     }
 
+    @И("^сформировать отчёт$")
+    public void createReport() {
+        super.createReport();
+    }
+
+    @И("служебный шаг: создать автотест в TestIT")
+    public void createTestItAutotest(){
+        super.createTestItAutotest();
+    }
 }

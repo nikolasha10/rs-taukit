@@ -37,6 +37,13 @@
     </repositories>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/ru.testit/testit-api-client -->
+        <dependency>
+            <groupId>ru.testit</groupId>
+            <artifactId>testit-api-client</artifactId>
+            <version>0.4.3-1</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.testng/testng -->
         <dependency>
             <groupId>org.testng</groupId>

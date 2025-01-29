@@ -76,11 +76,6 @@ public class BasicStep extends CommonManager {
         super.setNextCheckNotCritical();
     }
 
-    @И("^сформировать отчёт$")
-    public void createReport() {
-        super.createReport();
-    }
-
     @И("^сохранить значение \"(.+)\", как \"(.+)\"$")
     public void saveValueAs(String value, String parameterName) {
         super.saveValueAs(eval(value), parameterName);
