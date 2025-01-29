@@ -90,8 +90,8 @@ public class ContainerManager extends StepManager {
     public void listValueClick(String containerName, String listName, String itemName) {
         run(() -> {
                     IContainer container = getContainer(containerName);
-                    Editable editable = container.getElementByName(listName).castTo(Editable.class);
-                    editable.setValue(itemName);
+                    HasListItems listItems = container.getElementByName(listName).castTo(HasListItems.class);
+                    listItems.selectItem(itemName);
                 }, "Не удалось выбрать '%s' в списке '%s' в контейнере '%s' на странице '%s'",
                 itemName, listName, containerName, getPage().getPageName());
         TauLogger.report("В контейнере '%s' в списке '%s' выбрано значение '%s'", containerName, listName, itemName);

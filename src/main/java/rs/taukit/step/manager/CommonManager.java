@@ -71,7 +71,8 @@ public class CommonManager extends StepManager {
     @Step("[примечание] текущий контекст: контейнер '{containerName}'")
     public void closeCurrentAndSetNewBlockContext(String containerName) {
         closeCurrentContext(false);
-        getPage().setCurrentContext(containerName);
+        String[] blocks = containerName.split(" -> ");
+        Arrays.stream(blocks).forEach(block -> getPage().setCurrentContext(block));
         TauLogger.console("[примечание] текущий контекст: контейнер '%s'", containerName);
     }
 
@@ -102,22 +103,6 @@ public class CommonManager extends StepManager {
     //    @Step("[примечание] результат следующей проверки некритичен для теста")
     public void setNextCheckNotCritical() {
         scenarioData.put("NEXT_CHECK_NOT_CRITICAL", "NOT CRITICAL");
-    }
-
-    @Step("Отчёт")
-    public void createReport() {
-        scenarioData.put("scenarioData", ScenarioManager.getInstance().generateFinalReport());
-        scenarioData.put("jenkinsPipelineUrl", Config.getProperty("jenkins.pipeline.url"));
-        scenarioData.put("jenkinsAuth", Config.getProperty("jenkins.auth"));
-        List<Map<String, ?>> standList = YamlParser.parse(Config.eval("${baseResourcesDir}/configs/stands.yaml"));
-        String stands = standList.stream().map((item -> "'" + item.get("Название").toString() + "'")).toList().toString();
-        scenarioData.put("stands", stands);
-        scenarioData.put("currentStand", Config.getSTAND().getName());
-        scenarioData.put("branches", Config.getProperty("branches"));
-        scenarioData.put("defaultBranch", Config.getProperty("defaultBranch"));
-        String template = FileUtils.readFile("src/main/resources/templates/finalReportTemplate.html");
-        FileUtils.writeFile("target/temp/finalReport.html", eval(template));
-        TauLogger.attachFile("Отчёт", "target/temp/finalReport.html");
     }
 
     @Step("сохранить значение в '{parameterName}'")

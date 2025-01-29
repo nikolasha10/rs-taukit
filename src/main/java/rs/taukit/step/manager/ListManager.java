@@ -2,7 +2,11 @@ package rs.taukit.step.manager;
 
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
-import rs.taukit.element.interfaces.*;
+import rs.taukit.element.interfaces.HasListItems;
+import rs.taukit.element.interfaces.HasText;
+import rs.taukit.element.interfaces.IContainer;
+import rs.taukit.element.interfaces.IElement;
+import rs.taukit.testobject.TestCondition;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
@@ -17,9 +21,9 @@ public class ListManager extends StepManager {
     @Step("в списке '{listName}' выбрать '{itemName}'")
     public void selectItem(String listName, String itemName) {
         run(() -> {
-            HasListItems list = getElement(listName);
-            list.selectItem(itemName);
-        }, "Не удалось выбрать значение '%s' в списке '%s' на странице '%s'", 
+                    HasListItems list = getElement(listName);
+                    list.selectItem(itemName);
+                }, "Не удалось выбрать значение '%s' в списке '%s' на странице '%s'",
                 itemName, listName, getPage().getPageName());
         TauLogger.report("в списке '%s' выбран '%s'", listName, itemName);
     }
@@ -45,7 +49,7 @@ public class ListManager extends StepManager {
         TauLogger.report("[примечание] текущий контекст: %d-й элемент списка '%s'", foundItemNumber, listName);
     }
 
-    @Step("проверить состав элементов списка:")
+    @Step("проверить состав элементов списка '{listName}':")
     public void validateElements(String listName, DataTable dataTable) {
         TauLogger.attachDataTable("Элементы списка", dataTable);
         HasListItems list = getElement(listName);
@@ -74,5 +78,40 @@ public class ListManager extends StepManager {
             Runnable runnable = () -> TauLogger.attach("Элементы списка, не прошедшие проверку", validationResultTable);
             TauLogger.fail(runnable, "Состав элементов списка '%s' не соответствует ожидаемому", listName);
         }
+    }
+
+    @Step("проверить, что все блочные элементы списка '{listName}' соответствуют условиям:")
+    protected void validateAllBlockElements(String listName, DataTable dataTable) {
+        TauLogger.attachDataTable("Условия валидации элементов списка", dataTable);
+        List<List<String>> resultList = new ArrayList<>();
+        resultList.add(Arrays.asList("№", "Объект", "Название", "Состояние", "текущее значение", "Ожидалось"));
+        HasListItems list = getElement(listName);
+        for (int i = 0; i < list.getSize(); i++) {
+            IContainer item = list.getItemList().get(i).castTo(IContainer.class);
+            getPage().setCurrentContext(item);
+            int itemNumber = i + 1;
+            dataTable.asMaps().forEach(conditionData -> {
+                TestCondition testCondition = new TestCondition(conditionData).checkResult();
+                if (!testCondition.isConditionMet()) {
+                    resultList.add(Arrays.asList(
+                            String.valueOf(itemNumber),
+                            testCondition.getObjectType(),
+                            testCondition.getObjectName(),
+                            testCondition.getObjectState(),
+                            testCondition.getCurrentValue(),
+                            testCondition.getExpectedValue()));
+                }
+            });
+            getPage().dropCurrentContext();
+        }
+        if (resultList.size() > 1){
+            Runnable runnable = () -> {
+                DataTable resultDataTable = DataTable.create(resultList, TextUtils.tableConverter);
+                TauLogger.attachDataTable("Список элементов, не прошедших валидацию", resultDataTable);
+            };
+            TauLogger.fail(runnable, "Элементы списка '%s' не соответствуют требуемым условиям", listName);
+        }
+        TauLogger.resetNotCritical();
+        TauLogger.console("Все блочные элементы списка '%s' соответствуют требуемым условиям", listName);
     }
 }

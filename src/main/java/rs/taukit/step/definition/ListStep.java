@@ -35,4 +35,9 @@ public class ListStep extends ListManager{
         super.validateElements(listName, eval(dataTable));
     }
 
+    @И("^проверить, что все блочные элементы списка \"(.+)\" соответствуют условиям:$")
+    public void validateAllBlockElements(String listName, DataTable dataTable) {
+        super.validateAllBlockElements(listName, eval(dataTable));
+    }
+
 }
