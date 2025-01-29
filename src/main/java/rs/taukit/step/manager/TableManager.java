@@ -83,7 +83,17 @@ public class TableManager extends StepManager {
         run(() -> table.clickOnElement(elementName),
                 "Не удалось нажать на элемент '%s' в таблице '%s' на странице '%s'",
                 elementName, table.getElementName(), getPage().getPageName());
-        TauLogger.report("Нажали на элемент '%s' в таблице '%s'", elementName, table.getElementName());
+        TauLogger.console("Нажали на элемент '%s' в таблице '%s'", elementName, table.getElementName());
+    }
+
+    @Step("в найденной строке установить чекбокс '{checkboxName}'")
+    protected void setCheckbox(String checkboxName) {
+        IHasTableElements table = scenarioData.get("контекст таблицы");
+        run(() -> table.setCheckbox(checkboxName),
+                "Не удалось установить чекбокс '%s' в таблице '%s' на странице '%s'",
+                checkboxName, table.getElementName(), getPage().getPageName());
+        TauLogger.console("Установлен чекбокс '%s' в таблице '%s'", checkboxName, table.getElementName());
+
     }
 
     @Step("в таблице '{tableName}' дождаться строки, соответствующей условиям")
@@ -277,4 +287,6 @@ public class TableManager extends StepManager {
         getPage().setCurrentContext(cell);
         TauLogger.report("[примечание] текущий контекст заголовок '%s' таблицы '%s'", headerName, tableName);
     }
+
+
 }

@@ -168,16 +168,21 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     @Override
+    public void setCheckbox(String checkboxName) {
+        activeRow.getElementByName(checkboxName).castTo(PwCheckbox.class).setCheckbox();
+    }
+
+    @Override
     public void setContext(String headerName) {
         PwList cells = activeRow.getElementByName("Столбцы").castTo(PwList.class);
         IContainer cell = cells.getItemList().get(getHeaderIndex(headerName)).castTo(IContainer.class);
-        page().setCurrentContext(cell);
+        Objects.requireNonNull(page()).setCurrentContext(cell);
     }
 
     @Override
     public void setContainerContext(String containerName) {
         IContainer container = activeRow.getElementByName(containerName).castTo(IContainer.class);
-        page().setCurrentContext(container);
+        Objects.requireNonNull(page()).setCurrentContext(container);
     }
 
     @Override

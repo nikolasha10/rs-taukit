@@ -92,6 +92,11 @@ public class TableStep extends TableManager {
         super.clickOnElement(elementName);
     }
 
+    @И("^в найденной строке установить чекбокс \"(.+)\"$")
+    public void tableRowCheckboxSet(String checkboxName) {
+        super.setCheckbox(checkboxName);
+    }
+
     @И("^в найденной строке перейти к столбцу \"(.+)\"$")
     public void tableRowSetContext(String headerName) {
         super.tableRowSetContext(headerName);
