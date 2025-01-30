@@ -41,7 +41,7 @@ public class BasicStep extends CommonManager {
     }
 
 
-    @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы) \"(.+)\"$")
+    @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы|списка) \"(.+)\"$")
     public void waitForElement(String elementType, String elementName) {
         super.waitForElement(elementType, elementName);
     }
@@ -68,6 +68,11 @@ public class BasicStep extends CommonManager {
 
     @И("^примечание: выходим из контекста контейнера \"(.+)\"$")
     public void closeBlockContext(String blockName) {
+        closeCurrentContext(true);
+    }
+
+    @И("^примечание: выходим из текущего контекста$")
+    public void closeCurrentContext() {
         closeCurrentContext(true);
     }
 
