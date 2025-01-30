@@ -2,6 +2,7 @@ package rs.taukit.step.manager;
 
 import io.cucumber.datatable.DataTable;
 import rs.taukit.config.Config;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.scenario.CucumberScenario;
 import rs.taukit.scenario.ScenarioManager;
 import rs.taukit.testobject.TestCondition;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import static rs.taukit.utils.BasicUtils.element;
 import static rs.taukit.utils.BasicUtils.eval;
 
 public class ServiceManager extends StepManager {
@@ -45,6 +47,12 @@ public class ServiceManager extends StepManager {
         String template = FileUtils.readFile("src/main/resources/templates/finalReportTemplate.html");
         FileUtils.writeFile("target/temp/finalReport.html", eval(template));
         TauLogger.attachFile("Отчёт", "target/temp/finalReport.html");
+    }
+
+    protected void forceClickElement(String elementName) {
+        IElement element = element(elementName);
+        element.forceClick();
+        TauLogger.report("[примечание] нажата ЛКМ над элементом '%s'", elementName);
     }
 
     protected void createTestItAutotest() {
