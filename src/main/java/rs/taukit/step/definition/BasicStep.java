@@ -41,7 +41,7 @@ public class BasicStep extends CommonManager {
     }
 
 
-    @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы) \"(.+)\"$")
+    @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы|списка) \"(.+)\"$")
     public void waitForElement(String elementType, String elementName) {
         super.waitForElement(elementType, elementName);
     }
@@ -71,14 +71,14 @@ public class BasicStep extends CommonManager {
         closeCurrentContext(true);
     }
 
+    @И("^примечание: выходим из текущего контекста$")
+    public void closeCurrentContext() {
+        closeCurrentContext(true);
+    }
+
     @И("^примечание: результат следующей проверки некритичен для теста$")
     public void setNextCheckNotCritical() {
         super.setNextCheckNotCritical();
-    }
-
-    @И("^сформировать отчёт$")
-    public void createReport() {
-        super.createReport();
     }
 
     @И("^сохранить значение \"(.+)\", как \"(.+)\"$")

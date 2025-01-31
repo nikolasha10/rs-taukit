@@ -108,6 +108,11 @@ public class PwElement extends Element implements HasText {
     }
 
     @Override
+    public void forceClick() {
+        elementPwLocator.click(new Locator.ClickOptions().setForce(true));
+    }
+
+    @Override
     public String getColor() {
         String jsExpression = "(element) => window.getComputedStyle(element).getPropertyValue('color')";
         return elementPwLocator.evaluate(jsExpression).toString();

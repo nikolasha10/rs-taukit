@@ -90,11 +90,51 @@ public class ContainerManager extends StepManager {
     public void listValueClick(String containerName, String listName, String itemName) {
         run(() -> {
                     IContainer container = getContainer(containerName);
-                    Editable editable = container.getElementByName(listName).castTo(Editable.class);
-                    editable.setValue(itemName);
+                    HasListItems listItems = container.getElementByName(listName).castTo(HasListItems.class);
+                    listItems.selectItem(itemName);
                 }, "Не удалось выбрать '%s' в списке '%s' в контейнере '%s' на странице '%s'",
                 itemName, listName, containerName, getPage().getPageName());
-        TauLogger.report("В контейнере '%s' в списке '%s' выбрано значение '%s'", containerName, listName, itemName);
+        TauLogger.console("В контейнере '%s' в списке '%s' выбрано значение '%s'", containerName, listName, itemName);
+    }
+
+    @Step("в контейнере '{containerName}' в списке '{listName}' найти элемент с текстом '{itemValue}'")
+    public void listItemFindByValue(String containerName, String listName, String itemValue) {
+        run(() -> {
+                    IContainer container = getContainer(containerName);
+                    HasListItems listItems = container.getElementByName(listName).castTo(HasListItems.class);
+                    IContainer itemContainer = listItems.getItemList().stream()
+                            .filter(item -> item.castTo(HasText.class).getText().equalsIgnoreCase(itemValue))
+                            .findFirst().orElseThrow().castTo(IContainer.class);
+                    getPage().setCurrentContext(itemContainer);
+                }, "Не удалось найти элемент с текстом '%s' в списке '%s' в контейнере '%s' на странице '%s'",
+                itemValue, listName, containerName, getPage().getPageName());
+        TauLogger.report("[примечание] текущий контекст - элемент с тестом '%s' в списке '%s' в контейнере '%s'",
+                itemValue, listName, containerName);
+    }
+
+    @Step("в контейнере '{containerName}' в списке '{listName}' выбрать элемент № {itemNumber}")
+    protected void listItemClickByNumber(String containerName, String listName, String itemNumber) {
+        run(() -> {
+                    IContainer container = getContainer(containerName);
+                    HasListItems listItems = container.getElementByName(listName).castTo(HasListItems.class);
+                    int index = Integer.parseInt(itemNumber) - 1;
+                    listItems.getItemList().get(index).click();
+                }, "Не удалось выбрать элемент № %s в списке '%s' в контейнере '%s' на странице '%s'",
+                itemNumber, listName, containerName, getPage().getPageName());
+        TauLogger.console("В контейнере '%s' в списке '%s' выбран элемент № %s", containerName, listName, itemNumber);
+    }
+    @Step("в контейнере '{containerName}' в списке '{listName}' выбрать элемент № {itemNumber}")
+    protected void listItemFindByNumber(String containerName, String listName, String itemNumber) {
+        run(() -> {
+                    IContainer container = getContainer(containerName);
+                    HasListItems listItems = container.getElementByName(listName).castTo(HasListItems.class);
+                    int index = Integer.parseInt(itemNumber) - 1;
+                    IContainer item = listItems.getItemList().get(index).castTo(IContainer.class);
+                    getPage().setCurrentContext(item);
+                }, "Не удалось найти элемент № %s в списке '%s' в контейнере '%s' на странице '%s'",
+                itemNumber, listName, containerName, getPage().getPageName());
+        TauLogger.report("[примечание] текущий контекст - элемент № %s в списке '%s' в контейнере '%s'",
+                itemNumber, listName, containerName);
     }
 
     @Step("в контейнере '{containerName}' нажать на '{buttonName}' и скачать файл '{fileName}'")
@@ -174,7 +214,7 @@ public class ContainerManager extends StepManager {
     }
 
     @Step("в контейнере '{containerName}' установить переключатель '{fieldName}' в значение '{value}'")
-    public void setRadiButton(String containerName, String fieldName, String value) {
+    public void setRadioButton(String containerName, String fieldName, String value) {
         run(() -> {
             IContainer container = getContainer(containerName);
             Editable editable = container.getElementByName(fieldName).castTo(Editable.class);

@@ -19,6 +19,6 @@ public class TextFieldStep extends TextFieldManager {
 
     @И("^сохранить значения поля \"(.+)\", как \"(.+)\"$")
     public void saveElementValue(String fieldName, String parameterName) {
-        super.saveElementValue(fieldName, parameterName);
+        super.saveElementValue(fieldName, eval(parameterName));
     }
 }

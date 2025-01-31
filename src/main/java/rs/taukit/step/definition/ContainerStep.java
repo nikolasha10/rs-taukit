@@ -34,12 +34,27 @@ public class ContainerStep extends ContainerManager {
     }
     @И("^в контейнере \"(.+)\" установить переключатель \"(.+)\" в значение \"(.+)\"$")
     public void setRadioButton(String containerName, String fieldName, String value) {
-        super.setRadiButton(eval(containerName), fieldName, eval(value));
+        super.setRadioButton(eval(containerName), fieldName, eval(value));
     }
 
     @И("^в контейнере \"(.+)\" в списке \"(.+)\" выбрать \"(.+)\"$")
     public void listValueClick(String containerName, String listName, String itemName) {
-        super.listValueClick(eval(containerName), listName, itemName);
+        super.listValueClick(eval(containerName), listName, eval(itemName));
+    }
+
+    @И("^в контейнере \"(.+)\" в списке \"(.+)\" найти элемент с текстом \"(.+)\"$")
+    public void listItemFindByValue(String containerName, String listName, String itemValue) {
+        super.listItemFindByValue(eval(containerName), listName, eval(itemValue));
+    }
+
+    @И("^в контейнере \"(.+)\" в списке \"(.+)\" выбрать элемент № (.+)$")
+    public void listItemClickByNumber(String containerName, String listName, String itemNumber) {
+        super.listItemClickByNumber(eval(containerName), listName, eval(itemNumber));
+    }
+
+    @И("^в контейнере \"(.+)\" в списке \"(.+)\" найти элемент № (.+)$")
+    public void listItemFindByNumber(String containerName, String listName, String itemNumber) {
+        super.listItemFindByNumber(eval(containerName), listName, eval(itemNumber));
     }
 
     @И("^в контейнере \"(.+)\" нажать на \"(.+)\" и скачать файл \"(.+)\"$")

@@ -119,6 +119,7 @@ public final class TauLogger {
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
         scenarioData().put("WARNING", "PASSED with ERRORS");
         runnable.run();
+        if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
     }
 
     public static void warn(String format, Object... args) {

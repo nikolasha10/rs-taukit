@@ -137,4 +137,12 @@ public class CucumberScenario {
     public boolean equals(PickleWrapper pickleWrapper, FeatureWrapper featureWrapper) {
         return this.pickleWrapper.equals(pickleWrapper) && this.featureWrapper.equals(featureWrapper);
     }
+
+    public String getTestId() {
+        return getTagList().stream()
+                .map(tag -> tag.substring(1))
+                .filter(tag -> tag.matches("[\\d.]+"))
+                .toList()
+                .getLast();
+    }
 }
