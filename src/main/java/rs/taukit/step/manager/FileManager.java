@@ -213,6 +213,7 @@ public class FileManager extends StepManager {
         TauLogger.attachFile(standardFile.getName(), tempFilePath);
 
         if (!testContent.equals(standardContent)) {
+            scenarioData.put("testName", scenario.getFunctionality() + " " + scenario.getName());
             scenarioData.put("pageNumber", "1");
             scenarioData.put("ignoredZonesData", "");
             BufferedImage testTextImage = ImageUtils.textToImage(testContent, standardContent);
