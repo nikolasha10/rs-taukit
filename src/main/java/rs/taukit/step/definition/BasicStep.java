@@ -11,7 +11,7 @@ import static rs.taukit.utils.BasicUtils.eval;
 
 public class BasicStep extends CommonManager {
 
-    @И("^нажать на (элемент|поле|кнопку) \"(.+)\"$")
+    @И("^нажать на (элемент|поле|кнопку|ссылку) \"(.+)\"$")
     public void click(String elementType, String elementName) {
         super.clickElement(elementType, elementName);
     }

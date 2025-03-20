@@ -61,6 +61,9 @@ public enum TestObjectState {
     DOWNLOADED("загружен",
             t -> downloadable(t).isDownloaded(t.expectedValue()),
             t -> downloadable(t).isDownloaded(t.expectedValue()) ? "загружен" : "не загружен"),
+    CONTAINS_ITEM("содержит пункт",
+            t -> hasMenu(t).containsItem(t.expectedValue()),
+            t -> hasMenu(t).containsItem(t.expectedValue()) ? "содержит пункт" : "не содержит пункт"),
     ;
 
     public final Function<TestObject, Boolean> check;
@@ -99,6 +102,10 @@ public enum TestObjectState {
 
     private static Downloadable downloadable(TestObject t) {
         return (Downloadable) t.object();
+    }
+
+    private static IHasMenu hasMenu(TestObject t){
+        return (IHasMenu) t.object();
     }
 
     public static TestObjectState get(String title) {

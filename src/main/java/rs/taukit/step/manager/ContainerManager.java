@@ -51,11 +51,11 @@ public class ContainerManager extends StepManager {
     }
 
     @Step("сохранить значения поля '{fieldName}' в контейнере '{containerName}', как '{parameterName}'")
-    public void saveElementValue(String fieldName, String containerName, String parameterName) {
+    public void saveElementValue(String containerName, String fieldName, String parameterName) {
         run(() -> {
                     IContainer container = getContainer(containerName);
-                    Editable editableValue = container.getElementByName(fieldName).castTo(Editable.class);
-                    String value = editableValue.getText();
+                    HasText hasText = container.getElementByName(fieldName).castTo(HasText.class);
+                    String value = hasText.getText();
                     scenarioData.put(parameterName, value);
                 }, "Не удалось сохранить значение поля '%s' в контейнере '%s', как '%s'",
                 fieldName, containerName, parameterName);
@@ -123,6 +123,7 @@ public class ContainerManager extends StepManager {
                 itemNumber, listName, containerName, getPage().getPageName());
         TauLogger.console("В контейнере '%s' в списке '%s' выбран элемент № %s", containerName, listName, itemNumber);
     }
+
     @Step("в контейнере '{containerName}' в списке '{listName}' выбрать элемент № {itemNumber}")
     protected void listItemFindByNumber(String containerName, String listName, String itemNumber) {
         run(() -> {
@@ -222,5 +223,15 @@ public class ContainerManager extends StepManager {
         }, "Не удалось установить переключатель '%s' в контейнере '%s' в значение '%s'", fieldName, containerName, value);
 
         TauLogger.report("Переключатель '%s' в контейнере '%s' установлен в значение '%s'", fieldName, containerName, value);
+    }
+
+    @Step("в контейнере '{containerName}' в меню '{menuName}' выбрать '{itemName}'")
+    protected void selectMenuItem(String containerName, String menuName, String itemName) {
+        run(() -> {
+            IContainer container = getContainer(containerName);
+            IHasMenu menu = container.getElementByName(menuName).castTo(IHasMenu.class);
+            menu.selectMenuItem(itemName);
+        }, "Не удалось выбрать пункт '%s' в меню '%s' в контейнере '%s'", itemName, menuName, containerName);
+        TauLogger.console("Выбран пункт '%s' в меню '%s' в контейнере '%s'", itemName, menuName, containerName);
     }
 }

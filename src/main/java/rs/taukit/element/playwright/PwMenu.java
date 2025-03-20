@@ -53,6 +53,23 @@ public class PwMenu extends PwElement implements IHasMenu {
     }
 
     @Override
+    public boolean containsItem(String itemName) {
+        PwList itemList = getDescendant("Пункты меню");
+        if (itemList.getItemList().stream().anyMatch(item -> item.getText().equals(itemName)))
+            return true;
+        try {
+            PwButton additionalButton = getDescendant("Дополнительные пункты");
+            additionalButton.click();
+            PwList additionalItemList = getDescendant("Выпадающий список");
+            boolean contains = additionalItemList.getValues().stream().anyMatch(itemValue -> itemValue.equals(itemName));
+            additionalButton.click();
+            return contains;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
     @Step("в списке '{this.elementName}' выбрать значение '{value}'")
     public void setValue(String value) {
         try {

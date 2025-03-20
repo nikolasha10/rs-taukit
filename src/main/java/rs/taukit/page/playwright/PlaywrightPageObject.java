@@ -51,12 +51,12 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
         this.pageUrl = Config.getSTAND().getUrl() + Optional.ofNullable(pageUrl).orElse("");
         String controlUrl = YamlParser.convert(pageConfig.get("Обязательная часть адреса"));
         this.pageControlUrl = Optional.ofNullable(controlUrl).orElse("");
-        Map<String, Map<String, Object>> elementList = YamlParser.convert(pageConfig.get("Элементы"));
+        List<String> commonBlockList = YamlParser.convert(pageConfig.get("Общие блоки элементов"));
+        Map<String, Map<String, Object>> elementList = addCommonBlocks(commonBlockList);
         if (elementList == null) {
             elementList = new HashMap<>();
         }
-        List<String> commonBlockList = YamlParser.convert(pageConfig.get("Общие блоки элементов"));
-        elementList.putAll(addCommonBlocks(commonBlockList));
+        elementList.putAll(YamlParser.convert(pageConfig.get("Элементы")));
         Map<String, Object> bodyStructure = Map.of(
                 "тип", "контейнер",
                 "xpath", "//body",

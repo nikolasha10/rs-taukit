@@ -7,7 +7,7 @@ import rs.taukit.step.manager.ContainerManager;
 import static rs.taukit.utils.BasicUtils.eval;
 
 public class ContainerStep extends ContainerManager {
-    
+
     @И("^в контейнере \"(.+)\" нажать на (элемент|поле|кнопку) \"(.+)\"$")
     public void clickOnField(String containerName, String fieldType, String fieldName) {
         super.clickOnField(eval(containerName), fieldType, fieldName);
@@ -23,7 +23,7 @@ public class ContainerStep extends ContainerManager {
         super.setValue(eval(containerName), eval(value), eval(value));
     }
 
-    @И("^сохранить значения поля \"(.+)\" в контейнере \"(.+)\", как \"(.+)\"$")
+    @И("^в контейнере \"(.+)\" сохранить значение поля \"(.+)\", как \"(.+)\"$")
     public void saveElementValue(String containerName, String fieldName, String parameterName) {
         super.saveElementValue(eval(containerName), fieldName, parameterName);
     }
@@ -32,6 +32,7 @@ public class ContainerStep extends ContainerManager {
     public void setCheckbox(String containerName, String fieldName) {
         super.setCheckbox(eval(containerName), fieldName);
     }
+
     @И("^в контейнере \"(.+)\" установить переключатель \"(.+)\" в значение \"(.+)\"$")
     public void setRadioButton(String containerName, String fieldName, String value) {
         super.setRadioButton(eval(containerName), fieldName, eval(value));
@@ -55,6 +56,11 @@ public class ContainerStep extends ContainerManager {
     @И("^в контейнере \"(.+)\" в списке \"(.+)\" найти элемент № (.+)$")
     public void listItemFindByNumber(String containerName, String listName, String itemNumber) {
         super.listItemFindByNumber(eval(containerName), listName, eval(itemNumber));
+    }
+
+    @И("^в контейнере \"(.+)\" в меню \"(.+)\" выбрать \"(.+)\"$")
+    public void selectMenuItem(String containerName, String menuName, String itemName) {
+        super.selectMenuItem(eval(containerName), menuName, eval(itemName));
     }
 
     @И("^в контейнере \"(.+)\" нажать на \"(.+)\" и скачать файл \"(.+)\"$")
