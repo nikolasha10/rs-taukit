@@ -33,6 +33,11 @@ public class BrowserStep extends BrowserManager {
         super.continueWithBrowserNumber(browserNumber);
     }
 
+    @И("^закрыть браузер$")
+    public void closeBrowser() {
+        super.closeBrowser();
+    }
+
     @И("^перейти по ссылке \"(.+)\"$")
     public void openUrl(String url) {
         super.navigate(eval(url));

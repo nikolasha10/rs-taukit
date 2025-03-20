@@ -23,4 +23,9 @@ public class PageStep extends PageManager {
     public void openPage(String pageName) {
         super.openPage(pageName);
     }
+
+    @И("^сохранить текущий url, как \"(.+)\"$")
+    public void saveCurrentUrl(String parameterName) {
+        super.saveCurrentUrl(parameterName);
+    }
 }

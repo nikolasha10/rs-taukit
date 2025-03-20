@@ -125,4 +125,10 @@ public class BrowserManager extends StepManager {
         run(() -> browser.closeTab(tabNumber - 1), "Не удалось закрыть вкладку %d", tabNumber);
         TauLogger.report("Закрыта вкладка %d", tabNumber);
     }
+
+    @Step("Закрыть браузер")
+    protected void closeBrowser() {
+        run(driver::closeBrowser, "Не удалось закрыть браузер");
+        TauLogger.console("Браузер закрыт");
+    }
 }
