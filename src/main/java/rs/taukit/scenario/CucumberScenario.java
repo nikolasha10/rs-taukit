@@ -117,7 +117,7 @@ public class CucumberScenario {
         Config.getDependencies().changeStatus(getTagList(), testStatus.toLowerCase());
         scenarioStorage.getDriverManager().close();
         TauLogger.console("TEST %s: %s %s", testStatus, getFunctionality(), getName());
-        AllureReport.editReports(getName(), getFunctionality(), testStatus.toLowerCase(), endMillis);
+        AllureReport.editReports(this, testStatus, endMillis);
         TauLogger.collectLogs();
     }
 
@@ -125,13 +125,15 @@ public class CucumberScenario {
     public String toString() {
         String functionality = getFunctionality();
         Matcher matcher = Pattern.compile("\\[(.+)]\\[(.+)]").matcher(functionality);
+        List<String> tagList = getTagList().stream()
+                .filter(tag -> !tag.matches("@(.+)\\(\"(.+)\",\"(.+)\"\\)")).toList();
         if (matcher.matches()) {
             String testSuiteName = matcher.group(1);
             String testGroupName = matcher.group(2);
             return String.format("{tags: %s, suite: %s, group: %s, name: %s}",
-                    String.join(" ", getTagList()), testSuiteName, testGroupName, getName());
+                    String.join(" ", tagList), testSuiteName, testGroupName, getName());
         }
-        return String.format("{tags: %s, suite: %s, name: %s}", String.join(" "), functionality, getName());
+        return String.format("{tags: %s, suite: %s, name: %s}", String.join(" ", tagList), functionality, getName());
     }
 
     public boolean equals(PickleWrapper pickleWrapper, FeatureWrapper featureWrapper) {

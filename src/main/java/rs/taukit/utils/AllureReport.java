@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
+import rs.taukit.scenario.CucumberScenario;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,13 +41,16 @@ public class AllureReport {
                 }).toList();
     }
 
-    public static synchronized void editReports(String scenarioName, String functionality, String status, long testEndTime) {
+    public static synchronized void editReports(CucumberScenario scenario, String status, long testEndTime) {
+        String functionality = scenario.getFunctionality();
+        String scenarioName = scenario.getName();
+        List<String> tagList = scenario.getTagList();
         List<File> fileList = getFileList(functionality, scenarioName, testEndTime - 1000);
-        fileList.forEach(file -> replaceReport(file, scenarioName, functionality, status));
+        fileList.forEach(file -> replaceReport(file, scenarioName, functionality, status, tagList));
     }
 
     @SuppressWarnings("unchecked")
-    private static void replaceReport(File file, String scenarioName, String functionality, String status) {
+    private static void replaceReport(File file, String scenarioName, String functionality, String status, List<String> tagList) {
         try {
             String fileContent = Files.readString(file.toPath());
             Gson gson = new Gson();
@@ -77,12 +81,13 @@ public class AllureReport {
                 labels.add(parentSuitName);
             }
             report.replace("labels", labels);
+            report.put("links", getLinksFromTags(tagList));
             report.remove("parameters");
             String testStatus = report.get("status").toString();
             int warningFlag = checkBrokenSteps(report);
             if (testStatus.equals("passed") && warningFlag == 0) {
                 report.replace("status", "unknown");
-            } else if (warningFlag == 2){
+            } else if (warningFlag == 2) {
                 report.replace("status", "broken");
             } else {
                 report.replace("status", status);
@@ -107,6 +112,21 @@ public class AllureReport {
         }
     }
 
+    private static List<Map<String, String>> getLinksFromTags(List<String> tagList) {
+        List<Map<String, String>> links = new ArrayList<>();
+        tagList.forEach(tag -> {
+            Matcher matcher = Pattern.compile("@(.+)\\(\"(.+)\",\"(.+)\"\\)").matcher(tag);
+            if (matcher.matches()) {
+                Map<String, String> link = new HashMap<>();
+                link.put("name", matcher.group(2));
+                link.put("url", matcher.group(3));
+                link.put("type", matcher.group(1));
+                links.add(link);
+            }
+        });
+        return links;
+    }
+
     private static int checkBrokenSteps(Map json) {
         List<Map> steps = (List<Map>) json.get("steps");
         AtomicInteger resultStatus = new AtomicInteger(1);
@@ -124,7 +144,7 @@ public class AllureReport {
             }
             if (s.get("status").equals("failed")) {
                 json.replace("status", "failed");
-            } else if (s.get("status").equals("broken")){
+            } else if (s.get("status").equals("broken")) {
                 json.replace("status", "broken");
                 resultStatus.set(2);
             }
@@ -132,7 +152,7 @@ public class AllureReport {
         return resultStatus.get();
     }
 
-    public static Map<String, ?> getAllureResultModel(String filePath){
+    public static Map<String, ?> getAllureResultModel(String filePath) {
         String content = FileUtils.readFile(filePath);
         ObjectMapper jsonMapper = new JsonMapper();
         Map<String, ?> resultMap = new HashMap<>();

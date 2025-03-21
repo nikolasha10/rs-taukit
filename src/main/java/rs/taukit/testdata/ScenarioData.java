@@ -23,7 +23,10 @@ public class ScenarioData {
         this.dataStorage = new DataStorage(featurePath, getScenarioData(getFeatureData(featurePath)));
         this.nameSpaces = new HashMap<>();
         put("Адрес стенда", Config.getSTAND().getUrl());
-        put("Теги", String.join(" ", pickle.getTags()));
+        List<String> tagList = pickle.getTags().stream()
+                .filter(tag -> !tag.matches("@(.+)\\(\"(.+)\",\"(.+)\"\\)"))
+                .toList();
+        put("Теги", String.join(" ", tagList));
     }
 
     private List<Map<String, ?>> getFeatureData(String featurePath) {
@@ -81,9 +84,10 @@ public class ScenarioData {
         return nameSpaces.get(nameSpace).get(fieldName);
     }
 
-    public void remove(String key){
+    public void remove(String key) {
         dataStorage.remove(key);
     }
+
     public <T> T getOptional(String fieldName) {
         return dataStorage.getOptional(fieldName);
     }
