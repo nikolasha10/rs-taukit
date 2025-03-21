@@ -10,6 +10,7 @@ import rs.taukit.page.playwright.ElementBuilder;
 import rs.taukit.testobject.TestCondition;
 import rs.taukit.utils.TauLogger;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -65,6 +66,12 @@ public class PwList extends PwElement implements HasListItems {
     @Override
     public int getSize() {
         return getItemList().size();
+    }
+
+    @Override
+    public Boolean containsItems(List<String> expectedItems, boolean isStrong) {
+        HashSet<String> items = new HashSet<>(getValues());
+        return (!isStrong || items.size() == expectedItems.size()) && items.containsAll(expectedItems);
     }
 
     private Predicate<IContainer> containsElementWithText(String text) {

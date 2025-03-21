@@ -6,6 +6,8 @@ import rs.taukit.exceptions.AutoTestBrokenException;
 import java.util.Arrays;
 import java.util.function.Function;
 
+import static rs.taukit.utils.BasicUtils.scenarioData;
+
 public enum TestObjectState {
     IS_VISIBLE("отображается",
             t -> canBeVisible(t).isVisible(),
@@ -64,6 +66,9 @@ public enum TestObjectState {
     CONTAINS_ITEM("содержит пункт",
             t -> hasMenu(t).containsItem(t.expectedValue()),
             t -> hasMenu(t).containsItem(t.expectedValue()) ? "содержит пункт" : "не содержит пункт"),
+    CONSISTS_OF("состоит из элементов",
+            t -> hasListItems(t).containsItems(scenarioData().get(t.expectedValue()), true),
+            t -> hasMenu(t).containsItem(t.expectedValue()) ? "содержит пункт" : "не содержит пункт"),
     ;
 
     public final Function<TestObject, Boolean> check;
@@ -104,8 +109,12 @@ public enum TestObjectState {
         return (Downloadable) t.object();
     }
 
-    private static IHasMenu hasMenu(TestObject t){
+    private static IHasMenu hasMenu(TestObject t) {
         return (IHasMenu) t.object();
+    }
+
+    private static HasListItems hasListItems(TestObject t) {
+        return (HasListItems) t.object();
     }
 
     public static TestObjectState get(String title) {

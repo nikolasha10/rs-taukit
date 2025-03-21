@@ -256,4 +256,12 @@ public class CommonManager extends StepManager {
         scenarioData.put(parameterName, String.valueOf(currentValue));
         TauLogger.console("Счетчик: %d", currentValue);
     }
+
+    @Step("создать коллекцию значений '{parameterName}':")
+    protected void createCollection(String parameterName, DataTable dataTable) {
+        TauLogger.attachDataTable(parameterName, dataTable);
+        scenarioData.put(parameterName, dataTable.asList());
+        TauLogger.console(parameterName + ":");
+        System.out.println(dataTable);
+    }
 }

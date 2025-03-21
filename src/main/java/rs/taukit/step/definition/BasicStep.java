@@ -141,4 +141,9 @@ public class BasicStep extends CommonManager {
         super.increaseParameterValue(parameterName, increment);
     }
 
+    @И("^создать коллекцию значений \"(.+)\":$")
+    public void createCollection(String parameterName, DataTable dataTable) {
+        super.createCollection(parameterName, eval(dataTable));
+    }
+
 }

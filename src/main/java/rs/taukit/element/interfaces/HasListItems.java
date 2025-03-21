@@ -12,4 +12,6 @@ public interface HasListItems {
     void selectItem(String itemName);
 
     int getSize();
+
+    Boolean containsItems(List<String> expectedItems, boolean isStrong);
 }
