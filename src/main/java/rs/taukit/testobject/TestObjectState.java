@@ -68,7 +68,8 @@ public enum TestObjectState {
             t -> hasMenu(t).containsItem(t.expectedValue()) ? "содержит пункт" : "не содержит пункт"),
     CONSISTS_OF("состоит из элементов",
             t -> hasListItems(t).containsItems(scenarioData().get(t.expectedValue()), true),
-            t -> hasMenu(t).containsItem(t.expectedValue()) ? "содержит пункт" : "не содержит пункт"),
+            t -> hasListItems(t).containsItems(scenarioData().get(t.expectedValue()), true)
+                    ? "состоит из элементов" : "состав списка отличается от контрольного"),
     ;
 
     public final Function<TestObject, Boolean> check;
