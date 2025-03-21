@@ -23,6 +23,7 @@ public enum TestObjectType {
     TOGGLE("переключатель", name -> element(name).castTo(Editable.class)),
     DROPDOWN_LIST("выпадающий список", name -> element(name).castTo(IElement.class)),
     LIST("список", name -> element(name).castTo(HasListItems.class)),
+    MENU("меню", name -> element(name).castTo(IHasMenu.class)),
     CONTAINER("контейнер", name -> element(name).castTo(IContainer.class)),
     TABLE("таблица", name -> element(name).castTo(IHasTableElements.class)),
     TABLE_HEADER("столбец", name -> {

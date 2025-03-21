@@ -33,4 +33,10 @@ public class PageManager extends StepManager {
         TauLogger.report("[примечание] текущий контекст: %s '%s'",
                 getPage().getCurrentContext().getModel().getType(), getPage().getCurrentContext().getElementName());
     }
+
+    @Step("сохранить текущий url, как '{parameterName}'")
+    protected void saveCurrentUrl(String parameterName) {
+        scenarioData.put(parameterName, getPage().getCurrentUrl());
+        TauLogger.report("%s: %s", parameterName, scenarioData.get(parameterName));
+    }
 }

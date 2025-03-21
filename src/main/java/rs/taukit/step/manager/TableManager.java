@@ -288,5 +288,4 @@ public class TableManager extends StepManager {
         TauLogger.report("[примечание] текущий контекст заголовок '%s' таблицы '%s'", headerName, tableName);
     }
 
-
 }
