@@ -56,7 +56,10 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
         if (elementList == null) {
             elementList = new HashMap<>();
         }
-        elementList.putAll(YamlParser.convert(pageConfig.get("Элементы")));
+        Map<String, Map<String, Object>> elements = YamlParser.convert(pageConfig.get("Элементы"));
+        if (elements != null) {
+            elementList.putAll(elements);
+        }
         Map<String, Object> bodyStructure = Map.of(
                 "тип", "контейнер",
                 "xpath", "//body",
