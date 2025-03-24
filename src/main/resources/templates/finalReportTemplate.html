@@ -700,7 +700,7 @@
                     let scenarioTag = scenarioName.split('.')[0];
                     let scenarioNameContainer = createContainers(subSuiteContainer.container, scenarioName);
                     let expand = scenarioNameContainer.header.getElementsByClassName('shrink')[0];
-                    let status = testResults[scenarioName].status;
+                    let status = testResults[scenarioName].status.toLowerCase();
                     if (status === "passed"){
                         countersValues.successful++;
                         expand.className = status;
