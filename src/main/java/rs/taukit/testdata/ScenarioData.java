@@ -4,10 +4,12 @@ import io.cucumber.datatable.DataTable;
 import io.cucumber.testng.Pickle;
 import lombok.Getter;
 import rs.taukit.config.Config;
+import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.YamlParser;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Getter
@@ -29,10 +31,14 @@ public class ScenarioData {
         put("Теги", String.join(" ", tagList));
     }
 
-    private List<Map<String, ?>> getFeatureData(String featurePath) {
+    private File getFeatureDataFile(String featurePath) {
         String featureDataPath = featurePath.replace("feature", "yaml");
-        File featureDataFile = new File(featureDataPath);
-        return featureDataFile.exists() ? YamlParser.parse(featureDataPath) : new ArrayList<>();
+        return new File(featureDataPath);
+    }
+
+    private List<Map<String, ?>> getFeatureData(String featurePath) {
+        File featureDataFile = getFeatureDataFile(featurePath);
+        return featureDataFile.exists() ? YamlParser.parse(featureDataFile.getAbsolutePath()) : new ArrayList<>();
     }
 
     private Map<String, ?> getScenarioData(List<Map<String, ?>> featureData) {
@@ -106,5 +112,16 @@ public class ScenarioData {
 
     public String evalString(String template) {
         return dataStorage.evalString(template);
+    }
+
+    public void editTestDataFile(Map<String, ?> replacements) {
+        String testDataFilePath = getFeatureDataFile(featurePath).getAbsolutePath();
+        String newLines = new String(YamlParser.write(replacements, false), StandardCharsets.UTF_8)
+                .replaceAll("---\n", "").trim();
+        if (FileUtils.readFile(testDataFilePath).contains(newLines)) return;
+        List<String> lines = FileUtils.readFileToLineList(testDataFilePath);
+        int index = lines.indexOf("- Сценарий: " + scenarioName);
+        lines.add(index + 1, "  " + newLines);
+        FileUtils.writeFile(testDataFilePath, String.join("\n", lines));
     }
 }

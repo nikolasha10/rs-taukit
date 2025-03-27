@@ -1,8 +1,5 @@
 package rs.taukit.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.gson.Gson;
 import lombok.Getter;
 import rs.taukit.config.Config;
@@ -153,14 +150,6 @@ public class AllureReport {
     }
 
     public static Map<String, ?> getAllureResultModel(String filePath) {
-        String content = FileUtils.readFile(filePath);
-        ObjectMapper jsonMapper = new JsonMapper();
-        Map<String, ?> resultMap = new HashMap<>();
-        try {
-            resultMap = YamlParser.convert(jsonMapper.readValue(content, resultMap.getClass()));
-        } catch (JsonProcessingException e) {
-            TauLogger.error(e, "Ошибка при парсинге файла с Allure-отчётом: %s", filePath);
-        }
-        return resultMap;
+        return JsonParser.parse(FileUtils.readFile(filePath));
     }
 }

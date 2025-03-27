@@ -11,10 +11,11 @@ import rs.taukit.records.ApiResponse;
 import rs.taukit.testdata.TestData;
 import rs.taukit.utils.*;
 
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,7 +47,7 @@ public class HttpRequestManager extends StepManager {
         return runnable;
     }
 
-    protected void init(String name) {
+    public void init(String name) {
         this.name = name;
         this.headersParameterName = "httpRequest_headers_" + name;
         this.queryParameterName = "httpRequest_queryParams_" + name;
@@ -323,5 +324,75 @@ public class HttpRequestManager extends StepManager {
         dataTable.asMaps().forEach(row -> queryParams.put(
                 TestDataUtils.get(row, "Параметр"), TestDataUtils.get(row, "Значение")));
         scenarioData.put(queryParameterName, queryParams);
+    }
+
+    public URL createUrl(String urlString) {
+        try {
+            return new URI(urlString).toURL();
+        } catch (MalformedURLException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public ApiResponse sendPost(String url, String requestBody) {
+        int responseCode = 0;
+        try {
+            HttpURLConnection connection = (HttpURLConnection) createUrl(url).openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            headers.forEach(connection::setRequestProperty);
+            connection.setUseCaches(false);
+            connection.setConnectTimeout((int) Config.getTimeProperty("pageLoadingTimeout"));
+            connection.setReadTimeout((int) Config.getTimeProperty("pageLoadingTimeout"));
+            connection.connect();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
+            writer.write(requestBody);
+            writer.flush();
+            writer.close();
+            responseCode = connection.getResponseCode();
+            String responseMessage = connection.getResponseMessage();
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    responseCode == HttpURLConnection.HTTP_OK
+                            ? connection.getInputStream()
+                            : connection.getErrorStream()));
+            return new ApiResponse(
+                    responseCode == HttpURLConnection.HTTP_OK,
+                    responseCode,
+                    responseMessage,
+                    br.lines().collect(Collectors.joining()));
+        } catch (Exception e) {
+            throw new HttpRequestNotSentException(e, name, "POST", responseCode);
+        }
+    }
+
+    public ApiResponse sendGet(String url) {
+        int responseCode = 0;
+        try {
+            HttpURLConnection connection = (HttpURLConnection) createUrl(url).openConnection();
+            connection.setRequestMethod("GET");
+            connection.setDoOutput(true);
+            headers.forEach(connection::setRequestProperty);
+            connection.setUseCaches(false);
+            connection.setConnectTimeout((int) Config.getTimeProperty("pageLoadingTimeout"));
+            connection.setReadTimeout((int) Config.getTimeProperty("pageLoadingTimeout"));
+            connection.connect();
+            responseCode = connection.getResponseCode();
+            String responseMessage = connection.getResponseMessage();
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    responseCode == HttpURLConnection.HTTP_OK
+                            ? connection.getInputStream()
+                            : connection.getErrorStream()));
+            return new ApiResponse(
+                    responseCode == HttpURLConnection.HTTP_OK,
+                    responseCode,
+                    responseMessage,
+                    br.lines().collect(Collectors.joining()));
+        } catch (Exception e) {
+            throw new HttpRequestNotSentException(e, name, "GET", responseCode);
+        }
+    }
+
+    public void setHeader(String name, String value) {
+        headers.put(name, value);
     }
 }

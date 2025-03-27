@@ -1,10 +1,10 @@
 package rs.taukit.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import rs.taukit.config.Config;
+import rs.taukit.records.ApiResponse;
 import rs.taukit.scenario.CucumberScenario;
+import rs.taukit.step.manager.HttpRequestManager;
+import rs.taukit.testdata.ScenarioData;
 import ru.testit.client.api.AttachmentsApi;
 import ru.testit.client.api.AutoTestsApi;
 import ru.testit.client.invoker.ApiClient;
@@ -15,12 +15,14 @@ import ru.testit.client.model.*;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static rs.taukit.utils.AllureReport.getAllureResultModel;
 
 public class TestITUtils {
     private static CustomAutotestModel getAutotestModel(CustomAutotestModel model, CucumberScenario scenario) {
-        model.setExternalId(scenario.getTestId());
+        ScenarioData scenarioData = new ScenarioData(scenario.getPickleWrapper().getPickle());
+        scenario.getScenarioStorage().setScenarioData(scenarioData);
         model.setProjectId(UUID.fromString(Objects.requireNonNull(Config.getProperty("test-it.projectId"))));
         String name = scenario.getName();
         String parentSuiteName = scenario.getParentSuiteName();
@@ -30,6 +32,12 @@ public class TestITUtils {
             name = String.format("[%s] %s", subSuiteName, name);
         }
         model.setName(name);
+        String autotestId = scenarioData.getOptional("TestITId");
+        if (autotestId != null) {
+            model.setId(UUID.fromString(autotestId));
+        } else {
+            model.setExternalId(scenario.getTestId());
+        }
         if (!parentSuiteName.equals("-")) {
             model.setNamespace(parentSuiteName);
         }
@@ -39,14 +47,8 @@ public class TestITUtils {
         List<File> resultFiles = getFileList(parentSuiteName, suiteName, subSuiteName, name).stream()
                 .sorted(Comparator.comparingLong(File::lastModified)).toList();
         File resultFile = resultFiles.getLast();
-        ObjectMapper jsonMapper = new JsonMapper();
-        Map<String, ?> resultMap = new HashMap<>();
         String resultContent = FileUtils.readFile(resultFile.getAbsolutePath());
-        try {
-            resultMap = YamlParser.convert(jsonMapper.readValue(resultContent, resultMap.getClass()));
-        } catch (JsonProcessingException e) {
-            TauLogger.error(e, "Ошибка при чтении файла с отчётом");
-        }
+        Map<String, ?> resultMap = JsonParser.parse(resultContent);
         List<Map<String, ?>> steps = YamlParser.convert(resultMap.get("steps"));
         model.setSteps(getAutotestStepModel(steps));
         List<LabelPostModel> labelPostModelList = scenario.getTagList().stream().map(tag -> {
@@ -61,8 +63,12 @@ public class TestITUtils {
     public static void createAutotest(CucumberScenario cucumberScenario) {
         AutoTestsApi apiInstance = getAutoTestsApi();
         CustomAutotestModel autoTestPostModel = getAutotestModel(new CustomAutoTestPostModel(), cucumberScenario);
+        String autotestId = null, externalId = null;
+
         try {
-            apiInstance.createAutoTest((AutoTestPostModel) autoTestPostModel);
+            AutoTestModel autoTestModel = apiInstance.createAutoTest((AutoTestPostModel) autoTestPostModel);
+            autotestId = autoTestModel.getId().toString();
+            externalId = autoTestModel.getExternalId();
         } catch (ApiException e) {
             TauLogger.error(e, """
                             Exception when calling AutoTestsApi#createAutoTest.
@@ -71,13 +77,16 @@ public class TestITUtils {
                             Response headers: %s
                     """, e.getCode(), e.getResponseBody(), e.getResponseHeaders());
         }
+        ScenarioData scenarioData = cucumberScenario.getScenarioStorage().getScenarioData();
+        addAutoTestId(externalId, scenarioData);
+        linkAutotestToWorkItem(autotestId, cucumberScenario, apiInstance);
     }
 
     public static void updateAutotest(CucumberScenario cucumberScenario) {
         AutoTestsApi apiInstance = getAutoTestsApi();
-        CustomAutotestModel autoTestPutModel = getAutotestModel(new CustomAutoTestPutModel(), cucumberScenario);
+        AutoTestPutModel autoTestPutModel = (AutoTestPutModel) getAutotestModel(new CustomAutoTestPutModel(), cucumberScenario);
         try {
-            apiInstance.updateAutoTestWithHttpInfo((AutoTestPutModel) autoTestPutModel);
+            apiInstance.updateAutoTestWithHttpInfo(autoTestPutModel);
         } catch (ApiException e) {
             TauLogger.error(e, """
                             Exception when calling AutoTestsApi#updateAutotest.
@@ -86,6 +95,48 @@ public class TestITUtils {
                             Response headers: %s
                     """, e.getCode(), e.getResponseBody(), e.getResponseHeaders());
         }
+        ScenarioData scenarioData = cucumberScenario.getScenarioStorage().getScenarioData();
+        String externalId = autoTestPutModel.getExternalId();
+        String autotestId = externalId != null ? addAutoTestId(externalId, scenarioData) : autoTestPutModel.getId().toString();
+        linkAutotestToWorkItem(autotestId, cucumberScenario, apiInstance);
+    }
+
+    private static String addAutoTestId(String externalId, ScenarioData scenarioData) {
+        List<Map<String, ?>> autotestList = getAutotestByExternalId(externalId);
+        AtomicReference<String> autotestId = new AtomicReference<>();
+        autotestList.stream().filter(autotest -> autotest.get("isDeleted").toString().equals("false")).forEach(autotest -> {
+            autotestId.set(autotest.get("id").toString());
+            Map<String, String> replacement = Map.of("TestITId", autotestId.get());
+            scenarioData.editTestDataFile(replacement);
+        });
+        return autotestId.get();
+    }
+
+    private static void linkAutotestToWorkItem(String autotestId, CucumberScenario cucumberScenario, AutoTestsApi apiInstance) {
+        String tmsTag = cucumberScenario.getTagList().stream().filter(tag -> tag.startsWith("@tms("))
+                .findFirst().orElse(null);
+        if (tmsTag == null) return;
+        Map<String, ?> workItem = getWorkItem(tmsTag);
+        String workItemId = workItem.get("id").toString();
+        List<Map<String, ?>> autotests = YamlParser.convert(workItem.get("autoTests"));
+        if (autotests.stream().anyMatch(item -> item.get("id").toString().equals(autotestId))) {
+            TauLogger.console("Автотест '%s' уже прикреплён к тест-кейсу '%s'", cucumberScenario.getName(), workItem.get("name").toString());
+            return;
+        }
+        WorkItemIdModel workItemIdModel = new WorkItemIdModel();
+        workItemIdModel.setId(workItemId);
+        workItemIdModel.id(workItemId);
+        try {
+            apiInstance.linkAutoTestToWorkItem(autotestId, workItemIdModel);
+        } catch (ApiException e) {
+            TauLogger.error(e, """
+                            Exception when calling AutoTestsApi.linkAutoTestToWorkItem.
+                            Status code: %s
+                            Reason: %s
+                            Response headers: %s
+                    """, e.getCode(), e.getResponseBody(), e.getResponseHeaders());
+        }
+        TauLogger.console("Автотест '%s' успешно привязан к тест-кейсу '%s'", cucumberScenario.getName(), workItem.get("name").toString());
     }
 
     private static AutoTestsApi getAutoTestsApi() {
@@ -133,40 +184,35 @@ public class TestITUtils {
         return atStepModelList;
     }
 
-    private static AutoTestModel getAutotestByExternalId(AutoTestPostModel autoTestPostModel) {
-        AutoTestsApi apiInstance = getAutoTestsApi();
-        UUID projectId = autoTestPostModel.getProjectId();
-        String externalId = autoTestPostModel.getExternalId();
-        try {
-            ApiV2AutoTestsSearchPostRequest autoTestsSearchPostRequest = new ApiV2AutoTestsSearchPostRequest();
-            AutotestsSelectModelFilter autotestsSelectModelFilter = new AutotestsSelectModelFilter();
-            autotestsSelectModelFilter
-                    .addProjectIdsItem(projectId)
-                    .addExternalIdsItem(externalId);
-            autoTestsSearchPostRequest.setFilter(autotestsSelectModelFilter);
-            List<AutoTestModel> result = apiInstance.apiV2AutoTestsSearchPost(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    autoTestsSearchPostRequest);
-            System.out.println(result);
-            return result.getFirst();
-        } catch (ApiException e) {
-            System.err.println("Exception when calling AutoTestsApi#getAllAutoTests");
-            System.err.println("Status code: " + e.getCode());
-            System.err.println("Reason: " + e.getResponseBody());
-            System.err.println("Response headers: " + e.getResponseHeaders());
-            TauLogger.error(e, "Exception when calling AttachmentsApi#addAttachment");
-        } catch (IllegalArgumentException iae) {
+    private static List<Map<String, ?>> getAutotestByExternalId(String externalId) {
+        String url = String.format("%s/api/v2/autoTests/search", Config.getProperty("test-it.basePath"));
+        String requestBody = String.format(
+                "{\"filter\":{\"projectIds\":[\"%s\"],\"externalIds\":[\"%s\"]}}",
+                Config.getProperty("test-it.projectId"),
+                externalId
+        );
+        HttpRequestManager httpRequestManager = new HttpRequestManager();
+        httpRequestManager.init("getAutotestByExternalId");
+        httpRequestManager.setHeader("Content-Type", "application/json; charset=utf-8");
+        httpRequestManager.setHeader("Accept", "application/json");
+        httpRequestManager.setHeader("Authorization", "PrivateToken " + Config.getProperty("test-it.privateToken"));
+        ApiResponse apiResponse = httpRequestManager.sendPost(url, requestBody);
+        return JsonParser.parse(apiResponse.text());
+    }
 
-        }
-        return null;
+    private static Map<String, ?> getWorkItem(String tmsTag) {
+        String workItemId = Arrays.stream(tmsTag.split("/")).toList().getLast().replaceAll("\\D", "");
+        String url = String.format("%s/api/v2/workItems/%s", Config.getProperty("test-it.basePath"), workItemId);
+        HttpRequestManager httpRequestManager = new HttpRequestManager();
+        httpRequestManager.init("getAutotestByExternalId");
+        httpRequestManager.setHeader("Content-Type", "application/json; charset=utf-8");
+        httpRequestManager.setHeader("Accept", "application/json");
+        httpRequestManager.setHeader("Authorization", "PrivateToken " + Config.getProperty("test-it.privateToken"));
+        ApiResponse apiResponse = httpRequestManager.sendGet(url);
+        return JsonParser.parse(apiResponse.text());
     }
 
     public void getResult() {
-
         ApiClient defaultClient = Configuration.getDefaultApiClient();
         defaultClient.setBasePath("Your TMS address");
         defaultClient.setApiKeyPrefix("PrivateToken");

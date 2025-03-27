@@ -20,4 +20,6 @@ public interface CustomAutotestModel {
     void setSteps(List<AutoTestStepModel> autotestStepModel);
 
     void setLabels(List<LabelPostModel> labelPostModelList);
+
+    void setId(UUID uuid);
 }

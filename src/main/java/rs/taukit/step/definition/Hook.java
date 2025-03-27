@@ -23,6 +23,6 @@ public class Hook {
         String featureDirPath = featureFile.getParent();
         String featureDir = featureDirPath.replaceAll("\\\\", "/");
         scenarioData().put("FEATURE_DIR", YamlParser.convert(featureDir));
-        TauLogger.attachYaml("Тестовые данные", YamlParser.write(scenarioData().getDataStorage().getAttachment()));
+        TauLogger.attachYaml("Тестовые данные", YamlParser.write(scenarioData().getDataStorage().getAttachment(), true));
     }
 }
