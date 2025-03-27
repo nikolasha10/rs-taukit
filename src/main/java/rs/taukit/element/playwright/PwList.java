@@ -54,7 +54,7 @@ public class PwList extends PwElement implements HasListItems {
         try {
             driver.waitForCondition(condition, timeout);
         } catch (Exception e) {
-            throw valueNotFoundException(itemName).get();
+            throw valueNotFoundException(itemName, e).get();
         }
         getItemList().stream()
                 .filter(PwElement::isVisible)
@@ -135,6 +135,12 @@ public class PwList extends PwElement implements HasListItems {
                         Не удалось найти значение '%s' в списке '%s' на странице '%s'.
                         Доступны значения: %s""",
                 value, elementName, page().getPageName(), getValues()));
+    }
+    private Supplier<RuntimeException> valueNotFoundException(String value, Throwable throwable) {
+        return () -> new RuntimeException(String.format("""
+                        Не удалось найти значение '%s' в списке '%s' на странице '%s'.
+                        Доступны значения: %s""",
+                value, elementName, page().getPageName(), getValues()), throwable);
     }
 
     private Supplier<AutoTestBrokenException> valuesNotFoundException(Exception e) {
