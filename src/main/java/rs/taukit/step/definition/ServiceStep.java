@@ -48,4 +48,9 @@ public class ServiceStep extends ServiceManager {
     public void createTestItAutotest() {
         super.createTestItAutotest();
     }
+
+    @И("^служебный шаг: обновить автотест в TestIT$")
+    public void updateTestItAutotest() {
+        super.updateTestItAutotest();
+    }
 }

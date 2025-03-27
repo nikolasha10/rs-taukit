@@ -41,9 +41,12 @@ public class ScenarioManager {
         this.isStarted = true;
         this.runner = runner;
         String requestedTags = Objects.requireNonNull(Config.getProperty("scenario.tags"));
-        String tags = Config.getBooleanProperty("testIT.autotest.create")
-                ? "@createTestItAutotest"
-                : requestedTags;
+        String testItAction = Optional.ofNullable(Config.getProperty("testIT.autotest.action")).orElse("none");
+        String tags = requestedTags;
+        switch (testItAction){
+            case "create" -> tags = "@createTestItAutotest";
+            case "update" -> tags = "@updateTestItAutotest";
+        }
         scenarioList.addAll(findScenariosByTags(tags));
         requestedScenarioList.addAll(findScenariosByTags(requestedTags));
     }

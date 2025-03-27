@@ -18,22 +18,27 @@ import java.util.*;
 
 import static rs.taukit.utils.AllureReport.getAllureResultModel;
 
-public class TestITAdapter {
-    public static void createAutotest(CucumberScenario cucumberScenario) {
-        AutoTestsApi apiInstance = getAutoTestsApi();
-        AutoTestPostModel autoTestPostModel = new AutoTestPostModel(); // AutoTestPostModel |
-        autoTestPostModel.setExternalId(cucumberScenario.getTestId());
-        autoTestPostModel.setProjectId(UUID.fromString("86503c57-8b3c-488f-b224-525e740e2713"));
-        String name = cucumberScenario.getName();
-        String parentSuiteName = cucumberScenario.getParentSuiteName();
-        String suiteName = cucumberScenario.getSuiteName();
-        String subSuiteName = cucumberScenario.getSubSuiteName();
-        autoTestPostModel.setName(name);
-        autoTestPostModel.setNamespace(cucumberScenario.getParentSuiteName());
-        autoTestPostModel.setClassname(cucumberScenario.getSuiteName());
+public class TestITUtils {
+    private static CustomAutotestModel getAutotestModel(CustomAutotestModel model, CucumberScenario scenario) {
+        model.setExternalId(scenario.getTestId());
+        model.setProjectId(UUID.fromString(Objects.requireNonNull(Config.getProperty("test-it.projectId"))));
+        String name = scenario.getName();
+        String parentSuiteName = scenario.getParentSuiteName();
+        String suiteName = scenario.getSuiteName();
+        String subSuiteName = scenario.getSubSuiteName();
+        if (!subSuiteName.equals("-")) {
+            name = String.format("[%s] %s", subSuiteName, name);
+        }
+        model.setName(name);
+        if (!parentSuiteName.equals("-")) {
+            model.setNamespace(parentSuiteName);
+        }
+        if (!suiteName.equals("-")) {
+            model.setClassname(scenario.getSuiteName());
+        }
         List<File> resultFiles = getFileList(parentSuiteName, suiteName, subSuiteName, name).stream()
                 .sorted(Comparator.comparingLong(File::lastModified)).toList();
-        File resultFile = resultFiles.getFirst();
+        File resultFile = resultFiles.getLast();
         ObjectMapper jsonMapper = new JsonMapper();
         Map<String, ?> resultMap = new HashMap<>();
         String resultContent = FileUtils.readFile(resultFile.getAbsolutePath());
@@ -43,18 +48,21 @@ public class TestITAdapter {
             TauLogger.error(e, "Ошибка при чтении файла с отчётом");
         }
         List<Map<String, ?>> steps = YamlParser.convert(resultMap.get("steps"));
-        TauLogger.console("steps.size(): %d", steps.size());
-        autoTestPostModel.setSteps(getAutotestStepModel(steps));
-        List<LabelPostModel> labelPostModelList = cucumberScenario.getTagList().stream().map(tag -> {
+        model.setSteps(getAutotestStepModel(steps));
+        List<LabelPostModel> labelPostModelList = scenario.getTagList().stream().map(tag -> {
             LabelPostModel labelPostModel = new LabelPostModel();
             labelPostModel.setName(tag);
             return labelPostModel;
         }).toList();
-        autoTestPostModel.setLabels(labelPostModelList);
-        TauLogger.console("autoTestPostModel: %s", autoTestPostModel);
+        model.setLabels(labelPostModelList);
+        return model;
+    }
+
+    public static void createAutotest(CucumberScenario cucumberScenario) {
+        AutoTestsApi apiInstance = getAutoTestsApi();
+        CustomAutotestModel autoTestPostModel = getAutotestModel(new CustomAutoTestPostModel(), cucumberScenario);
         try {
-            AutoTestModel result = apiInstance.createAutoTest(autoTestPostModel);
-            TauLogger.console(result.toString());
+            apiInstance.createAutoTest((AutoTestPostModel) autoTestPostModel);
         } catch (ApiException e) {
             TauLogger.error(e, """
                             Exception when calling AutoTestsApi#createAutoTest.
@@ -65,14 +73,26 @@ public class TestITAdapter {
         }
     }
 
+    public static void updateAutotest(CucumberScenario cucumberScenario) {
+        AutoTestsApi apiInstance = getAutoTestsApi();
+        CustomAutotestModel autoTestPutModel = getAutotestModel(new CustomAutoTestPutModel(), cucumberScenario);
+        try {
+            apiInstance.updateAutoTestWithHttpInfo((AutoTestPutModel) autoTestPutModel);
+        } catch (ApiException e) {
+            TauLogger.error(e, """
+                            Exception when calling AutoTestsApi#updateAutotest.
+                            Status code: %s
+                            Reason: %s
+                            Response headers: %s
+                    """, e.getCode(), e.getResponseBody(), e.getResponseHeaders());
+        }
+    }
+
     private static AutoTestsApi getAutoTestsApi() {
         ApiClient defaultClient = Configuration.getDefaultApiClient();
-        defaultClient.setBasePath("https://team-624y.testit.software");
-
-        // Configure API key authorization: Bearer or PrivateToken
+        defaultClient.setBasePath(Objects.requireNonNull(Config.getProperty("test-it.basePath")));
         ApiKeyAuth token = (ApiKeyAuth) defaultClient.getAuthentication("Bearer or PrivateToken");
-        token.setApiKey("ZWlleWZxQXhGemhROTJDeXdQ");
-        // Uncomment the following line to set a prefix for the API key, e.g. "Token" (defaults to null)
+        token.setApiKey(Objects.requireNonNull(Config.getProperty("test-it.privateToken")));
         token.setApiKeyPrefix("PrivateToken");
 
         return new AutoTestsApi(defaultClient);
@@ -101,7 +121,7 @@ public class TestITAdapter {
 
     private static List<AutoTestStepModel> getAutotestStepModel(List<Map<String, ?>> steps) {
         List<AutoTestStepModel> atStepModelList = new ArrayList<>();
-        steps.forEach(step -> {
+        steps.stream().filter(step -> !step.get("name").toString().startsWith("[")).forEach(step -> {
             AutoTestStepModel autoTestStepModel = new AutoTestStepModel();
             autoTestStepModel.setTitle(YamlParser.convert(step.get("name")));
             List<Map<String, ?>> subSteps = YamlParser.convert(step.get("steps"));
@@ -111,6 +131,38 @@ public class TestITAdapter {
             atStepModelList.add(autoTestStepModel);
         });
         return atStepModelList;
+    }
+
+    private static AutoTestModel getAutotestByExternalId(AutoTestPostModel autoTestPostModel) {
+        AutoTestsApi apiInstance = getAutoTestsApi();
+        UUID projectId = autoTestPostModel.getProjectId();
+        String externalId = autoTestPostModel.getExternalId();
+        try {
+            ApiV2AutoTestsSearchPostRequest autoTestsSearchPostRequest = new ApiV2AutoTestsSearchPostRequest();
+            AutotestsSelectModelFilter autotestsSelectModelFilter = new AutotestsSelectModelFilter();
+            autotestsSelectModelFilter
+                    .addProjectIdsItem(projectId)
+                    .addExternalIdsItem(externalId);
+            autoTestsSearchPostRequest.setFilter(autotestsSelectModelFilter);
+            List<AutoTestModel> result = apiInstance.apiV2AutoTestsSearchPost(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    autoTestsSearchPostRequest);
+            System.out.println(result);
+            return result.getFirst();
+        } catch (ApiException e) {
+            System.err.println("Exception when calling AutoTestsApi#getAllAutoTests");
+            System.err.println("Status code: " + e.getCode());
+            System.err.println("Reason: " + e.getResponseBody());
+            System.err.println("Response headers: " + e.getResponseHeaders());
+            TauLogger.error(e, "Exception when calling AttachmentsApi#addAttachment");
+        } catch (IllegalArgumentException iae) {
+
+        }
+        return null;
     }
 
     public void getResult() {
@@ -128,7 +180,5 @@ public class TestITAdapter {
         } catch (ApiException e) {
             TauLogger.error(e, "Exception when calling AttachmentsApi#addAttachment");
         }
-
     }
-
 }

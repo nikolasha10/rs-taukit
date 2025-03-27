@@ -8,7 +8,7 @@ import rs.taukit.scenario.ScenarioManager;
 import rs.taukit.testobject.TestCondition;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
-import rs.taukit.utils.TestITAdapter;
+import rs.taukit.utils.TestITUtils;
 import rs.taukit.utils.YamlParser;
 
 import java.util.List;
@@ -57,6 +57,12 @@ public class ServiceManager extends StepManager {
 
     protected void createTestItAutotest() {
         List<CucumberScenario> scenarioList = ScenarioManager.getRequestedScenarioList();
-        scenarioList.forEach(TestITAdapter::createAutotest);
+        scenarioList.forEach(TestITUtils::createAutotest);
+    }
+
+    protected void updateTestItAutotest() {
+        List<CucumberScenario> scenarioList = ScenarioManager.getRequestedScenarioList();
+        scenarioList.forEach(TestITUtils::updateAutotest);
+
     }
 }
