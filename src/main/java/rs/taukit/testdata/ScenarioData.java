@@ -38,7 +38,12 @@ public class ScenarioData {
 
     private List<Map<String, ?>> getFeatureData(String featurePath) {
         File featureDataFile = getFeatureDataFile(featurePath);
-        return featureDataFile.exists() ? YamlParser.parse(featureDataFile.getAbsolutePath()) : new ArrayList<>();
+        List<Map<String, ?>> resultList = new ArrayList<>();
+        if (!featureDataFile.exists()) return resultList;
+        if (YamlParser.parse(featureDataFile.getAbsolutePath()) instanceof LinkedHashMap map){
+            resultList.add(map);
+            return resultList;
+        } else return YamlParser.parse(featureDataFile.getAbsolutePath());
     }
 
     private Map<String, ?> getScenarioData(List<Map<String, ?>> featureData) {
