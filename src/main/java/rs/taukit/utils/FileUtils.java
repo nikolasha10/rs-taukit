@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -58,7 +59,7 @@ public class FileUtils {
 
     public static String readFile(String filePath) {
         File file = new File(filePath);
-        if (!file.exists()){
+        if (!file.exists()) {
             File featureFile = new File(scenarioData().getFeaturePath());
             File localFile = new File(featureFile.getParent() + File.separator + filePath);
             if (localFile.exists()) {
@@ -71,9 +72,10 @@ public class FileUtils {
             throw new RuntimeException(e);
         }
     }
+
     public static String readFile(String filePath, String encoding) {
         File file = new File(filePath);
-        if (!file.exists()){
+        if (!file.exists()) {
             File featureFile = new File(scenarioData().getFeaturePath());
             File localFile = new File(featureFile.getParent() + File.separator + filePath);
             if (localFile.exists()) {
@@ -103,6 +105,15 @@ public class FileUtils {
             Files.writeString(file.toPath(), content);
         } catch (IOException e) {
             throw new FileNotCreatedException(e, filePath);
+        }
+
+    }
+
+    public static void writeFile(Path filePath, byte[] content) {
+        try {
+            Files.write(filePath, content);
+        } catch (IOException e) {
+            throw new FileNotCreatedException(e, filePath.toString());
         }
 
     }
@@ -149,11 +160,11 @@ public class FileUtils {
         String functionality = scenario().getFunctionality();
         Matcher matcher = Pattern.compile("\\[(.+)]\\[(.+)]").matcher(functionality);
         String suites = functionality;
-        if (matcher.matches()){
+        if (matcher.matches()) {
             suites = String.format("%s/%s", matcher.group(1), matcher.group(2));
         }
         String scenarioName = scenario().getName();
-        while (scenarioName.endsWith(".")){
+        while (scenarioName.endsWith(".")) {
             scenarioName = scenarioName.substring(0, scenarioName.length() - 1);
         }
         return String.format("%s/%s/%s", downloadDirPath, suites, scenarioName);

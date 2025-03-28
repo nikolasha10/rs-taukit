@@ -63,6 +63,5 @@ public class ServiceManager extends StepManager {
     protected void updateTestItAutotest() {
         List<CucumberScenario> scenarioList = ScenarioManager.getRequestedScenarioList();
         scenarioList.forEach(TestITUtils::updateAutotest);
-
     }
 }
