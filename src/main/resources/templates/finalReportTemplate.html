@@ -259,8 +259,10 @@
                            + "<div>Тег стенда</div><div><input id='stand_tag'></div>"
                            + "<div>Ветка фреймворка</div><div><select id='framework_branch'></select></div>"
                            + "<div>Ветка автотестов</div><div><select id='autotest_branch'></select></div>"
-                           + "<div>Очистить историю</div><div><input name='clean' type='radio' value='Да'> Да <br><input name='clean' type='radio' value='Нет' checked> Нет</div>"
-                           + "<div>Отправить email</div><div><input name='email' type='radio' value='Да'> Да <br><input name='email' type='radio' value='Нет' checked> Нет</div>"
+                           + "<div>Очистить историю</div><div><input name='mavenGoal' type='radio' value='clean test'> Да <br><input name='mavenGoal' type='radio' value='test' checked> Нет</div>"
+                           + "<div>Отслеживать зависимости</div><div><input name='trackDependencies' type='radio' value='true' checked> Да <br><input name='trackDependencies' type='radio' value='false'> Нет</div>"
+                           + "<div>Отправить email</div><div><input name='sendEmail' type='radio' value='true'> Да <br><input name='sendEmail' type='radio' value='false' checked> Нет</div>"
+                           + "<div>Автотесты в TestIT</div><div><input name='testItAction' type='radio' value='none' checked> Без изменений<br><input name='testItAction' type='radio' value='create'> Создать<br><input name='testItAction' type='radio' value='update'> Обновить</div>"
                            + "<div><button id='button_run'>Запустить</button></div><div id='buildInfo'></div>";
             const testStand = document.getElementById("test_stand");
             for (let stand of stands){
@@ -576,10 +578,16 @@
         let formData = new FormData();
         formData.append('standName', stand);
         formData.append('branch', branch);
-        formData.append('mavenGoal', 'test');
         formData.append('scenarioTags', scenarioTags);
-        formData.append('trackDependencies', 'true');
-        formData.append('sendEmail', 'false');
+        for (let label of ['mavenGoal', 'trackDependencies', 'sendEmail', 'testItAction']){
+            let actions = document.getElementsByName(label);
+            for (let action of actions){
+                if (action.checked){
+                    formData.append(label, action.value);
+                    break;
+                }
+            }
+        }
         let parameters = []
         for (const pair of formData.entries()) {
             parameters.push(pair.join('='));
