@@ -577,7 +577,7 @@
             tmsLink.href = tmsUrl;
             tmsLink.target = '_blank';
             header.appendChild(tmsLink);
-        } else {
+        } else if (parentContainer.className.includes("test-list")){
             let tmsLinkBox = document.createElement('div');
             tmsLinkBox.className = "tmsLinkBox";
             header.appendChild(tmsLinkBox);
