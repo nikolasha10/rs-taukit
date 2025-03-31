@@ -114,7 +114,7 @@
 
         .test-tree-header {
             display: grid;
-            grid-template-columns: max-content max-content max-content;
+            grid-template-columns: max-content max-content max-content max-content;
             align-items: center;
         }
         .test-tree-header.hidden {
@@ -172,6 +172,18 @@
         }
         .selected div {
             padding-right: 5px;
+        }
+        .tmsLinkBox {
+            min-width: 15px;
+            margin-right: 3px;
+        }
+        .tmsIcon {
+            width: 15px;
+            height: 15px;
+            margin-right: 3px;
+            background-position: 0 0;
+            background-repeat: no-repeat;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAYAAAA71pVKAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAIFSURBVDhPbVJNaxNBGH5mdnY3UYzNSbCiRQShKUqKVqWH2t70EDz4B/wL/hd/gkcRwZsXUaTQS1VaFFGLWikGgpqYTXdnZsd33p2NEXoY5nk/nvdbXL//0glTAtZB2JIfTI0d4UrHONgF2b1eToneiV8ger2XA4FxsNd6OSWyU4hOcqktiqwIQWYq4b/CsgIzBnK2ucHcsQS31jvIhhmR7X92j/0fyDMZc40oirG+cQV371zA4lIXSZSgLPQ/Ivmy/+q9Z44FMpjsECfbbXRXutCjHOXEoqli2CzC660XyLMxlBOhZwdVEx2Venl1BdIlWFs8gSRuIUmBvAB2toYYzS/h86dt5JOMAsi6bEdEjTPnz6GhUqjC4tHT73i1OfBzwsMHX7C3M8Jx1cTVixtopXNwxnDZNO0qcyOmNBMqpyiRIkIiJBmBppSIraAENP1xjvnWAm2C+qekvGdJGQZfD5CKGNIQSQOyFBARJRjSLP5Y0kkkVmE8+glpwUPjsiUN4Ve/jw9v3kJTdFD/g/0xWm3gRu8UrvVOI/+d4+DHR3zrv0dEPfPu13pP+Dx9EL8Op6kfkv2BdC4toLN8Fnu7+9h+/g6pUjSsiH2Zc/P2Y1pV2F0IUmEHc6hR0lNCIKbeebfBPp32UUT/x1Kgkaojif6s+cKmRK9kHJ7H9V37n+WKKEyJvyZckPG4s6vEAAAAAElFTkSuQmCC');
         }
         #container_run{
             display: grid;
@@ -233,9 +245,12 @@
                         "Проваленные": {
                             "С прогнозируемой ошибкой": {},
                             "С необработанным исключением": {}},
-                        "Пропущенные" : {}}},
-                "Содержат в названии": {"<textarea name='name_contains'></textarea>": {}},
-                "Не содержат в названии": {"<textarea name='name_not_contains'></textarea>": {}}
+                        "Пропущенные" : {}},
+                        "Добавленные в TestIT": {},
+                        "Отсутствующие в TestIT": {}}
+
+                // "Содержат в названии": {"<textarea name='name_contains'></textarea>": {}},
+                // "Не содержат в названии": {"<textarea name='name_not_contains'></textarea>": {}}
             };
             view.innerHTML = "<h3>Настройки фильтра</h3>";
             createTree(view, options);
@@ -374,6 +389,7 @@
                     skipped: "Все" in filterOptionsValues
                             || "Неуспешные" in filterOptionsValues
                             || "Пропущенные" in filterOptionsValues
+
                 }
                 const containerTests = document.getElementById("container_tests");
                 const expanders = containerTests.querySelectorAll(".expander");
@@ -382,9 +398,12 @@
                     const header = expander.parentNode;
                     if (header.className.includes("test-counters")) continue
                     const container = header.nextSibling;
+                    const tmsLink = header.querySelector(".tmsIcon");
+                    const displayAdded = tmsLink && "Добавленные в TestIT" in filterOptionsValues;
+                    const displayAbsent = !tmsLink && "Отсутствующие в TestIT" in filterOptionsValues;
                     for (const status in statuses){
                         if (child.className.includes(status)){
-                            let change = statuses[status] ? show : hide;
+                            let change = statuses[status] && (displayAdded || displayAbsent) ? show : hide;
                             change(header);
                             if (container && container.className.includes("test-tree-container")){
                                 change(container);
@@ -392,7 +411,7 @@
                         }
                     }
                 }
-                const warnings = containerTests.querySelectorAll(".warning");
+                const warnings = containerTests.querySelectorAll(".toggle");
                 checkEmpty(warnings);
             }
         }
@@ -405,7 +424,7 @@
             const container = header.nextSibling;
             if (container.className.includes("test-tree-container")){
                 show(container);
-                const warnings = container.querySelectorAll(".warning");
+                const warnings = container.querySelectorAll(".toggle");
                 checkEmpty(warnings);
                 const headers = container.querySelectorAll(".test-tree-header");
                 let displayed = 0;
@@ -531,7 +550,7 @@
             uncheckParent(previousHeader);
         }
     }
-    function createContainers(parentContainer, headerContent){
+    function createContainers(parentContainer, headerContent, tmsUrl){
         const header = document.createElement('div');
         header.className = "test-tree-header";
         parentContainer.appendChild(header);
@@ -552,6 +571,17 @@
         checkbox.type = 'checkbox';
         checkboxContainer.appendChild(checkbox);
         checkbox.onchange = checkAll;
+        if (tmsUrl){
+            let tmsLink = document.createElement('a');
+            tmsLink.className = "tmsIcon";
+            tmsLink.href = tmsUrl;
+            tmsLink.target = '_blank';
+            header.appendChild(tmsLink);
+        } else {
+            let tmsLinkBox = document.createElement('div');
+            tmsLinkBox.className = "tmsLinkBox";
+            header.appendChild(tmsLinkBox);
+        }
         let headerText = document.createElement('div');
         header.appendChild(headerText);
         headerText.innerHTML = headerContent;
@@ -671,9 +701,9 @@
         for (let suiteName of suiteNames){
             let suiteContainer;
             let suiteTag = parentSuiteTag;
-         	if (suiteName !== '-'){
-	            suiteTag = suiteName.split('.')[0];
-	            suiteContainer = createContainers(parentSuiteContainer.container, suiteName)
+            if (suiteName !== '-'){
+                suiteTag = suiteName.split('.')[0];
+                suiteContainer = createContainers(parentSuiteContainer.container, suiteName)
                 addClass(suiteContainer.header, 'suite-header');
                 checkbox = suiteContainer.header.querySelector("input");
                 suiteTag = parentSuiteTag + '.' + suiteName.split('.')[0];
@@ -705,8 +735,9 @@
                 let countTestUnsuccessful = 0;
                 for (let scenarioName of scenarioNames){
                     countersValues.total++;
+                    let tmsUrl = testResults[scenarioName].tmsLink;
                     let scenarioTag = scenarioName.split('.')[0];
-                    let scenarioNameContainer = createContainers(subSuiteContainer.container, scenarioName);
+                    let scenarioNameContainer = createContainers(subSuiteContainer.container, scenarioName, tmsUrl === "#" ? null : tmsUrl);
                     let expand = scenarioNameContainer.header.getElementsByClassName('shrink')[0];
                     let status = testResults[scenarioName].status ? testResults[scenarioName].status.toLowerCase() : null;
                     if (status === "passed"){

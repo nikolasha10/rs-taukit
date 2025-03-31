@@ -13,6 +13,7 @@ import rs.taukit.records.TestParentSuiteResults;
 import rs.taukit.records.TestResults;
 import rs.taukit.records.TestSubSuiteResults;
 import rs.taukit.records.TestSuiteResults;
+import rs.taukit.testdata.ScenarioData;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.YamlParser;
 
@@ -124,7 +125,9 @@ public class ScenarioManager {
             String scenarioName,
             String status,
             String finished,
-            String errorMessage) {
+            String errorMessage,
+            String autotestId,
+            String tmsLink) {
         parentSuiteName = parentSuiteName.replaceAll("\"", "&quot;");
         suiteName = suiteName.replaceAll("\"", "&quot;");
         subSuiteName = subSuiteName.replaceAll("\"", "&quot;");
@@ -135,10 +138,12 @@ public class ScenarioManager {
                     .replaceAll("\\{", "&lbrace;")
                     .replaceAll("}", "&rbrace;");
         }
-        TestResults testResults = new TestResults(status, finished, errorMessage);
         TestParentSuiteResults testParentSuiteResults = parentSuiteResults.getOrDefault(parentSuiteName, new TestParentSuiteResults(new HashMap<>()));
         TestSuiteResults testSuiteResults = testParentSuiteResults.testSuiteResults().getOrDefault(suiteName, new TestSuiteResults(new HashMap<>()));
         TestSubSuiteResults testSubSuiteResults = testSuiteResults.testSubSuiteResults().getOrDefault(subSuiteName, new TestSubSuiteResults(new HashMap<>()));
+        TestResults currentResults = testSubSuiteResults.testResults().get(scenarioName);
+        String currentAutotestId = Optional.ofNullable(autotestId).orElse(currentResults == null ? null :currentResults.autotestId());
+        TestResults testResults = new TestResults(status, finished, errorMessage, currentAutotestId, tmsLink);
         testSubSuiteResults.testResults().put(scenarioName, testResults);
         testSuiteResults.testSubSuiteResults().put(subSuiteName, testSubSuiteResults);
         testParentSuiteResults.testSuiteResults().put(suiteName, testSuiteResults);
@@ -160,6 +165,8 @@ public class ScenarioManager {
                 scenario.getName(),
                 null,
                 null,
+                null,
+                new ScenarioData(scenario.getPickleWrapper().getPickle()).getOptional("TestITId"),
                 null));
         List<File> resultFiles = FileUtils.getDirFileList("target/allure-results").stream()
                 .filter(file -> file.getName().endsWith("result.json"))
@@ -181,6 +188,12 @@ public class ScenarioManager {
                         .replaceAll("\"", "&quot;")
                         .replaceAll("\\{", "&lbrace;")
                         .replaceAll("}", "&rbrace;");
+                List<Map<String,String>> links = YamlParser.convert(result.get("links"));
+                String tmsLink = links.stream()
+                        .filter(link -> link.containsKey("type"))
+                        .filter(link -> link.get("type").equals("tms"))
+                        .findFirst().orElse(Map.of("url", "#"))
+                        .get("url");
                 if (!excludedScenarios.contains(String.format("%s %s %s", parentSuiteName, suiteName, scenarioName))) {
                     updateSuiteResults(
                             parentSuiteResults,
@@ -190,7 +203,9 @@ public class ScenarioManager {
                             scenarioName,
                             status,
                             finished,
-                            errorMessage
+                            errorMessage,
+                            null,
+                            tmsLink
                     );
                 }
             } catch (IOException e) {
