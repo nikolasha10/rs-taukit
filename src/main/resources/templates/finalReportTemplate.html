@@ -399,7 +399,7 @@
                     if (header.className.includes("test-counters")) continue
                     const container = header.nextSibling;
                     const tmsLink = header.querySelector(".tmsIcon");
-                    const displayAdded = tmsLink && "Добавленные в TestIT" in filterOptionsValues;
+                    const displayAdded = tmsLink != null && "Добавленные в TestIT" in filterOptionsValues;
                     const displayAbsent = !tmsLink && "Отсутствующие в TestIT" in filterOptionsValues;
                     for (const status in statuses){
                         if (child.className.includes(status)){
@@ -411,36 +411,29 @@
                         }
                     }
                 }
-                const warnings = containerTests.querySelectorAll(".toggle");
-                checkEmpty(warnings);
+                checkEmpty(document.getElementById("scenarioTreeContainer"));
             }
         }
     }
-    function checkEmpty(containers){
-        for (const toggle of containers){
-            const header = toggle.parentNode.parentNode;
-            if (header.className.includes("test-counters")) continue;
-            show(header);
-            const container = header.nextSibling;
-            if (container.className.includes("test-tree-container")){
+    function checkEmpty(container){
+        const children = container.childNodes;
+        let displayed = 0;
+        for (const container of children){
+            if (!container.className.includes('test-tree-header')) continue;
+            const nextContainer = container.nextSibling;
+            if (nextContainer && nextContainer.className.includes('test-tree-container') && nextContainer.firstChild.className != 'error'){
                 show(container);
-                const warnings = container.querySelectorAll(".toggle");
-                checkEmpty(warnings);
-                const headers = container.querySelectorAll(".test-tree-header");
-                let displayed = 0;
-                for (const h of headers){
-                    if (!h.className.includes("hidden")){
-                        displayed++;
-                        break;
-                    }
-                }
-                if (displayed == 0){
+                show(nextContainer);
+                if (checkEmpty(nextContainer)){ 
                     hide(container);
-                    hide(header);
+                    hide(nextContainer);
                 }
             }
+            if (!isHidden(container)){
+                displayed++;
+            }
         }
-
+        return displayed == 0;
     }
     function toggleMenu(){
         const label = this;
@@ -492,7 +485,9 @@
         e.className+= ' ' + c;
     }
     function removeClass(e, c){
-        e.className = e.className.replace(c,'').trim();
+        if (e.className){
+            e.className = e.className.replace(c,'').trim();
+        }
     }
     function filterOptions(){
         const filter = this;
@@ -813,5 +808,6 @@
     container_content.style.left = container_menu_main.offsetWidth + "px";
 
 </script>
-</body>
-</html>
+
+
+</body></html>
