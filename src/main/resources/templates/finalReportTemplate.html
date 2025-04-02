@@ -730,9 +730,9 @@
                 let countTestUnsuccessful = 0;
                 for (let scenarioName of scenarioNames){
                     countersValues.total++;
-                    let tmsUrl = testResults[scenarioName].tmsLink;
+                    let tmsUrl = testResults[scenarioName].autotestId ? testResults[scenarioName].tmsLink : null;
                     let scenarioTag = scenarioName.split('.')[0];
-                    let scenarioNameContainer = createContainers(subSuiteContainer.container, scenarioName, tmsUrl === "#" ? null : tmsUrl);
+                    let scenarioNameContainer = createContainers(subSuiteContainer.container, scenarioName, !tmsUrl || tmsUrl === "#" ? null : tmsUrl);
                     let expand = scenarioNameContainer.header.getElementsByClassName('shrink')[0];
                     let status = testResults[scenarioName].status ? testResults[scenarioName].status.toLowerCase() : null;
                     if (status === "passed"){
