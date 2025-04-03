@@ -1,5 +1,6 @@
 package rs.taukit.scenario;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -44,7 +45,7 @@ public class ScenarioManager {
         String requestedTags = Objects.requireNonNull(Config.getProperty("scenario.tags"));
         String testItAction = Optional.ofNullable(Config.getProperty("testIT.autotest.action")).orElse("none");
         String tags = requestedTags;
-        switch (testItAction){
+        switch (testItAction) {
             case "create" -> tags = "@createTestItAutotest";
             case "update" -> tags = "@updateTestItAutotest";
         }
@@ -142,7 +143,7 @@ public class ScenarioManager {
         TestSuiteResults testSuiteResults = testParentSuiteResults.testSuiteResults().getOrDefault(suiteName, new TestSuiteResults(new HashMap<>()));
         TestSubSuiteResults testSubSuiteResults = testSuiteResults.testSubSuiteResults().getOrDefault(subSuiteName, new TestSubSuiteResults(new HashMap<>()));
         TestResults currentResults = testSubSuiteResults.testResults().get(scenarioName);
-        String currentAutotestId = Optional.ofNullable(autotestId).orElse(currentResults == null ? null :currentResults.autotestId());
+        String currentAutotestId = Optional.ofNullable(autotestId).orElse(currentResults == null ? null : currentResults.autotestId());
         TestResults testResults = new TestResults(status, finished, errorMessage, currentAutotestId, tmsLink);
         testSubSuiteResults.testResults().put(scenarioName, testResults);
         testSuiteResults.testSubSuiteResults().put(subSuiteName, testSubSuiteResults);
@@ -172,6 +173,7 @@ public class ScenarioManager {
                 .filter(file -> file.getName().endsWith("result.json"))
                 .sorted(Comparator.comparingLong(File::lastModified)).toList();
         ObjectMapper mapper = new JsonMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         resultFiles.forEach(file -> {
             Map<String, ?> result = new HashMap<>();
             try {
@@ -188,7 +190,7 @@ public class ScenarioManager {
                         .replaceAll("\"", "&quot;")
                         .replaceAll("\\{", "&lbrace;")
                         .replaceAll("}", "&rbrace;");
-                List<Map<String,String>> links = YamlParser.convert(result.get("links"));
+                List<Map<String, String>> links = YamlParser.convert(result.get("links"));
                 String tmsLink = links.stream()
                         .filter(link -> link.containsKey("type"))
                         .filter(link -> link.get("type").equals("tms"))
@@ -203,7 +205,7 @@ public class ScenarioManager {
                             scenarioName,
                             status,
                             finished,
-                            errorMessage,
+                            errorMessage.isEmpty() ? null : errorMessage,
                             null,
                             tmsLink
                     );
