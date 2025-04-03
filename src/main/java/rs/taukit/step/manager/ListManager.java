@@ -40,13 +40,19 @@ public class ListManager extends StepManager {
         waitForCondition(condition,
                 "Не удалось найти %s, соответствующий заданным условиям, в списке '%s' на странице '%s'",
                 itemType, listName, getPage().getPageName());
-        int foundItemNumber = foundItem.get().getCurrentIndex() + 1;
-        TauLogger.report("Найден %s № %d", itemType, foundItemNumber);
+        int foundItemNumber = 1;
+        if (foundItem.get() != null) {
+            foundItemNumber = foundItem.get().getCurrentIndex() + 1;
+            TauLogger.report("Найден %s № %d", itemType, foundItemNumber);
+        } else {
+            foundItem.set(((HasListItems) getElement(listName)).getItemList().getFirst().castTo(IContainer.class));
+        }
         getPage().setCurrentContext(foundItem.get());
         scenarioStorage.clearStepActions();
         scenarioStorage.stopToSaveActions();
         TauLogger.resetNotCritical();
         TauLogger.report("[примечание] текущий контекст: %d-й элемент списка '%s'", foundItemNumber, listName);
+
     }
 
     @Step("проверить состав элементов списка '{listName}':")
