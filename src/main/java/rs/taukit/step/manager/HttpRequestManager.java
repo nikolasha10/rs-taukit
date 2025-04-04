@@ -19,6 +19,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import static rs.taukit.utils.BasicUtils.eval;
@@ -171,22 +172,32 @@ public class HttpRequestManager extends StepManager {
         AtomicReference<TestData> testData = new AtomicReference<>();
         Runnable runnable = () -> {
             AtomicInteger status = new AtomicInteger();
+            AtomicReference<HttpRequestNotSentException> finalException = new AtomicReference<>();
+            BooleanSupplier condition = () -> {
+                try {
+                    String contentType = TestDataUtils.getOptional(requestParametersMap, "contentType");
+                    String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
+                    headers.putIfAbsent("Content-Type", Optional.ofNullable(contentType).orElse("application/json; charset=utf-8"));
+                    headers.putIfAbsent("Accept", Optional.ofNullable(accept).orElse("application/json"));
+                    response.set(getBrowser().sendPost(requestUrl, headers, queryParams, content));
+                    String responseStatusParameterName = String.format("Статус запроса '%s'", name);
+                    String parameterName = String.format("Результат запроса '%s'", name);
+                    scenarioData().put(responseStatusParameterName, String.valueOf(response.get().status()));
+                    scenarioData().put(parameterName, response.get().text());
+                    status.set(response.get().status());
+                    LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.get().text());
+                    testData.set(new TestData(this.name + "_response", responseMap));
+                    responseMap.forEach((key, value) -> scenarioData().put(key, testData.get().getOptional(key)));
+                } catch (Exception e) {
+                    finalException.set(new HttpRequestNotSentException(e, name, "POST", status.get()));
+                    return false;
+                }
+                return true;
+            };
             try {
-                String contentType = TestDataUtils.getOptional(requestParametersMap, "contentType");
-                String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
-                headers.putIfAbsent("Content-Type", Optional.ofNullable(contentType).orElse("application/json; charset=utf-8"));
-                headers.putIfAbsent("Accept", Optional.ofNullable(accept).orElse("application/json"));
-                response.set(getBrowser().sendPost(requestUrl, headers, queryParams, content));
-                String responseStatusParameterName = String.format("Статус запроса '%s'", name);
-                String parameterName = String.format("Результат запроса '%s'", name);
-                scenarioData().put(responseStatusParameterName, String.valueOf(response.get().status()));
-                scenarioData().put(parameterName, response.get().text());
-                status.set(response.get().status());
-                LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.get().text());
-                testData.set(new TestData(this.name + "_response", responseMap));
-                responseMap.forEach((key, value) -> scenarioData().put(key, testData.get().getOptional(key)));
+                getDriver().waitForCondition(condition);
             } catch (Exception e) {
-                throw new HttpRequestNotSentException(e, name, "POST", status.get());
+                throw finalException.get();
             }
         };
         run(runnable);
