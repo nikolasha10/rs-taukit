@@ -77,6 +77,10 @@ public class AllureReport {
                 parentSuitName.put("value", functionality);
                 labels.add(parentSuitName);
             }
+            String projectFullName = Config.getProperty("project.full.name");
+            if (projectFullName != null) {
+                report.replace("fullName", Config.getProperty("project.full.name"));
+            }
             report.replace("labels", labels);
             report.put("links", getLinksFromTags(tagList));
             report.remove("parameters");
