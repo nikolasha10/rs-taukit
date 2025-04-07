@@ -49,5 +49,7 @@ public interface IWebBrowser {
 
     void closeOtherPages(int activePageIndex);
 
+    void setDefaultTimeout();
+
     void setDefaultTimeout(double timeProperty);
 }
