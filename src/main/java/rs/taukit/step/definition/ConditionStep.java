@@ -38,7 +38,13 @@ public class ConditionStep extends ConditionManager {
      *                           <li>вкладка</li>
      *                           <li>страница</li>
      *                           <li>[любой тип элемента]</li>
-     *                       </ul>
+     *                       </ul><br>Состояние:
+     *                       <ul>
+     *                          <li>отображается</li>
+     *                          <li>активен</li>
+     *                          <li>и т.д., одно из значений поля title перечисления TestObjectState.java</li>
+     *                       </ul><br>Ожидание: задаёт время ожидания выполнения условия в данной строке.
+     *                       Например, 1 минута
      */
     @И("^дождаться выполнения условий \"([а-яА-Я\\w\\d\\s'\\,:/\\-]+)\":$")
     public void waitForConditions(String conditionsName, DataTable datatable) {
