@@ -160,12 +160,19 @@ public class PlaywrightDriver implements IWebDriver {
     @Override
     public void waitForCondition(BooleanSupplier condition, double interval, double timeout, List<Runnable> previousStepList) {
         getCurrentBrowser().setDefaultTimeout(interval);
-        long start = new Date().getTime();
-        while (new Date().getTime() - start <= timeout) {
-            if (condition.getAsBoolean()) break;
-            waitForTimeout(interval);
-            previousStepList.forEach(Runnable::run);
-        }
+        BrowserContext.WaitForConditionOptions setTimeout = new BrowserContext.WaitForConditionOptions().setTimeout(timeout);
+        getBrowserContext().waitForCondition(() -> {
+            try {
+                BrowserContext.WaitForConditionOptions setInterval = new BrowserContext.WaitForConditionOptions().setTimeout(interval);
+                getBrowserContext().waitForCondition(condition, setInterval);
+                return true;
+            } catch (TimeoutError e) {
+                previousStepList.forEach(Runnable::run);
+                return false;
+            } catch (AssertionError ae) {
+                return condition.getAsBoolean();
+            }
+        }, setTimeout);
         getCurrentBrowser().setDefaultTimeout();
     }
 
