@@ -263,6 +263,11 @@ public abstract class PwBrowser implements IWebBrowser {
     }
 
     @Override
+    public void setDefaultTimeout() {
+        this.context.setDefaultTimeout(Config.getTimeProperty("defaultTimeout"));
+    }
+
+    @Override
     public void setDefaultTimeout(double timeProperty) {
         this.context.setDefaultTimeout(timeProperty);
     }
