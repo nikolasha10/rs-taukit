@@ -196,7 +196,7 @@ public class TestITUtils {
         httpRequestManager.setHeader("Content-Type", "application/json; charset=utf-8");
         httpRequestManager.setHeader("Accept", "application/json");
         httpRequestManager.setHeader("Authorization", "PrivateToken " + Config.getProperty("test-it.privateToken"));
-        ApiResponse apiResponse = httpRequestManager.sendPost(url, requestBody);
+        ApiResponse apiResponse = httpRequestManager.sendHttpRequest("POST", url, requestBody);
         return JsonParser.parse(apiResponse.text());
     }
 
