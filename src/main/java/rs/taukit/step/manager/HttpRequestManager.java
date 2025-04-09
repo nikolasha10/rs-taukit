@@ -19,6 +19,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 import static rs.taukit.utils.BasicUtils.eval;
@@ -30,7 +31,6 @@ public class HttpRequestManager extends StepManager {
     private String queryParameterName;
     private Map<String, String> headers;
     private Map<String, String> queryParams;
-    private int timeout;
 
     private static Runnable getRunnableParseResponse(DataTable dataTable, List<List<String>> parsedValues, String responseParameterName) {
         Runnable runnable = () -> {
@@ -52,20 +52,12 @@ public class HttpRequestManager extends StepManager {
         this.name = name;
         this.headersParameterName = "httpRequest_headers_" + name;
         this.queryParameterName = "httpRequest_queryParams_" + name;
-        Optional<Map<String, String>> headers = Optional.ofNullable(scenarioData.getOptional(headersParameterName));
-        Optional<Map<String, String>> queryParams = Optional.ofNullable(scenarioData.getOptional(queryParameterName));
-        this.headers = headers.orElse(new HashMap<>());
-        this.queryParams = queryParams.orElse(new HashMap<>());
-        this.headers.putIfAbsent("Content-Type", "application/json; charset=utf-8");
-        this.headers.putIfAbsent("Accept", "application/json");
-        this.timeout = (int) Config.getTimeProperty("pageLoadingTimeout");
+        Map<String, String> headers = scenarioData.getOptional(headersParameterName);
+        Map<String, String> queryParams = scenarioData.getOptional(queryParameterName);
+        this.headers = Optional.ofNullable(headers).orElse(new HashMap<>());
+        this.queryParams = Optional.ofNullable(queryParams).orElse(new HashMap<>());
         scenarioData().put(headersParameterName, this.headers);
         scenarioData().put(queryParameterName, this.queryParams);
-    }
-
-    private void addHeader(Map<String, String> headerValues, String headerName) {
-        Optional<String> headerValue = Optional.ofNullable(TestDataUtils.getOptional(headerValues, headerName));
-        headerValue.ifPresent(value -> setHeader(headerName, value));
     }
 
     @Step("отправить POST-запрос '{this.name}' с параметрами")
@@ -90,8 +82,6 @@ public class HttpRequestManager extends StepManager {
         } else {
             throw new RuntimeException("Отсутствует один из обязательных параметров шага (content или filePath)");
         }
-        addHeader(requestParametersMap, "Content-Type");
-        addHeader(requestParametersMap, "Accept");
         DataTable modified = DataTable.create(parameters, TextUtils.tableConverter);
         TauLogger.attachDataTable("Параметры шага", modified);
         if (!headers.isEmpty()) {
@@ -101,7 +91,7 @@ public class HttpRequestManager extends StepManager {
             TauLogger.attachMap("Параметры запроса", queryParams);
         }
         TauLogger.attach("Тело запроса", content);
-        sendPost(requestUrl, content);
+        sendPost(requestParametersMap, requestUrl, content);
         scenarioData().remove(headersParameterName);
         scenarioData().remove(queryParameterName);
     }
@@ -177,19 +167,37 @@ public class HttpRequestManager extends StepManager {
         scenarioData().remove(queryParameterName);
     }
 
-    private void sendPost(String url, String requestBody) {
+    private void sendPost(Map<String, String> requestParametersMap, String requestUrl, String content) {
         AtomicReference<ApiResponse> response = new AtomicReference<>();
         AtomicReference<TestData> testData = new AtomicReference<>();
         Runnable runnable = () -> {
-            response.set(sendHttpRequest("POST", url, requestBody));
-            String responseStatusParameterName = String.format("Статус запроса '%s'", name);
-            String parameterName = String.format("Результат запроса '%s'", name);
-            scenarioData().put(responseStatusParameterName, String.valueOf(response.get().status()));
-            scenarioData().put(parameterName, response.get().text());
-            if (headers.get("Accept").equals("application/json")) {
-                LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.get().text());
-                testData.set(new TestData(this.name + "_response", responseMap));
-                responseMap.forEach((key, value) -> scenarioData().put(key, testData.get().getOptional(key)));
+            AtomicInteger status = new AtomicInteger();
+            AtomicReference<HttpRequestNotSentException> finalException = new AtomicReference<>();
+            BooleanSupplier condition = () -> {
+                try {
+                    String contentType = TestDataUtils.getOptional(requestParametersMap, "contentType");
+                    String accept = TestDataUtils.getOptional(requestParametersMap, "accept");
+                    headers.putIfAbsent("Content-Type", Optional.ofNullable(contentType).orElse("application/json; charset=utf-8"));
+                    headers.putIfAbsent("Accept", Optional.ofNullable(accept).orElse("application/json"));
+                    response.set(getBrowser().sendPost(requestUrl, headers, queryParams, content));
+                    String responseStatusParameterName = String.format("Статус запроса '%s'", name);
+                    String parameterName = String.format("Результат запроса '%s'", name);
+                    scenarioData().put(responseStatusParameterName, String.valueOf(response.get().status()));
+                    scenarioData().put(parameterName, response.get().text());
+                    status.set(response.get().status());
+                    LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.get().text());
+                    testData.set(new TestData(this.name + "_response", responseMap));
+                    responseMap.forEach((key, value) -> scenarioData().put(key, testData.get().getOptional(key)));
+                } catch (Exception e) {
+                    finalException.set(new HttpRequestNotSentException(e, name, "POST", status.get()));
+                    return false;
+                }
+                return true;
+            };
+            try {
+                getDriver().waitForCondition(condition);
+            } catch (Exception e) {
+                throw finalException.get();
             }
         };
         run(runnable);
@@ -337,23 +345,21 @@ public class HttpRequestManager extends StepManager {
         }
     }
 
-    public ApiResponse sendHttpRequest(String requestType, String url, String requestBody) {
+    public ApiResponse sendPost(String url, String requestBody) {
         int responseCode = 0;
         try {
             HttpURLConnection connection = (HttpURLConnection) createUrl(url).openConnection();
-            connection.setRequestMethod(requestType);
+            connection.setRequestMethod("POST");
             connection.setDoOutput(true);
-            this.headers.forEach(connection::setRequestProperty);
+            headers.forEach(connection::setRequestProperty);
             connection.setUseCaches(false);
-            connection.setConnectTimeout(this.timeout);
-            connection.setReadTimeout(this.timeout);
+            connection.setConnectTimeout((int) Config.getTimeProperty("pageLoadingTimeout"));
+            connection.setReadTimeout((int) Config.getTimeProperty("pageLoadingTimeout"));
             connection.connect();
-            if (requestBody != null) {
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
-                writer.write(requestBody);
-                writer.flush();
-                writer.close();
-            }
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
+            writer.write(requestBody);
+            writer.flush();
+            writer.close();
             responseCode = connection.getResponseCode();
             String responseMessage = connection.getResponseMessage();
             BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -366,7 +372,7 @@ public class HttpRequestManager extends StepManager {
                     responseMessage,
                     br.lines().collect(Collectors.joining()));
         } catch (Exception e) {
-            throw new HttpRequestNotSentException(e, name, requestType, responseCode);
+            throw new HttpRequestNotSentException(e, name, "POST", responseCode);
         }
     }
 
