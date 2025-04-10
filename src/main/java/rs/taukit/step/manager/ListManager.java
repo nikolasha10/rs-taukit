@@ -60,25 +60,29 @@ public class ListManager extends StepManager {
         TauLogger.attachDataTable("Элементы списка", dataTable);
         HasListItems list = getElement(listName);
         Map<String, String> expected = new HashMap<>();
-        Map<String, IElement> items = list.getItemList().stream()
-                .collect(Collectors.toMap(item -> item.castTo(HasText.class).getText(), item -> item));
         List<List<String>> resultList = new ArrayList<>();
-        resultList.add(Arrays.asList("Элемент", "Состояние", "Ожидалось"));
         dataTable.asMaps().forEach(row -> {
             String elementText = TestDataUtils.get(row, "Название");
             String elementState = TestDataUtils.get(row, "Состояние");
             expected.put(elementText, elementState);
         });
-        expected.forEach((itemName, expectedState) -> {
-            String actualState = items.containsKey(itemName) && items.get(itemName).isVisible() ? "отображается" : "не отображается";
-            if (!expectedState.equals(actualState)) {
-                resultList.add(Arrays.asList(itemName, actualState, expectedState));
-            }
-        });
-
-        if (resultList.size() == 1) {
+        BooleanSupplier condition = () -> {
+            Map<String, IElement> items = list.getItemList().stream()
+                    .collect(Collectors.toMap(item -> item.castTo(HasText.class).getText(), item -> item));
+            resultList.clear();
+            expected.forEach((itemName, expectedState) -> {
+                String actualState = items.containsKey(itemName) && items.get(itemName).isVisible() ? "отображается" : "не отображается";
+                if (!expectedState.equals(actualState)) {
+                    resultList.add(Arrays.asList(itemName, actualState, expectedState));
+                }
+            });
+            return resultList.isEmpty();
+        };
+        try {
+            getDriver().waitForCondition(condition);
             TauLogger.console("Состав элементов списка '%s' соответствует ожидаемому", listName);
-        } else {
+        } catch (Exception e) {
+            resultList.addFirst(Arrays.asList("Элемент", "Состояние", "Ожидалось"));
             DataTable validationResultTable = DataTable.create(resultList, TextUtils.tableConverter);
             System.out.println(validationResultTable);
             Runnable runnable = () -> TauLogger.attach("Элементы списка, не прошедшие проверку", validationResultTable);
@@ -110,7 +114,7 @@ public class ListManager extends StepManager {
             });
             getPage().dropCurrentContext();
         }
-        if (resultList.size() > 1){
+        if (resultList.size() > 1) {
             Runnable runnable = () -> {
                 DataTable resultDataTable = DataTable.create(resultList, TextUtils.tableConverter);
                 TauLogger.attachDataTable("Список элементов, не прошедших валидацию", resultDataTable);
