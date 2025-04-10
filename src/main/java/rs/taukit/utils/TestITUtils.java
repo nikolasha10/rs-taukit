@@ -35,9 +35,8 @@ public class TestITUtils {
         String autotestId = scenarioData.getOptional("TestITId");
         if (autotestId != null) {
             model.setId(UUID.fromString(autotestId));
-        } else {
-            model.setExternalId(scenario.getTestId());
         }
+        model.setExternalId(scenario.getTestId());
         if (!parentSuiteName.equals("-")) {
             model.setNamespace(parentSuiteName);
         }
@@ -97,7 +96,10 @@ public class TestITUtils {
         }
         ScenarioData scenarioData = cucumberScenario.getScenarioStorage().getScenarioData();
         String externalId = autoTestPutModel.getExternalId();
-        String autotestId = externalId != null ? addAutoTestId(externalId, scenarioData) : autoTestPutModel.getId().toString();
+        Optional<UUID> autotestUUID = Optional.ofNullable(autoTestPutModel.getId());
+        String autotestId = autotestUUID.isEmpty()
+                ? addAutoTestId(externalId, scenarioData)
+                : autotestUUID.get().toString();
         linkAutotestToWorkItem(autotestId, cucumberScenario, apiInstance);
     }
 
@@ -124,8 +126,12 @@ public class TestITUtils {
             return;
         }
         WorkItemIdModel workItemIdModel = new WorkItemIdModel();
+        TauLogger.console("workItemId: %s", workItemId);
+        TauLogger.console("autotestId: %s", autotestId);
         workItemIdModel.setId(workItemId);
         workItemIdModel.id(workItemId);
+        System.out.println(workItemIdModel);
+        System.out.println(workItemIdModel);
         try {
             apiInstance.linkAutoTestToWorkItem(autotestId, workItemIdModel);
         } catch (ApiException e) {
