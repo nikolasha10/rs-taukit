@@ -53,4 +53,14 @@ public class ServiceStep extends ServiceManager {
     public void updateTestItAutotest() {
         super.updateTestItAutotest();
     }
+
+    @И("^служебный шаг: установить запрет на одновременное выполнение по ключу \"(.+)\"$")
+    public void setMutex(String mutexName) {
+        super.setMutex(mutexName);
+    }
+
+    @И("^служебный шаг: снять запрет на одновременное выполнение по ключу \"(.+)\"$")
+    public void releaseMutex(String mutexName) {
+        super.releaseMutex(mutexName);
+    }
 }

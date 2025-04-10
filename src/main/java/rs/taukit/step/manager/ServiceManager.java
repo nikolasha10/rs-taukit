@@ -64,4 +64,12 @@ public class ServiceManager extends StepManager {
         List<CucumberScenario> scenarioList = ScenarioManager.getRequestedScenarioList();
         scenarioList.forEach(TestITUtils::updateAutotest);
     }
+
+    protected void setMutex(String mutexName) {
+        scenario.setMutex(mutexName);
+    }
+
+    protected void releaseMutex(String mutexName) {
+        scenario.releaseMutex(mutexName);
+    }
 }

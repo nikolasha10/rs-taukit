@@ -1,9 +1,12 @@
 package rs.taukit.storage;
 
+import lombok.Getter;
+import rs.taukit.records.Mutex;
 import rs.taukit.scenario.CucumberScenario;
 import rs.taukit.testdata.DataStorage;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static rs.taukit.utils.BasicUtils.scenarioData;
@@ -11,6 +14,8 @@ import static rs.taukit.utils.BasicUtils.scenarioData;
 public class Storage {
     private final ThreadLocal<CucumberScenario> scenarioThreadLocal = new ThreadLocal<>();
     private final DataStorage dataStorage = new DataStorage(new HashMap<>());
+    @Getter
+    private final Map<String, Mutex> semaphores = new HashMap<>();
 
     public static Storage getInstance() {
         return StorageManagerHolder.INSTANCE;

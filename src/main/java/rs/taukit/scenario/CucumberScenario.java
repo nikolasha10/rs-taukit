@@ -5,15 +5,17 @@ import io.cucumber.testng.PickleWrapper;
 import io.cucumber.testng.TestNGCucumberRunner;
 import lombok.Getter;
 import rs.taukit.config.Config;
+import rs.taukit.records.Mutex;
 import rs.taukit.storage.ScenarioStorage;
+import rs.taukit.storage.Storage;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.utils.AllureReport;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
+import rs.taukit.utils.TimeStringParser;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.Semaphore;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,6 +28,7 @@ public class CucumberScenario {
     private final String parentSuiteName;
     private final String suiteName;
     private final String subSuiteName;
+    private final Set<String> mutexes = new HashSet<>();
     private boolean finished = false;
     private boolean started = false;
     private boolean skipped = false;
@@ -52,6 +55,10 @@ public class CucumberScenario {
 
     public String getName() {
         return pickleWrapper.getPickle().getName();
+    }
+
+    public String getFullName() {
+        return String.format("%s %s", getFunctionality(), getName());
     }
 
     public String getFunctionality() {
@@ -113,6 +120,7 @@ public class CucumberScenario {
 
     public void onFinish(int statusCode, long endMillis) {
         finished = true;
+        releaseAllMutexes();
         String testStatus = skipped ? "SKIPPED" : statusCode == 1 ? "PASSED" : "FAILED";
         Config.getDependencies().changeStatus(getTagList(), testStatus.toLowerCase());
         scenarioStorage.getDriverManager().close();
@@ -146,5 +154,39 @@ public class CucumberScenario {
                 .filter(tag -> tag.matches("[\\d.]+"))
                 .toList()
                 .getLast();
+    }
+
+    public synchronized void setMutex(String mutexName) {
+        Map<String, Mutex> semaphores = Storage.getInstance().getSemaphores();
+        Optional.ofNullable(semaphores.get(mutexName)).ifPresent(mutex ->
+                TauLogger.console("""
+                                Ожидается снятие запрета на одновременное выполнение действий по ключу '%s'.
+                                Установлен %s назад сценарием %s.""",
+                        mutexName,
+                        TimeStringParser.formatInterval(new Date().getTime() - mutex.startFrom()),
+                        mutex.scenarioName()));
+
+        semaphores.putIfAbsent(mutexName, new Mutex(getFullName(), new Date().getTime(), new Semaphore(1)));
+        try {
+            mutexes.add(mutexName);
+            Semaphore semaphore = semaphores.get(mutexName).semaphore();
+            semaphore.acquire();
+            TauLogger.console("Установлен запрет на одновременное выполнение действий по ключу '%s'", mutexName);
+            semaphores.put(mutexName, new Mutex(getFullName(), new Date().getTime(), semaphore));
+            mutexes.remove(mutexName);
+        } catch (InterruptedException ie) {
+            TauLogger.error("Thread interrupted", ie);
+        }
+    }
+
+    public synchronized void releaseMutex(String mutexName) {
+        Map<String, Mutex> semaphores = Storage.getInstance().getSemaphores();
+        Optional.ofNullable(semaphores.get(mutexName)).ifPresent(mutex -> mutex.semaphore().release());
+        mutexes.remove(mutexName);
+        TauLogger.console("Снят запрет на одновременное выполнение действий по ключу '%s'", mutexName);
+    }
+
+    public void releaseAllMutexes() {
+        mutexes.forEach(this::releaseMutex);
     }
 }
