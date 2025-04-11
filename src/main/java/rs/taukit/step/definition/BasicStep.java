@@ -133,7 +133,7 @@ public class BasicStep extends CommonManager {
 
     @И("^вычислить дату по формуле \"(.+)\" и сохранить в формате \"(.+)\", как \"(.*)\"$")
     public void evalDateTime(String formula, String format, String parameterName) {
-        super.evalDateTime(formula, format, parameterName);
+        super.evalDateTime(eval(formula), format, parameterName);
     }
 
     @И("^увеличить значение параметра \"(.+)\" на \"(\\d+)\"$")
