@@ -158,14 +158,16 @@ public class CucumberScenario {
 
     public synchronized void setMutex(String mutexName) {
         Map<String, Mutex> semaphores = Storage.getInstance().getSemaphores();
-        Optional.ofNullable(semaphores.get(mutexName)).ifPresent(mutex ->
+        Optional.ofNullable(semaphores.get(mutexName)).ifPresent(mutex -> {
+            if (!getFullName().equals(mutex.scenarioName())) {
                 TauLogger.console("""
                                 Ожидается снятие запрета на одновременное выполнение действий по ключу '%s'.
                                 Установлен %s назад сценарием %s.""",
                         mutexName,
                         TimeStringParser.formatInterval(new Date().getTime() - mutex.startFrom()),
-                        mutex.scenarioName()));
-
+                        mutex.scenarioName());
+            }
+        });
         semaphores.putIfAbsent(mutexName, new Mutex(getFullName(), new Date().getTime(), new Semaphore(1)));
         try {
             mutexes.add(mutexName);
