@@ -173,7 +173,6 @@ public class CucumberScenario {
             semaphore.acquire();
             TauLogger.console("Установлен запрет на одновременное выполнение действий по ключу '%s'", mutexName);
             semaphores.put(mutexName, new Mutex(getFullName(), new Date().getTime(), semaphore));
-            mutexes.remove(mutexName);
         } catch (InterruptedException ie) {
             TauLogger.error("Thread interrupted", ie);
         }
