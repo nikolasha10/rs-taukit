@@ -95,7 +95,7 @@ public class BrowserManager extends StepManager {
         int activeTabIndex = browser.getActiveTabIndex() + 1;
         waitForCondition(() -> browser.setActiveTab(activeTabIndex),
                 "Не удалось дождаться открытия новой вкладки браузера");
-        TauLogger.report("Открыта вкладка %d", browser.getActiveTabIndex());
+        TauLogger.report("Открыта вкладка %d", browser.getActiveTabIndex() + 1);
         run(() -> browser.getPage(pageName).waitForLoad());
         TauLogger.report("Отображается страница '%s'", pageName);
     }
