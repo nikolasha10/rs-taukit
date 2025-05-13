@@ -1,5 +1,6 @@
 package rs.taukit.step.manager;
 
+import com.microsoft.playwright.TimeoutError;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.config.Config;
@@ -143,23 +144,27 @@ public class ConditionManager extends StepManager {
         try {
             getDriver().waitForCondition(conditions, conditionsWaitTimeout, scenarioStorage.getStepActions());
         } catch (Exception e) {
-            TestCondition firstUnexpectedResult = dataTable.asMaps().stream()
-                    .map(row -> new TestCondition(row).waitForResult())
-                    .filter(result -> !result.isConditionMet())
-                    .findFirst().orElse(null);
-            if (firstUnexpectedResult != null) {
-                if (firstUnexpectedResult.getThrownException() != null) {
-                    e.addSuppressed(firstUnexpectedResult.getThrownException());
+            try {
+                TestCondition firstUnexpectedResult = dataTable.asMaps().stream()
+                        .map(row -> new TestCondition(row).waitForResult())
+                        .filter(result -> !result.isConditionMet())
+                        .findFirst().orElse(null);
+                if (firstUnexpectedResult != null) {
+                    if (firstUnexpectedResult.getThrownException() != null) {
+                        e.addSuppressed(firstUnexpectedResult.getThrownException());
+                    }
+                    String objectType = firstUnexpectedResult.getObjectType();
+                    String objectName = firstUnexpectedResult.getObjectName();
+                    String objectState = firstUnexpectedResult.getObjectState();
+                    String currentValue = firstUnexpectedResult.getCurrentValue();
+                    String expectedValue = firstUnexpectedResult.getExpectedValue() == null
+                            ? ""
+                            : String.format(" '%s'. Текущее значение: %s", firstUnexpectedResult.getExpectedValue(), currentValue);
+                    TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s '%s' %s %s",
+                            objectType, objectName, objectState, expectedValue);
                 }
-                String objectType = firstUnexpectedResult.getObjectType();
-                String objectName = firstUnexpectedResult.getObjectName();
-                String objectState = firstUnexpectedResult.getObjectState();
-                String currentValue = firstUnexpectedResult.getCurrentValue();
-                String expectedValue = firstUnexpectedResult.getExpectedValue() == null
-                        ? ""
-                        : String.format(" '%s'. Текущее значение: %s", firstUnexpectedResult.getExpectedValue(), currentValue);
-                TauLogger.fail(e, "Не удалось дождаться выполнения условия: %s '%s' %s %s",
-                        objectType, objectName, objectState, expectedValue);
+            } catch (TimeoutError te){
+                TauLogger.fail(te, "Не удалось дождаться выполнения условий");
             }
         }
         scenarioStorage.clearStepActions();
