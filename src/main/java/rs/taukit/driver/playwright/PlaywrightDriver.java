@@ -8,10 +8,12 @@ import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.IContainer;
+import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -58,6 +60,10 @@ public class PlaywrightDriver implements IWebDriver {
                 Chromium chromium = new Chromium(browserType, browserList.size(), args);
                 browserList.add(chromium);
                 currentBrowserIndex = browserList.size() - 1;
+                String harPath = String.format("%s/browser_%d/autotest.har", FileUtils.getDownloadFilePath(), browserList.size());
+                chromium.context.routeFromHAR(
+                        Path.of(harPath),
+                        new BrowserContext.RouteFromHAROptions().setUpdate(true));
                 return true;
             } catch (Exception e) {
                 suppressed.set(e);
