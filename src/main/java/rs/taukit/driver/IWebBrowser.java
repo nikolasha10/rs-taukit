@@ -52,4 +52,5 @@ public interface IWebBrowser {
     void setDefaultTimeout();
 
     void setDefaultTimeout(double timeProperty);
+
 }

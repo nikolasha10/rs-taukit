@@ -60,9 +60,8 @@ public class PlaywrightDriver implements IWebDriver {
                 Chromium chromium = new Chromium(browserType, browserList.size(), args);
                 browserList.add(chromium);
                 currentBrowserIndex = browserList.size() - 1;
-                String harPath = String.format("%s/browser_%d/autotest.har", FileUtils.getDownloadFilePath(), browserList.size());
                 chromium.context.routeFromHAR(
-                        Path.of(harPath),
+                        Path.of(getHarFilePath()),
                         new BrowserContext.RouteFromHAROptions().setUpdate(true));
                 return true;
             } catch (Exception e) {
@@ -77,6 +76,11 @@ public class PlaywrightDriver implements IWebDriver {
         } catch (TimeoutError te) {
             throw new RuntimeException(suppressed.get());
         }
+    }
+
+    @Override
+    public String getHarFilePath() {
+        return String.format("%s/browser_%d/autotest.har", FileUtils.getDownloadFilePath(), currentBrowserIndex + 1);
     }
 
     @Override

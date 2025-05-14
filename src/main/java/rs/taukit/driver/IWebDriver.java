@@ -38,5 +38,7 @@ public interface IWebDriver {
 
     IWebBrowser getCurrentBrowser();
 
+    String getHarFilePath();
+
     void closeOtherBrowsers(int activeBrowserIndex);
 }

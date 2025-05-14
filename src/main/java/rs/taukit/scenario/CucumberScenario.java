@@ -9,8 +9,12 @@ import rs.taukit.records.Mutex;
 import rs.taukit.storage.ScenarioStorage;
 import rs.taukit.storage.Storage;
 import rs.taukit.testdata.ScenarioData;
-import rs.taukit.utils.*;
+import rs.taukit.utils.AllureReport;
+import rs.taukit.utils.FileUtils;
+import rs.taukit.utils.TauLogger;
+import rs.taukit.utils.TimeStringParser;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.function.Predicate;
@@ -122,13 +126,10 @@ public class CucumberScenario {
         releaseAllMutexes();
         String testStatus = skipped ? "SKIPPED" : statusCode == 1 ? "PASSED" : "FAILED";
         if (testStatus.equalsIgnoreCase("failed")) {
-            while (driver().isBrowserOpen()) {
-                int index = driver().getCurrentBrowserIndex() + 1;
-                String harPath = String.format("%s/browser_%d/autotest.har", FileUtils.getDownloadFilePath(), index);
-                driver().closeBrowser();
-                String fileName = String.format("browser_%d.har", index);
-                TauLogger.attachFile(fileName, harPath);
-            }
+            String harPath = driver().getHarFilePath();
+            driver().closeBrowser();
+            File harFile = new File(harPath);
+            TauLogger.attachFile(harFile.getParentFile().getName(), harPath);
         }
         Config.getDependencies().changeStatus(getTagList(), testStatus.toLowerCase());
         scenarioStorage.getDriverManager().close();
