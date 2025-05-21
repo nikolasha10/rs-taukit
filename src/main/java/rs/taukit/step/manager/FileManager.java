@@ -4,8 +4,8 @@ import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import org.xml.sax.SAXException;
 import rs.taukit.config.Config;
-import rs.taukit.element.interfaces.IHasAttachment;
 import rs.taukit.element.interfaces.Downloadable;
+import rs.taukit.element.interfaces.IHasAttachment;
 import rs.taukit.testdata.TestDataFile;
 import rs.taukit.utils.*;
 
@@ -70,43 +70,50 @@ public class FileManager extends StepManager {
     @Step("нажать на '{buttonName}' и скачать файл '{this.fileName}'")
     public void downloadFile(String buttonName) {
         Downloadable downloadable = getElement(buttonName);
-        downloadable.click(this.fileName);
+        run(() -> downloadable.click(this.fileName),
+                "Не удалось нажать на '%s' и скачать файл '%s'", buttonName, fileName);
     }
 
     @Step("нажать на '{buttonName}' и скачать файлы:")
     public void downloadFiles(String buttonName) {
         TauLogger.attachDataTable("Список загружаемых файлов", this.dataTable);
         Downloadable downloadable = getElement(buttonName);
-        downloadable.click(this.dataTable);
+        run(() -> downloadable.click(this.dataTable),
+                "Не удалось нажать на '%s' и скачать указанные файлы", buttonName);
     }
 
     @Step("нажать на '{buttonName}' и выбрать загруженный файл '{fileName}'")
     public void attachDownloadedFile(String buttonName, String fileName) {
         IHasAttachment attachment = getElement(buttonName);
-        attachment.attach(fileDir, fileName);
-        TauLogger.report("Нажата кнопка '%s'", buttonName);
-        TauLogger.report("Выбран файл '%s' из папки '%s'", fileName, fileDir);
+        run(() -> attachment.attach(fileDir, fileName),
+                "Не удалось нажать на кнопку '%s' и выбрать файл '%s'", buttonName, fileName);
+        TauLogger.console("Нажата кнопка '%s'", buttonName);
+        TauLogger.console("Выбран файл '%s' из папки '%s'", fileName, fileDir);
     }
 
     @Step("нажать на '{buttonName}' и выбрать файл '{this.fileName}' из папки '{this.fileDir}'")
     public void attachFile(String buttonName) {
         TauLogger.attachFile(fileName, filePath);
         IHasAttachment attachment = getElement(buttonName);
-        attachment.attach(filePath);
-        TauLogger.report("Нажата кнопка '%s'", buttonName);
-        TauLogger.report("Выбран файл '%s'", fileName);
+        run(() -> attachment.attach(filePath),
+                "Не удалось нажать на кнопку '%s' и выбрать файл '%s' из папки '%s'",
+                buttonName, fileName, fileDir);
+        TauLogger.console("Нажата кнопка '%s'", buttonName);
+        TauLogger.console("Выбран файл '%s'", fileName);
     }
 
     @Step("сохранить значение параметра {parameterName} в файл {fileName}")
     public void writeValueToFile(String parameterName, String fileName) {
-        FileUtils.writeFile(filePath, scenarioData.get(parameterName).toString());
-        TauLogger.report("Файл '%s' создан", filePath);
+        run(() -> FileUtils.writeFile(filePath, scenarioData.get(parameterName).toString()),
+                "Не удалось сохранить значение параметра '%s' в файл '%s'", parameterName, fileName);
+        TauLogger.console("Файл '%s' создан", filePath);
     }
 
     @Step("сохранить значение параметра {parameterName} в файл:")
     public void writeValueToFile(String parameterName) {
-        FileUtils.writeFile(filePath, scenarioData.get(parameterName).toString());
-        TauLogger.report("Файл '%s' создан", filePath);
+        run(() -> FileUtils.writeFile(filePath, scenarioData.get(parameterName).toString()),
+                "Не удалось сохранить значение параметра '%s' в файл", parameterName);
+        TauLogger.console("Файл '%s' создан", filePath);
     }
 
     @Step("сохранить содержимое файла '{fileName}', как '{parameterName}'")
