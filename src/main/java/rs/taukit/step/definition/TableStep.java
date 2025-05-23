@@ -89,7 +89,7 @@ public class TableStep extends TableManager {
 
     @И("^в найденной строке нажать на \"(.+)\"$")
     public void tableRowElementClick(String elementName) {
-        super.clickOnElement(elementName);
+        super.clickOnElement(eval(elementName));
     }
 
     @И("^в найденной строке установить чекбокс \"(.+)\"$")
