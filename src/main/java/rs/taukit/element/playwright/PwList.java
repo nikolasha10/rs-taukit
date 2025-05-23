@@ -50,16 +50,23 @@ public class PwList extends PwElement implements HasListItems {
     @Override
     public void selectItem(String itemName) {
         double timeout = Config.getTimeProperty("element.check.interval");
-        BooleanSupplier condition = () -> getValues().stream().anyMatch(itemValue -> itemValue.contains(itemName));
+        String expectedItemText = itemName.replace("[!]", "").trim();
+        Predicate<String> predicate = itemName.contains("[!]")
+                ? value -> value.equals(expectedItemText)
+                : value -> value.contains(expectedItemText);
+        BooleanSupplier condition = () -> getValues().stream().anyMatch(predicate);
         try {
             driver.waitForCondition(condition, timeout);
         } catch (Exception e) {
             throw valueNotFoundException(itemName, e).get();
         }
+        Predicate<IContainer> containerPredicate = itemName.contains("[!]")
+                ? containsElementWithTextEquals(expectedItemText)
+                : containsElementWithText(expectedItemText);
         getItemList().stream()
                 .filter(PwElement::isVisible)
-                .filter(containsElementWithText(itemName))
-                .findFirst().orElseThrow(valueNotFoundException(itemName))
+                .filter(containerPredicate)
+                .findFirst().orElseThrow(valueNotFoundException(expectedItemText))
                 .click();
     }
 
@@ -76,6 +83,10 @@ public class PwList extends PwElement implements HasListItems {
 
     private Predicate<IContainer> containsElementWithText(String text) {
         return item -> item.containsText(text) || item.getElementByText(text) != null;
+    }
+
+    private Predicate<IContainer> containsElementWithTextEquals(String text) {
+        return item -> item.hasText(text) || item.getElementByText(text) != null;
     }
 
     public boolean contains(String value) {
@@ -136,6 +147,7 @@ public class PwList extends PwElement implements HasListItems {
                         Доступны значения: %s""",
                 value, elementName, page().getPageName(), getValues()));
     }
+
     private Supplier<RuntimeException> valueNotFoundException(String value, Throwable throwable) {
         return () -> new RuntimeException(String.format("""
                         Не удалось найти значение '%s' в списке '%s' на странице '%s'.
