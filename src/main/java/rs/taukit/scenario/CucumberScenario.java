@@ -127,9 +127,13 @@ public class CucumberScenario {
         String testStatus = skipped ? "SKIPPED" : statusCode == 1 ? "PASSED" : "FAILED";
         if (testStatus.equalsIgnoreCase("failed") && driver().isBrowserOpen()) {
             String harPath = driver().getHarFilePath();
-            driver().closeBrowser();
-            File harFile = new File(harPath);
-            TauLogger.attachFile(harFile.getParentFile().getName() + ".har", harPath);
+            try {
+                driver().closeBrowser();
+                File harFile = new File(harPath);
+                TauLogger.attachFile(harFile.getParentFile().getName() + ".har", harPath);
+            } catch (Exception e){
+                TauLogger.console(e);
+            }
         }
         Config.getDependencies().changeStatus(getTagList(), testStatus.toLowerCase());
         scenarioStorage.getDriverManager().close();
