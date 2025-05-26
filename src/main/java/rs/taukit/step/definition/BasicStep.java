@@ -16,6 +16,11 @@ public class BasicStep extends CommonManager {
         super.clickElement(elementType, elementName);
     }
 
+    @И("^нажать на (элемент|поле|кнопку|ссылку) \"(.+)\" и сохранить данные запроса, соответствующего условиям:$")
+    public void clickAndFindRequest(String elementType, String elementName, DataTable dataTable) {
+        super.clickElementAndFindRequest(elementType, elementName, eval(dataTable));
+    }
+
     /**
      * Считывает тестовые данные для текущего сценария из yaml-файла с таким же названием,
      * как feature-файл, содержащий этот сценарий. Блок данных ищется по названию сценария.

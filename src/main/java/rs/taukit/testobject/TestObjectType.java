@@ -35,6 +35,11 @@ public enum TestObjectType {
         Object optional = scenarioData().getOptional(name);
         String value = optional == null ? null : String.valueOf(optional);
         return new TestData(value);
+    }),
+    REQUEST_PARAMETER("параметр запроса", name -> {
+        Object optional = scenarioData().getOptional("REQUEST." + name);
+        String value = optional == null ? null : String.valueOf(optional);
+        return new TestData(value);
     });
 
     public final Function<String, ?> testObject;

@@ -1,20 +1,24 @@
 package rs.taukit.step.manager;
 
+import com.microsoft.playwright.Request;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
-import rs.taukit.config.Config;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.TestDataException;
-import rs.taukit.scenario.ScenarioManager;
 import rs.taukit.testdata.TestDataDateTime;
 import rs.taukit.testobject.TestCondition;
-import rs.taukit.utils.*;
+import rs.taukit.utils.TauLogger;
+import rs.taukit.utils.TestDataUtils;
+import rs.taukit.utils.TextUtils;
+import rs.taukit.utils.TimeStringParser;
 
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static rs.taukit.utils.BasicUtils.eval;
 import static rs.taukit.utils.BasicUtils.scenarioData;
@@ -41,6 +45,21 @@ public class CommonManager extends StepManager {
                 },
                 "Не удалось нажать на %s '%s'", elementType, elementName);
         TauLogger.report("Нажали на %s '%s'", elementType, elementName);
+    }
+
+    @Step("нажать на {elementType} '{elementName}' и сохранить данные запроса, соответствующего условиям:")
+    protected void clickElementAndFindRequest(String elementType, String elementName, DataTable dataTable) {
+        TauLogger.attachDataTable("Условия поиска запроса", dataTable);
+        HashSet<Request> requests = new HashSet<>();
+        Consumer<Request> requestHandler = requests::add;
+        getBrowser().getCurrentPage().setRequestHandler(requestHandler);
+        clickElement(elementType, elementName);
+        Predicate<Request> predicate = request -> dataTable.asMaps().stream().allMatch(row -> {
+            scenarioData.put("REQUEST.url", request.url());
+            TestCondition testCondition = new TestCondition(row);
+            return testCondition.checkResult().isConditionMet();
+        });
+        getDriver().waitForCondition(() -> requests.stream().anyMatch(predicate));
     }
 
     @Step("снимок: {screenshotName}")

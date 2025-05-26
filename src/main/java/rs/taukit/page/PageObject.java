@@ -1,8 +1,11 @@
 package rs.taukit.page;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Request;
 import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.interfaces.IElement;
+
+import java.util.function.Consumer;
 
 public interface PageObject {
     String getPageUrl();
@@ -62,4 +65,6 @@ public interface PageObject {
     String getCurrentUrl();
 
     Locator getByCss(String selector);
+
+    void setRequestHandler(Consumer<Request> handler);
 }

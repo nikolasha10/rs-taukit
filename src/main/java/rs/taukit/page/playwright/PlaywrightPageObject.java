@@ -2,6 +2,7 @@ package rs.taukit.page.playwright;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Request;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
@@ -20,6 +21,7 @@ import rs.taukit.utils.YamlParser;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 import static rs.taukit.utils.BasicUtils.driver;
 import static rs.taukit.utils.BasicUtils.scenarioStorage;
@@ -349,5 +351,10 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
     @Override
     public boolean isInvisible() {
         return !isVisible();
+    }
+
+    @Override
+    public void setRequestHandler(Consumer<Request> handler) {
+        page.onRequest(handler);
     }
 }
