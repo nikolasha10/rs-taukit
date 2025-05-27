@@ -129,6 +129,11 @@ public abstract class PwBrowser implements IWebBrowser {
     }
 
     @Override
+    public void goBack() {
+        getPage().goBack();
+    }
+
+    @Override
     public ApiResponse sendPost(String requestUrl, Map<String, String> headers, Map<String, String> queryParams, String content) {
         APIRequestContext apiRequestContext = context.request();
         RequestOptions requestOptions = RequestOptions.create().setData(content);

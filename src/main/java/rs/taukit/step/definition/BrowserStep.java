@@ -53,6 +53,11 @@ public class BrowserStep extends BrowserManager {
         super.waitForPageLoadNewTab(pageName);
     }
 
+    @И("^вернуться на предыдущую страницу$")
+    public void goBack() {
+        super.goBack();
+    }
+
     @И("^закрыть текущую вкладку$")
     public void closeCurrentTab() {
         super.closeCurrentTab();

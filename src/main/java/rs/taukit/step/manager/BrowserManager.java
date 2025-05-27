@@ -100,6 +100,12 @@ public class BrowserManager extends StepManager {
         TauLogger.report("Отображается страница '%s'", pageName);
     }
 
+    @Step("вернуться на предыдущую страницу")
+    protected void goBack() {
+        browser.goBack();
+        TauLogger.console("Вернулись на предыдущую страницу");
+    }
+
     @Step("перейти по ссылке {url}")
     public void navigate(String url) {
         run(() -> browser.navigate(url), "Не удалось перейти по ссылке '%s'", url);
@@ -131,4 +137,5 @@ public class BrowserManager extends StepManager {
         run(driver::closeBrowser, "Не удалось закрыть браузер");
         TauLogger.console("Браузер закрыт");
     }
+
 }
