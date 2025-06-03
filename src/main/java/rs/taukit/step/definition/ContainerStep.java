@@ -8,7 +8,7 @@ import static rs.taukit.utils.BasicUtils.eval;
 
 public class ContainerStep extends ContainerManager {
 
-    @И("^в контейнере \"(.+)\" нажать на (элемент|поле|кнопку) \"(.+)\"$")
+    @И("^в контейнере \"(.+)\" нажать на (элемент|поле|кнопку|ссылку) \"(.+)\"$")
     public void clickOnField(String containerName, String fieldType, String fieldName) {
         super.clickOnField(eval(containerName), fieldType, fieldName);
     }
