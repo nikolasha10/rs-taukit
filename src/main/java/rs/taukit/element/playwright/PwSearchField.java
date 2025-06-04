@@ -3,9 +3,9 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
-import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.Editable;
 import rs.taukit.element.interfaces.HasText;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.utils.TimeStringParser;
 
@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static rs.taukit.utils.BasicUtils.page;
 
-public class PwSearchField extends PwElement implements Editable {
+public class PwSearchField extends PwBlock implements Editable {
     public PwSearchField(String elementName, String locator) {
         this(elementName, new LinkedHashMap<>(Map.of("Локатор", locator)));
     }
@@ -37,7 +37,8 @@ public class PwSearchField extends PwElement implements Editable {
 
     @Override
     public void setValue(String value) {
-        descendants.get("поле ввода").castTo(PwTextField.class).setValue(value);
+        PwTextField textField = descendants.get("поле ввода").castTo(PwTextField.class);
+        textField.getElementPwLocator().fill(value);
         if (value.equalsIgnoreCase("заполнить вручную")) {
             double searchValueTimeout = TimeStringParser.getTime(Config.getProperty("element.check.timeout"));
             PwButton fillManually = descendants.get("заполнить вручную").castTo(PwButton.class);
