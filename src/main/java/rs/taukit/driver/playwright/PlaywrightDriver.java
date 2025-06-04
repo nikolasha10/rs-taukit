@@ -60,9 +60,11 @@ public class PlaywrightDriver implements IWebDriver {
                 Chromium chromium = new Chromium(browserType, browserList.size(), args);
                 browserList.add(chromium);
                 currentBrowserIndex = browserList.size() - 1;
-                chromium.context.routeFromHAR(
-                        Path.of(getHarFilePath()),
-                        new BrowserContext.RouteFromHAROptions().setUpdate(true));
+                if (Config.getBooleanProperty("har-file.save")) {
+                    chromium.context.routeFromHAR(
+                            Path.of(getHarFilePath()),
+                            new BrowserContext.RouteFromHAROptions().setUpdate(true));
+                }
                 return true;
             } catch (Exception e) {
                 suppressed.set(e);
