@@ -2,11 +2,18 @@ package rs.taukit.step.manager;
 
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
+import org.apache.commons.codec.digest.DigestUtils;
+import rs.taukit.config.Config;
 import rs.taukit.records.ImageDifferences;
+import rs.taukit.testdata.TestData;
 import rs.taukit.testdata.TestDataFile;
-import rs.taukit.utils.*;
+import rs.taukit.utils.FileUtils;
+import rs.taukit.utils.ImageUtils;
+import rs.taukit.utils.PdfUtils;
+import rs.taukit.utils.TauLogger;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,7 +24,18 @@ public class PdfManager extends StepManager {
         TauLogger.attachDataTable("Параметры проверки", dataTable);
         String nameSpace = "Проверка PDF";
         scenarioData.put(dataTable, nameSpace);
-        TestDataFile testedFileData = scenarioData.get(testedFileParameterName);
+        LinkedHashMap<String, String> info = new LinkedHashMap<>();
+        TestData description = scenarioData.get("Описание");
+        info.put("Функционал", description.get("Функционал"));
+        info.put("Сценарий", description.get("Сценарий"));
+        info.put("Шаг", description.get("Шаг"));
+        String hash = DigestUtils.md5Hex(info.toString());
+        String basePath = Config.getProperty("downloads.dir") + File.separator + hash;
+        String filePath = basePath + "-file.pdf";
+        LinkedHashMap<String, String> fileData = new LinkedHashMap<>();
+        fileData.put("тип", "файл");
+        fileData.put("путь", filePath);
+        TestDataFile testedFileData = new TestDataFile(testedFileParameterName, fileData);
         String standardFileParameterName = scenarioData.get(nameSpace, "эталон");
         TestDataFile standardFileData = scenarioData.get(standardFileParameterName);
         TauLogger.attachPdfFile(testedFileData.getFileName() + " (тест)", testedFileData.getFilePath());
@@ -32,37 +50,33 @@ public class PdfManager extends StepManager {
             String message = Optional.ofNullable(errorMessage).orElse("");
             List<String> differentPages = scenarioData.get(nameSpace, "Номера различающихся страниц");
             TauLogger.fail(validationResult, "%sСтраницы %s файла '%s' не соответствуют эталону",
-                    message, differentPages, testedFileData.getFileName());
+                    message, differentPages, testedFileParameterName);
         } else {
-            TauLogger.report("Содержимое файла '%s' соответствует эталону", testedFileData.getFileName());
+            TauLogger.console("Содержимое файла '%s' соответствует эталону", testedFileParameterName);
         }
         TauLogger.resetNotCritical();
     }
 
     @Step("сравнить количество страниц в PDF-файле '{testedFileParameterName}' с ожидаемым значением '{expectedPageCount}'")
     public void validatePdfPageCount(String testedFileParameterName, String expectedPageCount) {
-        String nameSpace = "Проверка страниц PDF";
-        TauLogger.console("Начата проверка количества страниц в файле: '%s'", testedFileParameterName);
         TestDataFile testedFileData = scenarioData.get(testedFileParameterName);
-        TauLogger.attachPdfFile(testedFileData.getFileName(), testedFileData.getFilePath());
         String testedFilePath = testedFileData.getFilePath();
         try {
             int expectedPageCountInt = Integer.parseInt(expectedPageCount);
             int actualPageCount = FileUtils.getPdfPageCount(testedFilePath);
-            TauLogger.console("Количество страниц в файле '%s': %d", testedFileData.getFileName(), actualPageCount);
             if (actualPageCount != expectedPageCountInt) {
                 TauLogger.fail(
-                        "Количество страниц не совпадает. Ожидалось: %d, фактически: %d",
-                        expectedPageCount, actualPageCount
+                        "Количество страниц в файле '%s' не совпадает. Ожидалось: %d, фактически: %d",
+                        testedFileParameterName, expectedPageCount, actualPageCount
                 );
             } else {
-                TauLogger.report(
+                TauLogger.console(
                         "Количество страниц в файле '%s' соответствует ожидаемому значению: %s",
-                        testedFileData.getFileName(), expectedPageCount
+                        testedFileParameterName, expectedPageCount
                 );
             }
         } catch (Exception e) {
-            TauLogger.fail(e,"Произошла ошибка при обработке PDF-файла '%s'", testedFileParameterName);
+            TauLogger.fail(e, "Произошла ошибка при обработке PDF-файла '%s'", testedFileParameterName);
         }
     }
 

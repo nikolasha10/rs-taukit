@@ -142,9 +142,12 @@ public class ContainerManager extends StepManager {
     public void downloadFile(String containerName, String buttonName, String fileName) {
         run(() -> {
                     IContainer container = getContainer(containerName);
-                    Downloadable downloadable = container.getElementByName(buttonName)
-                            .castTo(Downloadable.class);
-                    downloadable.click(fileName);
+                    IContainer currentContext = getPage().getCurrentContext();
+                    getPage().setCurrentContext(container);
+                    FileManager fileManager = new FileManager();
+                    fileManager.init("", fileName);
+                    fileManager.downloadFile(buttonName);
+                    getPage().setCurrentContext(currentContext);
                 }, "Не удалось скачать файл '%s' по нажатию на '%s' в контейнере '%s' на странице '%s'",
                 fileName, buttonName, containerName, getPage().getPageName());
         TauLogger.report("По нажатию на '%s' в контейнере '%s' был загружен файл '%s'", buttonName, containerName, fileName);
@@ -163,7 +166,6 @@ public class ContainerManager extends StepManager {
         TauLogger.report("В контейнере '%s' нажата кнопка '%s'", containerName, buttonName);
         TauLogger.report("Выбран файл '%s' из папки '%s'", fileName, dirPath);
     }
-
 
     @Step("дождаться отображения контейнера '{containerName}'")
     public void waitForDisplayed(String containerName) {

@@ -198,21 +198,20 @@ public abstract class PwBrowser implements IWebBrowser {
     }
 
     @Override
-    public void downloadByClick(PwFileDownload element, String fileName) {
+    public void downloadByClick(PwFileDownload element, File file) {
         AtomicBoolean isDownloaded = new AtomicBoolean(false);
         Consumer<Download> download = pwDownload -> {
             if (isDownloaded.get()) return;
-            String dirName = FileUtils.getDownloadFilePath();
-            File file = new File(dirName, fileName);
             pwDownload.saveAs(file.toPath());
-            TauLogger.report("Загружен файл '%s' в папку '%s'", fileName, dirName);
+            TauLogger.console("Загружен файл '%s' в папку '%s'", file.getName(), file.getParent());
             isDownloaded.set(true);
+            pwDownload.delete();
         };
         getPage().onDownload(download);
         double fileDownloadTimeout = Config.getTimeProperty("file.download.timeout");
         getPage().waitForDownload(new Page.WaitForDownloadOptions().setTimeout(fileDownloadTimeout), () -> {
             element.getElementPwLocator().click();
-            TauLogger.report("Нажали на кнопку '%s'", element.getElementName());
+            TauLogger.console("Нажали на кнопку '%s'", element.getElementName());
         });
     }
 

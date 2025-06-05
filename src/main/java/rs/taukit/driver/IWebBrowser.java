@@ -5,6 +5,7 @@ import rs.taukit.element.playwright.PwFileDownload;
 import rs.taukit.page.PageObject;
 import rs.taukit.records.ApiResponse;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ public interface IWebBrowser {
 
     ApiResponse sendGet(String requestUrl, Map<String, String> headers, Map<String, String> queryParams);
 
-    void downloadByClick(PwFileDownload element, String fileName);
+    void downloadByClick(PwFileDownload element, File file);
 
     void downloadByClick(PwFileDownload element, DataTable dataTable);
 
