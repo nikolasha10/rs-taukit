@@ -13,6 +13,7 @@ import rs.taukit.testdata.TestData;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
 
 @Getter
 public class ScenarioStorage {
@@ -38,6 +39,7 @@ public class ScenarioStorage {
     private boolean saveActions = false;
     @Setter
     private long freeSince;
+    private Stack<String> stepStack = new Stack<>();
 
     public void update(PickleWrapper pickleWrapper, String functionality) {
         this.pickle = pickleWrapper.getPickle();
@@ -76,4 +78,15 @@ public class ScenarioStorage {
         currentContextName = String.format(format, args);
     }
 
+    public void pushStep(String scenarioName) {
+        stepStack.push(scenarioName);
+    }
+
+    public void popStep() {
+        stepStack.pop();
+    }
+
+    public String getStepStack() {
+        return String.join(" -> ", stepStack);
+    }
 }

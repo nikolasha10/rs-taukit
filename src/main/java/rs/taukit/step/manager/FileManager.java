@@ -2,6 +2,7 @@ package rs.taukit.step.manager;
 
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.xml.sax.SAXException;
 import rs.taukit.config.Config;
 import rs.taukit.element.interfaces.Downloadable;
@@ -19,19 +20,23 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static rs.taukit.utils.BasicUtils.eval;
+import static rs.taukit.utils.BasicUtils.scenarioData;
 
 public class FileManager extends StepManager {
     private String fileDir;
     private String fileName;
     private String fileExtension;
     private String filePath;
+    private String infoPath;
     private TestDataFile testDataFile;
     private DataTable dataTable;
 
@@ -39,8 +44,9 @@ public class FileManager extends StepManager {
         this.fileName = fileName;
         String[] chunks = fileName.split("\\.");
         this.fileExtension = chunks[chunks.length - 1];
-        this.fileDir = fileDir;
-        this.filePath = fileDir + File.separator + fileName;
+        String guid = UUID.randomUUID().toString();
+        this.filePath = Config.getProperty("downloads.dir") + File.separator + guid + "-file." + this.fileExtension;
+        this.infoPath = Config.getProperty("downloads.dir") + File.separator + guid + "-info.yaml";
     }
 
     public void init(String fileDir, DataTable dataTable) {
@@ -67,11 +73,34 @@ public class FileManager extends StepManager {
         scenarioData.put(fileName, testDataFile);
     }
 
+    private LinkedHashMap<String, String> getInfo(String stepName) {
+        LinkedHashMap<String, String> info = new LinkedHashMap<>();
+        info.put("Функционал", scenario.getFunctionality());
+        info.put("Сценарий", scenario.getName());
+        info.put("Шаг", stepName);
+        return info;
+    }
+
     @Step("нажать на '{buttonName}' и скачать файл '{this.fileName}'")
     public void downloadFile(String buttonName) {
+        String stepName = String.format("%s -> нажать на '%s' и скачать файл '%s'",
+                scenarioStorage.getStepStack(), buttonName, this.fileName);
+        LinkedHashMap<String, String> info = getInfo(stepName);
+        String hash = DigestUtils.md5Hex(info.toString());
+        String basePath = Config.getProperty("downloads.dir") + File.separator + hash;
+        String infoPath = basePath + "-info.yaml";
+        String filePath = basePath + "-file." + fileExtension;
+        File file = new File(filePath);
         Downloadable downloadable = getElement(buttonName);
-        run(() -> downloadable.click(this.fileName),
+        run(() -> downloadable.click(file),
                 "Не удалось нажать на '%s' и скачать файл '%s'", buttonName, fileName);
+        FileUtils.writeFile(Path.of(infoPath), YamlParser.write(info, false));
+        TauLogger.attachFile(this.fileName, file.getAbsolutePath());
+        LinkedHashMap<String, String> fileData = new LinkedHashMap<>();
+        fileData.put("тип", "файл");
+        fileData.put("путь", file.getPath());
+        this.testDataFile = new TestDataFile(this.fileName, fileData);
+        scenarioData().put(this.fileName, this.testDataFile);
     }
 
     @Step("нажать на '{buttonName}' и скачать файлы:")
@@ -85,7 +114,7 @@ public class FileManager extends StepManager {
     @Step("нажать на '{buttonName}' и выбрать загруженный файл '{fileName}'")
     public void attachDownloadedFile(String buttonName, String fileName) {
         IHasAttachment attachment = getElement(buttonName);
-        run(() -> attachment.attach(fileDir, fileName),
+        run(() -> attachment.attach(this.testDataFile.getFilePath()),
                 "Не удалось нажать на кнопку '%s' и выбрать файл '%s'", buttonName, fileName);
         TauLogger.console("Нажата кнопка '%s'", buttonName);
         TauLogger.console("Выбран файл '%s' из папки '%s'", fileName, fileDir);

@@ -6,15 +6,12 @@ import io.cucumber.datatable.DataTable;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.Downloadable;
-import rs.taukit.testdata.TestDataFile;
-import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 
 import java.io.File;
 import java.util.LinkedHashMap;
 
 import static rs.taukit.utils.BasicUtils.scenario;
-import static rs.taukit.utils.BasicUtils.scenarioData;
 
 public class PwFileDownload extends PwElement implements Downloadable {
 
@@ -31,17 +28,9 @@ public class PwFileDownload extends PwElement implements Downloadable {
     }
 
     @Override
-    public void click(String fileName) {
+    public void click(File file) {
         try {
-            driver.getCurrentBrowser().downloadByClick(this, fileName);
-            String dirName = FileUtils.getDownloadFilePath();
-            File file = new File(dirName, fileName);
-            TauLogger.attachFile(fileName, file.getAbsolutePath());
-            LinkedHashMap<String, String> fileData = new LinkedHashMap<>();
-            fileData.put("тип", "файл");
-            fileData.put("путь", file.getPath());
-            TestDataFile testDataFile = new TestDataFile(fileName, fileData);
-            scenarioData().put(fileName, testDataFile);
+            driver.getCurrentBrowser().downloadByClick(this, file);
         } catch (TimeoutError e) {
             TauLogger.fail(e, "Не удалось дождаться окончания загрузки файлов");
         }
