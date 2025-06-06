@@ -3,12 +3,15 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import lombok.Getter;
 import rs.taukit.element.ElementModel;
-import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.Editable;
+import rs.taukit.element.interfaces.HasText;
+import rs.taukit.element.interfaces.IElement;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.page.PageObject;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static rs.taukit.utils.BasicUtils.browser;
 import static rs.taukit.utils.BasicUtils.page;
@@ -40,25 +43,43 @@ public class PwDictionary extends PwElement implements Editable {
     }
 
     public void setValue(String value) {
-        PageObject initialPage = page();
+        Optional<PageObject> initialPage = Optional.ofNullable(page());
         descendants.get("открыть справочник").castTo(PwButton.class).click();
-        page().waitForPopup(model.get("страница"));
-        page().getElement(model.get("поле поиска").toString()).castTo(PwTextField.class).setValue(value);
-        page().getElement(model.get("кнопка поиска").toString()).castTo(PwButton.class).click();
-        driver.waitForTimeout(2000);
-        page().getElement("Значения справочника").castTo(PwList.class).selectItem(value);
-        page().waitForPopupClose(model.get("страница"));
-        browser().getPage(initialPage.getPageName()).waitForLoad();
+        Optional<PageObject> optional = Optional.ofNullable(page());
+        optional.orElseThrow(AutoTestBrokenException::new);
+        optional.ifPresent(page -> {
+            page.waitForPopup(model.get("страница"));
+            page.getElement(model.get("поле поиска").toString()).castTo(PwTextField.class).setValue(value);
+            page.getElement(model.get("кнопка поиска").toString()).castTo(PwButton.class).click();
+            driver.waitForTimeout(2000);
+            page.getElement("Значения справочника").castTo(PwList.class).selectItem(value);
+            page.waitForPopupClose(model.get("страница"));
+            initialPage.orElseThrow(AutoTestBrokenException::new);
+            browser().getPage(initialPage.get().getPageName()).waitForLoad();
+        });
     }
 
     @Override
     public void setValue(String value, String controlValue) {
-
+        driver.waitForCondition(() -> {
+            setValue(value);
+            return hasText(controlValue);
+        });
     }
 
     @Override
     public boolean isVisible() {
         return elementPwLocator.isVisible();
+    }
+
+    @Override
+    public boolean isDisabled() {
+        return descendants.get("открыть справочник").isDisabled();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return descendants.get("открыть справочник").isEnabled();
     }
 
     @Override
@@ -68,16 +89,16 @@ public class PwDictionary extends PwElement implements Editable {
 
     @Override
     public String getText() {
-        return elementPwLocator.innerText();
+        return descendants.get("текущее значение").castTo(HasText.class).getText();
     }
 
     @Override
     public boolean hasText(String expectedValue) {
-        return false;
+        return getText().equals(expectedValue);
     }
 
     @Override
     public Boolean containsText(String expectedText) {
-        return null;
+        return getText().contains(expectedText);
     }
 }

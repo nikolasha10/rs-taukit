@@ -9,6 +9,7 @@ import rs.taukit.exceptions.AutoTestBrokenException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static rs.taukit.utils.BasicUtils.page;
@@ -59,10 +60,11 @@ public class PwRadioButton extends PwElement implements Editable {
     @Override
     public String getText() {
         PwBlock active = getButtonList().stream().filter(button -> button.getElementByName("Выбрана").isVisible())
-                .findFirst().orElseThrow(AutoTestBrokenException.get("""
-                                Не найдено выбранное значение радио-кнопки '%s' на странице '%s'""",
-                        elementName, page().getPageName()));
-        return active.getElementByName("Значение").castTo(HasText.class).getText();
+                .findFirst().orElse(null);
+        Optional<PwBlock> optional = Optional.ofNullable(active);
+        return optional.isPresent()
+                ? active.getElementByName("Значение").castTo(HasText.class).getText()
+                : "";
     }
 
     @Override

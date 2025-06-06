@@ -132,7 +132,13 @@ public class PwElement extends Element implements HasText {
 
     @Override
     public boolean hasBgColor(String colorRGB) {
-        return getBgColor().equalsIgnoreCase(hexToRGB(colorRGB));
+        if (colorRGB.toLowerCase().startsWith("rgb")){
+            return getBgColor().equalsIgnoreCase(colorRGB);
+        } else if (colorRGB.startsWith("#")) {
+            return getBgColor().equalsIgnoreCase(hexToRGB(colorRGB));
+        } else {
+            throw new AutoTestBrokenException("Некорректный формат цвета. Допустимы форматы #029e44 или rgba(0, 0, 0, 0)");
+        }
     }
 
     @Override
