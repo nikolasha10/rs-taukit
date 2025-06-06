@@ -31,6 +31,8 @@ public enum TestObjectType {
         return table.getActiveCell(name);
     }),
     SEARCH_FIELD("поиск по значению", name -> element(name).castTo(Editable.class)),
+    DICTIONARY("справочник", name -> element(name).castTo(Editable.class)),
+    ATTACHMENT("прикрепление файла", name -> element(name).castTo(Editable.class)),
     PARAMETER("параметр", name -> {
         Object optional = scenarioData().getOptional(name);
         String value = optional == null ? null : String.valueOf(optional);
