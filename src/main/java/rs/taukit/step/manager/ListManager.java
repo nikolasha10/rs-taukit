@@ -48,11 +48,12 @@ public class ListManager extends StepManager {
             foundItem.set(((HasListItems) getElement(listName)).getItemList().getFirst().castTo(IContainer.class));
         }
         getPage().setCurrentContext(foundItem.get());
+        scenarioStorage.setCurrentContextName(foundItem.get().getElementName());
+
         scenarioStorage.clearStepActions();
         scenarioStorage.stopToSaveActions();
         TauLogger.resetNotCritical();
         TauLogger.report("[примечание] текущий контекст: %d-й элемент списка '%s'", foundItemNumber, listName);
-
     }
 
     @Step("проверить состав элементов списка '{listName}':")
@@ -71,9 +72,12 @@ public class ListManager extends StepManager {
                     .collect(Collectors.toMap(item -> item.castTo(HasText.class).getText(), item -> item));
             resultList.clear();
             expected.forEach((itemName, expectedState) -> {
-                String actualState = items.containsKey(itemName) && items.get(itemName).isVisible() ? "отображается" : "не отображается";
-                if (!expectedState.equals(actualState)) {
-                    resultList.add(Arrays.asList(itemName, actualState, expectedState));
+                Optional<Map.Entry<String, IElement>> optionalItem = items.entrySet().stream()
+                        .filter(entry -> entry.getKey().contains(itemName)).findFirst();
+                AtomicReference<String> actualState = new AtomicReference<>("не отображается");
+                optionalItem.ifPresent(entry -> actualState.set(entry.getValue().isVisible() ? "отображается" : "не отображается"));
+                if (!expectedState.equals(actualState.get())) {
+                    resultList.add(Arrays.asList(itemName, actualState.get(), expectedState));
                 }
             });
             return resultList.isEmpty();
@@ -123,5 +127,15 @@ public class ListManager extends StepManager {
         }
         TauLogger.resetNotCritical();
         TauLogger.console("Все блочные элементы списка '%s' соответствуют требуемым условиям", listName);
+    }
+
+    @Step("проверить, что список '{listName}' содержит ровно {count} {word}")
+    protected void validateListElementsCountEquals(String listName, String count, String word) {
+        HasListItems list = getElement(listName);
+        if (list.getSize() != Integer.parseInt(count)) {
+            TauLogger.fail("Количество элементов списка '%s' (%d) не равно ожидаемому (%s)", listName, list.getSize(), count);
+        } else {
+            TauLogger.console("Количество элементов списка '%s' равно ожидаемому: %s", listName, count);
+        }
     }
 }

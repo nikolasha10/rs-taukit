@@ -40,4 +40,9 @@ public class ListStep extends ListManager{
         super.validateAllBlockElements(listName, eval(dataTable));
     }
 
+    @И("^проверить, что список \"(.+)\" содержит ровно \"(.+)\" (элемент(?:а|ов)?)$")
+    public void validateListElementsCountEquals(String listName, String count, String word) {
+        super.validateListElementsCountEquals(listName, eval(count), word);
+    }
+
 }
