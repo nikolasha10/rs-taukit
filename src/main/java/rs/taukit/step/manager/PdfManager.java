@@ -38,8 +38,8 @@ public class PdfManager extends StepManager {
         TestDataFile testedFileData = new TestDataFile(testedFileParameterName, fileData);
         String standardFileParameterName = scenarioData.get(nameSpace, "эталон");
         TestDataFile standardFileData = scenarioData.get(standardFileParameterName);
-        TauLogger.attachPdfFile(testedFileData.getFileName() + " (тест)", testedFileData.getFilePath());
-        TauLogger.attachPdfFile(standardFileData.getFileName() + " (эталон)", standardFileData.getFilePath());
+        TauLogger.attachPdfFile(testedFileParameterName + " (тест)", testedFileData.getFilePath());
+        TauLogger.attachPdfFile(testedFileParameterName + " (эталон)", standardFileData.getFilePath());
         String ignoredZonesParameterName = scenarioData.getOptional(nameSpace, "игнорируемые зоны");
         Runnable validationResult = validatePdfFullContent(
                 testedFileData,
