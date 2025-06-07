@@ -24,7 +24,7 @@ public class ConditionStep extends ConditionManager {
 
     @И("^дождаться выполнения условий \"(.+)\" в течение \"(.+)\":$")
     public void expectedResultCheckWithinTimeInterval(String conditionsName, String timeoutString, DataTable datatable) {
-        super.waitForConditionsWithinTimeIntervalNoName(conditionsName, timeoutString, eval(datatable));
+        super.waitForConditionsWithinTimeIntervalNoName(eval(conditionsName), timeoutString, eval(datatable));
     }
 
     /**
