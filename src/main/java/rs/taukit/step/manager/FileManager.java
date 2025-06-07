@@ -36,17 +36,14 @@ public class FileManager extends StepManager {
     private String fileName;
     private String fileExtension;
     private String filePath;
-    private String infoPath;
     private TestDataFile testDataFile;
     private DataTable dataTable;
 
     public void init(String fileDir, String fileName) {
+        this.fileDir = fileDir;
         this.fileName = fileName;
         String[] chunks = fileName.split("\\.");
         this.fileExtension = chunks[chunks.length - 1];
-        String guid = UUID.randomUUID().toString();
-        this.filePath = Config.getProperty("downloads.dir") + File.separator + guid + "-file." + this.fileExtension;
-        this.infoPath = Config.getProperty("downloads.dir") + File.separator + guid + "-info.yaml";
     }
 
     public void init(String fileDir, DataTable dataTable) {
