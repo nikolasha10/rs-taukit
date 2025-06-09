@@ -1,6 +1,7 @@
 package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.PlaywrightException;
 import lombok.Getter;
 import lombok.Setter;
 import rs.taukit.element.ElementModel;
@@ -46,7 +47,13 @@ public class PwBlock extends PwElement implements IContainer {
     @Override
     public IElement getElementByName(String elementName) {
         IContainer currentBlock = this;
-        driver.waitForCondition(currentBlock::isVisible);
+        try {
+            driver.waitForCondition(currentBlock::isVisible);
+        } catch (Exception e) {
+            throw new PlaywrightException(String.format(
+                    "Не удалось дождаться отображения блока '%s' (Селектор: %s",
+                    currentBlock.getElementName(), currentBlock.getSelector()));
+        }
         String[] blockNames = elementName.split(" -> ");
         if (blockNames.length > 1) {
             for (String blockName : blockNames) {

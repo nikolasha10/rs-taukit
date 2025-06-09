@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,9 +87,10 @@ public class FileManager extends StepManager {
         String infoPath = basePath + "-info.yaml";
         String filePath = basePath + "-file." + fileExtension;
         File file = new File(filePath);
-        Downloadable downloadable = getElement(buttonName);
-        run(() -> downloadable.click(file),
-                "Не удалось нажать на '%s' и скачать файл '%s'", buttonName, fileName);
+        run(() -> {
+            Downloadable downloadable = getElement(buttonName);
+            downloadable.click(file);
+        }, "Не удалось нажать на '%s' и скачать файл '%s'", buttonName, fileName);
         FileUtils.writeFile(Path.of(infoPath), YamlParser.write(info, false));
         TauLogger.attachFile(this.fileName, file.getAbsolutePath());
         LinkedHashMap<String, String> fileData = new LinkedHashMap<>();
