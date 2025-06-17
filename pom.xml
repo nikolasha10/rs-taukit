@@ -26,6 +26,12 @@
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
         <aspectj.version>1.9.22</aspectj.version>
+        <testit-api-client.version>2.0.1-TMS-5.3</testit-api-client.version>
+        <janino.version>3.1.9</janino.version>
+        <pdfbox.version>2.0.28</pdfbox.version>
+        <ashot.version>1.5.4</ashot.version>
+        <postgresql.version>42.2.18</postgresql.version>
+        <itextpdf.version>5.5.13.2</itextpdf.version>
         <suite.XmlFile>testng.xml</suite.XmlFile>
     </properties>
 
@@ -41,7 +47,7 @@
         <dependency>
             <groupId>ru.testit</groupId>
             <artifactId>testit-api-client</artifactId>
-            <version>0.4.3-1</version>
+            <version>${testit-api-client.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.testng/testng -->
@@ -148,30 +154,30 @@
         <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
-            <version>3.1.9</version>
+            <version>${janino.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>2.0.28</version>
+            <version>${pdfbox.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/ru.yandex.qatools.ashot/ashot -->
         <dependency>
             <groupId>ru.yandex.qatools.ashot</groupId>
             <artifactId>ashot</artifactId>
-            <version>1.5.4</version>
+            <version>${ashot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.18</version>
+            <version>${postgresql.version}</version>
         </dependency>
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itextpdf</artifactId>
-            <version>5.5.13.2</version>
+            <version>${itextpdf.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.aspectj/aspectjweaver -->
         <dependency>
