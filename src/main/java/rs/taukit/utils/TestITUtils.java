@@ -1,6 +1,7 @@
 package rs.taukit.utils;
 
 import rs.taukit.config.Config;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.records.ApiResponse;
 import rs.taukit.scenario.CucumberScenario;
 import rs.taukit.step.manager.HttpRequestManager;
@@ -45,6 +46,9 @@ public class TestITUtils {
         }
         List<File> resultFiles = getFileList(parentSuiteName, suiteName, subSuiteName, name).stream()
                 .sorted(Comparator.comparingLong(File::lastModified)).toList();
+        if (resultFiles.isEmpty()) {
+            throw new AutoTestBrokenException("Не удалось найти результаты выполнения теста %s", scenario.getFullName());
+        }
         File resultFile = resultFiles.getLast();
         String resultContent = FileUtils.readFile(resultFile.getAbsolutePath());
         Map<String, ?> resultMap = JsonParser.parse(resultContent);
@@ -75,6 +79,15 @@ public class TestITUtils {
                             Reason: %s
                             Response headers: %s
                     """, e.getCode(), e.getResponseBody(), e.getResponseHeaders());
+        } catch (Exception e){
+            if (e.getMessage().contains("The field `lastTestResultStatus` in the JSON string is not defined in the `AutoTestModel` properties")) {
+//                TauLogger.console(e.getMessage());
+                autotestId = e.getMessage().split("\"id\":\"")[1].split("\"")[0];
+                externalId = e.getMessage().split("\"externalId\":\"")[1].split("\"")[0];
+//                TauLogger.console("autotestId: %s, externalId: %s", autotestId, externalId);
+            } else {
+                throw new AutoTestBrokenException("Не удалось создать автотест в системе TestIT", e);
+            }
         }
         ScenarioData scenarioData = cucumberScenario.getScenarioStorage().getScenarioData();
         addAutoTestId(externalId, scenarioData);
@@ -126,12 +139,8 @@ public class TestITUtils {
             return;
         }
         WorkItemIdModel workItemIdModel = new WorkItemIdModel();
-        TauLogger.console("workItemId: %s", workItemId);
-        TauLogger.console("autotestId: %s", autotestId);
         workItemIdModel.setId(workItemId);
         workItemIdModel.id(workItemId);
-        System.out.println(workItemIdModel);
-        System.out.println(workItemIdModel);
         try {
             apiInstance.linkAutoTestToWorkItem(autotestId, workItemIdModel);
         } catch (ApiException e) {
