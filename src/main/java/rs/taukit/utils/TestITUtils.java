@@ -44,7 +44,7 @@ public class TestITUtils {
         if (!suiteName.equals("-")) {
             model.setClassname(scenario.getSuiteName());
         }
-        List<File> resultFiles = getFileList(parentSuiteName, suiteName, subSuiteName, name).stream()
+        List<File> resultFiles = getFileList(parentSuiteName, suiteName, subSuiteName, scenario.getName()).stream()
                 .sorted(Comparator.comparingLong(File::lastModified)).toList();
         if (resultFiles.isEmpty()) {
             throw new AutoTestBrokenException("Не удалось найти результаты выполнения теста %s", scenario.getFullName());
