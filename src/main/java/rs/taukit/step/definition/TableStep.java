@@ -30,6 +30,11 @@ public class TableStep extends TableManager {
         super.tableHeadersCheckConditions(tableName, eval(dataTable));
     }
 
+    @И("^в таблице \"(.+)\" для каждой строки проверить выполнение условий:$")
+    public void tableAllRowsCheckConditions(String tableName, DataTable dataTable) {
+        super.tableAllRowsCheckConditions(tableName, eval(dataTable));
+    }
+
     @И("^в таблице \"(.+)\" для каждой ячейки в столбце № (\\d+) проверить выполнение условий:$")
     public void tableColumnCellsCheckConditions(String tableName, int columnNumber, DataTable dataTable) {
         super.tableColumnCellsCheckConditions(tableName, columnNumber, eval(dataTable));

@@ -226,4 +226,14 @@ public class PwTable extends PwElement implements IHasTableElements {
         clickOnElementByConditions(elementName, conditions, true, null);
         TauLogger.report("Текст \"%s\" сохранён, как \"%s\"", scenarioData().get(elementName), elementName);
     }
+
+    @Override
+    public PwBlock setActiveRow(int index) {
+        try {
+            this.activeRow = getRowList().get(index).castTo(PwBlock.class);
+            return this.activeRow;
+        } catch (ArrayIndexOutOfBoundsException ignored) {
+            return null;
+        }
+    }
 }

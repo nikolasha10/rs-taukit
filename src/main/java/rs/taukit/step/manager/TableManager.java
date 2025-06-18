@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.stream.IntStream;
 
+import static rs.taukit.utils.BasicUtils.scenarioData;
+
 public class TableManager extends StepManager {
 
     private static List<Integer> getValidetedHeadersNumbers(String headersNumbers) {
@@ -207,6 +209,53 @@ public class TableManager extends StepManager {
     protected void tableHeadersCheckConditions(String tableName, DataTable dataTable) {
         IHasTableElements table = getElement(tableName);
         tableHeadersCheckConditions(tableName, table.getHeadersList().getItemList(), dataTable);
+    }
+
+    @Step("в таблице '{tableName}' для каждой строки проверить выполнение условий:")
+    protected void tableAllRowsCheckConditions(String tableName, DataTable dataTable) {
+        TauLogger.attachDataTable("Условия проверки столбца таблицы", dataTable);
+        IContainer original = getContext();
+        IHasTableElements table = getElement(tableName);
+        scenarioData().put("контекст таблицы", table);
+        List<IContainer> rows = table.getRowList();
+        Map<String, DataTable> failedRows = new LinkedHashMap<>();
+        IntStream.range(0, rows.size()).boxed().forEach(index -> {
+            IContainer activeRow = table.setActiveRow(index);
+            if (activeRow == null) {
+                return;
+            }
+            getPage().setCurrentContext(activeRow);
+            List<List<String>> notMetConditionList = new ArrayList<>();
+            notMetConditionList.add(dataTable.asLists().getFirst());
+            notMetConditionList.getFirst().remove("Ожидание");
+            notMetConditionList.getFirst().add("Текущее значение");
+            dataTable.asMaps().forEach(conditionData -> {
+                TestCondition testCondition = new TestCondition(conditionData).waitForResult();
+                if (!testCondition.isConditionMet()) {
+                    notMetConditionList.add(Arrays.asList(
+                            testCondition.getObjectType(),
+                            testCondition.getObjectName(),
+                            testCondition.getObjectState(),
+                            testCondition.getExpectedValue(),
+                            testCondition.getCurrentValue()));
+                }
+            });
+            if (notMetConditionList.size() > 1) {
+                DataTable notMetConditionTable = DataTable.create(notMetConditionList, TextUtils.tableConverter);
+                failedRows.put("Строка " + (index + 1), notMetConditionTable);
+            }
+            getPage().setCurrentContext(original);
+        });
+        if (!failedRows.isEmpty()) {
+            Runnable runnable = () -> failedRows.forEach(TauLogger::attachDataTable);
+            List<String> rowNumbers = failedRows.keySet().stream()
+                    .map(name -> name.replace("Строка ", "")).toList();
+            TauLogger.fail(runnable, "Ячейки таблицы '%s' в строках %s не соответствуют требованиям",
+                    tableName, rowNumbers);
+
+        }
+        getPage().replaceCurrentContext(original);
+        TauLogger.console("Строки таблицы '%s' соответствуют условиям проверки", tableName);
     }
 
     @Step("в таблице '{tableName}' для каждой ячейки в столбце № {columnNumber} проверить выполнение условий:")
