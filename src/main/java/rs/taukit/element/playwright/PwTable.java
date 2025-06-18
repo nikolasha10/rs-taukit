@@ -100,6 +100,18 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     @Override
+    public long countRowsByConditions(DataTable dataTable) {
+        PwList rowList = getDescendant("Строки");
+        return rowList.getItemList().stream().filter(row -> {
+            Objects.requireNonNull(page()).setCurrentContext(row);
+            boolean result = dataTable.asMaps().stream()
+                    .allMatch(conditionData -> new TestCondition(conditionData).checkResult().isConditionMet());
+            Objects.requireNonNull(page()).dropCurrentContext();
+            return result;
+        }).count();
+    }
+
+    @Override
     public IElement getActiveCell(String headerName) {
         return activeRow.getElementByName("Столбцы").castTo(PwList.class).getItemList()
                 .get(getHeaderIndex(headerName));

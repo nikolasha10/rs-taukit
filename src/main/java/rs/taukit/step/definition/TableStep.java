@@ -87,6 +87,11 @@ public class TableStep extends TableManager {
         super.findRowByConditions(tableName, eval(dataTable));
     }
 
+    @И("^в таблице \"(.+)\" подсчитать количество строк, соответствующих условиям, и сохранить, как \"(.+)\":$")
+    public void countRowsByConditions(String tableName, String parameterName, DataTable dataTable) {
+        super.countRowsByConditions(tableName, parameterName, eval(dataTable));
+    }
+
     @И("^в найденной строке найти и сохранить значения элементов:$")
     public void findTableRowByConditions(DataTable dataTable) {
         super.saveTableRowElementValue(eval(dataTable));

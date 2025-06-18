@@ -71,6 +71,19 @@ public class TableManager extends StepManager {
         scenarioStorage.stopToSaveActions();
     }
 
+    @Step("в таблице '{tableName}' подсчитать количество строк, соответствующих условиям, и сохранить, как '{parameterName}':")
+    protected void countRowsByConditions(String tableName, String parameterName, DataTable dataTable) {
+        TauLogger.attach("Условия поиска строк", dataTable);
+        Runnable runnable = () -> {
+            IHasTableElements table = waitForTable(tableName);
+            scenarioData.put(parameterName, Long.toString(table.countRowsByConditions(dataTable)));
+        };
+        run(runnable, "В таблице '%s' не удалось подсчитать количество строк, соответствующих заданным условиям", tableName);
+        TauLogger.report("%s = %s", parameterName, scenarioData.get(parameterName));
+        scenarioStorage.clearStepActions();
+        scenarioStorage.stopToSaveActions();
+    }
+
     @Step("в найденной строке сохранить значения элементов:")
     public void saveTableRowElementValue(DataTable dataTable) {
         IHasTableElements table = scenarioData.get("контекст таблицы");
@@ -336,5 +349,4 @@ public class TableManager extends StepManager {
         getPage().setCurrentContext(cell);
         TauLogger.report("[примечание] текущий контекст заголовок '%s' таблицы '%s'", headerName, tableName);
     }
-
 }

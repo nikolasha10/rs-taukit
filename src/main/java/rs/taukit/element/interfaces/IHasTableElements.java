@@ -7,6 +7,8 @@ import java.util.List;
 public interface IHasTableElements extends IElement {
     int findRowByConditions(DataTable dataTable);
 
+    long countRowsByConditions(DataTable dataTable);
+
     IElement getElementByConditions(String elementName, DataTable conditions);
 
     void clickOnElementByConditions(String elementName, DataTable conditions);
@@ -40,4 +42,5 @@ public interface IHasTableElements extends IElement {
     void setCheckbox(String checkboxName);
 
     IContainer setActiveRow(int index);
+
 }
