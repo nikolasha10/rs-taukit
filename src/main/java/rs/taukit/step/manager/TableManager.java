@@ -121,14 +121,18 @@ public class TableManager extends StepManager {
                 : TimeStringParser.getTime(timeout);
         double elementCheckTimeout = Config.getTimeProperty("element.check.timeout");
         AtomicReference<Exception> exception = new AtomicReference<>();
+        IContainer currentContext = getPage().getCurrentContext();
         BooleanSupplier conditions = () -> {
+            boolean isMet = false;
             try {
                 IHasTableElements table = getElement(tableName);
-                return table.isVisible() && table.findRowByConditions(dataTable) > -1;
+                isMet = table.isVisible() && table.findRowByConditions(dataTable) > -1;
             } catch (Exception e) {
                 exception.set(e);
-                return false;
+            } finally {
+                getPage().replaceCurrentContext(currentContext);
             }
+            return isMet;
         };
         Runnable runnable = () -> getDriver().waitForCondition(
                 conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage.getStepActions());
