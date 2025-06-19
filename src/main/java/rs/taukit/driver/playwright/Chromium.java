@@ -27,6 +27,7 @@ public class Chromium extends PwBrowser {
         File downloadDir = new File(Objects.requireNonNull(Config.getProperty("downloads.dir")));
         return browserType.launch(new BrowserType.LaunchOptions()
                 .setHeadless(Config.getBooleanProperty("browser.headless"))
+                .setChannel("chromium")
                 .setDownloadsPath(downloadDir.toPath()));
     }
 
@@ -53,6 +54,7 @@ public class Chromium extends PwBrowser {
                         Config.getIntegerProperty("window.width"),
                         Config.getIntegerProperty("window.height"))
                 .setHeadless(Config.getBooleanProperty("browser.headless"))
+                .setChannel("chromium")
                 .setDownloadsPath(downloadDir.toPath())
                 .setIgnoreHTTPSErrors(true)
                 .setArgs(args);
