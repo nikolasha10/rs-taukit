@@ -38,6 +38,11 @@ public class ContainerStep extends ContainerManager {
         super.setCheckbox(eval(containerName), fieldName);
     }
 
+    @И("^в контейнере \"(.+)\" снять чекбокс \"(.+)\"$")
+    public void unsetCheckbox(String containerName, String fieldName) {
+        super.unsetCheckbox(eval(containerName), fieldName);
+    }
+
     @И("^в контейнере \"(.+)\" установить переключатель \"(.+)\" в значение \"(.+)\"$")
     public void setRadioButton(String containerName, String fieldName, String value) {
         super.setRadioButton(eval(containerName), fieldName, eval(value));

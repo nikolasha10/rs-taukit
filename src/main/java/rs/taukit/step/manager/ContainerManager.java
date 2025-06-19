@@ -93,7 +93,18 @@ public class ContainerManager extends StepManager {
                     checkbox.setCheckbox();
                 }, "Не удалось установить чекбокс '%s' в контейнере '%s' на странице '%s'",
                 fieldName, containerName, getPage().getPageName());
-        TauLogger.report("Установлен чекбокс '%s' в контейнере '%s'", fieldName, containerName);
+        TauLogger.console("Установлен чекбокс '%s' в контейнере '%s'", fieldName, containerName);
+    }
+
+    @Step("в контейнере '{containerName}' снять чекбокс '{fieldName}'")
+    public void unsetCheckbox(String containerName, String fieldName) {
+        run(() -> {
+                    IContainer container = getContainer(containerName);
+                    CanBeChecked checkbox = container.getElementByName(fieldName).castTo(CanBeChecked.class);
+                    checkbox.unsetCheckbox();
+                }, "Не удалось снять чекбокс '%s' в контейнере '%s' на странице '%s'",
+                fieldName, containerName, getPage().getPageName());
+        TauLogger.console("Снят чекбокс '%s' в контейнере '%s'", fieldName, containerName);
     }
 
     @Step("в контейнере '{containerName}' в списке '{listName}' выбрать '{itemName}'")
