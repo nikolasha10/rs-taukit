@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Getter
 public class TestData implements ITestData, HasText {
@@ -32,7 +34,7 @@ public class TestData implements ITestData, HasText {
     public TestData(String fieldName, LinkedHashMap<String, ?> parameters, String dirPath) {
         this.fieldName = fieldName;
         String filePath = YamlParser.convert(parameters.get("файл"));
-        if (filePath == null){
+        if (filePath == null) {
             searchValue = fieldName;
             dataStorage = new DataStorage(parameters);
             return;
@@ -76,6 +78,7 @@ public class TestData implements ITestData, HasText {
     public <T> T get(String fieldName) {
         return dataStorage.get(fieldName);
     }
+
     @Override
     public <T> T getOptional(String fieldName) {
         return dataStorage.getOptional(fieldName);
@@ -100,4 +103,11 @@ public class TestData implements ITestData, HasText {
     public Boolean containsText(String expectedText) {
         return getText().contains(expectedText);
     }
+
+    @Override
+    public Boolean matches(String format) {
+        Matcher matcher = Pattern.compile(format).matcher(getText());
+        return matcher.matches();
+    }
+
 }

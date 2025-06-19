@@ -6,4 +6,6 @@ public interface HasText {
     boolean hasText(String expectedValue);
 
     Boolean containsText(String expectedText);
+
+    Boolean matches(String format);
 }

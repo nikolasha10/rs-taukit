@@ -37,7 +37,7 @@ public class ContainerManager extends StepManager {
             Editable editableValue = container.getElementByName(fieldName).castTo(Editable.class);
             editableValue.setValue(value);
         }, "Не удалось заполнить поле '%s' в контейнере '%s' значением '%s'", fieldName, containerName, value);
-        TauLogger.report("Поле '%s' в контейнере '%s' заполнено значением '%s'", fieldName, containerName, value);
+        TauLogger.console("Поле '%s' в контейнере '%s' заполнено значением '%s'", fieldName, containerName, value);
     }
 
     @Step("в контейнере '{containerName}' заполнить поле '{fieldName}' значением '{value}'")

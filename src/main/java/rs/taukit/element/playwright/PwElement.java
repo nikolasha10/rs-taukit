@@ -14,6 +14,8 @@ import rs.taukit.page.playwright.ElementBuilder;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static rs.taukit.utils.BasicUtils.driver;
@@ -163,6 +165,12 @@ public class PwElement extends Element implements HasText {
     @Override
     public boolean hasText(String value) {
         return getText().equals(value);
+    }
+
+    @Override
+    public Boolean matches(String format) {
+        Matcher matcher = Pattern.compile(format).matcher(getText());
+        return matcher.matches();
     }
 
     @Override
