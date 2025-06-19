@@ -13,7 +13,7 @@ public class TextFieldManager extends StepManager {
             Editable editableValue = getPage().getElement(fieldName);
             editableValue.setValue(value);
         }, "Не удалось заполнить поле '%s' значением '%s'", fieldName, value);
-        TauLogger.report("Поле '%s' заполнено значением '%s'", fieldName, value);
+        TauLogger.console("Поле '%s' заполнено значением '%s'", fieldName, value);
     }
 
     @Step("заполнить поле '{fieldName}' значением '{value}'")
@@ -22,7 +22,17 @@ public class TextFieldManager extends StepManager {
             Editable editableValue = getPage().getElement(fieldName);
             editableValue.setValue(value, controlValue);
         }, "Не удалось заполнить поле '%s' значением '%s'", fieldName, value);
-        TauLogger.report("Поле '%s' заполнено значением '%s'", fieldName, value);
+        TauLogger.console("Поле '%s' заполнено значением '%s'. Текущее значение совпадает с контрольным (%s)",
+                fieldName, value, controlValue);
+    }
+
+    @Step("очистить поле '{fieldName}'")
+    public void clear(String fieldName) {
+        run(() -> {
+            Editable editableValue = getPage().getElement(fieldName).castTo(Editable.class);
+            editableValue.clear();
+        }, "Не удалось очистить поле '%s'", fieldName);
+        TauLogger.console("Поле '%s' очищено", fieldName);
     }
 
     @Step("сохранить значения поля '{fieldName}', как '{parameterName}'")

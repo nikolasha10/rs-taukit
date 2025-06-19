@@ -82,6 +82,10 @@ public class PwElement extends Element implements HasText {
         elementPwLocator.blur();
     }
 
+    public void clear() {
+        elementPwLocator.clear();
+    }
+
     @Override
     public boolean isVisible() {
         return elementPwLocator.first().isVisible();
@@ -132,7 +136,7 @@ public class PwElement extends Element implements HasText {
 
     @Override
     public boolean hasBgColor(String colorRGB) {
-        if (colorRGB.toLowerCase().startsWith("rgb")){
+        if (colorRGB.toLowerCase().startsWith("rgb")) {
             return getBgColor().equalsIgnoreCase(colorRGB);
         } else if (colorRGB.startsWith("#")) {
             return getBgColor().equalsIgnoreCase(hexToRGB(colorRGB));

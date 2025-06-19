@@ -2,8 +2,8 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
-import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.Editable;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
@@ -48,6 +48,11 @@ public class PwTextField extends PwElement implements Editable {
             }
             return currentValue.equals(controlValueFinal);
         });
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
     }
 
     @Override

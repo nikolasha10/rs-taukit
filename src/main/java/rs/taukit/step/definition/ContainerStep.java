@@ -18,6 +18,11 @@ public class ContainerStep extends ContainerManager {
         super.setValue(eval(containerName), fieldName, eval(value));
     }
 
+    @И("^в контейнере \"(.+)\" очистить поле \"(.+)\"$")
+    public void clean(String containerName, String fieldName) {
+        super.clear(eval(containerName), fieldName);
+    }
+
     @И("^в контейнере \"(.+)\" ввести в поле \"(.+)\" значение \"(.+)\" и проконтролировать$")
     public void fillWithControl(String containerName, String fieldName, String value) {
         super.setValue(eval(containerName), eval(value), eval(value));
