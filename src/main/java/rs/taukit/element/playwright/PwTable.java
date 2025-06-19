@@ -96,6 +96,7 @@ public class PwTable extends PwElement implements IHasTableElements {
             return conditionsMet;
         }).findFirst().orElseThrow();
         activeRow = rowList.getItemList().get(foundRowIndex);
+        activeRow.getElementPwLocator().evaluate("e => e.scrollTop += 100");
         return foundRowIndex;
     }
 
@@ -161,7 +162,7 @@ public class PwTable extends PwElement implements IHasTableElements {
                         .get(getHeaderIndex(elementName)).castTo(HasText.class).getText();
                 scenarioData().put(parameterName, elementText);
             } else {
-                PwElement expectedElement = descendants.get(elementName).castTo(PwElement.class);
+                PwElement expectedElement = activeRow.getDescendant(elementName).castTo(PwElement.class);
                 Locator expectedLocator = activeRow.elementPwLocator.locator(expectedElement.getElementPwLocator());
                 elementText = ElementBuilder.buildElement(elementName, expectedElement, expectedLocator)
                         .castTo(HasText.class).getText();
