@@ -5,6 +5,7 @@ import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.*;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.exceptions.TableElementNotFoundException;
 import rs.taukit.page.playwright.ElementBuilder;
@@ -114,6 +115,10 @@ public class PwTable extends PwElement implements IHasTableElements {
 
     @Override
     public IElement getActiveCell(String headerName) {
+        if (activeRow.getElementByName("Столбцы").castTo(PwList.class).getItemList().size() <= getHeaderIndex(headerName)) {
+            throw new AutoTestBrokenException("В строке %d нет столбца с номером %d (%s)",
+                    activeRow.getCurrentIndex(), getHeaderIndex(headerName) + 1, headerName);
+        }
         return activeRow.getElementByName("Столбцы").castTo(PwList.class).getItemList()
                 .get(getHeaderIndex(headerName));
     }
