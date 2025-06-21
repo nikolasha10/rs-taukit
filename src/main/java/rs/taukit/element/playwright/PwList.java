@@ -48,7 +48,7 @@ public class PwList extends PwElement implements HasListItems {
     }
 
     @Override
-    public void selectItem(String itemName) {
+    public PwElement getItem(String itemName) {
         double timeout = Config.getTimeProperty("element.check.interval");
         String expectedItemText = itemName.replace("[!]", "").trim();
         Predicate<String> predicate = itemName.contains("[!]")
@@ -63,11 +63,15 @@ public class PwList extends PwElement implements HasListItems {
         Predicate<IContainer> containerPredicate = itemName.contains("[!]")
                 ? containsElementWithTextEquals(expectedItemText)
                 : containsElementWithText(expectedItemText);
-        getItemList().stream()
+        return getItemList().stream()
                 .filter(PwElement::isVisible)
                 .filter(containerPredicate)
-                .findFirst().orElseThrow(valueNotFoundException(expectedItemText))
-                .click();
+                .findFirst().orElseThrow(valueNotFoundException(expectedItemText));
+    }
+
+    @Override
+    public void selectItem(String itemName) {
+        getItem(itemName).click();
     }
 
     @Override

@@ -14,4 +14,6 @@ public interface HasListItems {
     int getSize();
 
     Boolean containsItems(List<String> expectedItems, boolean isStrong);
+
+    IElement getItem(String itemName);
 }

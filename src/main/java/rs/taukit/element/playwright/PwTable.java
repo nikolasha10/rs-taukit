@@ -168,7 +168,7 @@ public class PwTable extends PwElement implements IHasTableElements {
                 scenarioData().put(parameterName, elementText);
             } else {
                 PwElement expectedElement = activeRow.getDescendant(elementName).castTo(PwElement.class);
-                Locator expectedLocator = activeRow.elementPwLocator.locator(expectedElement.getElementPwLocator());
+                Locator expectedLocator = expectedElement.getElementPwLocator();
                 elementText = ElementBuilder.buildElement(elementName, expectedElement, expectedLocator)
                         .castTo(HasText.class).getText();
                 scenarioData().put(parameterName, elementText);
