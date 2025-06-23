@@ -82,6 +82,11 @@ public class TableStep extends TableManager {
         super.waitForTableConditions(tableName, eval(dataTable));
     }
 
+    @И("^в таблице \"(.+)\" дождаться появления строки, соответствующей условиям \\(в течение (.+)\\):$")
+    public void waitForTableConditions(String tableName, String timeoutString, DataTable dataTable) {
+        super.waitForTableConditions(tableName, timeoutString, eval(dataTable));
+    }
+
     @И("^в таблице \"(.+)\" найти строку, соответствующую условиям:$")
     public void findTableRowByConditions(String tableName, DataTable dataTable) {
         super.findRowByConditions(tableName, eval(dataTable));
@@ -90,6 +95,11 @@ public class TableStep extends TableManager {
     @И("^в таблице \"(.+)\" подсчитать количество строк, соответствующих условиям, и сохранить, как \"(.+)\":$")
     public void countRowsByConditions(String tableName, String parameterName, DataTable dataTable) {
         super.countRowsByConditions(tableName, parameterName, eval(dataTable));
+    }
+
+    @И("^в таблице \"(.+)\" пролистать содержимое (вниз|вверх)$")
+    public void scroll(String tableName, String direction) {
+        super.scroll(tableName, direction);
     }
 
     @И("^в найденной строке найти и сохранить значения элементов:$")

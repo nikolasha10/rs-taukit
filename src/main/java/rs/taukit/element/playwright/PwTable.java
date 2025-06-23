@@ -97,7 +97,7 @@ public class PwTable extends PwElement implements IHasTableElements {
             return conditionsMet;
         }).findFirst().orElseThrow();
         activeRow = rowList.getItemList().get(foundRowIndex);
-        activeRow.getElementPwLocator().evaluate("e => e.scrollTop += 100");
+        activeRow.scrollIntoView(true);
         return foundRowIndex;
     }
 

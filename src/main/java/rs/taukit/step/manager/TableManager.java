@@ -111,15 +111,19 @@ public class TableManager extends StepManager {
 
     }
 
-    @Step("в таблице '{tableName}' дождаться строки, соответствующей условиям")
     public void waitForTableConditions(String tableName, DataTable dataTable) {
+        waitForTableConditions(tableName, Config.getProperty("element.check.interval"), dataTable);
+    }
+
+    @Step("в таблице '{tableName}' дождаться строки, соответствующей условиям")
+    public void waitForTableConditions(String tableName, String timeoutString, DataTable dataTable) {
         TauLogger.attachDataTable("Условия поиска строки", dataTable);
         TauLogger.console("В таблице '%s' ожидается появление строки, соответствующей условиям:", tableName, dataTable);
         String timeout = TestDataUtils.getOptional(dataTable.asMaps().getFirst(), "Ожидание");
         double elementCheckInterval = timeout == null
                 ? Config.getTimeProperty("element.check.interval")
                 : TimeStringParser.getTime(timeout);
-        double elementCheckTimeout = Config.getTimeProperty("element.check.timeout");
+        double elementCheckTimeout = TimeStringParser.getTime(timeoutString);
         AtomicReference<Exception> exception = new AtomicReference<>();
         IContainer currentContext = getPage().getCurrentContext();
         BooleanSupplier conditions = () -> {
@@ -352,5 +356,20 @@ public class TableManager extends StepManager {
         IContainer cell = table.getHeaderByName(headerName);
         getPage().setCurrentContext(cell);
         TauLogger.report("[примечание] текущий контекст заголовок '%s' таблицы '%s'", headerName, tableName);
+    }
+
+    @Step("в таблице '{tableName}' пролистать содержимое {direction}")
+    protected void scroll(String tableName, String direction) {
+        run(() -> {
+            IHasTableElements table = getElement(tableName);
+            List<IContainer> rows = table.getRowList();
+            int visibleCount = (int) rows.stream().filter(CanBeVisible::isVisible).count();
+            switch (direction) {
+                case ("вниз") -> rows.get(visibleCount - 1).scrollIntoView(true);
+                case ("вверх") -> rows.getFirst().scrollIntoView(false);
+            }
+            TauLogger.console("Выполнен скроллинг %s", direction);
+        });
+
     }
 }
