@@ -12,4 +12,6 @@ public interface IElement extends Clickable, CanBeVisible, CanBeEnabled, HasColo
     ElementModel getModel();
 
     void hover();
+
+    void scrollIntoView(boolean alignToTop);
 }

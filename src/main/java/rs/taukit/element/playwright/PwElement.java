@@ -182,4 +182,9 @@ public class PwElement extends Element implements HasText {
     public void hover() {
         elementPwLocator.hover();
     }
+
+    @Override
+    public void scrollIntoView(boolean alignToTop) {
+        elementPwLocator.evaluate("e => e.scrollIntoView(" + alignToTop + ")");
+    }
 }
