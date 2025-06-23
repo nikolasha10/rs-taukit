@@ -9,7 +9,7 @@ public class MouseManager extends StepManager {
     protected void mouseOver(String elementType, String elementName) {
         run(() -> {
             getPage().getElement(elementName).hover();
-            TauLogger.console("Навели указать мыши на %s '%s'", elementType, elementName);
+            TauLogger.console("Навели указатель мыши на %s '%s'", elementType, elementName);
         }, "Не удалось навести указатель мыши на %s '%s' на странице '%s'",
                 elementType, elementName, getPage().getPageName());
     }

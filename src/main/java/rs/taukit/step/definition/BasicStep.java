@@ -46,7 +46,7 @@ public class BasicStep extends CommonManager {
     }
 
 
-    @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы|списка) \"(.+)\"$")
+    @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы|списка|переключателя) \"(.+)\"$")
     public void waitForElement(String elementType, String elementName) {
         super.waitForElement(elementType, elementName);
     }
