@@ -101,13 +101,14 @@ public class TableManager extends StepManager {
         TauLogger.console("Нажали на элемент '%s' в таблице '%s'", elementName, table.getElementName());
     }
 
-    @Step("в найденной строке установить чекбокс '{checkboxName}'")
-    protected void setCheckbox(String checkboxName) {
+    @Step("в найденной строке {action} чекбокс '{checkboxName}'")
+    protected void setCheckbox(String checkboxName, String action) {
         IHasTableElements table = scenarioData.get("контекст таблицы");
-        run(() -> table.setCheckbox(checkboxName),
-                "Не удалось установить чекбокс '%s' в таблице '%s' на странице '%s'",
-                checkboxName, table.getElementName(), getPage().getPageName());
-        TauLogger.console("Установлен чекбокс '%s' в таблице '%s'", checkboxName, table.getElementName());
+        run(() -> table.setCheckbox(checkboxName, action.equals("установить")),
+                "Не удалось %s чекбокс '%s' в таблице '%s' на странице '%s'",
+                action, checkboxName, table.getElementName(), getPage().getPageName());
+        TauLogger.console("%s чекбокс '%s' в таблице '%s'",
+                action.equals("установить") ? "Установлен" : "Снят", checkboxName, table.getElementName());
 
     }
 

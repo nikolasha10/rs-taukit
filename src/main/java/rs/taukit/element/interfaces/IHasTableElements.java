@@ -39,7 +39,7 @@ public interface IHasTableElements extends IElement {
 
     List<IContainer> getRowList();
 
-    void setCheckbox(String checkboxName);
+    void setCheckbox(String checkboxName, boolean state);
 
     IContainer setActiveRow(int index);
 

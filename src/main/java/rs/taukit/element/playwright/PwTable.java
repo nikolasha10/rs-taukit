@@ -186,8 +186,13 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     @Override
-    public void setCheckbox(String checkboxName) {
-        activeRow.getElementByName(checkboxName).castTo(PwCheckbox.class).setCheckbox();
+    public void setCheckbox(String checkboxName, boolean state) {
+        PwCheckbox checkbox = activeRow.getElementByName(checkboxName).castTo(PwCheckbox.class);
+        if (state) {
+            checkbox.setCheckbox();
+        } else {
+            checkbox.unsetCheckbox();
+        }
     }
 
     @Override
