@@ -145,6 +145,7 @@ public class TableManager extends StepManager {
                 "В таблице '%s' не удалось дождаться строки, соответствующей заданным условиям", tableName);
         scenarioStorage.clearStepActions();
         scenarioStorage.stopToSaveActions();
+        TauLogger.console("Строка найдена");
     }
 
     @Step("в таблице '{tableName}' проверить наличие столбцов:")
