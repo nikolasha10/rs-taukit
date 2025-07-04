@@ -5,7 +5,8 @@
     <style>
         body {margin: 0px; padding: 0px}
         .active {color: #ffd050;}
-        #button_run {margin: 20px; padding: 10px;}
+        #buttonRun {margin: 20px; padding: 10px;}
+        .started {border: 1px solid green; background-color: #a0ffa0; }
         .expander {padding: 3px 15px 3px 3px;}
         .passed{
             position: absolute;
@@ -85,7 +86,7 @@
             content: "✓";
             color: yellow;
         }
-        #container_content { position: absolute; right: 0px; top: 0px; bottom: 0px; overflow: hidden; background-color: #BFCbCe; padding: 5px 10px 5px 10px; z-index: 1;}
+        #container_content { position: absolute; right: 0px; top: 0px; bottom: 0px; overflow: auto; background-color: #BFCbCe; padding: 5px 10px 5px 10px; z-index: 1;}
         #scenarioTreeContainer { position: absolute; overflow: auto; padding-top: 0px;}
         .test-counters {
             font-weight: bold;
@@ -217,7 +218,7 @@
 </div>
 
 <script type="text/javascript">
-    const pipelineUrl = '${jenkinsPipelineUrl}'.replace('qatar', window.location.hostname);
+    const pipelineUrl = '';
     const authorization = 'Basic ${jenkinsAuth}';
     const stands = ${stands};
     const currentStand = '${currentStand}';
@@ -225,6 +226,9 @@
     const defaultBranch = '${defaultBranch}';
     const scenarioData = ${scenarioData};
     const filterOptionsValues = {"Все": true};
+    let checkStatusTimeout;
+    let getLogTimeout;
+    let testsStarted = false;
 
     function createTree(parentContainer, data){
         for (let name in data){
@@ -269,23 +273,22 @@
             apply.onclick = filterApply.bind(apply, label, null);
         },
         run: function(label, view){
-            view.innerHTML = "<div>Тестовый стенд</div><div><select id='test_stand'></select></div>"
+            view.innerHTML = "<div>Тестовый стенд</div><div><select id='testStand'></select></div>"
                            + "<div id='container_tag_list'>Теги тестов:<br><textarea id='tag_list' rows=20></textarea></div>"
                            + "<div>Тег стенда</div><div><input id='stand_tag'></div>"
                            + "<div>Ветка фреймворка</div><div><select id='framework_branch'></select></div>"
-                           + "<div>Ветка автотестов</div><div><select id='autotest_branch'></select></div>"
-                           + "<div>Очистить историю</div><div><input name='mavenGoal' type='radio' value='clean test'> Да <br><input name='mavenGoal' type='radio' value='test' checked> Нет</div>"
+                           + "<div>Ветка автотестов</div><div><select id='autotestBranch'></select></div>"
+                           + "<div>Очистить историю</div><div><input name='mavenGoal' id='maven_goal' type='radio' value='clean test'> Да <br><input name='mavenGoal' type='radio' value='test' checked> Нет</div>"
                            + "<div>Отслеживать зависимости</div><div><input name='trackDependencies' type='radio' value='true' checked> Да <br><input name='trackDependencies' type='radio' value='false'> Нет</div>"
                            + "<div>Отправить email</div><div><input name='sendEmail' type='radio' value='true'> Да <br><input name='sendEmail' type='radio' value='false' checked> Нет</div>"
                            + "<div>Автотесты в TestIT</div><div><input name='testItAction' type='radio' value='none' checked> Без изменений<br><input name='testItAction' type='radio' value='create'> Создать<br><input name='testItAction' type='radio' value='update'> Обновить</div>"
-                           + "<div><button id='button_run'>Запустить</button></div><div id='buildInfo'></div>";
-            const testStand = document.getElementById("test_stand");
+                           + "<div><button id='buttonRun'>Запустить</button></div><div id='buildInfo'></div><div><textarea id='testRunLog' cols=150 rows=20 class='hidden'></textarea></div>"
+                           + "<iframe name='iframe' class='hidden'></iframe>";
             for (let stand of stands){
                 let selected = stand === currentStand;
                 let option = new Option(stand, stand, selected, selected);
                 testStand.add(option);
             }
-            const autotestBranch = document.getElementById("autotest_branch");
             for (let branch of branches){
                 let selected = branch === defaultBranch;
                 let option = new Option(branch, branch, selected, selected);
@@ -297,21 +300,48 @@
             const tagList = checkbox.checked && !tags.hasHidden ? [checkbox.value] : tags.tagList;
             const textarea = document.getElementById("tag_list");
             textarea.innerHTML = tagList.join("\n");
-            const buttonRun = document.getElementById("button_run");
-            buttonRun.onclick = function(){
-                checkBuildStatus((data) => {
-                    let startConfirm = true;
-                    if (data.inProgress){
-                        startConfirm = window.confirm('Тесты уже выполняются. Вы уверены, что хотите запустить выбранные тесты параллельно?')
-                    }
-                    if (startConfirm){
-                        startNewBuild(data.id, tags.tagList, testStand.value, autotestBranch.value);
-                    }
-                });
-            }
+<!--            startForm.action = pipelineUrl + '/start';-->
+            checkTestRunStatus();
+            buttonRun.onclick = startNewTestRun;
 
         }
     }
+    function checkTestRunStatus(){
+        if (!document.getElementById('buildInfo')){
+            clearTimeout(checkStatusTimeout);
+            return;
+        }
+        fetch(pipelineUrl + '/start/status', {
+            method: 'GET',
+            mode: 'cors'
+        }).then(response => {
+            if (response.status == 200){
+                return response.json();
+            } else {
+                alert('Запрос статуса вернул ошибку ' + response.status);
+            }
+        }).then(status => {
+            if (status == true){
+                buildInfo.innerHTML = 'Автотесты выполняются';
+                addClass(buildInfo, 'started');
+                buttonRun.innerHTML = 'Остановить';
+                buttonRun.disabled = false;
+                buttonRun.onclick = cancelTests;
+                testsStarted = true;
+                if (isHidden(testRunLog)) {
+                    show(testRunLog);
+                    getLog(0);
+                }
+            } else if (testsStarted){
+                buildInfo.innerHTML = 'Автотесты завершены';
+                removeClass(buildInfo, 'started');
+                buttonRun.innerHTML = 'Запустить';
+                buttonRun.onclick = startNewTestRun;
+            }
+            checkStatusTimeout = setTimeout(checkTestRunStatus, 7000);
+        });
+    }
+
     function getSelectedTags(checkbox){
         const tags = {hasHidden: false, tagList: []};
         const header = checkbox.parentNode.parentNode;
@@ -424,7 +454,7 @@
             if (nextContainer && nextContainer.className.includes('test-tree-container') && nextContainer.firstChild.className != 'error'){
                 show(container);
                 show(nextContainer);
-                if (checkEmpty(nextContainer)){ 
+                if (checkEmpty(nextContainer)){
                     hide(container);
                     hide(nextContainer);
                 }
@@ -482,7 +512,9 @@
         e.className = e.className.replace(c, n);
     }
     function addClass(e, c){
-        e.className+= ' ' + c;
+        if (e.className.split(' ').indexOf(c) < 0){
+            e.className+= ' ' + c;
+        }
     }
     function removeClass(e, c){
         if (e.className){
@@ -583,7 +615,7 @@
         return {header: header, container: container};
     }
     function checkBuildStatus(callback, lastBuildId){
-        fetch(pipelineUrl + '/lastBuild/api/json', {
+        fetch(pipelineUrl + '/start/check', {
             method: 'GET',
             headers: {
                 'Authorization': authorization
@@ -598,6 +630,110 @@
             callback(data, lastBuildId);
         });
     }
+    function startTests(){
+        if (testsStarted) return;
+        testsStarted = true;
+        submit.disabled = true;
+        const tagList = document.getElementById('tag_list').value.replaceAll('\n',',');
+        mavenGoal.value = maven_goal.value;
+        standName.value = test_stand.value;
+        tags.value = tagList;
+        let actions = document.getElementsByName('mavenGoal');
+        for (let action of actions){
+            if (action.checked){
+                mavenGoal.value = action.value;
+                break;
+            }
+        }
+        testsStarted = true;
+        show(testRunLog);
+        getLog(0);
+        if (startForm) {
+            startForm.submit();
+        }
+    }
+
+    function getLog(lastIndex){
+        if (lastIndex < 0) {
+            clearTimeout(getLogTimeout);
+            return;
+        } else if (lastIndex == 0){
+            testRunLog.innerHTML = '';
+        }
+        fetch(pipelineUrl + '/start/getLog/' + lastIndex, {
+            method: 'GET',
+            mode: 'cors'
+        }).then(response => {
+            if (response.status == 200){
+                return response.json();
+            } else {
+                alert('Запрос статуса вернул ошибку ' + response.status);
+            }
+        }).then(data => {
+            if (!document.getElementById('testRunLog')) return;
+            const scrolledDown =  Math.abs(testRunLog.scrollHeight - testRunLog.clientHeight - testRunLog.scrollTop) <= 1;
+            for (let index in data){
+                testRunLog.innerHTML += data[index] + '\n';
+            }
+            if (scrolledDown) {
+                testRunLog.scrollTop = testRunLog.scrollHeight;
+            }
+            getLogTimeout = setTimeout(getLog, 3000, lastIndex + data.length);
+        });
+    }
+
+    function cancelTests(){
+        buildInfo.innerHTML = 'Отправлен запрос на отмену запуска тестов';
+        fetch(pipelineUrl + '/start/cancel', {
+            method: 'GET',
+            mode: 'cors'
+        }).then(response => {
+            if (response.status == 200){
+                return response.json();
+            } else {
+                alert('Запрос статуса вернул ошибку ' + response.status);
+            }
+        }).then(status => {
+            if (status == false){
+                buildInfo.innerHTML = 'Процесс запуска остановлен';
+                buttonRun.innerHTML = 'Запустить';
+                buttonRun.onclick = startNewTestRun;
+                getLog(-1);
+            }
+        });
+    }
+
+    function startNewTestRun(){
+        buttonRun.disabled = true;
+        buildInfo.innerHTML = 'Подготовка данных для запуска автотестов';
+        let formData = {};
+        formData.standName = testStand.value;
+        formData.tags = document.getElementById('tag_list').value.replaceAll('\n',',');
+        for (let label of ['mavenGoal', 'trackDependencies', 'sendEmail', 'testItAction']){
+            let actions = document.getElementsByName(label);
+            for (let action of actions){
+                if (action.checked){
+                    formData[label] = action.value;
+                    break;
+                }
+            }
+        }
+        fetch(pipelineUrl + '/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                mode: 'cors'
+            },
+            body: JSON.stringify(formData)
+        }).then(response => {
+            testsStarted = true;
+            show(testRunLog);
+            getLog(0);
+        });
+        buildInfo.innerHTML = 'Отправлен запрос на запуск автотестов';
+
+    }
+
     function startNewBuild(lastBuildId, tagList, stand, branch, ){
         let scenarioTags = tagList.join(',');
         let formData = new FormData();
@@ -618,7 +754,7 @@
             parameters.push(pair.join('='));
         }
         let fetchBody = parameters.join('&');
-        fetch(pipelineUrl + '/buildWithParameters', {
+        fetch(pipelineUrl + '/start', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -810,4 +946,5 @@
 </script>
 
 
-</body></html>
+</body>
+</html>
