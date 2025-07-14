@@ -43,6 +43,8 @@ public abstract class PwBrowser implements IWebBrowser {
 
     protected abstract BrowserContext createContext(int index, List<String> args);
 
+    protected abstract void removeChromeDir(int index);
+
     private PlaywrightPageObject initPage(String pageName) {
         try {
             return new PlaywrightPageObject(getPage(), pageName);

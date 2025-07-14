@@ -110,14 +110,17 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public void closeBrowser() {
-        browserList.get(currentBrowserIndex).close();
+        getCurrentBrowser().close();
+        getCurrentBrowser().removeChromeDir(currentBrowserIndex);
         scenarioStorage().setCurrentUser(null);
         browserList.remove(currentBrowserIndex);
     }
 
-
     @Override
     public void closeDriver() {
+        if (isBrowserOpen()) {
+            closeBrowser();
+        }
         playwright.close();
     }
 

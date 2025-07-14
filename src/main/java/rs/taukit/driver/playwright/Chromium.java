@@ -7,6 +7,8 @@ import com.microsoft.playwright.options.Proxy;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.FileNotCreatedException;
+import rs.taukit.utils.FileUtils;
+import rs.taukit.utils.TauLogger;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,5 +69,12 @@ public class Chromium extends PwBrowser {
                 .launchPersistentContext(
                         chromeDirExternally.getAbsoluteFile().toPath(),
                         options);
+    }
+
+    @Override
+    protected void removeChromeDir(int index) {
+        long threadId = Thread.currentThread().threadId();
+        File chromeDirExternally = new File(String.format("target/chromium/%d_%d", threadId, index));
+        FileUtils.deleteDirectory(chromeDirExternally.toPath());
     }
 }
