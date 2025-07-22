@@ -281,6 +281,5 @@ public class CommonManager extends StepManager {
         TauLogger.attachDataTable(parameterName, dataTable);
         scenarioData.put(parameterName, dataTable.asList());
         TauLogger.console(parameterName + ":");
-        System.out.println(dataTable);
     }
 }
