@@ -28,6 +28,22 @@ public class ListManager extends StepManager {
         TauLogger.report("в списке '%s' выбран '%s'", listName, itemName);
     }
 
+    @Step("в списке '{listName}' выбрать {number}-й '{elementType}'")
+    public void selectItem(String listName, String number, String elementType) {
+        run(() -> {
+                    HasListItems list = getElement(listName);
+                    int index = Integer.parseInt(number) - 1;
+                    IElement element = list.getItemList().get(index);
+                    if (elementType.equals("блок")) {
+                        getPage().setCurrentContext(element);
+                        TauLogger.report("[примечание] текущий контекст: %s-й элемент списка '%s'", number, listName);
+                    } else {
+                        element.click();
+                    }
+                }, "Не удалось выбрать %s-й %s в списке '%s' на странице '%s'",
+                number, elementType, listName, getPage().getPageName());
+    }
+
     @Step("в списке '{listName}' найти {itemType}, соответствующий условиям:")
     public void findItemByConditions(String listName, String itemType, DataTable dataTable) {
         TauLogger.attachDataTable("Условия поиска элемента", dataTable);
