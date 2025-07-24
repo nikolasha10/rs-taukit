@@ -92,7 +92,7 @@ public class FileManager extends StepManager {
             downloadable.click(file);
         }, "Не удалось нажать на '%s' и скачать файл '%s'", buttonName, fileName);
         FileUtils.writeFile(Path.of(infoPath), YamlParser.write(info, false));
-        TauLogger.attachFile(this.fileName, file.getAbsolutePath());
+        TauLogger.attachFile(this.fileName, file.getAbsolutePath(), fileExtension);
         LinkedHashMap<String, String> fileData = new LinkedHashMap<>();
         fileData.put("тип", "файл");
         fileData.put("путь", file.getPath());

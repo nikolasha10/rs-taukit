@@ -110,14 +110,17 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public void closeBrowser() {
-        browserList.get(currentBrowserIndex).close();
+        getCurrentBrowser().close();
+        getCurrentBrowser().removeChromeDir(currentBrowserIndex);
         scenarioStorage().setCurrentUser(null);
         browserList.remove(currentBrowserIndex);
     }
 
-
     @Override
     public void closeDriver() {
+        if (isBrowserOpen()) {
+            closeBrowser();
+        }
         playwright.close();
     }
 
@@ -170,7 +173,8 @@ public class PlaywrightDriver implements IWebDriver {
     }
 
     @Override
-    public void waitForCondition(BooleanSupplier condition, double interval, double timeout, List<Runnable> previousStepList) {
+    public void waitForCondition(BooleanSupplier condition, double singleCheckTimeout, double timeout, List<Runnable> previousStepList) {
+        double interval = previousStepList.isEmpty() ? timeout : singleCheckTimeout;
         getCurrentBrowser().setDefaultTimeout(interval);
         BrowserContext.WaitForConditionOptions setTimeout = new BrowserContext.WaitForConditionOptions().setTimeout(timeout);
         getBrowserContext().waitForCondition(() -> {

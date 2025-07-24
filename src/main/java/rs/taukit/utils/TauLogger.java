@@ -367,8 +367,47 @@ public final class TauLogger {
         return null;
     }
 
+    public static byte[] attachFile(String fileName, String filePath, String fileExtension) {
+        switch (fileExtension) {
+            case "pdf":
+                attachPdfFile(fileName, filePath);
+                break;
+            case "txt":
+                attachTxtFile(fileName, filePath);
+                break;
+            case "xls":
+                attachXlsFile(fileName, filePath);
+                break;
+            default:
+                attachFile(fileName, filePath);
+        }
+        return null;
+    }
+
+    @Attachment(value = "{fileName}", type = "text/plain", fileExtension = ".txt")
+    public static byte[] attachTxtFile(String fileName, String filePath) {
+        File file = new File(filePath);
+        try {
+            return Files.readAllBytes(file.toPath());
+        } catch (IOException ioException) {
+            warnWOSS(ioException, "Не удалось приложить файл '%s' к отчету", filePath);
+        }
+        return null;
+    }
+
     @Attachment(value = "{fileName}", type = "application/pdf", fileExtension = ".pdf")
     public static byte[] attachPdfFile(String fileName, String filePath) {
+        File file = new File(filePath);
+        try {
+            return Files.readAllBytes(file.toPath());
+        } catch (IOException ioException) {
+            warnWOSS(ioException, "Не удалось приложить файл '%s' к отчету", filePath);
+        }
+        return null;
+    }
+
+    @Attachment(value = "{fileName}", type = "application/vnd.ms-excel", fileExtension = ".xls")
+    public static byte[] attachXlsFile(String fileName, String filePath) {
         File file = new File(filePath);
         try {
             return Files.readAllBytes(file.toPath());

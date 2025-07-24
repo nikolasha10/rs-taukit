@@ -136,6 +136,18 @@ public class BasicStep extends CommonManager {
         super.convertDateTimeFormat(eval(dateTimeString), parameterName, eval(dataTable));
     }
 
+    /**
+     * * преобразовать значение даты "09 июля 2025" в формате "dd LLLL yyyy" и сохранить в параметрах:
+     * <table>
+     *     <tr><td>| Параметр </td><td>| Требуемый формат </td><td>|</td></tr>
+     *     <tr><td>| Конец периода (дата)  </td><td>| dd.MM.yyyy </td><td>|</td></tr>
+     * </table>
+     */
+    @И("^преобразовать значение даты \"(.+)\" в формате \"(.+)\" и сохранить в параметрах:$")
+    public void convertDateTimeFormatMultiple(String dateTimeString, String currentFormat, DataTable dataTable) {
+        super.convertDateTimeFormatMultiple(eval(dateTimeString), currentFormat, eval(dataTable));
+    }
+
     @И("^вычислить дату по формуле \"(.+)\" и сохранить в формате \"(.+)\", как \"(.*)\"$")
     public void evalDateTime(String formula, String format, String parameterName) {
         super.evalDateTime(eval(formula), format, parameterName);

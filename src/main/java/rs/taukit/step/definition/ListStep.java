@@ -9,7 +9,7 @@ import static rs.taukit.utils.BasicUtils.eval;
 /**
  * Шаги для взаимодействия со списковыми элементами
  */
-public class ListStep extends ListManager{
+public class ListStep extends ListManager {
 
     @И("^в списке \"(.+)\" выбрать \"(.+)\"$")
     public void selectItem(String listName, String itemName) {
@@ -19,6 +19,18 @@ public class ListStep extends ListManager{
     @И("^в списке \"(.+)\" найти (элемент|блок), соответствующий условиям:$")
     public void selectValue(String listName, String elementType, DataTable dataTable) {
         super.findItemByConditions(listName, elementType, eval(dataTable));
+    }
+
+    /**
+     * @param listName    название списка
+     * @param number      порядковый номер элемента
+     * @param elementType тип элемента: <br>
+     *                    элемент - будет произведён клик <br>
+     *                    блок - будет установлен в качестве текущего контекста
+     */
+    @И("^в списке \"(.+)\" выбрать (\\d+)-й (элемент|блок)$")
+    public void selectValue(String listName, String number, String elementType) {
+        super.selectItem(listName, eval(number), elementType);
     }
 
     /**

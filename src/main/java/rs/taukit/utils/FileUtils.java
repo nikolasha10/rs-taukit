@@ -8,9 +8,8 @@ import rs.taukit.exceptions.FileNotCreatedException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -249,4 +248,43 @@ public class FileUtils {
         }
     }
 
+    public static String getFileType(String fileExtension) {
+        switch (fileExtension) {
+            case "xls" -> {
+                return "application/vnd.ms-excel";
+            }
+            case "doc" -> {
+                return "application/msword";
+            }
+            case "pdf" -> {
+                return "application/pdf";
+            }
+            case "xml" -> {
+                return "application/xml";
+            }
+            default -> {
+                return "text/plain";
+            }
+        }
+    }
+
+    public static void deleteDirectory(Path path) {
+        try {
+            Files.walkFileTree(path, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException exception) {
+            TauLogger.console(exception);
+        }
+    }
 }

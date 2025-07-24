@@ -258,6 +258,29 @@ public class CommonManager extends StepManager {
         TauLogger.console("дата '%s' преобразована в '%s'", dateTimeString, scenarioData.get(parameterName));
     }
 
+    @Step("преобразовать дату '{dateTimeString}' в формате '{currentFormat}' и сохранить в параметрах:")
+    public void convertDateTimeFormatMultiple(String dateTimeString, String currentFormat, DataTable dataTable) {
+        SimpleDateFormat initialDateFormat = new SimpleDateFormat(currentFormat, Locale.forLanguageTag("ru"));
+        List<Map<String, String>> dataList = dataTable.asMaps();
+        List<List<String>> resultList = new ArrayList<>();
+        resultList.add(Arrays.asList("Параметр", "Требуемый формат", "Результат"));
+        dataList.forEach(data -> {
+            String requiredPattern = data.get("Требуемый формат");
+            String parameter = data.get("Параметр");
+            SimpleDateFormat requiredDateFormat = new SimpleDateFormat(requiredPattern, Locale.forLanguageTag("ru"));
+            try {
+                Date dateTime = initialDateFormat.parse(dateTimeString);
+                scenarioData.put(parameter, requiredDateFormat.format(dateTime));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            resultList.add(Arrays.asList(parameter, requiredPattern, scenarioData.get(parameter)));
+            TauLogger.console("дата '%s' преобразована в '%s'", dateTimeString, scenarioData.get(parameter));
+        });
+        DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
+        TauLogger.attachDataTable("Результат преобразования", resultTable);
+    }
+
     @Step("вычислить дату по формуле '{formula}' и сохранить в формате '{format}', как '{parameterName}'")
     public void evalDateTime(String formula, String format, String parameterName) {
         LinkedHashMap<String, String> data = new LinkedHashMap<>();
@@ -281,6 +304,5 @@ public class CommonManager extends StepManager {
         TauLogger.attachDataTable(parameterName, dataTable);
         scenarioData.put(parameterName, dataTable.asList());
         TauLogger.console(parameterName + ":");
-        System.out.println(dataTable);
     }
 }
