@@ -113,7 +113,7 @@ public class TableManager extends StepManager {
     }
 
     public void waitForTableConditions(String tableName, DataTable dataTable) {
-        waitForTableConditions(tableName, Config.getProperty("condition.wait.timeout"), dataTable);
+        waitForTableConditions(tableName, Config.getProperty("conditions.wait.timeout"), dataTable);
     }
 
     @Step("в таблице '{tableName}' дождаться строки, соответствующей условиям")
