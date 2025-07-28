@@ -121,7 +121,7 @@ public class TableManager extends StepManager {
         TauLogger.attachDataTable("Условия поиска строки", dataTable);
         TauLogger.console("В таблице '%s' ожидается появление строки, соответствующей условиям:", tableName, dataTable);
         String timeout = TestDataUtils.getOptional(dataTable.asMaps().getFirst(), "Ожидание");
-        double elementCheckInterval = timeout == null
+        double elementCheckInterval = timeout == null || timeout.isEmpty()
                 ? Config.getTimeProperty("element.check.interval")
                 : TimeStringParser.getTime(timeout);
         double elementCheckTimeout = TimeStringParser.getTime(timeoutString);
