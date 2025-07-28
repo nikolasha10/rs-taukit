@@ -113,7 +113,7 @@ public class TableManager extends StepManager {
     }
 
     public void waitForTableConditions(String tableName, DataTable dataTable) {
-        waitForTableConditions(tableName, Config.getProperty("element.check.interval"), dataTable);
+        waitForTableConditions(tableName, Config.getProperty("condition.wait.timeout"), dataTable);
     }
 
     @Step("в таблице '{tableName}' дождаться строки, соответствующей условиям")
@@ -122,7 +122,7 @@ public class TableManager extends StepManager {
         TauLogger.console("В таблице '%s' ожидается появление строки, соответствующей условиям:", tableName, dataTable);
         String timeout = TestDataUtils.getOptional(dataTable.asMaps().getFirst(), "Ожидание");
         double elementCheckInterval = timeout == null || timeout.isEmpty()
-                ? Config.getTimeProperty("element.check.interval")
+                ? Config.getTimeProperty("condition.wait.timeout")
                 : TimeStringParser.getTime(timeout);
         double elementCheckTimeout = TimeStringParser.getTime(timeoutString);
         AtomicReference<Exception> exception = new AtomicReference<>();
