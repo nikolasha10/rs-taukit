@@ -123,7 +123,7 @@ public class BasicStep extends CommonManager {
 
     @И("^служебный шаг: выбрать значение, соответствующее условиям, и сохранить, как \"(.+)\":$")
     public void chooseValueByConditions(String parameterName, DataTable dataTable) {
-        super.chooseValueByConditions(eval(dataTable), parameterName);
+        super.chooseValueByConditions(eval(dataTable), eval(parameterName));
     }
 
     @И("^разобрать значение параметра \"(.+)\", сохранив значения в параметрах:$")
@@ -161,6 +161,21 @@ public class BasicStep extends CommonManager {
     @И("^создать коллекцию значений \"(.+)\":$")
     public void createCollection(String parameterName, DataTable dataTable) {
         super.createCollection(parameterName, eval(dataTable));
+
+    }
+
+    /**
+     * Объединяет непустые значения из таблицы через разделитель
+     *     * служебный шаг: объединить значения коллекции через разделитель ", ", и сохранить, как "Контрольное значение":
+     *     <table>
+     *       <tr><td>| раз</td><td>|</td></tr>
+     *       <tr><td>| два</td><td>|</td></tr>
+     *       <tr><td>| три</td><td>|</td></tr>
+     *     </table>
+     */
+    @И("^служебный шаг: объединить значения коллекции через разделитель \"(.+)\", и сохранить, как \"(.+)\":$")
+    public void joinCollection(String delimiter, String parameterName, DataTable dataTable) {
+        super.joinCollection(eval(delimiter), parameterName, eval(dataTable));
     }
 
 }

@@ -4,8 +4,8 @@ import io.cucumber.datatable.DataTable;
 import rs.taukit.driver.DriverManager;
 import rs.taukit.driver.IWebBrowser;
 import rs.taukit.driver.IWebDriver;
-import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.IContainer;
+import rs.taukit.element.interfaces.IElement;
 import rs.taukit.page.PageObject;
 import rs.taukit.page.PageStorage;
 import rs.taukit.scenario.CucumberScenario;
@@ -97,6 +97,8 @@ public class BasicUtils {
     public static DataTable eval(DataTable dataTable) {
         Function<String, String> evaluate = (template) -> {
             if (template == null) return null;
+            if (template.equalsIgnoreCase("${empty}")) return "";
+            if (template.equalsIgnoreCase("${space}")) return " ";
             String format = "\\$\\{(.+?)} -> (.+)";
             Matcher matcher = Pattern.compile(format).matcher(template);
             if (matcher.matches()) {

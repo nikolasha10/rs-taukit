@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static rs.taukit.utils.BasicUtils.eval;
 import static rs.taukit.utils.BasicUtils.scenarioData;
@@ -304,5 +305,12 @@ public class CommonManager extends StepManager {
         TauLogger.attachDataTable(parameterName, dataTable);
         scenarioData.put(parameterName, dataTable.asList());
         TauLogger.console(parameterName + ":");
+    }
+
+    protected void joinCollection(String delimiter, String parameterName, DataTable dataTable) {
+        List<String> collection = dataTable.asList();
+        String result = collection.stream().filter(item -> !item.isEmpty()).collect(Collectors.joining(delimiter));
+        scenarioData.put(parameterName, result);
+        TauLogger.console("Значения коллекции объединены и сохранены в параметр '%s' = '%s'", parameterName, result);
     }
 }

@@ -98,6 +98,13 @@ public class TestCondition {
             conditionMet = false;
             this.currentValue = "<не определено>";
         }
+        String debug = scenarioData().getOptional("debug");
+        if (debug != null && debug.equals("debug")) {
+            TauLogger.report("Текущее значение: %s, Условие выполнено: %s", this.currentValue, this.isConditionMet());
+            if (this.thrownException != null) {
+                TauLogger.console(this.thrownException);
+            }
+        }
         return this;
     }
 }
