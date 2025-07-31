@@ -95,9 +95,11 @@ public class PwTable extends PwElement implements IHasTableElements {
                     .allMatch(conditionData -> new TestCondition(conditionData).checkResult().isConditionMet());
             page().dropCurrentContext();
             return conditionsMet;
-        }).findFirst().orElseThrow();
-        activeRow = rowList.getItemList().get(foundRowIndex);
-        activeRow.scrollIntoView(true);
+        }).findFirst().orElse(-1);
+        if (foundRowIndex > -1) {
+            activeRow = rowList.getItemList().get(foundRowIndex);
+            activeRow.scrollIntoView(true);
+        }
         return foundRowIndex;
     }
 

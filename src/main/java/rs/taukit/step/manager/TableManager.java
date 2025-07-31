@@ -116,6 +116,42 @@ public class TableManager extends StepManager {
         waitForTableConditions(tableName, Config.getProperty("conditions.wait.timeout"), dataTable);
     }
 
+    protected void waitForTableNotContainsRow(String tableName, DataTable dataTable) {
+        waitForTableNotContainsRow(tableName, Config.getProperty("conditions.wait.timeout"), dataTable);
+    }
+
+    @Step("в таблице '{tableName}' дождаться отсутствия строки, соответствующей условиям")
+    protected void waitForTableNotContainsRow(String tableName, String timeoutString, DataTable dataTable) {
+        TauLogger.attachDataTable("Условия поиска строки", dataTable);
+        TauLogger.console("В таблице '%s' ожидается отсутствие строки, соответствующей условиям:", tableName, dataTable);
+        String timeout = TestDataUtils.getOptional(dataTable.asMaps().getFirst(), "Ожидание");
+        double elementCheckInterval = timeout == null || timeout.isEmpty()
+                ? Config.getTimeProperty("condition.wait.timeout")
+                : TimeStringParser.getTime(timeout);
+        double elementCheckTimeout = TimeStringParser.getTime(timeoutString);
+        AtomicReference<Exception> exception = new AtomicReference<>();
+        IContainer currentContext = getPage().getCurrentContext();
+        BooleanSupplier conditions = () -> {
+            boolean isMet = false;
+            try {
+                IHasTableElements table = getElement(tableName);
+                isMet = table.isVisible() && table.findRowByConditions(dataTable) < 0;
+            } catch (Exception e) {
+                exception.set(e);
+            } finally {
+                getPage().replaceCurrentContext(currentContext);
+            }
+            return isMet;
+        };
+        Runnable runnable = () -> getDriver().waitForCondition(
+                conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage.getStepActions());
+        runOnce(runnable, exception.get(),
+                "В таблице '%s' не удалось дождаться отсутствия строки, соответствующей заданным условиям", tableName);
+        scenarioStorage.clearStepActions();
+        scenarioStorage.stopToSaveActions();
+        TauLogger.console("Строка отсутствует");
+    }
+
     @Step("в таблице '{tableName}' дождаться строки, соответствующей условиям")
     public void waitForTableConditions(String tableName, String timeoutString, DataTable dataTable) {
         TauLogger.attachDataTable("Условия поиска строки", dataTable);

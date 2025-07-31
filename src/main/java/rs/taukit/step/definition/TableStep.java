@@ -82,6 +82,11 @@ public class TableStep extends TableManager {
         super.waitForTableConditions(tableName, eval(dataTable));
     }
 
+    @И("^в таблице \"(.+)\" дождаться отсутствия строки, соответствующей условиям:$")
+    public void waitForTableNotContainsRow(String tableName, DataTable dataTable) {
+        super.waitForTableNotContainsRow(tableName, eval(dataTable));
+    }
+
     @И("^в таблице \"(.+)\" дождаться появления строки, соответствующей условиям \\(в течение (.+)\\):$")
     public void waitForTableConditions(String tableName, String timeoutString, DataTable dataTable) {
         super.waitForTableConditions(tableName, timeoutString, eval(dataTable));
