@@ -1,5 +1,6 @@
 package rs.taukit.step.definition;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ru.И;
 import rs.taukit.step.manager.TextFieldManager;
 
@@ -20,5 +21,10 @@ public class TextFieldStep extends TextFieldManager {
     @И("^сохранить значения поля \"(.+)\", как \"(.+)\"$")
     public void saveElementValue(String fieldName, String parameterName) {
         super.saveElementValue(fieldName, eval(parameterName));
+    }
+
+    @И("^сохранить значения элементов в параметры:$")
+    public void saveElementValue(DataTable dataTable) {
+        super.saveElementsValue(eval(dataTable));
     }
 }

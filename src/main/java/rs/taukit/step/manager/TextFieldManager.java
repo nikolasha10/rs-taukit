@@ -1,9 +1,14 @@
 package rs.taukit.step.manager;
 
+import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.element.interfaces.Editable;
 import rs.taukit.element.interfaces.HasText;
 import rs.taukit.utils.TauLogger;
+import rs.taukit.utils.TestDataUtils;
+import rs.taukit.utils.TextUtils;
+
+import java.util.List;
 
 public class TextFieldManager extends StepManager {
 
@@ -43,5 +48,27 @@ public class TextFieldManager extends StepManager {
         }, "Не удалось сохранить значение поля '%s' в параметр '%s'", fieldName, parameterName);
         TauLogger.report("Значение поля '%s' (%s) сохранено, как '%s'",
                 fieldName, scenarioData.get(parameterName), parameterName);
+    }
+
+    @Step("сохранить значения элементов в параметры:")
+    public void saveElementsValue(DataTable dataTable) {
+        run(() -> {
+            dataTable.asMaps().forEach(data -> {
+                String elementName = TestDataUtils.get(data, "Название");
+                String parameterName = TestDataUtils.get(data, "Параметр");
+                HasText textElement = getPage().getElement(elementName);
+                scenarioData.put(parameterName, textElement.getText());
+            });
+        }, "Не удалось сохранить значения элементов в параметры");
+        List<List<String>> resultList = dataTable.asLists();
+        resultList.getFirst().add("Значение");
+        for (int i = 1; i < resultList.size(); i++) {
+            List<String> row = resultList.get(i);
+            row.add(scenarioData.get(row.getLast()));
+        }
+        DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
+        TauLogger.console("Сохранены значения элементов");
+        System.out.println(resultTable);
+        TauLogger.attachDataTable("Значения элементов", resultTable);
     }
 }

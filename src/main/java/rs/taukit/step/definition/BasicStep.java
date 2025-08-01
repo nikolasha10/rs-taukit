@@ -178,4 +178,9 @@ public class BasicStep extends CommonManager {
         super.joinCollection(eval(delimiter), parameterName, eval(dataTable));
     }
 
+    @И("^служебный шаг: произвести замену текста в значениях параметров:$")
+    public void replaceText(DataTable dataTable) {
+        super.replaceText(eval(dataTable));
+    }
+
 }
