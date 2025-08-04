@@ -313,4 +313,24 @@ public class CommonManager extends StepManager {
         scenarioData.put(parameterName, result);
         TauLogger.console("Значения коллекции объединены и сохранены в параметр '%s' = '%s'", parameterName, result);
     }
+
+    protected void replaceText(DataTable dataTable) {
+        dataTable.asMaps().forEach(data -> {
+            String parameterName = TestDataUtils.get(data,"Параметр");
+            String regex = TestDataUtils.get(data,"Поиск");
+            String replacement = TestDataUtils.get(data,"Замена");
+            String saveAs = TestDataUtils.get(data,"Сохранить как");
+            String result = scenarioData.get(parameterName).toString().replaceAll(regex, replacement);
+            scenarioData.put(saveAs, result);
+        });
+        List<List<String>> resultList = dataTable.asLists();
+        resultList.getFirst().add("Результат");
+        for (int i = 1; i < resultList.size(); i++) {
+            List<String> row = resultList.get(i);
+            row.add(scenarioData.get(row.getLast()));
+        }
+        DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
+        TauLogger.console("Произведена замена текста в значениях параметров");
+        System.out.println(resultTable);
+    }
 }

@@ -116,6 +116,42 @@ public class TableManager extends StepManager {
         waitForTableConditions(tableName, Config.getProperty("conditions.wait.timeout"), dataTable);
     }
 
+    protected void waitForTableNotContainsRow(String tableName, DataTable dataTable) {
+        waitForTableNotContainsRow(tableName, Config.getProperty("conditions.wait.timeout"), dataTable);
+    }
+
+    @Step("в таблице '{tableName}' дождаться отсутствия строки, соответствующей условиям")
+    protected void waitForTableNotContainsRow(String tableName, String timeoutString, DataTable dataTable) {
+        TauLogger.attachDataTable("Условия поиска строки", dataTable);
+        TauLogger.console("В таблице '%s' ожидается отсутствие строки, соответствующей условиям:", tableName, dataTable);
+        String timeout = TestDataUtils.getOptional(dataTable.asMaps().getFirst(), "Ожидание");
+        double elementCheckInterval = timeout == null || timeout.isEmpty()
+                ? Config.getTimeProperty("condition.wait.timeout")
+                : TimeStringParser.getTime(timeout);
+        double elementCheckTimeout = TimeStringParser.getTime(timeoutString);
+        AtomicReference<Exception> exception = new AtomicReference<>();
+        IContainer currentContext = getPage().getCurrentContext();
+        BooleanSupplier conditions = () -> {
+            boolean isMet = false;
+            try {
+                IHasTableElements table = getElement(tableName);
+                isMet = table.isVisible() && table.findRowByConditions(dataTable) < 0;
+            } catch (Exception e) {
+                exception.set(e);
+            } finally {
+                getPage().replaceCurrentContext(currentContext);
+            }
+            return isMet;
+        };
+        Runnable runnable = () -> getDriver().waitForCondition(
+                conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage.getStepActions());
+        runOnce(runnable, exception.get(),
+                "В таблице '%s' не удалось дождаться отсутствия строки, соответствующей заданным условиям", tableName);
+        scenarioStorage.clearStepActions();
+        scenarioStorage.stopToSaveActions();
+        TauLogger.console("Строка отсутствует");
+    }
+
     @Step("в таблице '{tableName}' дождаться строки, соответствующей условиям")
     public void waitForTableConditions(String tableName, String timeoutString, DataTable dataTable) {
         TauLogger.attachDataTable("Условия поиска строки", dataTable);
@@ -344,6 +380,31 @@ public class TableManager extends StepManager {
                 containerName, table.getElementName());
     }
 
+    @Step("в найденной строке в меню '{menuName}' выбрать '{itemName}'")
+    protected void tableRowSelectMenuItem(String menuName, String itemName) {
+        IHasTableElements table = scenarioData.get("контекст таблицы");
+        run(() -> table.selectMenuItem(menuName, itemName),
+                "Не удалось выбрать '%s' в меню '%s' в найденной строке таблицы '%s' на странице '%s'",
+                itemName, menuName, table.getElementName(), getPage().getPageName());
+        TauLogger.console("в найденной строке таблицы '%s' в меню '%s' выбран пункт '%s'",
+                table.getElementName(), menuName, itemName);
+    }
+
+    @Step("в найденной строке в меню '{menuName}' выбрать '{itemName}' и скачать файл '{fileName}'")
+    protected void tableRowSelectMenuDownloadFile(String menuName, String itemName, String fileName) {
+        IHasTableElements table = scenarioData.get("контекст таблицы");
+        run(() -> {
+                    Downloadable item = table.getMenuDownloadableItem(menuName, itemName);
+                    FileManager fileManager = new FileManager();
+                    fileManager.init("", fileName);
+                    fileManager.downloadFile(item);
+                },
+                "Не удалось скачать файл по нажатию на '%s' в меню '%s' в найденной строке таблицы '%s' на странице '%s'",
+                itemName, menuName, table.getElementName(), getPage().getPageName());
+        TauLogger.console("в найденной строке таблицы '%s' в меню '%s' выбран пункт '%s' и загружен файл '%s'",
+                table.getElementName(), menuName, itemName, fileName);
+    }
+
     @Step("в таблице '{tableName}' перейти к заголовку столбца № {headerNumber}")
     protected void tableHeaderSetContext(String tableName, int headerNumber) {
         IHasTableElements table = getElement(tableName);
@@ -372,6 +433,5 @@ public class TableManager extends StepManager {
             }
             TauLogger.console("Выполнен скроллинг %s", direction);
         });
-
     }
 }

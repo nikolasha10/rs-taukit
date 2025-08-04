@@ -79,6 +79,12 @@ public class FileManager extends StepManager {
 
     @Step("нажать на '{buttonName}' и скачать файл '{this.fileName}'")
     public void downloadFile(String buttonName) {
+        Downloadable downloadable = getElement(buttonName);
+        downloadFile(downloadable);
+    }
+
+    public void downloadFile(Downloadable downloadable) {
+        String buttonName = downloadable.getElementName();
         String stepName = String.format("%s -> нажать на '%s' и скачать файл '%s'",
                 scenarioStorage.getStepStack(), buttonName, this.fileName);
         LinkedHashMap<String, String> info = getInfo(stepName);
@@ -88,7 +94,6 @@ public class FileManager extends StepManager {
         String filePath = basePath + "-file." + fileExtension;
         File file = new File(filePath);
         run(() -> {
-            Downloadable downloadable = getElement(buttonName);
             downloadable.click(file);
         }, "Не удалось нажать на '%s' и скачать файл '%s'", buttonName, fileName);
         FileUtils.writeFile(Path.of(infoPath), YamlParser.write(info, false));

@@ -82,6 +82,11 @@ public class TableStep extends TableManager {
         super.waitForTableConditions(tableName, eval(dataTable));
     }
 
+    @И("^в таблице \"(.+)\" дождаться отсутствия строки, соответствующей условиям:$")
+    public void waitForTableNotContainsRow(String tableName, DataTable dataTable) {
+        super.waitForTableNotContainsRow(tableName, eval(dataTable));
+    }
+
     @И("^в таблице \"(.+)\" дождаться появления строки, соответствующей условиям \\(в течение (.+)\\):$")
     public void waitForTableConditions(String tableName, String timeoutString, DataTable dataTable) {
         super.waitForTableConditions(tableName, timeoutString, eval(dataTable));
@@ -125,6 +130,16 @@ public class TableStep extends TableManager {
     @И("^в найденной строке перейти к контейнеру \"(.+)\"$")
     public void tableRowSetContainerContext(String containerName) {
         super.tableRowSetContainerContext(containerName);
+    }
+
+    @И("^в найденной строке в меню \"(.+)\" выбрать \"([^\"]+)\"$")
+    public void tableRowSelectMenuItem(String menuName, String itemName) {
+        super.tableRowSelectMenuItem(menuName, itemName);
+    }
+
+    @И("^в найденной строке в меню \"(.+)\" выбрать \"([^\"]+)\" и скачать файл \"([^\"]+)\"$")
+    public void tableRowSelectMenuDownloadFile(String menuName, String itemName, String fileName) {
+        super.tableRowSelectMenuDownloadFile(menuName, itemName, fileName);
     }
 
     @И("^в строке \\((.+)\\) нажать на \"(.+)\"$")

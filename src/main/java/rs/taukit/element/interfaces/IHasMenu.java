@@ -4,4 +4,6 @@ public interface IHasMenu extends IElement {
     void selectMenuItem(String itemName);
 
     boolean containsItem(String itemName);
+
+    IElement getMenuItem(String itemName);
 }

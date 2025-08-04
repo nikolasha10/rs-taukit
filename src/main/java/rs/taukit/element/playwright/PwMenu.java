@@ -31,13 +31,13 @@ public class PwMenu extends PwElement implements IHasMenu {
     }
 
     @Override
-    public void selectMenuItem(String itemName) {
+    public IElement getMenuItem(String itemName) {
         PwList itemList = getDescendant("Пункты меню");
         List<String> itemValues = itemList.getValues();
         AtomicReference<String> errorMessage = new AtomicReference<>("");
         try {
             if (itemList.getItemList().stream().anyMatch(item -> item.getText().equals(itemName))) {
-                itemList.selectItem(itemName);
+                return itemList.getItem(itemName);
             } else {
                 PwButton item = getDescendant("Дополнительные пункты");
                 PwList additionalItemList = getDescendant("Выпадающий список");
@@ -55,7 +55,6 @@ public class PwMenu extends PwElement implements IHasMenu {
                                     Дополнительные: %s""", itemName, itemValues, additionalValues));
                             throw new RuntimeException(errorMessage.get());
                         }
-                        additionalItemList.selectItem(itemName);
                         return true;
                     } catch (Exception e) {
                         return false;
@@ -63,12 +62,18 @@ public class PwMenu extends PwElement implements IHasMenu {
                 };
                 getDriver().waitForCondition(condition);
                 getDriver().getCurrentBrowser().setDefaultTimeout();
+                return additionalItemList.getItem(itemName);
             }
         } catch (Exception e) {
             String message = String.format("""
-                    Не удалось выбрать пункт '%s' в меню '%s'%s""", itemName, elementName, errorMessage.get());
+                    Не удалось найти пункт '%s' в меню '%s'%s""", itemName, elementName, errorMessage.get());
             throw new RuntimeException(message, e);
         }
+    }
+
+    @Override
+    public void selectMenuItem(String itemName) {
+        getMenuItem(itemName).click();
     }
 
     @Override

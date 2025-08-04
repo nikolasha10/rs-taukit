@@ -95,9 +95,11 @@ public class PwTable extends PwElement implements IHasTableElements {
                     .allMatch(conditionData -> new TestCondition(conditionData).checkResult().isConditionMet());
             page().dropCurrentContext();
             return conditionsMet;
-        }).findFirst().orElseThrow();
-        activeRow = rowList.getItemList().get(foundRowIndex);
-        activeRow.scrollIntoView(true);
+        }).findFirst().orElse(-1);
+        if (foundRowIndex > -1) {
+            activeRow = rowList.getItemList().get(foundRowIndex);
+            activeRow.scrollIntoView(true);
+        }
         return foundRowIndex;
     }
 
@@ -206,6 +208,22 @@ public class PwTable extends PwElement implements IHasTableElements {
     public void setContainerContext(String containerName) {
         IContainer container = activeRow.getElementByName(containerName).castTo(IContainer.class);
         Objects.requireNonNull(page()).setCurrentContext(container);
+    }
+
+    @Override
+    public void selectMenuItem(String menuName, String itemName) {
+        this.activeRow.getElementByName(menuName).castTo(PwMenu.class).selectMenuItem(itemName);
+    }
+
+    @Override
+    public IElement getMenuItem(String menuName, String itemName) {
+        return this.activeRow.getElementByName(menuName).castTo(PwMenu.class).getMenuItem(itemName);
+    }
+
+    @Override
+    public Downloadable getMenuDownloadableItem(String menuName, String itemName) {
+        PwBlock element = getMenuItem(menuName, itemName).castTo(PwBlock.class);
+        return new PwFileDownload(itemName, element.getElementPwLocator(), element.getModel());
     }
 
     @Override
