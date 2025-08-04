@@ -132,9 +132,14 @@ public class TableStep extends TableManager {
         super.tableRowSetContainerContext(containerName);
     }
 
-    @И("^в найденной строке в меню \"(.+)\" выбрать \"(.+)\"$")
+    @И("^в найденной строке в меню \"(.+)\" выбрать \"([^\"]+)\"$")
     public void tableRowSelectMenuItem(String menuName, String itemName) {
         super.tableRowSelectMenuItem(menuName, itemName);
+    }
+
+    @И("^в найденной строке в меню \"(.+)\" выбрать \"([^\"]+)\" и скачать файл \"([^\"]+)\"$")
+    public void tableRowSelectMenuDownloadFile(String menuName, String itemName, String fileName) {
+        super.tableRowSelectMenuDownloadFile(menuName, itemName, fileName);
     }
 
     @И("^в строке \\((.+)\\) нажать на \"(.+)\"$")

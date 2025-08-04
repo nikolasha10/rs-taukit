@@ -44,4 +44,8 @@ public interface IHasTableElements extends IElement {
     IContainer setActiveRow(int index);
 
     void selectMenuItem(String menuName, String itemName);
+
+    IElement getMenuItem(String menuName, String itemName);
+
+    Downloadable getMenuDownloadableItem(String menuName, String itemName);
 }

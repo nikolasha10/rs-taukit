@@ -390,6 +390,21 @@ public class TableManager extends StepManager {
                 table.getElementName(), menuName, itemName);
     }
 
+    @Step("в найденной строке в меню '{menuName}' выбрать '{itemName}' и скачать файл '{fileName}'")
+    protected void tableRowSelectMenuDownloadFile(String menuName, String itemName, String fileName) {
+        IHasTableElements table = scenarioData.get("контекст таблицы");
+        run(() -> {
+                    Downloadable item = table.getMenuDownloadableItem(menuName, itemName);
+                    FileManager fileManager = new FileManager();
+                    fileManager.init("", fileName);
+                    fileManager.downloadFile(item);
+                },
+                "Не удалось скачать файл по нажатию на '%s' в меню '%s' в найденной строке таблицы '%s' на странице '%s'",
+                itemName, menuName, table.getElementName(), getPage().getPageName());
+        TauLogger.console("в найденной строке таблицы '%s' в меню '%s' выбран пункт '%s' и загружен файл '%s'",
+                table.getElementName(), menuName, itemName, fileName);
+    }
+
     @Step("в таблице '{tableName}' перейти к заголовку столбца № {headerNumber}")
     protected void tableHeaderSetContext(String tableName, int headerNumber) {
         IHasTableElements table = getElement(tableName);

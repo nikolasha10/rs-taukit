@@ -216,6 +216,17 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     @Override
+    public IElement getMenuItem(String menuName, String itemName) {
+        return this.activeRow.getElementByName(menuName).castTo(PwMenu.class).getMenuItem(itemName);
+    }
+
+    @Override
+    public Downloadable getMenuDownloadableItem(String menuName, String itemName) {
+        PwBlock element = getMenuItem(menuName, itemName).castTo(PwBlock.class);
+        return new PwFileDownload(itemName, element.getElementPwLocator(), element.getModel());
+    }
+
+    @Override
     public boolean checkHeader(String name) {
         try {
             return getHeaderIndex(name) > -1;
