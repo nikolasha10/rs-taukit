@@ -211,6 +211,11 @@ public class PwTable extends PwElement implements IHasTableElements {
     }
 
     @Override
+    public void selectMenuItem(String menuName, String itemName) {
+        this.activeRow.getElementByName(menuName).castTo(PwMenu.class).selectMenuItem(itemName);
+    }
+
+    @Override
     public boolean checkHeader(String name) {
         try {
             return getHeaderIndex(name) > -1;

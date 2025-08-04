@@ -132,6 +132,11 @@ public class TableStep extends TableManager {
         super.tableRowSetContainerContext(containerName);
     }
 
+    @И("^в найденной строке в меню \"(.+)\" выбрать \"(.+)\"$")
+    public void tableRowSelectMenuItem(String menuName, String itemName) {
+        super.tableRowSelectMenuItem(menuName, itemName);
+    }
+
     @И("^в строке \\((.+)\\) нажать на \"(.+)\"$")
     public void tableRowElementClick(String rowName, String elementName) {
         ((IHasTableElements) scenarioData().get(rowName)).tableRowElementClick(rowName, elementName);

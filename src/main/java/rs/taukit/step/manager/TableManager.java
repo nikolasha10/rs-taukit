@@ -380,6 +380,16 @@ public class TableManager extends StepManager {
                 containerName, table.getElementName());
     }
 
+    @Step("в найденной строке в меню '{menuName}' выбрать '{itemName}'")
+    protected void tableRowSelectMenuItem(String menuName, String itemName) {
+        IHasTableElements table = scenarioData.get("контекст таблицы");
+        run(() -> table.selectMenuItem(menuName, itemName),
+                "Не удалось выбрать '%s' в меню '%s' в найденной строке таблицы '%s' на странице '%s'",
+                itemName, menuName, table.getElementName(), getPage().getPageName());
+        TauLogger.console("в найденной строке таблицы '%s' в меню '%s' выбран пункт '%s'",
+                table.getElementName(), menuName, itemName);
+    }
+
     @Step("в таблице '{tableName}' перейти к заголовку столбца № {headerNumber}")
     protected void tableHeaderSetContext(String tableName, int headerNumber) {
         IHasTableElements table = getElement(tableName);
@@ -408,6 +418,5 @@ public class TableManager extends StepManager {
             }
             TauLogger.console("Выполнен скроллинг %s", direction);
         });
-
     }
 }
