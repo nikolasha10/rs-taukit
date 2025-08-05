@@ -13,7 +13,7 @@ public class BasicStep extends CommonManager {
 
     @И("^нажать на (элемент|поле|кнопку|ссылку) \"(.+)\"$")
     public void click(String elementType, String elementName) {
-        super.clickElement(elementType, elementName);
+        super.clickElement(elementType, eval(elementName));
     }
 
     @И("^нажать на (элемент|поле|кнопку|ссылку) \"(.+)\" и сохранить данные запроса, соответствующего условиям:$")
@@ -48,7 +48,7 @@ public class BasicStep extends CommonManager {
 
     @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы|списка|переключателя) \"(.+)\"$")
     public void waitForElement(String elementType, String elementName) {
-        super.waitForElement(elementType, elementName);
+        super.waitForElement(elementType, eval(elementName));
     }
 
     @И("^сохранить файл \"(.+)\", как \"(.+)\"$")
@@ -166,12 +166,12 @@ public class BasicStep extends CommonManager {
 
     /**
      * Объединяет непустые значения из таблицы через разделитель
-     *     * служебный шаг: объединить значения коллекции через разделитель ", ", и сохранить, как "Контрольное значение":
-     *     <table>
-     *       <tr><td>| раз</td><td>|</td></tr>
-     *       <tr><td>| два</td><td>|</td></tr>
-     *       <tr><td>| три</td><td>|</td></tr>
-     *     </table>
+     * * служебный шаг: объединить значения коллекции через разделитель ", ", и сохранить, как "Контрольное значение":
+     * <table>
+     *   <tr><td>| раз</td><td>|</td></tr>
+     *   <tr><td>| два</td><td>|</td></tr>
+     *   <tr><td>| три</td><td>|</td></tr>
+     * </table>
      */
     @И("^служебный шаг: объединить значения коллекции через разделитель \"(.+)\", и сохранить, как \"(.+)\":$")
     public void joinCollection(String delimiter, String parameterName, DataTable dataTable) {
