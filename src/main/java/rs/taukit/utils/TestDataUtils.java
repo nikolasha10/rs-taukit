@@ -4,16 +4,44 @@ import io.cucumber.datatable.DataTable;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.DataTableFormatMismatchException;
 import rs.taukit.exceptions.PageFileNotFoundException;
+import rs.taukit.testdata.TestData;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class TestDataUtils {
     public static <T> T get(Map<String, T> data, String fieldName) {
-        return Optional.ofNullable(data.get(fieldName))
-                .orElseThrow(() -> new DataTableFormatMismatchException("Не найдено поле '%s'. Присутствуют поля: %s",
-                        fieldName, data.keySet()));
+        if (data.containsKey(fieldName)) {
+            return data.get(fieldName);
+        }
+        Supplier<RuntimeException> exceptionSupplier = () -> new DataTableFormatMismatchException(
+                "Не найдено поле '%s'. Присутствуют поля: %s", fieldName, data.keySet());
+        if (fieldName.contains(".")) {
+            String[] chunks = fieldName.split("\\.");
+            T testData = null;
+            for (int i = 0; i <chunks.length; i++) {
+                String chunk = chunks[i].trim();
+                if (i == 0) {
+                    if (chunk.equals("System properties")) {
+                        testData = YamlParser.convert(Config.getProperty(chunks[1].trim()));
+                        i++;
+                        continue;
+                    }
+                    testData = Optional.ofNullable(data.get(chunk)).orElseThrow(exceptionSupplier);
+                } else {
+                    TestData testDataObject = YamlParser.convert(testData);
+                    testData = testDataObject.getOptional(chunk);
+                    if (testData == null){
+                        throw exceptionSupplier.get();
+                    }
+                }
+            }
+            return testData;
+        } else {
+            throw exceptionSupplier.get();
+        }
     }
 
     public static <T> T getOptional(Map<String, T> data, String fieldName) {

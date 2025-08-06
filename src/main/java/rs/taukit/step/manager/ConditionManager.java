@@ -79,19 +79,16 @@ public class ConditionManager extends StepManager {
     @Step("дождаться выполнения условий:")
     public void waitForConditionsNoName(DataTable dataTable) {
         waitForConditions(dataTable);
-        TauLogger.console("Условия выполнены");
     }
 
     @Step("дождаться выполнения условий в течение {timeoutString}:")
     public void waitForConditionsWithinTimeIntervalNoName(String timeoutString, DataTable dataTable) {
         waitForConditions(TimeStringParser.getTime(timeoutString), dataTable);
-        TauLogger.console("Условия выполнены");
     }
 
     @Step("дождаться выполнения условий '{conditionsName}' в течение {timeoutString}:")
     public void waitForConditionsWithinTimeIntervalNoName(String conditionsName, String timeoutString, DataTable dataTable) {
         waitForConditions(TimeStringParser.getTime(timeoutString), dataTable);
-        TauLogger.console("Условия '%s' выполнены", conditionsName);
     }
 
     private void waitForConditions(DataTable dataTable) {
