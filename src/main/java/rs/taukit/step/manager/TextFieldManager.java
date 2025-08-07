@@ -4,6 +4,7 @@ import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.element.interfaces.Editable;
 import rs.taukit.element.interfaces.HasText;
+import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
@@ -52,14 +53,19 @@ public class TextFieldManager extends StepManager {
 
     @Step("сохранить значения элементов в параметры:")
     public void saveElementsValue(DataTable dataTable) {
-        run(() -> {
-            dataTable.asMaps().forEach(data -> {
-                String elementName = TestDataUtils.get(data, "Название");
-                String parameterName = TestDataUtils.get(data, "Параметр");
-                HasText textElement = getPage().getElement(elementName);
-                scenarioData.put(parameterName, textElement.getText());
-            });
-        }, "Не удалось сохранить значения элементов в параметры");
+        run(() -> dataTable.asMaps().forEach(data -> {
+            String elementName = TestDataUtils.get(data, "Название");
+            String blockName = TestDataUtils.getOptional(data, "В блоке");
+            String parameterName = TestDataUtils.get(data, "Параметр");
+            HasText textElement;
+            if (blockName != null) {
+                IContainer container = getElement(blockName);
+                textElement = container.getElementByName(elementName).castTo(HasText.class);
+            } else {
+                textElement = getElement(elementName);
+            }
+            scenarioData.put(parameterName, textElement.getText());
+        }), "Не удалось сохранить значения элементов в параметры");
         List<List<String>> resultList = dataTable.asLists();
         resultList.getFirst().add("Значение");
         for (int i = 1; i < resultList.size(); i++) {

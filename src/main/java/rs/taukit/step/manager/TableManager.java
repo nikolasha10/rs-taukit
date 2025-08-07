@@ -1,5 +1,6 @@
 package rs.taukit.step.manager;
 
+import com.microsoft.playwright.TimeoutError;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.config.Config;
@@ -143,8 +144,17 @@ public class TableManager extends StepManager {
             }
             return isMet;
         };
-        Runnable runnable = () -> getDriver().waitForCondition(
-                conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage.getStepActions());
+        Runnable runnable = () -> {
+            try {
+                getDriver().waitForCondition(
+                        conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage.getStepActions());
+            } catch (TimeoutError te) {
+                IHasTableElements table = getElement(tableName);
+                if (table.isVisible()) {
+                    throw te;
+                }
+            }
+        };
         runOnce(runnable, exception.get(),
                 "В таблице '%s' не удалось дождаться отсутствия строки, соответствующей заданным условиям", tableName);
         scenarioStorage.clearStepActions();

@@ -41,7 +41,7 @@ public class ServiceStep extends ServiceManager {
 
     @И("^служебный шаг: кликнуть ЛКМ в области над элементом \"(.+)\"$")
     public void forceClickElement(String elementName) {
-        super.forceClickElement(elementName);
+        super.forceClickElement(eval(elementName));
     }
 
     @И("^служебный шаг: создать автотест в TestIT$")

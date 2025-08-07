@@ -73,7 +73,23 @@ public class PwMenu extends PwElement implements IHasMenu {
 
     @Override
     public void selectMenuItem(String itemName) {
-        getMenuItem(itemName).click();
+        getDriver().getCurrentBrowser().setDefaultTimeout(Config.getTimeProperty("element.check.interval"));
+        AtomicReference<Exception> exception = new AtomicReference<>();
+        BooleanSupplier condition = () -> {
+            try {
+                getMenuItem(itemName).click();
+                return true;
+            } catch (Exception e) {
+                exception.set(e);
+                return false;
+            }
+        };
+        try {
+            getDriver().waitForCondition(condition);
+        } catch (Exception e) {
+            throw new RuntimeException(exception.get());
+        }
+        getDriver().getCurrentBrowser().setDefaultTimeout();
     }
 
     @Override

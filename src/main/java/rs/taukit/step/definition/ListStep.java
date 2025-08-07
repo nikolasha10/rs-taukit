@@ -18,7 +18,7 @@ public class ListStep extends ListManager {
 
     @И("^в списке \"(.+)\" найти (элемент|блок), соответствующий условиям:$")
     public void selectValue(String listName, String elementType, DataTable dataTable) {
-        super.findItemByConditions(listName, elementType, eval(dataTable));
+        super.findItemByConditions(eval(listName), elementType, eval(dataTable));
     }
 
     /**
