@@ -5,6 +5,7 @@ import io.cucumber.testng.Pickle;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.utils.FileUtils;
+import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.YamlParser;
 
@@ -22,7 +23,7 @@ public class ScenarioData {
     public ScenarioData(Pickle pickle) {
         this.featurePath = pickle.getUri().getPath();
         this.scenarioName = pickle.getName();
-        this.dataStorage = new DataStorage(featurePath, getScenarioData(getFeatureData(featurePath)));
+        this.dataStorage = createDataStorage();
         this.nameSpaces = new HashMap<>();
         put("Адрес стенда", Config.getSTAND().getUrl());
         List<String> tagList = pickle.getTags().stream()
@@ -40,7 +41,7 @@ public class ScenarioData {
         File featureDataFile = getFeatureDataFile(featurePath);
         List<Map<String, ?>> resultList = new ArrayList<>();
         if (!featureDataFile.exists()) return resultList;
-        if (YamlParser.parse(featureDataFile.getAbsolutePath()) instanceof LinkedHashMap map){
+        if (YamlParser.parse(featureDataFile.getAbsolutePath()) instanceof LinkedHashMap map) {
             resultList.add(map);
             return resultList;
         } else return YamlParser.parse(featureDataFile.getAbsolutePath());
@@ -50,6 +51,15 @@ public class ScenarioData {
         return featureData.stream()
                 .filter(data -> data.get("Сценарий").toString().equalsIgnoreCase(scenarioName))
                 .findFirst().orElse(new LinkedHashMap<>());
+    }
+
+    private DataStorage createDataStorage() {
+        try {
+            return new DataStorage(featurePath, getScenarioData(getFeatureData(featurePath)));
+        } catch (Exception e) {
+            TauLogger.error(e, "Не удалось создать хранилище данных для теста '%s'", scenarioName);
+        }
+        return null;
     }
 
     public LinkedHashMap<String, Object> getAttachments() {
