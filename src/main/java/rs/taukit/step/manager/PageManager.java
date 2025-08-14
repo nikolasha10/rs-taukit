@@ -14,6 +14,7 @@ public class PageManager extends StepManager {
     public void waitForPageLoad(String pageName) {
         run(() -> getBrowser().getPage(pageName).waitForLoad());
         TauLogger.report("Отображается страница '%s'", pageName);
+        TauLogger.savePageSource(getBrowser().getPage(pageName));
     }
 
 
@@ -22,6 +23,7 @@ public class PageManager extends StepManager {
         run(() -> getPage().waitForPopup(pageName),
                 "Не удалось дождаться отображения всплывающего окна '%s'", pageName);
         TauLogger.report("Отображается всплывающее окно '%s'", pageName);
+        TauLogger.savePageSource(getPage().getPopup(pageName));
     }
 
     @Step("дождаться закрытия всплывающего окна '{pageName}'")

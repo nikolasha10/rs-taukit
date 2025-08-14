@@ -66,6 +66,7 @@ public class CommonManager extends StepManager {
     @Step("снимок: {screenshotName}")
     public void takeScreenshot(String screenshotName) {
         TauLogger.attachScreenshot(screenshotName, getPage().takeScreenshot());
+        TauLogger.savePageSource(getPage());
     }
 
     public void waitForTimeout(String timeValue, String timeUnit) {
@@ -316,10 +317,10 @@ public class CommonManager extends StepManager {
 
     protected void replaceText(DataTable dataTable) {
         dataTable.asMaps().forEach(data -> {
-            String parameterName = TestDataUtils.get(data,"Параметр");
-            String regex = TestDataUtils.get(data,"Поиск");
-            String replacement = TestDataUtils.get(data,"Замена");
-            String saveAs = TestDataUtils.get(data,"Сохранить как");
+            String parameterName = TestDataUtils.get(data, "Параметр");
+            String regex = TestDataUtils.get(data, "Поиск");
+            String replacement = TestDataUtils.get(data, "Замена");
+            String saveAs = TestDataUtils.get(data, "Сохранить как");
             String result = scenarioData.get(parameterName).toString().replaceAll(regex, replacement);
             scenarioData.put(saveAs, result);
         });

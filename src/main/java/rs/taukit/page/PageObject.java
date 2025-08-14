@@ -28,6 +28,8 @@ public interface PageObject {
 
     byte[] takeScreenshot();
 
+    String takeContent();
+
     void waitForElement(String elementName, boolean isVisible);
 
     void waitForPopup(String pageName);
