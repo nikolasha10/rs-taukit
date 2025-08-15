@@ -60,6 +60,21 @@ public class PwDropdownList extends PwElement implements Editable {
     }
 
     @Override
+    public List<String> getOptions() {
+        // Кликаем принудительно, игнорируя перекрывающие элементы
+        elementPwLocator.click(new Locator.ClickOptions().setForce(true));
+
+        try {
+            // Ждём, пока список опций станет видимым
+            driver.waitForCondition(() -> options.isVisible(), 2_000);
+            return options.getValues();
+        } finally {
+            // Закрываем — тоже с force, если нужно
+            elementPwLocator.click(new Locator.ClickOptions().setForce(true));
+        }
+    }
+
+    @Override
     public void setValue(String value, String controlValue) {
         driver.waitForCondition(() -> {
             setValue(value);
