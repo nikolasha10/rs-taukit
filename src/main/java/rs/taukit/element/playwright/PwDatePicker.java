@@ -75,4 +75,9 @@ public class PwDatePicker extends PwBlock implements ICalendar, Editable {
             return currentValue.equals(controlValueFinal);
         });
     }
+
+    @Override
+    public String getText() {
+        return elementPwLocator.inputValue();
+    }
 }

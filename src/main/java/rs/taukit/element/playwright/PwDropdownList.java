@@ -10,7 +10,7 @@ import java.util.List;
 
 import static rs.taukit.utils.BasicUtils.page;
 
-public class PwDropdownList extends PwElement implements Editable {
+public class PwDropdownList extends PwBlock implements Editable {
     protected PwList options;
     protected PwElement selectedValue;
 
