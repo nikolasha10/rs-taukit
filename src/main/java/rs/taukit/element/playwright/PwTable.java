@@ -273,4 +273,10 @@ public class PwTable extends PwElement implements IHasTableElements {
             return null;
         }
     }
+
+    @Override
+    public int setActiveRowContext() {
+        page().setCurrentContext(activeRow);
+        return activeRow.getCurrentIndex();
+    }
 }
