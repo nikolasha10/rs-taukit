@@ -317,7 +317,7 @@ public class PdfUtils {
             TestDataFile ignoredZonesFileData = scenarioData().get(ignoredZonesParameterName);
             try {
                 ignoredZones = YamlParser.parse(ignoredZonesFileData.getFilePath());
-            } catch (Exception ignored){
+            } catch (Exception ignored) {
                 TauLogger.console("Не удалось обработать файл '%s'", ignoredZonesFileData.getFilePath());
             }
         }
@@ -350,6 +350,7 @@ public class PdfUtils {
         }
         return images;
     }
+
     private static void addVisualDifference(int pageNumber,
                                             int testedPagesNumber,
                                             int standardPagesNumber,
@@ -427,7 +428,7 @@ public class PdfUtils {
             originalPdfStandardPageTextContent = "";
         }
         String pdfStandardPageTextContent = TextUtils.replaceValues(originalPdfStandardPageTextContent, autoReplacingParameterName);
-        if (!pdfTestedPageTextContent.equals(pdfStandardPageTextContent)){
+        if (!pdfTestedPageTextContent.equals(pdfStandardPageTextContent)) {
             BufferedImage pdfTestedPageTextImage = ImageUtils.textToImage(pdfTestedPageTextContent, pdfStandardPageTextContent);
             BufferedImage pdfStandardPageTextImage = ImageUtils.textToImage(pdfStandardPageTextContent, pdfTestedPageTextContent);
             BufferedImage differencesImage = ImageUtils.getDifferencesImage(pdfTestedPageTextImage, pdfStandardPageTextImage);
@@ -477,5 +478,24 @@ public class PdfUtils {
             throw new RuntimeException(e);
         }
         return pageContentFilePathList;
+    }
+
+    public static String convertPdfToTxt(String fileParameterName) {
+        TestDataFile testDataFile = scenarioData().get(fileParameterName);
+        String pdfFilePath = testDataFile.getFilePath();
+        StringBuilder stringBuilder = new StringBuilder();
+        try {
+            PdfReader reader = new PdfReader(pdfFilePath);
+            for (int i = 1; i <= reader.getNumberOfPages(); i++) {
+                TextExtractionStrategy strategy = new LocationTextExtractionStrategy();
+                String pdfPageTextContent = PdfTextExtractor.getTextFromPage(reader, i, strategy);
+                stringBuilder.append(pdfPageTextContent);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        String textFilePath = pdfFilePath.replaceAll("\\.pdf", ".txt");
+        FileUtils.writeFile(textFilePath, stringBuilder.toString());
+        return textFilePath;
     }
 }

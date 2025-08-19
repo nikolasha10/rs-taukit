@@ -150,7 +150,9 @@ public class FileManager extends StepManager {
     @Step("сохранить содержимое файла '{fileName}', как '{parameterName}'")
     public void saveFileContentAs(String fileName, String parameterName) {
         scenarioData.put(parameterName, eval(FileUtils.readFile(filePath)));
-        TauLogger.report("Параметр '%s' содержит значение '%s'", parameterName, scenarioData.get(parameterName));
+        if (Config.getProperty("debug") != null) {
+            TauLogger.report("Параметр '%s' содержит значение '%s'", parameterName, scenarioData.get(parameterName));
+        }
     }
 
     @Step("выполнить команду '{command}' и сохранить результат в файл '{this.fileName}'")

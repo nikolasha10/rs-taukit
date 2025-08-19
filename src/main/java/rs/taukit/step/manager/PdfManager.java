@@ -17,6 +17,8 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static rs.taukit.utils.BasicUtils.scenarioData;
+
 public class PdfManager extends StepManager {
 
     @Step("проверить документ '{testedFileParameterName}' на соответствие эталону")
@@ -186,4 +188,16 @@ public class PdfManager extends StepManager {
         return String.format("%s/%s", FileUtils.getDownloadFilePath(), fileName);
     }
 
+    @Step("конвертировать pdf-файл 'fileParameterName' в текстовый формат")
+    protected void convertPdfToTxt(String fileParameterName) {
+        String filePath = PdfUtils.convertPdfToTxt(fileParameterName);
+        LinkedHashMap<String, String> fileData = new LinkedHashMap<>();
+        fileData.put("тип", "файл");
+        fileData.put("путь", filePath);
+        String fileName = fileParameterName.replaceAll("\\.pdf", ".txt");
+        TestDataFile testDataFile = new TestDataFile(fileName, fileData);
+        scenarioData().put(fileName, testDataFile);
+        TauLogger.attachFile(fileName, filePath);
+        TauLogger.console("Файл '%s' конвертирован в '%s'", fileParameterName, fileName);
+    }
 }
