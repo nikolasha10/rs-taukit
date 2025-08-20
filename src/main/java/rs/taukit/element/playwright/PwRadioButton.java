@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 
 import static rs.taukit.utils.BasicUtils.page;
 
-public class PwRadioButton extends PwElement implements Editable {
+public class PwRadioButton extends PwBlock implements Editable {
     public PwRadioButton(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
     }
