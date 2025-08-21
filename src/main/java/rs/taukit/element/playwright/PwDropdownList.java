@@ -47,7 +47,7 @@ public class PwDropdownList extends PwBlock implements Editable {
         }
         try {
             driver.waitForCondition(() -> {
-                click();
+                forceClick();
                 return options.isVisible();
             });
         } catch (Exception e) {
