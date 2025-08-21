@@ -5,7 +5,6 @@ import io.cucumber.java.ru.И;
 import rs.taukit.step.manager.DropdownListManager;
 
 import static rs.taukit.utils.BasicUtils.eval;
-import rs.taukit.utils.BasicUtils;
 
 public class DropdownListStep extends DropdownListManager {
 
@@ -19,6 +18,6 @@ public class DropdownListStep extends DropdownListManager {
      */
     @И("^проверить,что в выпадающем списке \"(.+)\" отображаются значения:$")
     public void verifyDropdownOptions(String elementName, DataTable dataTable) {
-        super.verifyDropdownOptions(elementName, BasicUtils.eval(dataTable));
+        super.verifyDropdownOptions(elementName, eval(dataTable));
     }
 }

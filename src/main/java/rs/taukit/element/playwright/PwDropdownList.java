@@ -4,13 +4,15 @@ import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.Editable;
 import rs.taukit.element.interfaces.IElement;
+import rs.taukit.element.interfaces.Selectable;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import static rs.taukit.utils.BasicUtils.page;
 
-public class PwDropdownList extends PwBlock implements Editable {
+public class PwDropdownList extends PwBlock implements Editable, Selectable {
     protected PwList options;
     protected PwElement selectedValue;
 
@@ -62,15 +64,14 @@ public class PwDropdownList extends PwBlock implements Editable {
     @Override
     public List<String> getOptions() {
         // Кликаем принудительно, игнорируя перекрывающие элементы
-        elementPwLocator.click(new Locator.ClickOptions().setForce(true));
-
+        this.forceClick();
         try {
             // Ждём, пока список опций станет видимым
             driver.waitForCondition(() -> options.isVisible(), 2_000);
-            return options.getValues();
+            return options.getValues().stream().filter(Objects::nonNull).toList();
         } finally {
             // Закрываем — тоже с force, если нужно
-            elementPwLocator.click(new Locator.ClickOptions().setForce(true));
+            this.forceClick();
         }
     }
 

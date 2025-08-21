@@ -3,9 +3,15 @@ package rs.taukit.step.manager;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.element.interfaces.Editable;
+import rs.taukit.element.interfaces.Selectable;
 import rs.taukit.utils.TauLogger;
+import rs.taukit.utils.TextUtils;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DropdownListManager extends StepManager {
 
@@ -18,30 +24,30 @@ public class DropdownListManager extends StepManager {
 
     @Step("в выпадающем списке '{elementName}' проверить отображаемые значения")
     public void verifyDropdownOptions(String elementName, DataTable dataTable) {
-        List<String> expectedValues = new ArrayList<>();
-        for (List<String> row : dataTable.asLists(String.class)) {
-            String cell = row.get(0);
-            expectedValues.add(cell != null ? cell.trim() : "");
-        }
         TauLogger.attachDataTable("Ожидаемые значения в списке", dataTable);
-        TauLogger.console("Проверка, что в выпадающем списке '%s' отображаются значения: %s", elementName, expectedValues);
+        List<String> expectedValues = dataTable.asList();
+        AtomicReference<String> errorMessage = new AtomicReference<>(
+                String.format("Не удалось проверить значения в выпадающем списке '%s'", elementName));
         run(() -> {
-            Editable dropdown = getPage().getElement(elementName).castTo(Editable.class);
+            Selectable dropdown = getElement(elementName);
             List<String> actualValues = dropdown.getOptions();
-            if (actualValues == null || actualValues.isEmpty()) {
-                throw new AssertionError(
-                        "Не удалось получить значения из выпадающего списка '" + elementName + "'");
+            if (expectedValues.size() != actualValues.size()
+                    || !new HashSet<>(expectedValues).containsAll(actualValues)
+                    || !new HashSet<>(actualValues).containsAll(expectedValues)) {
+                errorMessage.set(String.format("Значения выпадающего списка '%s' не совпадают с ожидаемыми", elementName));
+                List<List<String>> diff = new ArrayList<>();
+                diff.add(Arrays.asList("Ожидаемые значения", "Фактические значения"));
+                for (int i = 0; i < Math.max(actualValues.size(), expectedValues.size()); i++) {
+                    diff.add(Arrays.asList(
+                            i < expectedValues.size() ? expectedValues.toArray()[i].toString() : "",
+                            i < actualValues.size() ? actualValues.toArray()[i].toString() : ""));
+                }
+                DataTable diffTable = DataTable.create(diff, TextUtils.tableConverter);
+                TauLogger.attachDataTable("Разница в значениях", diffTable);
+                System.out.println(diffTable);
+                throw new AssertionError(errorMessage.get());
             }
-            List<String> normalizedActual = actualValues.stream()
-                    .map(s -> s != null ? s.trim() : "")
-                    .toList();
-            if (!normalizedActual.containsAll(expectedValues) || !expectedValues.containsAll(normalizedActual)) {
-                throw new AssertionError(String.format(
-                        "Несоответствие значений в списке '%s'.\nОжидалось: %s\nФактически: %s",
-                        elementName, expectedValues, normalizedActual
-                ));
-            }
-            TauLogger.report("В выпадающем списке '%s' подтверждены все ожидаемые значения", elementName);
-        }, "Не удалось проверить значения в выпадающем списке '%s'", elementName);
+        }, errorMessage.get());
+        TauLogger.console("Выпадающий список '%s' содержит ожидаемые значения: %s", elementName, expectedValues);
     }
 }

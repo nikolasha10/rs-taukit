@@ -8,9 +8,4 @@ public interface Editable extends IElement, HasText {
 
     void clear();
 
-    default List<String> getOptions() {
-        throw new UnsupportedOperationException(
-                "Метод getOptions() не поддерживается для типа '" + this.getClass().getSimpleName() + "'"
-        );
-    }
 }
