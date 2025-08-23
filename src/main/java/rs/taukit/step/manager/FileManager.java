@@ -41,6 +41,7 @@ public class FileManager extends StepManager {
     public void init(String fileDir, String fileName) {
         this.fileDir = fileDir;
         this.fileName = fileName;
+        this.filePath = String.format("%s/%s", fileDir, fileName);
         String[] chunks = fileName.split("\\.");
         this.fileExtension = chunks[chunks.length - 1];
     }
