@@ -115,7 +115,9 @@ public class PwElement extends Element implements HasText {
 
     @Override
     public void forceClick() {
-        elementPwLocator.click(new Locator.ClickOptions().setForce(true));
+        if (elementPwLocator.isVisible()) {
+            elementPwLocator.click(new Locator.ClickOptions().setForce(true));
+        }
     }
 
     @Override
