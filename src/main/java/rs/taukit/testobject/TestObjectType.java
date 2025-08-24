@@ -42,7 +42,8 @@ public enum TestObjectType {
         Object optional = scenarioData().getOptional("REQUEST." + name);
         String value = optional == null ? null : String.valueOf(optional);
         return new TestData(value);
-    });
+    }),
+    TIMEOUT("таймаут", name -> null);
 
     public final Function<String, ?> testObject;
     private final String title;

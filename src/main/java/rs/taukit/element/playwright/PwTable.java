@@ -96,10 +96,6 @@ public class PwTable extends PwElement implements IHasTableElements {
             page().dropCurrentContext();
             return conditionsMet;
         }).findFirst().orElse(-1);
-        if (foundRowIndex > -1) {
-            activeRow = rowList.getItemList().get(foundRowIndex);
-            activeRow.scrollIntoView(true);
-        }
         return foundRowIndex;
     }
 
@@ -276,5 +272,11 @@ public class PwTable extends PwElement implements IHasTableElements {
         } catch (ArrayIndexOutOfBoundsException ignored) {
             return null;
         }
+    }
+
+    @Override
+    public int setActiveRowContext() {
+        page().setCurrentContext(activeRow);
+        return activeRow.getCurrentIndex();
     }
 }

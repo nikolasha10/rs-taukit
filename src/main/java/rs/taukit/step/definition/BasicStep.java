@@ -66,6 +66,11 @@ public class BasicStep extends CommonManager {
         super.setCurrentPageContext();
     }
 
+    @И("^примечание: далее работаем в контексте найденной строки$")
+    public void setTableActiveRowContext() {
+        super.setTableActiveRowContext();
+    }
+
     @И("^примечание: выходим из текущего контекста и работаем в контексте контейнера \"(.+)\"$")
     public void closeCurrentAndSetNewContext(String blockName) {
         closeCurrentAndSetNewBlockContext(blockName);
@@ -178,6 +183,12 @@ public class BasicStep extends CommonManager {
         super.joinCollection(eval(delimiter), parameterName, eval(dataTable));
     }
 
+    /**
+     * * служебный шаг: произвести замену текста в значениях параметров:
+     * <table>
+     *     <tr><td>| Параметр </td><td>| Поиск </td><td>| Замена </td><td>| Сохранить как</td><td>|</td></tr>
+     *     <tr><td>| Номер счёта </td><td>| \D </td><td>| ${empty} </td><td>| Номер счёта без пробелов </td><td>|</td></tr>
+     */
     @И("^служебный шаг: произвести замену текста в значениях параметров:$")
     public void replaceText(DataTable dataTable) {
         super.replaceText(eval(dataTable));

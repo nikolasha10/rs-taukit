@@ -37,6 +37,11 @@ public class PdfStep extends PdfManager {
         validate(fileParameterName, eval(dataTable));
     }
 
+    @И("^конвертировать PDF-файл \"(.+)\" в текстовый формат$")
+    public void convertPdfToTxt(String fileParameterName) {
+        super.convertPdfToTxt(fileParameterName);
+    }
+
     @И("^сравнить количество страниц в PDF-файле \"(.+)\" с ожидаемым значением \"(.+)\"$")
     public void validatePageCount(String testedFileParameterName, String expectedPageCount){
         validatePdfPageCount(testedFileParameterName, eval(expectedPageCount));

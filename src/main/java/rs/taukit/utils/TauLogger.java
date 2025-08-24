@@ -9,11 +9,13 @@ import org.slf4j.MDC;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 import rs.taukit.exceptions.TestDataException;
+import rs.taukit.page.PageObject;
 import rs.taukit.testdata.TestDataFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -462,4 +464,25 @@ public final class TauLogger {
         scenarioData().put("NEXT_CHECK_NOT_CRITICAL", null);
     }
 
+    public static void savePageSource(PageObject page) {
+        Boolean saveContent = Config.getBooleanProperty("debug.saveContent");
+        if (saveContent) {
+            String basePath = Path.of(Config.getProperty("downloads.dir"), "debug", page.getPageName()).toString();
+            FileUtils.createDirectories(basePath);
+            int index = 1;
+            while (Path.of(basePath, String.format("%03d", index)).toFile().exists()) {
+                index++;
+            }
+            basePath = Path.of(basePath, String.format("%03d", index)).toString();
+            FileUtils.createDirectories(basePath);
+            Path screenshotPath = Path.of(basePath, "screenshot.png");
+            Path pageSourcePath = Path.of(basePath, "pageSource.html");
+            TauLogger.console("screenshotPath: %s", screenshotPath);
+            TauLogger.console("pageSourcePath: %s", pageSourcePath);
+            driver().waitForTimeout(2000);
+            FileUtils.writeFile(screenshotPath, page.takeScreenshot());
+            FileUtils.writeFile(pageSourcePath, page.takeContent().getBytes());
+        }
+
+    }
 }

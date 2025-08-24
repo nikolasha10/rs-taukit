@@ -48,4 +48,6 @@ public interface IHasTableElements extends IElement {
     IElement getMenuItem(String menuName, String itemName);
 
     Downloadable getMenuDownloadableItem(String menuName, String itemName);
+
+    int setActiveRowContext();
 }

@@ -4,13 +4,15 @@ import com.microsoft.playwright.Locator;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.Editable;
 import rs.taukit.element.interfaces.IElement;
+import rs.taukit.element.interfaces.Selectable;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import static rs.taukit.utils.BasicUtils.page;
 
-public class PwDropdownList extends PwElement implements Editable {
+public class PwDropdownList extends PwBlock implements Editable, Selectable {
     protected PwList options;
     protected PwElement selectedValue;
 
@@ -47,8 +49,8 @@ public class PwDropdownList extends PwElement implements Editable {
         }
         try {
             driver.waitForCondition(() -> {
-                click();
-                return options.isVisible();
+                forceClick();
+                return options.isVisible() && options.getValues().stream().anyMatch(v -> v.equals(value));
             });
         } catch (Exception e) {
             String message = String.format("Не удалось дождаться значений выпадающего списка '%s' по локатору: %s",
@@ -57,6 +59,20 @@ public class PwDropdownList extends PwElement implements Editable {
             throw e;
         }
         options.selectItem(value);
+    }
+
+    @Override
+    public List<String> getOptions() {
+        // Кликаем принудительно, игнорируя перекрывающие элементы
+        this.forceClick();
+        try {
+            // Ждём, пока список опций станет видимым
+            driver.waitForCondition(() -> options.isVisible(), 2_000);
+            return options.getValues().stream().filter(Objects::nonNull).toList();
+        } finally {
+            // Закрываем — тоже с force, если нужно
+            this.forceClick();
+        }
     }
 
     @Override

@@ -172,12 +172,14 @@ public class TableManager extends StepManager {
                 : TimeStringParser.getTime(timeout);
         double elementCheckTimeout = TimeStringParser.getTime(timeoutString);
         AtomicReference<Exception> exception = new AtomicReference<>();
+        AtomicReference<Integer> rowIndex = new AtomicReference<>(-1);
         IContainer currentContext = getPage().getCurrentContext();
         BooleanSupplier conditions = () -> {
             boolean isMet = false;
             try {
                 IHasTableElements table = getElement(tableName);
-                isMet = table.isVisible() && table.findRowByConditions(dataTable) > -1;
+                rowIndex.set(table.findRowByConditions(dataTable));
+                isMet = table.isVisible() && rowIndex.get() > -1;
             } catch (Exception e) {
                 exception.set(e);
             } finally {
@@ -191,7 +193,7 @@ public class TableManager extends StepManager {
                 "В таблице '%s' не удалось дождаться строки, соответствующей заданным условиям", tableName);
         scenarioStorage.clearStepActions();
         scenarioStorage.stopToSaveActions();
-        TauLogger.console("Строка найдена");
+        TauLogger.console("Найдена строка № %d", rowIndex.get() + 1);
     }
 
     @Step("в таблице '{tableName}' проверить наличие столбцов:")
@@ -434,14 +436,15 @@ public class TableManager extends StepManager {
     @Step("в таблице '{tableName}' пролистать содержимое {direction}")
     protected void scroll(String tableName, String direction) {
         run(() -> {
-            IHasTableElements table = getElement(tableName);
-            List<IContainer> rows = table.getRowList();
-            int visibleCount = (int) rows.stream().filter(CanBeVisible::isVisible).count();
-            switch (direction) {
-                case ("вниз") -> rows.get(visibleCount - 1).scrollIntoView(true);
-                case ("вверх") -> rows.getFirst().scrollIntoView(false);
-            }
-            TauLogger.console("Выполнен скроллинг %s", direction);
-        });
+                    IHasTableElements table = getElement(tableName);
+                    List<IContainer> rows = table.getRowList();
+                    int visibleCount = (int) rows.stream().filter(CanBeVisible::isVisible).count();
+                    switch (direction) {
+                        case ("вниз") -> rows.get(visibleCount - 1).scrollIntoView(true);
+                        case ("вверх") -> rows.getFirst().scrollIntoView(false);
+                    }
+                    TauLogger.console("Выполнен скроллинг %s", direction);
+                }, "Не удалось выполнить скроллинг %s в таблице '%s' на странице '%s'",
+                direction, tableName, getPage().getPageName());
     }
 }

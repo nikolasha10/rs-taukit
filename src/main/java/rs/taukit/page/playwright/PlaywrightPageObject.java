@@ -265,6 +265,10 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
         return page.screenshot((new Page.ScreenshotOptions().setFullPage(true)));
     }
 
+    public String takeContent() {
+        return page.content();
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <T extends IElement> T getElement(String elementName) {

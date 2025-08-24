@@ -66,6 +66,10 @@ public class TestCondition {
      * @return Объект, описывающий ожидаемый и полученный результат проверки.
      */
     public TestCondition waitForResult() {
+        if (objectState == null) {
+            conditionMet = true;
+            return this;
+        }
         try {
             driver().waitForCondition(condition, checkTimeout);
             this.conditionMet = true;
@@ -90,6 +94,10 @@ public class TestCondition {
     }
 
     public TestCondition checkResult() {
+        if (objectState == null) {
+            conditionMet = true;
+            return this;
+        }
         try {
             this.conditionMet = condition.getAsBoolean();
             this.currentValue = TestObjectState.get(objectState).value.apply(testObject).toString();

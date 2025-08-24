@@ -4,6 +4,7 @@ import com.microsoft.playwright.Request;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import rs.taukit.element.interfaces.IElement;
+import rs.taukit.element.interfaces.IHasTableElements;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.exceptions.TestDataException;
 import rs.taukit.testdata.TestDataDateTime;
@@ -66,6 +67,7 @@ public class CommonManager extends StepManager {
     @Step("снимок: {screenshotName}")
     public void takeScreenshot(String screenshotName) {
         TauLogger.attachScreenshot(screenshotName, getPage().takeScreenshot());
+        TauLogger.savePageSource(getPage());
     }
 
     public void waitForTimeout(String timeValue, String timeUnit) {
@@ -316,10 +318,10 @@ public class CommonManager extends StepManager {
 
     protected void replaceText(DataTable dataTable) {
         dataTable.asMaps().forEach(data -> {
-            String parameterName = TestDataUtils.get(data,"Параметр");
-            String regex = TestDataUtils.get(data,"Поиск");
-            String replacement = TestDataUtils.get(data,"Замена");
-            String saveAs = TestDataUtils.get(data,"Сохранить как");
+            String parameterName = TestDataUtils.get(data, "Параметр");
+            String regex = TestDataUtils.get(data, "Поиск");
+            String replacement = TestDataUtils.get(data, "Замена");
+            String saveAs = TestDataUtils.get(data, "Сохранить как");
             String result = scenarioData.get(parameterName).toString().replaceAll(regex, replacement);
             scenarioData.put(saveAs, result);
         });
@@ -332,5 +334,13 @@ public class CommonManager extends StepManager {
         DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
         TauLogger.console("Произведена замена текста в значениях параметров");
         System.out.println(resultTable);
+    }
+
+    protected void setTableActiveRowContext() {
+        IHasTableElements table = scenarioData.get("контекст таблицы");
+        int rowNumber = table.setActiveRowContext() + 1;
+        scenarioStorage.setCurrentContextName("строка № %d таблицы '%s'", rowNumber, table.getElementName());
+        TauLogger.report("[примечание] текущий контекст: строка № %d таблицы '%s'", rowNumber, getPage().getPageName());
+
     }
 }

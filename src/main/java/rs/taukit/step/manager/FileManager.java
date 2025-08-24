@@ -41,6 +41,7 @@ public class FileManager extends StepManager {
     public void init(String fileDir, String fileName) {
         this.fileDir = fileDir;
         this.fileName = fileName;
+        this.filePath = String.format("%s/%s", fileDir, fileName);
         String[] chunks = fileName.split("\\.");
         this.fileExtension = chunks[chunks.length - 1];
     }
@@ -150,7 +151,9 @@ public class FileManager extends StepManager {
     @Step("сохранить содержимое файла '{fileName}', как '{parameterName}'")
     public void saveFileContentAs(String fileName, String parameterName) {
         scenarioData.put(parameterName, eval(FileUtils.readFile(filePath)));
-        TauLogger.report("Параметр '%s' содержит значение '%s'", parameterName, scenarioData.get(parameterName));
+        if (Config.getProperty("debug") != null) {
+            TauLogger.report("Параметр '%s' содержит значение '%s'", parameterName, scenarioData.get(parameterName));
+        }
     }
 
     @Step("выполнить команду '{command}' и сохранить результат в файл '{this.fileName}'")

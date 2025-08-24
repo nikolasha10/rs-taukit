@@ -1,5 +1,6 @@
 package rs.taukit.step.definition;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.ru.И;
 import rs.taukit.step.manager.DropdownListManager;
 
@@ -12,4 +13,11 @@ public class DropdownListStep extends DropdownListManager {
         super.selectValue(elementName, eval(value));
     }
 
+    /**
+     * Проверить, что в выпадающем списке отображаются указанные значения (через таблицу)
+     */
+    @И("^проверить,что в выпадающем списке \"(.+)\" отображаются значения:$")
+    public void verifyDropdownOptions(String elementName, DataTable dataTable) {
+        super.verifyDropdownOptions(elementName, eval(dataTable));
+    }
 }

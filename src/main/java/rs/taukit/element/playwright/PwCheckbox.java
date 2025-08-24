@@ -49,12 +49,12 @@ public class PwCheckbox extends PwElement implements Editable, CanBeChecked {
 
     @Override
     public void setCheckbox() {
-        setValue("да");
+        setValue("да","да");
     }
 
     @Override
     public void unsetCheckbox() {
-        setValue("нет");
+        setValue("нет","нет");
     }
 
     @Override

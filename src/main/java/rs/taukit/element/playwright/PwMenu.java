@@ -99,12 +99,13 @@ public class PwMenu extends PwElement implements IHasMenu {
             return true;
         try {
             PwButton additionalButton = getDescendant("Дополнительные пункты");
-            additionalButton.click();
+            additionalButton.forceClick();
             PwList additionalItemList = getDescendant("Выпадающий список");
             boolean contains = additionalItemList.getValues().stream().anyMatch(itemValue -> itemValue.equals(itemName));
-            additionalButton.click();
+            additionalButton.forceClick();
             return contains;
         } catch (Exception e) {
+            TauLogger.console(e);
             return false;
         }
     }
