@@ -67,7 +67,7 @@ public class PwDropdownList extends PwBlock implements Editable, Selectable {
         this.forceClick();
         try {
             // Ждём, пока список опций станет видимым
-            driver.waitForCondition(() -> options.isVisible(), 2_000);
+            driver.waitForCondition(() -> options.isVisible());
             return options.getValues().stream().filter(Objects::nonNull).toList();
         } finally {
             // Закрываем — тоже с force, если нужно
