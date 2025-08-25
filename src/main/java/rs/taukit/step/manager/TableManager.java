@@ -62,11 +62,12 @@ public class TableManager extends StepManager {
     public void findRowByConditions(String tableName, DataTable dataTable) {
         TauLogger.attach("Условия поиска строки", dataTable);
         AtomicReference<Integer> rowNumber = new AtomicReference<>();
-        Runnable runnable = () -> {
+        BooleanSupplier condition = () -> {
             IHasTableElements table = waitForTable(tableName);
             rowNumber.set(table.findRowByConditions(dataTable) + 1);
+            return rowNumber.get() > 0;
         };
-        run(runnable, "В таблице '%s' не удалось найти строку, соответствующую заданным условиям", tableName);
+        waitForCondition(condition, "В таблице '%s' не удалось найти строку, соответствующую заданным условиям", tableName);
         TauLogger.report("Найдена строка %d", rowNumber.get());
         scenarioStorage.clearStepActions();
         scenarioStorage.stopToSaveActions();
