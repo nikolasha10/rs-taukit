@@ -439,7 +439,7 @@ public class TableManager extends StepManager {
         run(() -> {
                     IHasTableElements table = getElement(tableName);
                     List<IContainer> rows = table.getRowList();
-                    int index = (int) rows.stream().filter(CanBeVisible::isVisible).count();
+                    int index = (int) rows.stream().filter(CanBeVisible::isVisible).count() - 1;
                     while (index > 1 && !rows.get(index).isVisible()) {
                         index--;
                     }
