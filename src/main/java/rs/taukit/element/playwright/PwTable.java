@@ -3,6 +3,7 @@ package rs.taukit.element.playwright;
 import com.microsoft.playwright.Locator;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
+import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.*;
 import rs.taukit.exceptions.AutoTestBrokenException;
@@ -15,6 +16,7 @@ import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
 
 import java.util.*;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
@@ -278,5 +280,25 @@ public class PwTable extends PwElement implements IHasTableElements {
     public int setActiveRowContext() {
         page().setCurrentContext(activeRow);
         return activeRow.getCurrentIndex();
+    }
+
+    @Override
+    public void scroll(String direction) {
+        browser().getCurrentPage().waitForElement(elementName, true);
+        List<IContainer> rows = getRowList();
+        int index = (int) rows.stream().filter(CanBeVisible::isVisible).count() - 1;
+        double timeout = Config.getTimeProperty("conditions.wait.timeout");
+        BooleanSupplier condition = () -> {
+            try {
+                switch (direction) {
+                    case ("вниз") -> rows.get(index).scrollIntoView(true);
+                    case ("вверх") -> rows.getFirst().scrollIntoView(false);
+                }
+            } catch (Exception ignored) {
+                return false;
+            }
+            return true;
+        };
+        driver.waitForCondition(condition, timeout);
     }
 }

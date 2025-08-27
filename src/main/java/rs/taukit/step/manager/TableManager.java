@@ -438,17 +438,9 @@ public class TableManager extends StepManager {
     protected void scroll(String tableName, String direction) {
         run(() -> {
                     IHasTableElements table = getElement(tableName);
-                    List<IContainer> rows = table.getRowList();
-                    int index = (int) rows.stream().filter(CanBeVisible::isVisible).count() - 1;
-                    while (index > 1 && !rows.get(index).isVisible()) {
-                        index--;
-                    }
-                    switch (direction) {
-                        case ("вниз") -> rows.get(index).scrollIntoView(true);
-                        case ("вверх") -> rows.getFirst().scrollIntoView(false);
-                    }
-                    TauLogger.console("Выполнен скроллинг %s", direction);
+                    table.scroll(direction);
                 }, "Не удалось выполнить скроллинг %s в таблице '%s' на странице '%s'",
                 direction, tableName, getPage().getPageName());
+        TauLogger.console("Выполнен скроллинг %s", direction);
     }
 }
