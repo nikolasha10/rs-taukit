@@ -50,7 +50,7 @@ public class PwDropdownList extends PwBlock implements Editable, Selectable {
         try {
             driver.waitForCondition(() -> {
                 forceClick();
-                return options.isVisible() && options.getValues().stream().anyMatch(v -> v.equals(value));
+                return options.isVisible() && options.getValues().stream().anyMatch(value::contains);
             });
         } catch (Exception e) {
             String message = String.format("Не удалось дождаться значений выпадающего списка '%s' по локатору: %s",
