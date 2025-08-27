@@ -50,11 +50,15 @@ public class PwDropdownList extends PwBlock implements Editable, Selectable {
         try {
             driver.waitForCondition(() -> {
                 forceClick();
-                return options.isVisible() && options.getValues().stream().anyMatch(value::contains);
+                try {
+                    return options.isVisible() && options.getItem(value).isVisible();
+                } catch (Exception e) {
+                    return false;
+                }
             });
         } catch (Exception e) {
-            String message = String.format("Не удалось дождаться значений выпадающего списка '%s' по локатору: %s",
-                    elementName, options.elementPwLocator);
+            String message = String.format("Не удалось дождаться отображения значения '%s' выпадающего списка '%s'",
+                    value, elementName);
             e.addSuppressed(new RuntimeException(message));
             throw e;
         }
