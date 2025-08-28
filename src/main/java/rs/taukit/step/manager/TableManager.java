@@ -316,7 +316,7 @@ public class TableManager extends StepManager {
                 DataTable notMetConditionTable = DataTable.create(notMetConditionList, TextUtils.tableConverter);
                 failedRows.put("Строка " + (index + 1), notMetConditionTable);
             }
-            getPage().setCurrentContext(original);
+            getPage().dropCurrentContext();
         });
         if (!failedRows.isEmpty()) {
             Runnable runnable = () -> failedRows.forEach(TauLogger::attachDataTable);
