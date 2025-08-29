@@ -69,8 +69,9 @@ public class ContainerManager extends StepManager {
                     scenarioData.put(parameterName, value);
                 }, "Не удалось сохранить значение поля '%s' в контейнере '%s', как '%s'",
                 fieldName, containerName, parameterName);
-        TauLogger.report("Значение поля '%s' в контейнере '%s' сохранено, как '%s'",
-                fieldName, containerName, parameterName);
+        TauLogger.console("Значение поля '%s' в контейнере '%s' сохранено, как '%s': %s",
+                fieldName, containerName, parameterName, scenarioData.get(parameterName));
+        TauLogger.attach(parameterName, scenarioData.get(parameterName));
     }
 
     @Step("в контейнере '{containerName}' нажать на {elementType} '{fieldName}'")

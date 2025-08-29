@@ -50,4 +50,6 @@ public interface IHasTableElements extends IElement {
     Downloadable getMenuDownloadableItem(String menuName, String itemName);
 
     int setActiveRowContext();
+
+    void scroll(String direction);
 }

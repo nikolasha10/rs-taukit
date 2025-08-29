@@ -62,11 +62,12 @@ public class TableManager extends StepManager {
     public void findRowByConditions(String tableName, DataTable dataTable) {
         TauLogger.attach("Условия поиска строки", dataTable);
         AtomicReference<Integer> rowNumber = new AtomicReference<>();
-        Runnable runnable = () -> {
+        BooleanSupplier condition = () -> {
             IHasTableElements table = waitForTable(tableName);
             rowNumber.set(table.findRowByConditions(dataTable) + 1);
+            return rowNumber.get() > 0;
         };
-        run(runnable, "В таблице '%s' не удалось найти строку, соответствующую заданным условиям", tableName);
+        waitForCondition(condition, "В таблице '%s' не удалось найти строку, соответствующую заданным условиям", tableName);
         TauLogger.report("Найдена строка %d", rowNumber.get());
         scenarioStorage.clearStepActions();
         scenarioStorage.stopToSaveActions();
@@ -315,7 +316,7 @@ public class TableManager extends StepManager {
                 DataTable notMetConditionTable = DataTable.create(notMetConditionList, TextUtils.tableConverter);
                 failedRows.put("Строка " + (index + 1), notMetConditionTable);
             }
-            getPage().setCurrentContext(original);
+            getPage().dropCurrentContext();
         });
         if (!failedRows.isEmpty()) {
             Runnable runnable = () -> failedRows.forEach(TauLogger::attachDataTable);
@@ -437,14 +438,9 @@ public class TableManager extends StepManager {
     protected void scroll(String tableName, String direction) {
         run(() -> {
                     IHasTableElements table = getElement(tableName);
-                    List<IContainer> rows = table.getRowList();
-                    int visibleCount = (int) rows.stream().filter(CanBeVisible::isVisible).count();
-                    switch (direction) {
-                        case ("вниз") -> rows.get(visibleCount - 1).scrollIntoView(true);
-                        case ("вверх") -> rows.getFirst().scrollIntoView(false);
-                    }
-                    TauLogger.console("Выполнен скроллинг %s", direction);
+                    table.scroll(direction);
                 }, "Не удалось выполнить скроллинг %s в таблице '%s' на странице '%s'",
                 direction, tableName, getPage().getPageName());
+        TauLogger.console("Выполнен скроллинг %s", direction);
     }
 }

@@ -116,6 +116,7 @@ public class ListManager extends StepManager {
         List<List<String>> resultList = new ArrayList<>();
         resultList.add(Arrays.asList("№", "Объект", "Название", "Состояние", "текущее значение", "Ожидалось"));
         HasListItems list = getElement(listName);
+        getDriver().waitForCondition(() -> list.getSize() > 0);
         for (int i = 0; i < list.getSize(); i++) {
             IContainer item = list.getItemList().get(i).castTo(IContainer.class);
             getPage().setCurrentContext(item);
