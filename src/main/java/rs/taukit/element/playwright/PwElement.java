@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static rs.taukit.utils.BasicUtils.driver;
+import static rs.taukit.utils.BasicUtils.scenarioData;
 import static rs.taukit.utils.TextUtils.hexToRGB;
 
 @Getter
@@ -110,12 +111,22 @@ public class PwElement extends Element implements HasText {
 
     @Override
     public void click() {
+        String debug = scenarioData().getOptional("debug");
+        if (debug != null && debug.equals("debug")) {
+            elementPwLocator.highlight();
+            getDriver().waitForTimeout(2500);
+        }
         elementPwLocator.click();
     }
 
     @Override
     public void forceClick() {
         if (elementPwLocator.isVisible()) {
+            String debug = scenarioData().getOptional("debug");
+            if (debug != null && debug.equals("debug")) {
+                elementPwLocator.highlight();
+                getDriver().waitForTimeout(2500);
+            }
             elementPwLocator.click(new Locator.ClickOptions().setForce(true));
         }
     }
