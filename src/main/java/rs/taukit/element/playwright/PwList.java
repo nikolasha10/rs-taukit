@@ -109,8 +109,6 @@ public class PwList extends PwElement implements HasListItems {
                 values.set(itemsText);
                 return true;
             } catch (Exception e) {
-                TauLogger.console("values: %s", values.get());
-                TauLogger.console(e);
                 ex.set(e);
                 return false;
             }
