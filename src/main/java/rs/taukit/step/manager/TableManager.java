@@ -181,6 +181,12 @@ public class TableManager extends StepManager {
                 IHasTableElements table = getElement(tableName);
                 rowIndex.set(table.findRowByConditions(dataTable));
                 isMet = table.isVisible() && rowIndex.get() > -1;
+            } catch (TimeoutError te) {
+                if (exception.get() == null) {
+                    exception.get().addSuppressed(te);
+                } else {
+                    exception.set(te);
+                }
             } catch (Exception e) {
                 exception.set(e);
             } finally {

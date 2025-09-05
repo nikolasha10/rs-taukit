@@ -58,7 +58,7 @@ public class PwList extends PwElement implements HasListItems {
         try {
             driver.waitForCondition(condition, timeout);
         } catch (Exception e) {
-            throw valueNotFoundException(itemName, e).get();
+            throw valueNotFoundException(expectedItemText, e).get();
         }
         Predicate<IContainer> containerPredicate = itemName.contains("[!]")
                 ? containsElementWithTextEquals(expectedItemText)
@@ -109,8 +109,6 @@ public class PwList extends PwElement implements HasListItems {
                 values.set(itemsText);
                 return true;
             } catch (Exception e) {
-                TauLogger.console("values: %s", values.get());
-                TauLogger.console(e);
                 ex.set(e);
                 return false;
             }

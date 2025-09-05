@@ -16,6 +16,8 @@ import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -286,19 +288,27 @@ public class PwTable extends PwElement implements IHasTableElements {
     public void scroll(String direction) {
         browser().getCurrentPage().waitForElement(elementName, true);
         List<IContainer> rows = getRowList();
-        int index = (int) rows.stream().filter(CanBeVisible::isVisible).count() - 1;
+        AtomicInteger index = new AtomicInteger((int) rows.stream().filter(CanBeVisible::isVisible).count() - 1);
         double timeout = Config.getTimeProperty("conditions.wait.timeout");
+        AtomicReference<Exception> exception = new AtomicReference<>();
         BooleanSupplier condition = () -> {
             try {
                 switch (direction) {
-                    case ("вниз") -> rows.get(index).scrollIntoView(true);
+                    case ("вниз") -> rows.get(index.get()).scrollIntoView(true);
                     case ("вверх") -> rows.getFirst().scrollIntoView(false);
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                exception.set(e);
+                index.getAndDecrement();
                 return false;
             }
             return true;
         };
-        driver.waitForCondition(condition, timeout);
+        try {
+            driver.waitForCondition(condition, timeout);
+        } catch (Exception e) {
+            e.addSuppressed(exception.get());
+            throw e;
+        }
     }
 }
