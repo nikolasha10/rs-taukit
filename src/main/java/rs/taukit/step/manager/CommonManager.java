@@ -296,10 +296,17 @@ public class CommonManager extends StepManager {
     }
 
     protected void increaseParameterValue(String parameterName, String increment) {
-        int value = Integer.parseInt(scenarioData.get(parameterName));
-        int currentValue = value + Integer.parseInt(increment);
+        double value = Double.parseDouble(scenarioData.get(parameterName));
+        double currentValue = value + Double.parseDouble(increment);
         scenarioData.put(parameterName, String.valueOf(currentValue));
-        TauLogger.console("Счетчик: %d", currentValue);
+        TauLogger.console("%s: %.2f",parameterName, currentValue);
+    }
+
+    protected void decreaseParameterValue(String parameterName, String increment) {
+        double value = Double.parseDouble(scenarioData.get(parameterName));
+        double currentValue = value - Double.parseDouble(increment);
+        scenarioData.put(parameterName, String.valueOf(currentValue));
+        TauLogger.console("%s: %.2f",parameterName, currentValue);
     }
 
     @Step("создать коллекцию значений '{parameterName}':")
