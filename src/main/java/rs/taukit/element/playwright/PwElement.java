@@ -26,6 +26,7 @@ import static rs.taukit.utils.TextUtils.hexToRGB;
 public class PwElement extends Element implements HasText {
     protected Locator elementPwLocator;
     protected PlaywrightDriver driver = driver().castTo();
+    protected RuntimeException exception = null;
 
     public PwElement(String elementName, Locator locator) {
         super(elementName, "");
@@ -112,23 +113,21 @@ public class PwElement extends Element implements HasText {
     @Override
     public void click() {
         String debug = scenarioData().getOptional("debug");
-        if (debug != null && debug.equals("debug")) {
+        if (elementPwLocator.isVisible() && debug != null && debug.equals("debug")) {
             elementPwLocator.highlight();
-            getDriver().waitForTimeout(2500);
+            getDriver().waitForTimeout(1000);
         }
         elementPwLocator.click();
     }
 
     @Override
     public void forceClick() {
-        if (elementPwLocator.isVisible()) {
-            String debug = scenarioData().getOptional("debug");
-            if (debug != null && debug.equals("debug")) {
-                elementPwLocator.highlight();
-                getDriver().waitForTimeout(2500);
-            }
-            elementPwLocator.click(new Locator.ClickOptions().setForce(true));
+        String debug = scenarioData().getOptional("debug");
+        if (elementPwLocator.isVisible() && debug != null && debug.equals("debug")) {
+            elementPwLocator.highlight();
+            getDriver().waitForTimeout(1000);
         }
+        elementPwLocator.click(new Locator.ClickOptions().setForce(true));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.TimeoutError;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.Editable;
 import rs.taukit.element.interfaces.IElement;
@@ -49,18 +50,22 @@ public class PwDropdownList extends PwBlock implements Editable, Selectable {
         }
         try {
             driver.waitForCondition(() -> {
-                forceClick();
+                try {
+                    forceClick();
+                } catch (Exception e) {
+                    this.exception = new RuntimeException(String.format("Не удалось нажать на поле '%s'", elementName), e);
+                    return false;
+                }
                 try {
                     return options.isVisible() && options.getItem(value).isVisible();
                 } catch (Exception e) {
+                    this.exception = new RuntimeException(String.format("Не удалось найти значение '%s' в выпадающем списке '%s'", value, elementName), e);
                     return false;
                 }
             });
-        } catch (Exception e) {
-            String message = String.format("Не удалось дождаться отображения значения '%s' выпадающего списка '%s'",
-                    value, elementName);
-            e.addSuppressed(new RuntimeException(message));
-            throw e;
+        } catch (TimeoutError te) {
+            te.addSuppressed(this.exception);
+            throw te;
         }
         options.selectItem(value);
     }
