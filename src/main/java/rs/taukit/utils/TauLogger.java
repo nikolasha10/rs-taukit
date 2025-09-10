@@ -3,6 +3,7 @@ package rs.taukit.utils;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Attachment;
 import io.qameta.allure.Step;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -10,16 +11,14 @@ import rs.taukit.config.Config;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 import rs.taukit.exceptions.TestDataException;
 import rs.taukit.page.PageObject;
+import rs.taukit.testdata.TestData;
 import rs.taukit.testdata.TestDataFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -83,7 +82,7 @@ public final class TauLogger {
     public static void collectLogs() {
         if (!logger.getName().equalsIgnoreCase("scenarioLog")) return;
         Logger consoleLogger = LoggerFactory.getLogger("collectLogs");
-        String logPath = String.format("%s.log", MDC.get("logName").replaceAll("\"", "_"));
+        String logPath = String.format("%s.log", MDC.get("logName"));
         File file = new File(logPath);
         try {
             consoleLogger.info(Files.readString(file.toPath()));
@@ -305,7 +304,8 @@ public final class TauLogger {
      */
     public static void setLogPath(String functionality, String scenarioName) {
         String logPath = Config.getProperty("logger.default.logPath");
-        String logName = String.format("%s/%s/%s", logPath, functionality, scenarioName.replaceAll("\"", "_"));
+        String hash = DigestUtils.md5Hex(functionality + scenarioName);
+        String logName = String.format("%s/%s", logPath, hash);
         MDC.put("logName", logName);
     }
 
