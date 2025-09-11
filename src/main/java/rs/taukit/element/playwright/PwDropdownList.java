@@ -2,6 +2,7 @@ package rs.taukit.element.playwright;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.TimeoutError;
+import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
 import rs.taukit.element.interfaces.Editable;
 import rs.taukit.element.interfaces.IElement;
@@ -62,7 +63,7 @@ public class PwDropdownList extends PwBlock implements Editable, Selectable {
                     this.exception = new RuntimeException(String.format("Не удалось найти значение '%s' в выпадающем списке '%s'", value, elementName), e);
                     return false;
                 }
-            });
+            }, Config.getTimeProperty("conditions.wait.timeout"));
         } catch (TimeoutError te) {
             te.addSuppressed(this.exception);
             throw te;

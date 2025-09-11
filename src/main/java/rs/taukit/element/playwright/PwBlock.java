@@ -74,19 +74,23 @@ public class PwBlock extends PwElement implements IContainer {
 
     @Override
     public IElement getElementByText(String text) {
-        if (!isVisible()) return null;
+        if (isInvisible()) return null;
         return descendants.values().stream().map(iElement -> {
             try {
                 if (iElement instanceof PwBlock pwBlock) {
                     return pwBlock.getElementByText(text);
                 } else if (iElement instanceof PwText) {
                     PwElement pwElement = iElement.castTo(PwElement.class);
-                    Locator pwLocator = getElementPwLocator().locator(pwElement.elementPwLocator);
+                    String elementLocator = pwElement.getElementPwLocator().toString();
+                    String containerLocator = elementPwLocator.toString();
+                    Locator pwLocator = elementLocator.contains(containerLocator)
+                            ? pwElement.elementPwLocator
+                            : getElementPwLocator().locator(pwElement.elementPwLocator);
                     PwText pwText = ElementBuilder.buildElement(iElement.getElementName(), pwElement, pwLocator).castTo(PwText.class);
                     return pwText.getText().equals(text) ? pwText : null;
                 }
             } catch (Exception e) {
-                TauLogger.fail(e, "Не удалось найти элемент в контейнере '%s' по тексту '%s'", elementName, text);
+                throw new RuntimeException(String.format("Не удалось найти элемент в контейнере '%s' по тексту '%s'", elementName, text));
             }
             return null;
         }).filter(Objects::nonNull).findFirst().orElse(null);
