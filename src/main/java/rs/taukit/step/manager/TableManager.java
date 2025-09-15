@@ -306,6 +306,8 @@ public class TableManager extends StepManager {
             List<List<String>> notMetConditionList = new ArrayList<>();
             notMetConditionList.add(dataTable.asLists().getFirst());
             notMetConditionList.getFirst().remove("Ожидание");
+            notMetConditionList.getFirst().remove("Значение");
+            notMetConditionList.getFirst().add("Ожидаемое значение");
             notMetConditionList.getFirst().add("Текущее значение");
             dataTable.asMaps().forEach(conditionData -> {
                 TestCondition testCondition = new TestCondition(conditionData).waitForResult();
