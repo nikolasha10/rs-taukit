@@ -121,13 +121,14 @@ public class DataStorage {
                     return optional.toString();
                 }
             }
-            return matcher.replaceAll(matchResult -> {
+            String result = matcher.replaceAll(matchResult -> {
                 if (get(matchResult.group(1)) instanceof ITestData iTestData) {
                     return iTestData.getStringValue();
                 } else {
                     return get(matchResult.group(1)).toString().replaceAll("\\$", "&dollar;");
                 }
             });
+            return result.replaceAll("&dollar;", "\\$");
         } catch (IllegalArgumentException e) {
             String message = String.format("Не удалось вычислить значение параметра '%s'", template);
             throw new TestDataException(e, message);
