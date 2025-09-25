@@ -24,7 +24,7 @@ import java.util.stream.IntStream;
 
 import static rs.taukit.utils.BasicUtils.*;
 
-public class PwTable extends PwElement implements IHasTableElements {
+public class PwTable extends PwBlock implements IHasTableElements {
     private PwBlock activeRow;
 
     public PwTable(String elementName, LinkedHashMap<String, Object> elementData) {
@@ -258,7 +258,7 @@ public class PwTable extends PwElement implements IHasTableElements {
         } else if (headers.contains(elementName)) {
             activeRow.getElementByName("Столбцы").castTo(PwList.class).get(getHeaderIndex(elementName)).click();
         } else {
-            throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName(), this);
+            throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName(), this.castTo(IHasTableElements.class));
         }
     }
 
