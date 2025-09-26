@@ -286,20 +286,19 @@ public class PwTable extends PwBlock implements IHasTableElements {
 
     @Override
     public void scroll(String direction) {
-        browser().getCurrentPage().waitForElement(elementName, true);
-        List<IContainer> rows = getRowList();
-        AtomicInteger index = new AtomicInteger((int) rows.stream().filter(CanBeVisible::isVisible).count() - 1);
         double timeout = Config.getTimeProperty("conditions.wait.timeout");
         AtomicReference<Exception> exception = new AtomicReference<>();
+        browser().getCurrentPage().waitForElement(elementName, true);
         BooleanSupplier condition = () -> {
             try {
+                List<IContainer> rows = getRowList();
+                int index = (int) (rows.stream().filter(CanBeVisible::isVisible).count() - 1);
                 switch (direction) {
-                    case ("вниз") -> rows.get(index.get()).scrollIntoView(true);
+                    case ("вниз") -> rows.get(index).scrollIntoView(true);
                     case ("вверх") -> rows.getFirst().scrollIntoView(false);
                 }
             } catch (Exception e) {
                 exception.set(e);
-                index.getAndDecrement();
                 return false;
             }
             return true;
