@@ -69,7 +69,7 @@ public class PdfManager extends StepManager {
             if (actualPageCount != expectedPageCountInt) {
                 TauLogger.fail(
                         "Количество страниц в файле '%s' не совпадает. Ожидалось: %d, фактически: %d",
-                        testedFileParameterName, expectedPageCount, actualPageCount
+                        testedFileParameterName, expectedPageCountInt, actualPageCount
                 );
             } else {
                 TauLogger.console(
