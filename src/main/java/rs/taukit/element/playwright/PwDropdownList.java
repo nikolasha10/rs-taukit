@@ -65,7 +65,9 @@ public class PwDropdownList extends PwBlock implements Editable, Selectable {
                 }
             }, Config.getTimeProperty("conditions.wait.timeout"));
         } catch (TimeoutError te) {
-            te.addSuppressed(this.exception);
+            if (exception != null) {
+                te.addSuppressed(this.exception);
+            }
             throw te;
         }
         options.selectItem(value);
