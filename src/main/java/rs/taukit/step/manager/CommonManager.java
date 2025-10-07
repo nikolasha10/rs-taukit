@@ -296,14 +296,14 @@ public class CommonManager extends StepManager {
     }
 
     protected void increaseParameterValue(String parameterName, String increment) {
-        double value = Double.parseDouble(scenarioData.get(parameterName));
+        double value = Double.parseDouble(scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", ""));
         double currentValue = value + Double.parseDouble(increment);
         scenarioData.put(parameterName, String.valueOf(currentValue));
         TauLogger.console("%s: %.2f",parameterName, currentValue);
     }
 
     protected void decreaseParameterValue(String parameterName, String increment) {
-        double value = Double.parseDouble(scenarioData.get(parameterName));
+        double value = Double.parseDouble(scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", ""));
         double currentValue = value - Double.parseDouble(increment);
         scenarioData.put(parameterName, String.valueOf(currentValue));
         TauLogger.console("%s: %.2f",parameterName, currentValue);

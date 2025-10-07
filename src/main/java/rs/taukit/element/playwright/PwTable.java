@@ -24,7 +24,7 @@ import java.util.stream.IntStream;
 
 import static rs.taukit.utils.BasicUtils.*;
 
-public class PwTable extends PwElement implements IHasTableElements {
+public class PwTable extends PwBlock implements IHasTableElements {
     private PwBlock activeRow;
 
     public PwTable(String elementName, LinkedHashMap<String, Object> elementData) {
@@ -258,7 +258,7 @@ public class PwTable extends PwElement implements IHasTableElements {
         } else if (headers.contains(elementName)) {
             activeRow.getElementByName("Столбцы").castTo(PwList.class).get(getHeaderIndex(elementName)).click();
         } else {
-            throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName(), this);
+            throw new ElementNotDescribedException(elementName, scenarioStorage().getCurrentPageName(), this.castTo(IHasTableElements.class));
         }
     }
 
@@ -286,20 +286,19 @@ public class PwTable extends PwElement implements IHasTableElements {
 
     @Override
     public void scroll(String direction) {
-        browser().getCurrentPage().waitForElement(elementName, true);
-        List<IContainer> rows = getRowList();
-        AtomicInteger index = new AtomicInteger((int) rows.stream().filter(CanBeVisible::isVisible).count() - 1);
         double timeout = Config.getTimeProperty("conditions.wait.timeout");
         AtomicReference<Exception> exception = new AtomicReference<>();
+        browser().getCurrentPage().waitForElement(elementName, true);
         BooleanSupplier condition = () -> {
             try {
+                List<IContainer> rows = getRowList();
+                int index = (int) (rows.stream().filter(CanBeVisible::isVisible).count() - 1);
                 switch (direction) {
-                    case ("вниз") -> rows.get(index.get()).scrollIntoView(true);
+                    case ("вниз") -> rows.get(index).scrollIntoView(true);
                     case ("вверх") -> rows.getFirst().scrollIntoView(false);
                 }
             } catch (Exception e) {
                 exception.set(e);
-                index.getAndDecrement();
                 return false;
             }
             return true;

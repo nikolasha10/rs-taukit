@@ -9,10 +9,8 @@ import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
 import rs.taukit.utils.YamlParser;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,7 +49,8 @@ public class Config {
     private static void setConfig(Properties properties, String filePath, boolean required) {
         try {
             InputStream configInputStream = new FileInputStream(filePath);
-            properties.load(configInputStream);
+            InputStreamReader reader = new InputStreamReader(configInputStream, StandardCharsets.UTF_8);
+            properties.load(reader);
             if (!required) {
                 TauLogger.console("[примечание] установлены значения параметров из файла '%s'", filePath);
             }
