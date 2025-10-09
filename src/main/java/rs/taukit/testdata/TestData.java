@@ -61,7 +61,11 @@ public class TestData implements ITestData, HasText {
         });
         Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля '%s'. %s",
                 fieldName, filePathTmp);
-        dataStorage = new DataStorage(filePath, dataList.stream().filter(condition).findFirst().orElseThrow(exception));
+        try {
+            dataStorage = new DataStorage(filePath, dataList.stream().filter(condition).findFirst().orElseThrow(exception));
+        } catch (ClassCastException e) {
+            throw new TestDataException(e, "Неверный формат данных для поля '%s' в файле '%s'",fieldName, filePathTmp);
+        }
     }
 
     @Override
