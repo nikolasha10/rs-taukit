@@ -89,9 +89,12 @@ public class TableManager extends StepManager {
     @Step("в найденной строке сохранить значения элементов:")
     public void saveTableRowElementValue(DataTable dataTable) {
         IHasTableElements table = scenarioData.get("контекст таблицы");
-        DataTable resultTable = table.tableRowSaveElementValues(dataTable);
-        TauLogger.attachDataTable("Значения элементов", resultTable);
-        TauLogger.console("Сохранены значения элементов", resultTable);
+        run(() -> {
+            DataTable resultTable = table.tableRowSaveElementValues(dataTable);
+            TauLogger.attachDataTable("Значения элементов", resultTable);
+            TauLogger.console("Сохранены значения элементов", resultTable);
+        }, "Не удалось сохранить значения элементов в таблице '%s' на странице '%s'",
+                table.getElementName(), getPage().getPageName());
     }
 
     @Step("в найденной строке нажать на '{elementName}'")
