@@ -13,6 +13,11 @@ public class DropdownListStep extends DropdownListManager {
         super.selectValue(elementName, eval(value));
     }
 
+    @И("^в выпадающем списке \"(.+)\" выбрать (\\d+)-й элемент$")
+    public void selectValue(String elementName, int number) {
+        super.selectElementByNumber(elementName, number);
+    }
+
     /**
      * Проверить, что в выпадающем списке отображаются указанные значения (через таблицу)
      */

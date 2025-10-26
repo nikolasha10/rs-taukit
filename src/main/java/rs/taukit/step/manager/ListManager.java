@@ -42,6 +42,7 @@ public class ListManager extends StepManager {
                     }
                 }, "Не удалось выбрать %s-й %s в списке '%s' на странице '%s'",
                 number, elementType, listName, getPage().getPageName());
+        TauLogger.console("в списке '%s' выбран %s-й %s", listName, number, elementType);
     }
 
     @Step("в списке '{listName}' найти {itemType}, соответствующий условиям:")

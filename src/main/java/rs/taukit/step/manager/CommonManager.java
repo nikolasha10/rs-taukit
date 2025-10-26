@@ -78,8 +78,10 @@ public class CommonManager extends StepManager {
     @Step("[примечание] текущий контекст: контейнер '{containerName}'")
     public void setBlockContext(String containerName) {
         String[] blocks = containerName.split(" -> ");
-        Arrays.stream(blocks).forEach(block -> getPage().setCurrentContext(block));
-        scenarioStorage.setCurrentContextName("контейнер '%s'", containerName);
+        run(() -> {
+            Arrays.stream(blocks).forEach(block -> getPage().setCurrentContext(block));
+            scenarioStorage.setCurrentContextName("контейнер '%s'", containerName);
+        }, "Не удалось установить контекст '%s'", containerName);
         TauLogger.console("[примечание] текущий контекст: %s", scenarioStorage.getCurrentContextName());
     }
 
@@ -299,14 +301,14 @@ public class CommonManager extends StepManager {
         double value = Double.parseDouble(scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", ""));
         double currentValue = value + Double.parseDouble(increment);
         scenarioData.put(parameterName, String.valueOf(currentValue));
-        TauLogger.console("%s: %.2f",parameterName, currentValue);
+        TauLogger.console("%s: %.2f", parameterName, currentValue);
     }
 
     protected void decreaseParameterValue(String parameterName, String increment) {
         double value = Double.parseDouble(scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", ""));
         double currentValue = value - Double.parseDouble(increment);
         scenarioData.put(parameterName, String.valueOf(currentValue));
-        TauLogger.console("%s: %.2f",parameterName, currentValue);
+        TauLogger.console("%s: %.2f", parameterName, currentValue);
     }
 
     @Step("создать коллекцию значений '{parameterName}':")

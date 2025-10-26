@@ -19,7 +19,7 @@ public class DropdownListManager extends StepManager {
     public void selectValue(String elementName, String value) {
         run(() -> getPage().getElement(elementName).castTo(Editable.class).setValue(value),
                 "Не удалось выбрать значение '%s' в выпадающем списке '%s'", value, elementName);
-        TauLogger.report("В выпадающем списке '%s' выбрано значение '%s'", elementName, value);
+        TauLogger.console("В выпадающем списке '%s' выбрано значение '%s'", elementName, value);
     }
 
     @Step("в выпадающем списке '{elementName}' проверить отображаемые значения")
@@ -49,5 +49,12 @@ public class DropdownListManager extends StepManager {
             }
         }, errorMessage.get());
         TauLogger.console("Выпадающий список '%s' содержит ожидаемые значения: %s", elementName, expectedValues);
+    }
+
+    protected void selectElementByNumber(String elementName, int number) {
+        Selectable dropdown = getElement(elementName);
+        run(() -> dropdown.getOptionByNumber(number).click(),
+                "Не удалось выбрать %d-й элемент в выпадающем списке '%s'", number, elementName);
+        TauLogger.console("В выпадающем списке '%s' выбран %d-й элемент", elementName, number);
     }
 }

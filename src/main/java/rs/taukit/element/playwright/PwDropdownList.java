@@ -4,6 +4,7 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.TimeoutError;
 import rs.taukit.config.Config;
 import rs.taukit.element.ElementModel;
+import rs.taukit.element.interfaces.Clickable;
 import rs.taukit.element.interfaces.Editable;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.element.interfaces.Selectable;
@@ -94,6 +95,33 @@ public class PwDropdownList extends PwBlock implements Editable, Selectable {
             page().waitForTimeout(1000);
             return getText().equals(controlValue);
         });
+    }
+
+    @Override
+    public Clickable getOptionByNumber(int number) {
+        try {
+            driver.waitForCondition(() -> {
+                try {
+                    forceClick();
+                } catch (Exception e) {
+                    this.exception = new RuntimeException(String.format("Не удалось нажать на поле '%s'", elementName), e);
+                    return false;
+                }
+                try {
+                    return options.isVisible() && options.getSize() >= number;
+                } catch (Exception e) {
+                    this.exception = new RuntimeException(String.format(
+                            "В выпадающем списке '%s' отсутствует %d-й элемент", elementName, number), e);
+                    return false;
+                }
+            }, Config.getTimeProperty("conditions.wait.timeout"));
+        } catch (TimeoutError te) {
+            if (exception != null) {
+                te.addSuppressed(this.exception);
+            }
+            throw te;
+        }
+        return options.get(number - 1);
     }
 
     @Override
