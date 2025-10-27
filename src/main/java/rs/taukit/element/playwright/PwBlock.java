@@ -9,13 +9,13 @@ import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.ElementNotDescribedException;
 import rs.taukit.page.playwright.ElementBuilder;
-import rs.taukit.utils.TauLogger;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static rs.taukit.utils.BasicUtils.page;
 import static rs.taukit.utils.BasicUtils.scenarioStorage;
 
 @Setter
@@ -47,12 +47,14 @@ public class PwBlock extends PwElement implements IContainer {
     @Override
     public IElement getElementByName(String elementName) {
         IContainer currentBlock = this;
-        try {
-            driver.waitForCondition(currentBlock::isVisible);
-        } catch (Exception e) {
-            throw new PlaywrightException(String.format(
-                    "Не удалось дождаться отображения блока '%s' (Селектор: %s",
-                    currentBlock.getElementName(), currentBlock.getSelector()));
+        if (!currentBlock.getElementName().equals(page().getPageName())) {
+            try {
+                driver.waitForCondition(currentBlock::isVisible);
+            } catch (Exception e) {
+                throw new PlaywrightException(String.format(
+                        "Не удалось дождаться отображения блока '%s' (Селектор: %s",
+                        currentBlock.getElementName(), currentBlock.getSelector()));
+            }
         }
         String[] blockNames = elementName.split(" -> ");
         if (blockNames.length > 1) {
