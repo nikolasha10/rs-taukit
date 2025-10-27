@@ -20,20 +20,24 @@ public class PageManager extends StepManager {
 
     @Step("дождаться отображения всплывающего окна '{pageName}'")
     public void waitForPopupWindow(String pageName) {
-        run(() -> getPage().waitForPopup(pageName),
+        run(() -> {
+                    getPage().waitForPopup(pageName);
+                    TauLogger.report("Отображается всплывающее окно '%s'", pageName);
+                    TauLogger.savePageSource(getPage().getPopup(pageName));
+                },
                 "Не удалось дождаться отображения всплывающего окна '%s'", pageName);
-        TauLogger.report("Отображается всплывающее окно '%s'", pageName);
-        TauLogger.savePageSource(getPage().getPopup(pageName));
     }
 
     @Step("дождаться закрытия всплывающего окна '{pageName}'")
     public void waitForPopupClose(String pageName) {
-        run(() -> getPage().waitForPopupClose(pageName),
+        run(() -> {
+                    getPage().waitForPopupClose(pageName);
+                    TauLogger.report("Закрыто всплывающее окно '%s'", pageName);
+                    TauLogger.report("[примечание] открыта страница: %s", getPage().getPageName());
+                    TauLogger.report("[примечание] текущий контекст: %s '%s'",
+                            getPage().getCurrentContext().getModel().getType(), getPage().getCurrentContext().getElementName());
+                },
                 "Не удалось дождаться закрытия всплывающего окна '%s'", pageName);
-        TauLogger.report("Закрыто всплывающее окно '%s'", pageName);
-        TauLogger.report("[примечание] открыта страница: %s", getPage().getPageName());
-        TauLogger.report("[примечание] текущий контекст: %s '%s'",
-                getPage().getCurrentContext().getModel().getType(), getPage().getCurrentContext().getElementName());
     }
 
     @Step("сохранить текущий url, как '{parameterName}'")

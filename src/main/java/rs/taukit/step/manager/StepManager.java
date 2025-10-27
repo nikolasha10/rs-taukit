@@ -99,7 +99,10 @@ public abstract class StepManager {
      */
     void run(Runnable action, String format, Object... args) {
         Runnable runnable = () -> {
-            if (skipped()) return;
+            if (skipped()) {
+                TauLogger.report("Шаг пропущен");
+                return;
+            }
             try {
                 action.run();
             } catch (Exception e) {
