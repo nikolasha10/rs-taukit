@@ -334,9 +334,12 @@ public final class TauLogger {
             IntStream.range(0, screenshotList.size())
                     .forEach(index -> {
                         browser().setActiveTab(index);
+                        String pageName = page() != null ? page().getPageName() : "Без названия";
                         attachScreenshot(
-                                String.format("Снимок: Вкладка %d. %s", index + 1, page() != null ? page().getPageName() : "Без названия"),
+                                String.format("Снимок: Вкладка %d. %s", index + 1, pageName),
                                 screenshotList.get(index));
+                        attachFile(String.format("Исходный код: Вкладка %d. %s", index + 1, pageName),
+                                page().takeContent().getBytes());
                     });
         }
     }
