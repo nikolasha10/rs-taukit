@@ -81,9 +81,9 @@ public class ContainerManager extends StepManager {
                     IElement iElement = container.getElementByName(fieldName).castTo(IElement.class);
                     getDriver().waitForCondition(iElement::isVisible);
                     iElement.click();
+                    TauLogger.report("Нажали на %s '%s' в контейнере '%s'", elementType, fieldName, containerName);
                 }, "Не удалось нажать на %s '%s' в контейнере '%s' на странице '%s'",
                 elementType, fieldName, containerName, getPage().getPageName());
-        TauLogger.report("Нажали на %s '%s' в контейнере '%s'", elementType, fieldName, containerName);
     }
 
     @Step("в контейнере '{containerName}' установить чекбокс '{fieldName}'")
