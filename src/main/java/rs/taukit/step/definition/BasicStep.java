@@ -37,7 +37,7 @@ public class BasicStep extends CommonManager {
 
     @И("^сделать снимок страницы и сохранить, как \"(.+)\"$")
     public void takeScreenshot(String screenshotName) {
-        super.takeScreenshot(screenshotName);
+        super.takeScreenshot(eval(screenshotName));
     }
 
     @И("^подождать (\\d+) (секунд|минут|секунду|минуту|секунды|минуты)$")
