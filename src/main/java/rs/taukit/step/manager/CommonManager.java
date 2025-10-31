@@ -81,8 +81,8 @@ public class CommonManager extends StepManager {
         run(() -> {
             Arrays.stream(blocks).forEach(block -> getPage().setCurrentContext(block));
             scenarioStorage.setCurrentContextName("контейнер '%s'", containerName);
+            TauLogger.console("[примечание] текущий контекст: %s", scenarioStorage.getCurrentContextName());
         }, "Не удалось установить контекст '%s'", containerName);
-        TauLogger.console("[примечание] текущий контекст: %s", scenarioStorage.getCurrentContextName());
     }
 
     public void setCurrentPageContext() {
@@ -101,14 +101,16 @@ public class CommonManager extends StepManager {
     }
 
     public void closeCurrentContext(boolean haveToReport) {
-        IElement currentBlock = getPage().dropCurrentContext();
-        String currentContext = currentBlock == null
-                ? String.format("страница '%s'", scenarioStorage.getCurrentPageName())
-                : String.format("контейнер '%s'", currentBlock.getElementName());
-        scenarioStorage.setCurrentContextName(currentContext);
-        if (haveToReport) {
-            TauLogger.report("[примечание] текущий контекст: %s", currentContext);
-        }
+        run(() -> {
+            IElement currentBlock = getPage().dropCurrentContext();
+            String currentContext = currentBlock == null
+                    ? String.format("страница '%s'", scenarioStorage.getCurrentPageName())
+                    : String.format("контейнер '%s'", currentBlock.getElementName());
+            scenarioStorage.setCurrentContextName(currentContext);
+            if (haveToReport) {
+                TauLogger.report("[примечание] текущий контекст: %s", currentContext);
+            }
+        }, "Не удалось выйти из текущего контекста");
     }
 
     @Step("дождаться отображения {elementType} '{elementName}'")
