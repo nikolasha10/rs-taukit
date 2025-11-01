@@ -7,6 +7,7 @@ import rs.taukit.element.interfaces.Editable;
 import rs.taukit.element.interfaces.HasText;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.exceptions.AutoTestBrokenException;
+import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
 
 import java.util.LinkedHashMap;
@@ -45,7 +46,20 @@ public class PwSearchField extends PwBlock implements Editable {
             driver.waitForCondition(fillManually::isVisible, searchValueTimeout);
             fillManually.click();
         } else {
-            descendants.get("список значений").castTo(PwList.class).selectItem(value);
+            PwList valuesList = descendants.get("список значений").castTo(PwList.class);
+            try {
+                driver.waitForCondition(() -> !valuesList.getItemList().isEmpty());
+            } catch (Exception e) {
+                TauLogger.fail("Не удалось дождаться появления значений выпадающего списка '%s' на странице '%s'",
+                        elementName, page().getPageName());
+            }
+            try {
+                driver.waitForCondition(() -> valuesList.getItemList().stream().anyMatch(item -> item.getText().contains(value)));
+            } catch (Exception e) {
+                TauLogger.fail("Не удалось дождаться появления значения '%s' в выпадающем списке '%s' на странице '%s'",
+                        value, elementName, page().getPageName());
+            }
+            valuesList.selectItem(value);
         }
     }
 

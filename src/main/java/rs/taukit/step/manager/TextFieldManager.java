@@ -18,8 +18,8 @@ public class TextFieldManager extends StepManager {
         run(() -> {
             Editable editableValue = getPage().getElement(fieldName);
             editableValue.setValue(value);
+            TauLogger.console("Поле '%s' заполнено значением '%s'", fieldName, value);
         }, "Не удалось заполнить поле '%s' значением '%s'", fieldName, value);
-        TauLogger.console("Поле '%s' заполнено значением '%s'", fieldName, value);
     }
 
     @Step("заполнить поле '{fieldName}' значением '{value}'")

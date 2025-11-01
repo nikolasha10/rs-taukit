@@ -52,8 +52,8 @@ public class PwBlock extends PwElement implements IContainer {
                 driver.waitForCondition(currentBlock::isVisible);
             } catch (Exception e) {
                 throw new PlaywrightException(String.format(
-                        "Не удалось дождаться отображения блока '%s' (Селектор: %s",
-                        currentBlock.getElementName(), currentBlock.getSelector()));
+                        "Не удалось дождаться отображения блока '%s' (Селектор: %s) на странице '%s'",
+                        currentBlock.getElementName(), currentBlock.getSelector(), page().getPageName()));
             }
         }
         String[] blockNames = elementName.split(" -> ");
