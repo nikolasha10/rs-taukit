@@ -56,7 +56,7 @@ public class PwSearchField extends PwBlock implements Editable {
             try {
                 driver.waitForCondition(() -> valuesList.getItemList().stream().anyMatch(item -> item.getText().contains(value)));
             } catch (Exception e) {
-                TauLogger.fail("Не удалось дождаться появления значения '%s' в выпадающем списке '%s' на странице '%s'",
+                TauLogger.fail(e, "Не удалось дождаться появления значения '%s' в выпадающем списке '%s' на странице '%s'",
                         value, elementName, page().getPageName());
             }
             valuesList.selectItem(value);

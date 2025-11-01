@@ -39,14 +39,14 @@ public class CommonManager extends StepManager {
     @Step("нажать на {elementType} '{elementName}'")
     public void clickElement(String elementType, String elementName) {
         run(() -> {
-                    String debug = scenarioData().getOptional("debug");
-                    if (debug != null && debug.equals("debug")) {
-                        TauLogger.report("Нажимаем на %s '%s'", elementType, elementName);
-                    }
-                    getPage().getElement(elementName).click();
-                },
-                "Не удалось нажать на %s '%s'", elementType, elementName);
-        TauLogger.report("Нажали на %s '%s'", elementType, elementName);
+            String debug = scenarioData().getOptional("debug");
+            if (debug != null && debug.equals("debug")) {
+                TauLogger.report("Нажимаем на %s '%s'", elementType, elementName);
+            }
+            getPage().getElement(elementName).click();
+            TauLogger.console("Нажали на %s '%s'", elementType, elementName);
+        }, "Не удалось нажать на %s '%s'", elementType, elementName);
+
     }
 
     @Step("нажать на {elementType} '{elementName}' и сохранить данные запроса, соответствующего условиям:")
@@ -71,8 +71,10 @@ public class CommonManager extends StepManager {
     }
 
     public void waitForTimeout(String timeValue, String timeUnit) {
-        TauLogger.console("Ждём %s %s", timeValue, timeUnit);
-        getDriver().waitForTimeout(TimeStringParser.getTime(timeValue + " " + timeUnit));
+        run(() -> {
+            TauLogger.console("Ждём %s %s", timeValue, timeUnit);
+            getDriver().waitForTimeout(TimeStringParser.getTime(timeValue + " " + timeUnit));
+        });
     }
 
     @Step("[примечание] текущий контекст: контейнер '{containerName}'")
