@@ -52,9 +52,11 @@ public class DropdownListManager extends StepManager {
     }
 
     protected void selectElementByNumber(String elementName, int number) {
-        Selectable dropdown = getElement(elementName);
-        run(() -> dropdown.getOptionByNumber(number).click(),
+        run(() -> {
+                    Selectable dropdown = getElement(elementName);
+                    dropdown.getOptionByNumber(number).click();
+                    TauLogger.console("В выпадающем списке '%s' выбран %d-й элемент", elementName, number);
+                },
                 "Не удалось выбрать %d-й элемент в выпадающем списке '%s'", number, elementName);
-        TauLogger.console("В выпадающем списке '%s' выбран %d-й элемент", elementName, number);
     }
 }

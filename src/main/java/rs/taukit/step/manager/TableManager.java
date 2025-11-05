@@ -90,10 +90,10 @@ public class TableManager extends StepManager {
     public void saveTableRowElementValue(DataTable dataTable) {
         IHasTableElements table = scenarioData.get("контекст таблицы");
         run(() -> {
-            DataTable resultTable = table.tableRowSaveElementValues(dataTable);
-            TauLogger.attachDataTable("Значения элементов", resultTable);
-            TauLogger.console("Сохранены значения элементов", resultTable);
-        }, "Не удалось сохранить значения элементов в таблице '%s' на странице '%s'",
+                    DataTable resultTable = table.tableRowSaveElementValues(dataTable);
+                    TauLogger.attachDataTable("Значения элементов", resultTable);
+                    TauLogger.console("Сохранены значения элементов", resultTable);
+                }, "Не удалось сохранить значения элементов в таблице '%s' на странице '%s'",
                 table.getElementName(), getPage().getPageName());
     }
 
@@ -450,8 +450,8 @@ public class TableManager extends StepManager {
         run(() -> {
                     IHasTableElements table = getElement(tableName);
                     table.scroll(direction);
+                    TauLogger.console("Выполнен скроллинг %s", direction);
                 }, "Не удалось выполнить скроллинг %s в таблице '%s' на странице '%s'",
                 direction, tableName, getPage().getPageName());
-        TauLogger.console("Выполнен скроллинг %s", direction);
     }
 }
