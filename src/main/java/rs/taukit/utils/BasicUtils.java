@@ -99,6 +99,7 @@ public class BasicUtils {
             if (template == null) return null;
             if (template.equalsIgnoreCase("${empty}")) return "";
             if (template.equalsIgnoreCase("${space}")) return " ";
+            if (template.equalsIgnoreCase("${nbsp}")) return "\u00A0";
             String format = "\\$\\{(.+?)} -> (.+)";
             Matcher matcher = Pattern.compile(format).matcher(template);
             if (matcher.matches()) {

@@ -51,6 +51,7 @@ public class DropdownListManager extends StepManager {
         TauLogger.console("Выпадающий список '%s' содержит ожидаемые значения: %s", elementName, expectedValues);
     }
 
+    @Step("в выпадающем списке '{elementName}' выбрать {number}-й элемент")
     protected void selectElementByNumber(String elementName, int number) {
         run(() -> {
                     Selectable dropdown = getElement(elementName);

@@ -46,15 +46,22 @@ public class PwSearchField extends PwBlock implements Editable {
             driver.waitForCondition(fillManually::isVisible, searchValueTimeout);
             fillManually.click();
         } else {
+            double searchValueTimeout = TimeStringParser.getTime(Config.getProperty("conditions.wait.timeout"));
             PwList valuesList = descendants.get("список значений").castTo(PwList.class);
             try {
-                driver.waitForCondition(() -> !valuesList.getItemList().isEmpty());
+                driver.waitForCondition(() -> !valuesList.getItemList().isEmpty(), searchValueTimeout);
             } catch (Exception e) {
                 TauLogger.fail("Не удалось дождаться появления значений выпадающего списка '%s' на странице '%s'",
                         elementName, page().getPageName());
             }
             try {
-                driver.waitForCondition(() -> valuesList.getItemList().stream().anyMatch(item -> item.getText().contains(value)));
+                driver.waitForCondition(() -> {
+                    try {
+                        return valuesList.getItemList().stream().anyMatch(item -> item.getText().contains(value));
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }, searchValueTimeout);
             } catch (Exception e) {
                 TauLogger.fail(e, "Не удалось дождаться появления значения '%s' в выпадающем списке '%s' на странице '%s'",
                         value, elementName, page().getPageName());

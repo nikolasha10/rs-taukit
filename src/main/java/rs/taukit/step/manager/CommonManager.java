@@ -302,17 +302,21 @@ public class CommonManager extends StepManager {
     }
 
     protected void increaseParameterValue(String parameterName, String increment) {
-        double value = Double.parseDouble(scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", ""));
-        double currentValue = value + Double.parseDouble(increment);
-        scenarioData.put(parameterName, String.valueOf(currentValue));
-        TauLogger.console("%s: %.2f", parameterName, currentValue);
+        run(() -> {
+            double value = Double.parseDouble(scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", ""));
+            double currentValue = value + Double.parseDouble(increment);
+            scenarioData.put(parameterName, String.valueOf(currentValue));
+            TauLogger.console("%s: %.2f", parameterName, currentValue);
+        }, "Не удалось увеличить значение параметра '%s'", parameterName);
     }
 
     protected void decreaseParameterValue(String parameterName, String increment) {
-        double value = Double.parseDouble(scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", ""));
-        double currentValue = value - Double.parseDouble(increment);
-        scenarioData.put(parameterName, String.valueOf(currentValue));
-        TauLogger.console("%s: %.2f", parameterName, currentValue);
+        run(() -> {
+            double value = Double.parseDouble(scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", ""));
+            double currentValue = value - Double.parseDouble(increment);
+            scenarioData.put(parameterName, String.valueOf(currentValue));
+            TauLogger.console("%s: %.2f", parameterName, currentValue);
+        }, "Не удалось уменьшить значение параметра '%s'", parameterName);
     }
 
     @Step("создать коллекцию значений '{parameterName}':")
