@@ -73,6 +73,11 @@ public class ContainerStep extends ContainerManager {
         super.selectMenuItem(eval(containerName), menuName, eval(itemName));
     }
 
+    @И("^в контейнере \"(.+)\" в выпадающем списке \"(.+)\" выбрать (\\d+)-й элемент$")
+    public void selectDropdownListItem(String containerName, String dropdownListName, int number) {
+        super.selectDropdownListItem(eval(containerName), dropdownListName, number);
+    }
+
     @И("^в контейнере \"(.+)\" в выпадающем списке \"(.+)\" выбрать \"(.+)\"$")
     public void selectDropdownListItem(String containerName, String dropdownListName, String itemName) {
         super.selectDropdownListItem(eval(containerName), dropdownListName, eval(itemName));

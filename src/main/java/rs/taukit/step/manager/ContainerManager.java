@@ -269,4 +269,17 @@ public class ContainerManager extends StepManager {
         TauLogger.console("Выбран элемент '%s' в выпадающем списке '%s' в контейнере '%s'",
                 value, dropdownListName, containerName);
     }
+
+    @Step("в контейнере '{containerName}' в выпадающем списке '{dropdownListName}' выбрать {number}-й элемент")
+    protected void selectDropdownListItem(String containerName, String dropdownListName, int number) {
+        run(() -> {
+                    IContainer container = getContainer(containerName);
+                    Selectable dropdown = container.getElementByName(dropdownListName).castTo(Selectable.class);
+                    dropdown.getOptionByNumber(number).click();
+                    TauLogger.console("В контейнере '%s' в выпадающем списке '%s' выбран %d-й элемент",
+                            containerName, dropdownListName, number);
+                },
+                "Не удалось выбрать %d-й элемент в выпадающем списке '%s' в контейнере '%s'",
+                number, dropdownListName, containerName);
+    }
 }
