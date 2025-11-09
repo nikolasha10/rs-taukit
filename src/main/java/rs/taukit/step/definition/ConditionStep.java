@@ -22,7 +22,7 @@ public class ConditionStep extends ConditionManager {
         super.waitForConditionsWithinTimeIntervalNoName(timeoutString, eval(datatable));
     }
 
-    @И("^дождаться выполнения условий \"(.+)\" в течение \"(.+)\":$")
+    @И("^дождаться выполнения условий \"([^\"]+)\" в течение \"(.+)\":$")
     public void expectedResultCheckWithinTimeInterval(String conditionsName, String timeoutString, DataTable datatable) {
         super.waitForConditionsWithinTimeIntervalNoName(eval(conditionsName), timeoutString, eval(datatable));
     }
@@ -46,7 +46,7 @@ public class ConditionStep extends ConditionManager {
      *                       </ul><br>Ожидание: задаёт время ожидания выполнения условия в данной строке.
      *                       Например, 1 минута
      */
-    @И("^дождаться выполнения условий \"([а-яёЁА-Я\\w\\d\\s'\\,:/\\-\\()]+)\":$")
+    @И("^дождаться выполнения условий \"([^\"]+)\":$")
     public void waitForConditions(String conditionsName, DataTable datatable) {
         super.waitForConditions(conditionsName, eval(datatable));
     }
