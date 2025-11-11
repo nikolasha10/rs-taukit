@@ -174,7 +174,7 @@ public class CucumberScenario {
     public synchronized void setMutex(String mutexName) {
         Map<String, Mutex> semaphores = Storage.getInstance().getSemaphores();
         Optional.ofNullable(semaphores.get(mutexName)).ifPresent(mutex -> {
-            if (!getFullName().equals(mutex.scenarioName())) {
+            if (!getFullName().equals(mutex.scenarioName()) && mutex.semaphore().availablePermits() == 0) {
                 TauLogger.console("""
                                 Ожидается снятие запрета на одновременное выполнение действий по ключу '%s'.
                                 Установлен %s назад сценарием %s.""",
