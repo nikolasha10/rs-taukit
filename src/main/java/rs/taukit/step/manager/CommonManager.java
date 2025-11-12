@@ -117,15 +117,11 @@ public class CommonManager extends StepManager {
 
     @Step("дождаться отображения {elementType} '{elementName}'")
     public void waitForElement(String elementType, String elementName) {
-        try {
-            getPage().waitForElement(elementName, true);
-            scenarioStorage.saveStepAction(() -> getPage().waitForElement(elementName, true));
-            TauLogger.report("Дождались отображения %s '%s'", elementType, elementName);
-        } catch (Exception e) {
-            TauLogger.fail(e, "Не удалось дождаться отображения %s '%s' на странице '%s'",
-                    elementType, elementName, scenarioStorage.getCurrentPageName());
-        }
-        TauLogger.resetNotCritical();
+        run(() -> {
+                    getPage().waitForElement(elementName, true);
+                    TauLogger.console("Дождались отображения %s '%s'", elementType, elementName);
+                }, "Не удалось дождаться отображения %s '%s' на странице '%s'",
+                elementType, elementName, scenarioStorage.getCurrentPageName());
     }
 
     //    @Step("[примечание] результат следующей проверки некритичен для теста")
@@ -305,8 +301,12 @@ public class CommonManager extends StepManager {
         run(() -> {
             double value = Double.parseDouble(scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", ""));
             double currentValue = value + Double.parseDouble(increment);
-            scenarioData.put(parameterName, String.valueOf(currentValue));
-            TauLogger.console("%s: %.2f", parameterName, currentValue);
+            if (currentValue == Math.round(currentValue)) {
+                scenarioData.put(parameterName, String.valueOf((int) currentValue));
+            } else {
+                scenarioData.put(parameterName, String.valueOf(currentValue));
+            }
+            TauLogger.console("%s: %s", parameterName, scenarioData.get(parameterName));
         }, "Не удалось увеличить значение параметра '%s'", parameterName);
     }
 

@@ -28,7 +28,7 @@ public class ListStep extends ListManager {
      *                    элемент - будет произведён клик <br>
      *                    блок - будет установлен в качестве текущего контекста
      */
-    @И("^в списке \"(.+)\" выбрать (\\d+)-й (элемент|блок)$")
+    @И("^в списке \"(.+)\" выбрать (.+)-й (элемент|блок)$")
     public void selectValue(String listName, String number, String elementType) {
         super.selectItem(listName, eval(number), elementType);
     }
