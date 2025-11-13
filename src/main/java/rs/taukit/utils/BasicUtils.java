@@ -80,6 +80,9 @@ public class BasicUtils {
     public static String eval(String template) {
         ScenarioData scenarioData = scenarioStorage().getScenarioData();
         if (scenarioData == null) return template;
+        if (template.equalsIgnoreCase("${empty}")) return "";
+        if (template.equalsIgnoreCase("${space}")) return " ";
+        if (template.equalsIgnoreCase("${nbsp}")) return "\u00A0";
         String evalResult = storage.evalObjectField(template);
         return storage.evalString(evalResult);
     }
