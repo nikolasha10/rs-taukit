@@ -4,6 +4,7 @@ import rs.taukit.element.interfaces.*;
 import rs.taukit.exceptions.AutoTestBrokenException;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 import static rs.taukit.utils.BasicUtils.scenarioData;
@@ -76,6 +77,10 @@ public enum TestObjectState {
             t -> hasListItems(t).containsItems(scenarioData().get(t.expectedValue()), true),
             t -> hasListItems(t).containsItems(scenarioData().get(t.expectedValue()), true)
                     ? "состоит из элементов" : "состав списка отличается от контрольного"),
+    INCLUDED_IN("содержится в списке",
+            t -> isIncludedIn(hasText(t), scenarioData().get(t.expectedValue())),
+            t -> isIncludedIn(hasText(t), scenarioData().get(t.expectedValue()))
+                    ? "содержится в списке" : "не содержится в списке"),
     ;
 
     public final Function<TestObject, Boolean> check;
@@ -122,6 +127,10 @@ public enum TestObjectState {
 
     private static HasListItems hasListItems(TestObject t) {
         return (HasListItems) t.object();
+    }
+
+    private static boolean isIncludedIn(HasText item, List<String> list) {
+        return list.contains(item.getText());
     }
 
     public static TestObjectState get(String title) {
