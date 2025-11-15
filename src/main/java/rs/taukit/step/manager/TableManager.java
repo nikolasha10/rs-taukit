@@ -77,13 +77,15 @@ public class TableManager extends StepManager {
     protected void countRowsByConditions(String tableName, String parameterName, DataTable dataTable) {
         TauLogger.attach("Условия поиска строк", dataTable);
         Runnable runnable = () -> {
-            IHasTableElements table = waitForTable(tableName);
-            scenarioData.put(parameterName, Long.toString(table.countRowsByConditions(dataTable)));
+            try {
+                IHasTableElements table = waitForTable(tableName);
+                scenarioData.put(parameterName, Long.toString(table.countRowsByConditions(dataTable)));
+            } catch (TimeoutError te) {
+                scenarioData.put(parameterName, "0");
+            }
         };
         run(runnable, "В таблице '%s' не удалось подсчитать количество строк, соответствующих заданным условиям", tableName);
         TauLogger.report("%s = %s", parameterName, scenarioData.get(parameterName));
-        scenarioStorage.clearStepActions();
-        scenarioStorage.stopToSaveActions();
     }
 
     @Step("в найденной строке сохранить значения элементов:")
