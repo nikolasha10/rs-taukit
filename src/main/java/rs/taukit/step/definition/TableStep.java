@@ -79,7 +79,7 @@ public class TableStep extends TableManager {
 
     @И("^в таблице \"(.+)\" дождаться появления строки, соответствующей условиям:$")
     public void waitForTableConditions(String tableName, DataTable dataTable) {
-        super.waitForTableConditions(tableName, eval(dataTable));
+        super.waitForTableConditions(eval(tableName), eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" дождаться отсутствия строки, соответствующей условиям:$")

@@ -98,9 +98,7 @@ public class ConditionManager extends StepManager {
     private void conditionsWait(double conditionsWaitTimeout, DataTable dataTable) {
         TauLogger.attachDataTable("Ожидаемый результат", dataTable);
         TauLogger.console("Ожидается выполнение условий", dataTable);
-        BooleanSupplier conditions = () -> dataTable.asMaps().stream()
-                .map(data -> new TestCondition(data).waitForResult())
-                .allMatch(TestCondition::isConditionMet);
+        BooleanSupplier conditions = getConditions(dataTable);
         double conditionWaitTimeout = Config.getTimeProperty("condition.wait.timeout");
         try {
             getDriver().waitForCondition(conditions, conditionWaitTimeout, conditionsWaitTimeout, scenarioStorage.getStepActions());
@@ -135,9 +133,7 @@ public class ConditionManager extends StepManager {
     private void waitForConditions(String conditionsName, double conditionsWaitTimeout, DataTable dataTable) {
         TauLogger.attachDataTable("Ожидаемый результат", dataTable);
         TauLogger.console("Ожидается выполнение условий", dataTable);
-        BooleanSupplier conditions = () -> dataTable.asMaps().stream()
-                .map(data -> new TestCondition(data).waitForResult())
-                .allMatch(TestCondition::isConditionMet);
+        BooleanSupplier conditions = getConditions(dataTable);
         Map<String, String> expectedHeaders = dataTable.asMaps().getFirst();
         List<List<String>> unexpectedResultList = new ArrayList<>();
         List<String> resultsHeaders = new ArrayList<>(expectedHeaders.keySet().stream().toList());

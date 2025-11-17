@@ -1,5 +1,6 @@
 package rs.taukit.step.manager;
 
+import io.cucumber.datatable.DataTable;
 import rs.taukit.driver.DriverManager;
 import rs.taukit.driver.IWebBrowser;
 import rs.taukit.driver.IWebDriver;
@@ -9,6 +10,7 @@ import rs.taukit.scenario.CucumberScenario;
 import rs.taukit.storage.ScenarioStorage;
 import rs.taukit.storage.Storage;
 import rs.taukit.testdata.ScenarioData;
+import rs.taukit.testobject.TestCondition;
 import rs.taukit.utils.TauLogger;
 
 import java.util.Optional;
@@ -166,5 +168,11 @@ public abstract class StepManager {
 
     protected void waitForCondition(BooleanSupplier condition, Exception exception, String format, Object... args) {
         run(() -> getDriver().waitForCondition(condition), exception, format, args);
+    }
+
+    protected BooleanSupplier getConditions(DataTable dataTable) {
+        return () -> dataTable.asMaps().stream()
+                .map(data -> new TestCondition(data).waitForResult())
+                .allMatch(TestCondition::isConditionMet);
     }
 }
