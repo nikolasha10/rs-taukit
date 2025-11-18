@@ -22,22 +22,22 @@ public class TableStep extends TableManager {
      */
     @И("^в таблице \"(.+)\" проверить наличие столбцов:$")
     public void tableHeadersCheck(String tableName, DataTable dataTable) {
-        super.tableHeadersCheck(tableName, eval(dataTable));
+        super.tableHeadersCheck(eval(tableName), eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" для каждого заголовка столбца проверить выполнение условий:$")
     public void tableHeadersCheckConditions(String tableName, DataTable dataTable) {
-        super.tableHeadersCheckConditions(tableName, eval(dataTable));
+        super.tableHeadersCheckConditions(eval(tableName), eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" для каждой строки проверить выполнение условий:$")
     public void tableAllRowsCheckConditions(String tableName, DataTable dataTable) {
-        super.tableAllRowsCheckConditions(tableName, eval(dataTable));
+        super.tableAllRowsCheckConditions(eval(tableName), eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" для каждой ячейки в столбце № (\\d+) проверить выполнение условий:$")
     public void tableColumnCellsCheckConditions(String tableName, int columnNumber, DataTable dataTable) {
-        super.tableColumnCellsCheckConditions(tableName, columnNumber, eval(dataTable));
+        super.tableColumnCellsCheckConditions(eval(tableName), columnNumber, eval(dataTable));
     }
 
     /**
@@ -48,7 +48,7 @@ public class TableStep extends TableManager {
      */
     @И("^в таблице \"(.+)\" перейти к заголовку столбца № (\\d+)$")
     public void tableHeaderSetContext(String tableName, int headerNumber) {
-        super.tableHeaderSetContext(tableName, headerNumber);
+        super.tableHeaderSetContext(eval(tableName), headerNumber);
     }
 
     /**
@@ -59,12 +59,12 @@ public class TableStep extends TableManager {
      */
     @И("^в таблице \"(.+)\" перейти к заголовку столбца \"(.+)\"$")
     public void tableHeaderSetContext(String tableName, String headerName) {
-        super.tableHeaderSetContext(tableName, headerName);
+        super.tableHeaderSetContext(eval(tableName), headerName);
     }
 
     @И("^в таблице \"(.+)\" для заголовков столбцов \"([\\d\\,\\-]+)\" проверить выполнение условий:$")
     public void tableHeadersCheckConditions(String tableName, String headersNumbers, DataTable dataTable) {
-        super.tableHeadersCheckConditions(tableName, eval(headersNumbers), eval(dataTable));
+        super.tableHeadersCheckConditions(eval(tableName), eval(headersNumbers), eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" нажать на \"(.+)\" в строке, соответствующей условиям:$")
@@ -84,32 +84,32 @@ public class TableStep extends TableManager {
 
     @И("^в таблице \"(.+)\" дождаться отсутствия строки, соответствующей условиям:$")
     public void waitForTableNotContainsRow(String tableName, DataTable dataTable) {
-        super.waitForTableNotContainsRow(tableName, eval(dataTable));
+        super.waitForTableNotContainsRow(eval(tableName), eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" дождаться появления строки, соответствующей условиям \\(в течение (.+)\\):$")
     public void waitForTableConditions(String tableName, String timeoutString, DataTable dataTable) {
-        super.waitForTableConditions(tableName, timeoutString, eval(dataTable));
+        super.waitForTableConditions(eval(tableName), timeoutString, eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" дождаться отсутствия строки, соответствующей условиям \\(в течение (.+)\\):$")
     public void waitForTableNotContainsRow(String tableName, String timeoutString, DataTable dataTable) {
-        super.waitForTableNotContainsRow(tableName, timeoutString, eval(dataTable));
+        super.waitForTableNotContainsRow(eval(tableName), timeoutString, eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" найти строку, соответствующую условиям:$")
     public void findTableRowByConditions(String tableName, DataTable dataTable) {
-        super.findRowByConditions(tableName, eval(dataTable));
+        super.findRowByConditions(eval(tableName), eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" подсчитать количество строк, соответствующих условиям, и сохранить, как \"(.+)\":$")
     public void countRowsByConditions(String tableName, String parameterName, DataTable dataTable) {
-        super.countRowsByConditions(tableName, parameterName, eval(dataTable));
+        super.countRowsByConditions(eval(tableName), parameterName, eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" пролистать содержимое (вниз|вверх)$")
     public void scroll(String tableName, String direction) {
-        super.scroll(tableName, direction);
+        super.scroll(eval(tableName), direction);
     }
 
     @И("^в найденной строке найти и сохранить значения элементов:$")
