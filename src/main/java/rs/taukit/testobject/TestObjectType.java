@@ -26,6 +26,7 @@ public enum TestObjectType {
     LIST("список", name -> element(name).castTo(HasListItems.class)),
     MENU("меню", name -> element(name).castTo(IHasMenu.class)),
     CONTAINER("контейнер", name -> element(name).castTo(IContainer.class)),
+    SUBSECTION("подраздел", name -> element(name).castTo(IContainer.class)),
     TABLE("таблица", name -> element(name).castTo(IHasTableElements.class)),
     TABLE_HEADER("столбец", name -> {
         IHasTableElements table = scenarioData().get("контекст таблицы");
