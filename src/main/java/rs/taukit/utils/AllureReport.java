@@ -5,6 +5,7 @@ import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 import rs.taukit.scenario.CucumberScenario;
+import rs.taukit.testdata.ScenarioData;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,11 +44,11 @@ public class AllureReport {
         String scenarioName = scenario.getName();
         List<String> tagList = scenario.getTagList();
         List<File> fileList = getFileList(functionality, scenarioName, testEndTime - 1000);
-        fileList.forEach(file -> replaceReport(file, scenarioName, functionality, status, tagList));
+        fileList.forEach(file -> replaceReport(file, scenarioName, functionality, status, tagList, scenario));
     }
 
     @SuppressWarnings("unchecked")
-    private static void replaceReport(File file, String scenarioName, String functionality, String status, List<String> tagList) {
+    private static void replaceReport(File file, String scenarioName, String functionality, String status, List<String> tagList, CucumberScenario scenario) {
         try {
             String fileContent = Files.readString(file.toPath());
             Gson gson = new Gson();
@@ -77,6 +78,27 @@ public class AllureReport {
                 parentSuitName.put("value", functionality);
                 labels.add(parentSuitName);
             }
+
+            ScenarioData scenarioData = scenario.getScenarioStorage().getScenarioData();
+
+            // Получаем severity, если есть
+            String severity = scenarioData != null ? scenarioData.getSeverity() : null;
+            if (severity != null && !severity.isBlank()) {
+                Map<String, String> sevLabel = new HashMap<>();
+                sevLabel.put("name", "severity");
+                sevLabel.put("value", severity);
+                labels.add(sevLabel);
+            }
+
+            // Получаем теги, если есть
+            List<String> allureTags = scenarioData != null ? scenarioData.getAllureTags() : Collections.emptyList();
+            for (String tag : allureTags) {
+                Map<String, String> tagLabel = new HashMap<>();
+                tagLabel.put("name", "tag");
+                tagLabel.put("value", tag);
+                labels.add(tagLabel);
+            }
+
             String projectFullName = Config.getProperty("project.full.name");
             if (projectFullName != null) {
                 report.replace("fullName", Config.getProperty("project.full.name"));

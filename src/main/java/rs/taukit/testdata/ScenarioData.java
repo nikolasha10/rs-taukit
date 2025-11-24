@@ -129,4 +129,23 @@ public class ScenarioData {
         lines.add(index + 1, "  " + newLines);
         FileUtils.writeFile(testDataFilePath, String.join("\n", lines));
     }
+
+    // Метод получения severity из файла тестовых данных
+    public String getSeverity() {
+        return dataStorage.getOptional("severity");
+    }
+
+    // Метод получения tag из файла тестовых данных. Через запятую будет несколько
+    public List<String> getAllureTags() {
+        Object tagsObj = getOptional("allureTag");
+        if (tagsObj instanceof String tagsStr) {
+            return Arrays.stream(tagsStr.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .toList();
+        } else if (tagsObj instanceof List<?> tagsList) {
+            return tagsList.stream().map(Object::toString).toList();
+        }
+        return Collections.emptyList();
+    }
 }
