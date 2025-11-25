@@ -46,9 +46,9 @@ public class TextFieldManager extends StepManager {
         run(() -> {
             HasText textField = getPage().getElement(fieldName);
             scenarioData.put(parameterName, textField.getText());
+            TauLogger.report("Значение поля '%s' (%s) сохранено, как '%s'",
+                    fieldName, scenarioData.get(parameterName), parameterName);
         }, "Не удалось сохранить значение поля '%s' в параметр '%s'", fieldName, parameterName);
-        TauLogger.report("Значение поля '%s' (%s) сохранено, как '%s'",
-                fieldName, scenarioData.get(parameterName), parameterName);
     }
 
     @Step("сохранить значения элементов в параметры:")
