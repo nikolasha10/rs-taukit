@@ -56,7 +56,9 @@ public class TestCondition {
         Object object = TestObjectType.get(objectType).testObject.apply(objectName);
         this.testObject = new TestObject(object, expectedValue);
         this.condition = () -> TestObjectState.get(objectState).check.apply(testObject);
-        if (currentContext != null) Objects.requireNonNull(page()).replaceCurrentContext(currentContext);
+        if (parentNodeName != null) {
+            while (Objects.requireNonNull(page()).dropCurrentContext() != currentContext);
+        }
     }
 
     /**
