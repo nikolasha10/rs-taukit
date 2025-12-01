@@ -93,12 +93,16 @@ public class PwTable extends PwBlock implements IHasTableElements {
         scenarioData().put("контекст таблицы", this);
         PwList rowList = getDescendant("Строки");
         int foundRowIndex = IntStream.range(0, rowList.getSize()).boxed().filter(index -> {
-            activeRow = rowList.getItemList().get(index);
-            page().setCurrentContext(activeRow);
-            boolean conditionsMet = dataTable.asMaps().stream()
-                    .allMatch(conditionData -> new TestCondition(conditionData).checkResult().isConditionMet());
-            page().dropCurrentContext();
-            return conditionsMet;
+            try {
+                activeRow = rowList.getItemList().get(index);
+                page().setCurrentContext(activeRow);
+                boolean conditionsMet = dataTable.asMaps().stream()
+                        .allMatch(conditionData -> new TestCondition(conditionData).checkResult().isConditionMet());
+                page().dropCurrentContext();
+                return conditionsMet;
+            } catch (Exception e) {
+                return false;
+            }
         }).findFirst().orElse(-1);
         return foundRowIndex;
     }
