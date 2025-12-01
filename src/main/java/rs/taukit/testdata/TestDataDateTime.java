@@ -102,4 +102,9 @@ public class TestDataDateTime implements ITestData {
         LocalTime localTime = LocalTime.of(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
         return DateTimeFormatter.ofPattern(format).format(LocalDateTime.of(localDate, localTime));
     }
+
+    @Override
+    public String toString() {
+        return getStringValue();
+    }
 }
