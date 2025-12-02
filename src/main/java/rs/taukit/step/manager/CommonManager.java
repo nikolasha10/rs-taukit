@@ -288,13 +288,15 @@ public class CommonManager extends StepManager {
 
     @Step("вычислить дату по формуле '{formula}' и сохранить в формате '{format}', как '{parameterName}'")
     public void evalDateTime(String formula, String format, String parameterName) {
-        LinkedHashMap<String, String> data = new LinkedHashMap<>();
-        data.put("тип", "дата");
-        data.put("формат", format);
-        data.put("формула", formula);
-        TestDataDateTime testDataDateTime = new TestDataDateTime(parameterName, data);
-        scenarioData.put(parameterName, testDataDateTime);
-        TauLogger.report("Значение '%s' сохранено, как '%s'", testDataDateTime.getStringValue(), parameterName);
+        run(() -> {
+            LinkedHashMap<String, String> data = new LinkedHashMap<>();
+            data.put("тип", "дата");
+            data.put("формат", format);
+            data.put("формула", formula);
+            TestDataDateTime testDataDateTime = new TestDataDateTime(parameterName, data);
+            scenarioData.put(parameterName, testDataDateTime);
+            TauLogger.report("Значение '%s' сохранено, как '%s'", testDataDateTime.getStringValue(), parameterName);
+        });
     }
 
     protected void increaseParameterValue(String parameterName, String increment) {
