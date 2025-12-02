@@ -175,7 +175,6 @@ public class PlaywrightDriver implements IWebDriver {
     @Override
     public void waitForCondition(BooleanSupplier condition, double singleCheckTimeout, double timeout, List<Runnable> previousStepList) {
         double interval = previousStepList.isEmpty() ? timeout : singleCheckTimeout;
-        getCurrentBrowser().setDefaultTimeout(interval);
         BrowserContext.WaitForConditionOptions setTimeout = new BrowserContext.WaitForConditionOptions().setTimeout(timeout);
         getBrowserContext().waitForCondition(() -> {
             try {
@@ -189,7 +188,6 @@ public class PlaywrightDriver implements IWebDriver {
                 return condition.getAsBoolean();
             }
         }, setTimeout);
-        getCurrentBrowser().setDefaultTimeout();
     }
 
     @Override

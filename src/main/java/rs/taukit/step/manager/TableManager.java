@@ -137,22 +137,9 @@ public class TableManager extends StepManager {
                 : TimeStringParser.getTime(timeout);
         double elementCheckTimeout = TimeStringParser.getTime(timeoutString);
         AtomicReference<Exception> exception = new AtomicReference<>();
-        IContainer currentContext = getPage().getCurrentContext();
         BooleanSupplier conditions = () -> {
-            boolean isMet = false;
-            try {
-                IHasTableElements table = getElement(tableName);
-                isMet = table.isVisible() && table.findRowByConditions(dataTable) < 0;
-            } catch (Exception e) {
-                exception.set(e);
-            } finally {
-                while (getPage().getCurrentContext() != currentContext) {
-                    TauLogger.console("currentContext: %s", getPage().getCurrentContext() != null
-                            ? getPage().getCurrentContext().getElementName() : "null");
-                    getPage().dropCurrentContext();
-                }
-            }
-            return isMet;
+            IHasTableElements table = getElement(tableName);
+            return table.isVisible() && table.findRowByConditions(dataTable) < 0;
         };
         Runnable runnable = () -> {
             try {
@@ -187,29 +174,10 @@ public class TableManager extends StepManager {
         double elementCheckTimeout = TimeStringParser.getTime(timeoutString);
         AtomicReference<Exception> exception = new AtomicReference<>();
         AtomicReference<Integer> rowIndex = new AtomicReference<>(-1);
-        IContainer currentContext = getPage().getCurrentContext();
         BooleanSupplier conditions = () -> {
-            boolean isMet = false;
-            try {
-                IHasTableElements table = getElement(tableName);
-                rowIndex.set(table.findRowByConditions(dataTable));
-                isMet = table.isVisible() && rowIndex.get() > -1;
-            } catch (TimeoutError te) {
-                if (exception.get() == null) {
-                    exception.get().addSuppressed(te);
-                } else {
-                    exception.set(te);
-                }
-            } catch (Exception e) {
-                exception.set(e);
-            } finally {
-                while (getPage().getCurrentContext() != currentContext) {
-                    TauLogger.console("currentContext: %s", getPage().getCurrentContext() != null
-                            ? getPage().getCurrentContext().getElementName() : "null");
-                    getPage().dropCurrentContext();
-                }
-            }
-            return isMet;
+            IHasTableElements table = getElement(tableName);
+            rowIndex.set(table.findRowByConditions(dataTable));
+            return table.isVisible() && rowIndex.get() > -1;
         };
         Runnable runnable = () -> getDriver().waitForCondition(
                 conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage.getStepActions());

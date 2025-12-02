@@ -92,6 +92,7 @@ public class PwTable extends PwBlock implements IHasTableElements {
     public int findRowByConditions(DataTable dataTable) {
         scenarioData().put("контекст таблицы", this);
         PwList rowList = getDescendant("Строки");
+        IContainer currentContext = page().getCurrentContext();;
         int foundRowIndex = IntStream.range(0, rowList.getSize()).boxed().filter(index -> {
             try {
                 activeRow = rowList.getItemList().get(index);
@@ -101,6 +102,9 @@ public class PwTable extends PwBlock implements IHasTableElements {
                 page().dropCurrentContext();
                 return conditionsMet;
             } catch (Exception e) {
+                while (page().getCurrentContext() != currentContext) {
+                    page().dropCurrentContext();
+                }
                 return false;
             }
         }).findFirst().orElse(-1);
