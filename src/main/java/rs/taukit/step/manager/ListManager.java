@@ -149,11 +149,10 @@ public class ListManager extends StepManager {
 
     @Step("проверить, что список '{listName}' содержит ровно {count} {word}")
     protected void validateListElementsCountEquals(String listName, String count, String word) {
+        BooleanSupplier condition = () -> ((HasListItems) getElement(listName)).getSize() == Integer.parseInt(count);
         HasListItems list = getElement(listName);
-        if (list.getSize() != Integer.parseInt(count)) {
-            TauLogger.fail("Количество элементов списка '%s' (%d) не равно ожидаемому (%s)", listName, list.getSize(), count);
-        } else {
-            TauLogger.console("Количество элементов списка '%s' равно ожидаемому: %s", listName, count);
-        }
+        waitForCondition(condition, "Количество элементов списка '%s' (%d) не равно ожидаемому (%s)",
+                listName, list.getSize(), count);
+        TauLogger.console("Количество элементов списка '%s' равно ожидаемому: %s", listName, count);
     }
 }

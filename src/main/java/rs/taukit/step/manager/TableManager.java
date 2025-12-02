@@ -146,7 +146,11 @@ public class TableManager extends StepManager {
             } catch (Exception e) {
                 exception.set(e);
             } finally {
-                getPage().replaceCurrentContext(currentContext);
+                while (getPage().getCurrentContext() != currentContext) {
+                    TauLogger.console("currentContext: %s", getPage().getCurrentContext() != null
+                            ? getPage().getCurrentContext().getElementName() : "null");
+                    getPage().dropCurrentContext();
+                }
             }
             return isMet;
         };
@@ -158,6 +162,10 @@ public class TableManager extends StepManager {
                 IHasTableElements table = getElement(tableName);
                 if (table.isVisible()) {
                     throw te;
+                } else {
+                    throw new TableElementNotFoundException(
+                            "Таблица '%s' не отображается на странице '%s' в контексте '%s'",
+                            tableName, getPage().getPageName(), getPage().getCurrentContext().getElementName());
                 }
             }
         };
@@ -195,7 +203,11 @@ public class TableManager extends StepManager {
             } catch (Exception e) {
                 exception.set(e);
             } finally {
-                getPage().replaceCurrentContext(currentContext);
+                while (getPage().getCurrentContext() != currentContext) {
+                    TauLogger.console("currentContext: %s", getPage().getCurrentContext() != null
+                            ? getPage().getCurrentContext().getElementName() : "null");
+                    getPage().dropCurrentContext();
+                }
             }
             return isMet;
         };

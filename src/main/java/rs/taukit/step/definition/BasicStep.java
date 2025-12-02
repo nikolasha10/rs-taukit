@@ -158,14 +158,14 @@ public class BasicStep extends CommonManager {
         super.evalDateTime(eval(formula), format, parameterName);
     }
 
-    @И("^увеличить значение параметра \"(.+)\" на \"(\\d+)\"$")
+    @И("^увеличить значение параметра \"(.+)\" на \"(.+)\"$")
     public void increaseParameterValue(String parameterName, String increment) {
-        super.increaseParameterValue(parameterName, increment);
+        super.increaseParameterValue(parameterName, eval(increment));
     }
 
-    @И("^уменьшить значение параметра \"(.+)\" на \"(\\d+)\"$")
-    public void decreaseParameterValue(String parameterName, String increment) {
-        super.decreaseParameterValue(parameterName, increment);
+    @И("^уменьшить значение параметра \"(.+)\" на \"(.+)\"$")
+    public void decreaseParameterValue(String parameterName, String decrement) {
+        super.decreaseParameterValue(parameterName, eval(decrement));
     }
 
     @И("^создать коллекцию значений \"(.+)\":$")

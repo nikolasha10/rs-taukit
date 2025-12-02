@@ -298,8 +298,10 @@ public class CommonManager extends StepManager {
     }
 
     protected void increaseParameterValue(String parameterName, String increment) {
+        String stringValue = scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", "");
         run(() -> {
-            double value = Double.parseDouble(scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", ""));
+            TauLogger.console("Увеличиваем значение параметра '%s' (%s) на %s", parameterName, stringValue, increment);
+            double value = Double.parseDouble(stringValue);
             double currentValue = value + Double.parseDouble(increment);
             if (currentValue == Math.round(currentValue)) {
                 scenarioData.put(parameterName, String.valueOf((int) currentValue));
@@ -307,16 +309,18 @@ public class CommonManager extends StepManager {
                 scenarioData.put(parameterName, String.valueOf(currentValue));
             }
             TauLogger.console("%s: %s", parameterName, scenarioData.get(parameterName));
-        }, "Не удалось увеличить значение параметра '%s'", parameterName);
+        }, "Не удалось увеличить значение параметра '%s' (%s) на %s", parameterName, stringValue, increment);
     }
 
-    protected void decreaseParameterValue(String parameterName, String increment) {
+    protected void decreaseParameterValue(String parameterName, String decrement) {
+        String stringValue = scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", "");
         run(() -> {
-            double value = Double.parseDouble(scenarioData.get(parameterName).toString().replaceAll("[^\\d.]", ""));
-            double currentValue = value - Double.parseDouble(increment);
+            TauLogger.console("Уменьшаем значение параметра '%s' (%s) на %s", parameterName, stringValue, decrement);
+            double value = Double.parseDouble(stringValue);
+            double currentValue = value - Double.parseDouble(decrement);
             scenarioData.put(parameterName, String.valueOf(currentValue));
             TauLogger.console("%s: %.2f", parameterName, currentValue);
-        }, "Не удалось уменьшить значение параметра '%s'", parameterName);
+        }, "Не удалось уменьшить значение параметра '%s' (%s) на %s", parameterName, stringValue, decrement);
     }
 
     @Step("создать коллекцию значений '{parameterName}':")
