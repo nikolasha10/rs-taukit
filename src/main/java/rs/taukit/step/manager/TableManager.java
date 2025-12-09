@@ -139,7 +139,7 @@ public class TableManager extends StepManager {
         AtomicReference<Exception> exception = new AtomicReference<>();
         BooleanSupplier conditions = () -> {
             IHasTableElements table = getElement(tableName);
-            return table.isVisible() && table.findRowByConditions(dataTable) < 0;
+            return table.isInvisible() || table.findRowByConditions(dataTable) < 0;
         };
         Runnable runnable = () -> {
             try {
