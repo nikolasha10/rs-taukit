@@ -20,7 +20,7 @@ public class ConditionManager extends StepManager {
 
     @Step("дождаться выполнения условий '{conditionsName}':")
     public void waitForConditions(String conditionsName, DataTable dataTable) {
-        waitForConditions(dataTable);
+        run(() -> waitForConditions(dataTable));
     }
 
     @Step("проверить выполнение условий '{conditionsName}':")
