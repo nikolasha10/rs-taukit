@@ -90,11 +90,11 @@ public class FormDataManager extends StepManager {
 
     @Step("заполнить поля формы в контейнере '{blockName}' значениями:")
     public void fillFormBlock(String blockName, DataTable dataTable) {
-        fillFormBlockAction(blockName, 1, dataTable);
+        run(() -> fillFormBlockAction(blockName, 1, dataTable));
     }
 
     @Step("заполнить поля формы в контейнере '{blockName}' ({blockNumber}) значениями:")
     public void fillFormBlock(String blockName, int blockNumber, DataTable dataTable) {
-        fillFormBlockAction(blockName, blockNumber, dataTable);
+        run(() -> fillFormBlockAction(blockName, blockNumber, dataTable));
     }
 }
