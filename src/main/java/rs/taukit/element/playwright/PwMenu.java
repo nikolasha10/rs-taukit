@@ -36,7 +36,8 @@ public class PwMenu extends PwElement implements IHasMenu {
         List<String> itemValues = itemList.getValues();
         AtomicReference<String> errorMessage = new AtomicReference<>("");
         try {
-            if (itemList.getItemList().stream().anyMatch(item -> item.getText().trim().equals(itemName))) {
+            String expectedItemText = itemName.replace("[!]", "").trim();
+            if (itemList.contains(expectedItemText)) {
                 return itemList.getItem(itemName);
             } else {
                 PwButton item = getDescendant("Дополнительные пункты");
