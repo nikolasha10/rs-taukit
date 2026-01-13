@@ -124,6 +124,15 @@ public class CommonManager extends StepManager {
                 elementType, elementName, scenarioStorage.getCurrentPageName());
     }
 
+    @Step("дождаться отсутствия {elementType} '{elementName}'")
+    public void waitElementNotDisplayed(String elementType, String elementName) {
+        run(() -> {
+                    getPage().waitForElement(elementName, false);
+                    TauLogger.console("Дождались отсутствия %s '%s'", elementType, elementName);
+                }, "Не удалось дождаться отсутствия %s '%s' на странице '%s'",
+                elementType, elementName, scenarioStorage.getCurrentPageName());
+    }
+
     //    @Step("[примечание] результат следующей проверки некритичен для теста")
     public void setNextCheckNotCritical() {
         scenarioData.put("NEXT_CHECK_NOT_CRITICAL", "NOT CRITICAL");
@@ -355,8 +364,7 @@ public class CommonManager extends StepManager {
             row.add(scenarioData.get(row.getLast()));
         }
         DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
-        TauLogger.console("Произведена замена текста в значениях параметров");
-        System.out.println(resultTable);
+        TauLogger.console("Произведена замена текста в значениях параметров", resultTable);
     }
 
     protected void setTableActiveRowContext() {
