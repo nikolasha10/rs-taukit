@@ -105,7 +105,7 @@ public class ListManager extends StepManager {
         } catch (Exception e) {
             resultList.addFirst(Arrays.asList("Элемент", "Состояние", "Ожидалось"));
             DataTable validationResultTable = DataTable.create(resultList, TextUtils.tableConverter);
-            System.out.println(validationResultTable);
+            TauLogger.console("Элементы списка, не прошедшие проверку", validationResultTable);
             Runnable runnable = () -> TauLogger.attach("Элементы списка, не прошедшие проверку", validationResultTable);
             TauLogger.fail(runnable, "Состав элементов списка '%s' не соответствует ожидаемому", listName);
         }
@@ -116,26 +116,28 @@ public class ListManager extends StepManager {
         TauLogger.attachDataTable("Условия валидации элементов списка", dataTable);
         List<List<String>> resultList = new ArrayList<>();
         resultList.add(Arrays.asList("№", "Объект", "Название", "Состояние", "текущее значение", "Ожидалось"));
-        HasListItems list = getElement(listName);
-        getDriver().waitForCondition(() -> list.getSize() > 0);
-        for (int i = 0; i < list.getSize(); i++) {
-            IContainer item = list.getItemList().get(i).castTo(IContainer.class);
-            getPage().setCurrentContext(item);
-            int itemNumber = i + 1;
-            dataTable.asMaps().forEach(conditionData -> {
-                TestCondition testCondition = new TestCondition(conditionData).checkResult();
-                if (!testCondition.isConditionMet()) {
-                    resultList.add(Arrays.asList(
-                            String.valueOf(itemNumber),
-                            testCondition.getObjectType(),
-                            testCondition.getObjectName(),
-                            testCondition.getObjectState(),
-                            testCondition.getCurrentValue(),
-                            testCondition.getExpectedValue()));
-                }
-            });
-            getPage().dropCurrentContext();
-        }
+        run(() -> {
+            HasListItems list = getElement(listName);
+            getDriver().waitForCondition(() -> list.getSize() > 0);
+            for (int i = 0; i < list.getSize(); i++) {
+                IContainer item = list.getItemList().get(i).castTo(IContainer.class);
+                getPage().setCurrentContext(item);
+                int itemNumber = i + 1;
+                dataTable.asMaps().forEach(conditionData -> {
+                    TestCondition testCondition = new TestCondition(conditionData).checkResult();
+                    if (!testCondition.isConditionMet()) {
+                        resultList.add(Arrays.asList(
+                                String.valueOf(itemNumber),
+                                testCondition.getObjectType(),
+                                testCondition.getObjectName(),
+                                testCondition.getObjectState(),
+                                testCondition.getCurrentValue(),
+                                testCondition.getExpectedValue()));
+                    }
+                });
+                getPage().dropCurrentContext();
+            }
+        }, "Не удалось проверить элементы списка '%s' на странице '%s'", listName, getPage().getPageName());
         if (resultList.size() > 1) {
             Runnable runnable = () -> {
                 DataTable resultDataTable = DataTable.create(resultList, TextUtils.tableConverter);

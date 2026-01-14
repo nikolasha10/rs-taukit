@@ -50,6 +50,10 @@ public class BasicStep extends CommonManager {
     public void waitForElement(String elementType, String elementName) {
         super.waitForElement(elementType, eval(elementName));
     }
+    @И("^дождаться отсутствия (элемента|поля|кнопки|ссылки|таблицы|списка|переключателя) \"(.+)\"$")
+    public void waitElementNotDisplayed(String elementType, String elementName) {
+        super.waitElementNotDisplayed(elementType, eval(elementName));
+    }
 
     @И("^сохранить файл \"(.+)\", как \"(.+)\"$")
     public void saveDownloadedFileAs(String originalFileName, String fileName) {
