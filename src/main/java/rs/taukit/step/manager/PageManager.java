@@ -6,13 +6,14 @@ import rs.taukit.utils.TauLogger;
 public class PageManager extends StepManager {
     @Step("открыть страницу '{pageName}'")
     public void openPage(String pageName) {
-        run(() -> getBrowser().getPage(pageName).loadPage());
+        run(() -> getBrowser().getPage(pageName).loadPage(), "Не удалось открыть страницу '%s'", pageName);
         TauLogger.report("Открыта страница '%s'", pageName);
     }
 
     @Step("дождаться отображения страницы '{pageName}'")
     public void waitForPageLoad(String pageName) {
-        run(() -> getBrowser().getPage(pageName).waitForLoad());
+        run(() -> getBrowser().getPage(pageName).waitForLoad(),
+                "Не удалось дождаться загрузки страницы '%s'", pageName);
         TauLogger.report("Отображается страница '%s'", pageName);
         TauLogger.savePageSource(getBrowser().getPage(pageName));
     }
