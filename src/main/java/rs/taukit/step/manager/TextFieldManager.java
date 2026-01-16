@@ -73,8 +73,7 @@ public class TextFieldManager extends StepManager {
             row.add(scenarioData.get(row.getLast()));
         }
         DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
-        TauLogger.console("Сохранены значения элементов");
-        System.out.println(resultTable);
+        TauLogger.console("Сохранены значения элементов", resultTable);
         TauLogger.attachDataTable("Значения элементов", resultTable);
     }
 }

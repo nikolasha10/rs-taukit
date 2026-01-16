@@ -12,12 +12,13 @@ public class PageManager extends StepManager {
 
     @Step("дождаться отображения страницы '{pageName}'")
     public void waitForPageLoad(String pageName) {
-        run(() -> getBrowser().getPage(pageName).waitForLoad(),
+        run(() -> {
+                    getBrowser().getPage(pageName).waitForLoad();
+                    TauLogger.report("Отображается страница '%s'", pageName);
+                    TauLogger.savePageSource(getBrowser().getPage(pageName));
+                },
                 "Не удалось дождаться загрузки страницы '%s'", pageName);
-        TauLogger.report("Отображается страница '%s'", pageName);
-        TauLogger.savePageSource(getBrowser().getPage(pageName));
     }
-
 
     @Step("дождаться отображения всплывающего окна '{pageName}'")
     public void waitForPopupWindow(String pageName) {

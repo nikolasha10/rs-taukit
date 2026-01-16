@@ -13,35 +13,37 @@ public class FormDataManager extends StepManager {
 
     @Step("заполнить поля формы значениями:")
     public void fillForm(DataTable dataTable) {
-        TauLogger.attachDataTable("Значения полей формы", dataTable);
-        dataTable.asMaps().forEach((row) -> {
-            String type = TestDataUtils.get(row, "Тип");
-            String name = TestDataUtils.get(row, "Название");
-            String value = Optional.ofNullable(TestDataUtils.getOptional(row, "Значение")).orElse("");
-            String containerName = TestDataUtils.getOptional(row, "Блок");
-            String control = TestDataUtils.getOptional(row, "Контроль");
-            IContainer container = null;
-            try {
-                container = containerName == null ? null : getElement(containerName);
-            } catch (Exception e){
-                TauLogger.fail("Не удалось дождаться контейнера '%s' на странице '%s'",
-                        containerName, getPage().getPageName());
-            }
-            try {
-                Editable element = container == null
-                        ? getElement(name)
-                        : container.getElementByName(name).castTo(Editable.class);
-                if (control == null) {
-                    element.setValue(value);
-                } else {
-                    element.setValue(value, control);
+        run(() -> {
+            TauLogger.attachDataTable("Значения полей формы", dataTable);
+            dataTable.asMaps().forEach((row) -> {
+                String type = TestDataUtils.get(row, "Тип");
+                String name = TestDataUtils.get(row, "Название");
+                String value = Optional.ofNullable(TestDataUtils.getOptional(row, "Значение")).orElse("");
+                String containerName = TestDataUtils.getOptional(row, "Блок");
+                String control = TestDataUtils.getOptional(row, "Контроль");
+                IContainer container = null;
+                try {
+                    container = containerName == null ? null : getElement(containerName);
+                } catch (Exception e) {
+                    TauLogger.fail("Не удалось дождаться контейнера '%s' на странице '%s'",
+                            containerName, getPage().getPageName());
                 }
-            } catch (Exception e) {
-                TauLogger.fail(e, "Не удалось заполнить %s '%s' в контейнере '%s' значением '%s'",
-                        type, name, getContext().getElementName(), value);
-            }
+                try {
+                    Editable element = container == null
+                            ? getElement(name)
+                            : container.getElementByName(name).castTo(Editable.class);
+                    if (control == null) {
+                        element.setValue(value);
+                    } else {
+                        element.setValue(value, control);
+                    }
+                } catch (Exception e) {
+                    TauLogger.fail(e, "Не удалось заполнить %s '%s' в контейнере '%s' значением '%s'",
+                            type, name, getContext().getElementName(), value);
+                }
+            });
+            TauLogger.report("Поля формы заполнены значениями из таблицы", dataTable);
         });
-        TauLogger.report("Поля формы заполнены значениями из таблицы", dataTable);
     }
 
     private void fillFormBlockAction(String containerName, int containerNumber, DataTable dataTable) {
