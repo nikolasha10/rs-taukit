@@ -125,8 +125,8 @@ public class CucumberScenario {
         finished = true;
         releaseAllMutexes();
         String testStatus = skipped ? "SKIPPED" : statusCode == 1 ? "PASSED" : "FAILED";
-        Boolean harFileSave = scenarioData().get("har-file.save");
-        if ((Config.getBooleanProperty("har-file.save") || harFileSave)
+        Boolean harFileSave = scenarioData().getOptional("har-file.save");
+        if ((Config.getBooleanProperty("har-file.save") || Optional.ofNullable(harFileSave).orElse(false))
                 && testStatus.equalsIgnoreCase("failed")
                 && driver().isBrowserOpen()) {
             String harPath = driver().getHarFilePath();
