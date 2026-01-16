@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static rs.taukit.utils.BasicUtils.driver;
+import static rs.taukit.utils.BasicUtils.*;
 
 @Getter
 public class CucumberScenario {
@@ -125,16 +125,31 @@ public class CucumberScenario {
         finished = true;
         releaseAllMutexes();
         String testStatus = skipped ? "SKIPPED" : statusCode == 1 ? "PASSED" : "FAILED";
-        if (Config.getBooleanProperty("har-file.save")
+        Boolean harFileSave = scenarioData().get("har-file.save");
+        if ((Config.getBooleanProperty("har-file.save") || harFileSave)
                 && testStatus.equalsIgnoreCase("failed")
                 && driver().isBrowserOpen()) {
             String harPath = driver().getHarFilePath();
             try {
-                driver().closeBrowser();
+                browser().close();
+            } catch (Exception e){
+                TauLogger.console("Не удалось закрыть браузер");
+                TauLogger.console(e);
+                TauLogger.console("Ждём 5 секунд");
+                driver().waitForTimeout(5000);
+                TauLogger.console("Пробуем закрыть драйвер");
+                driver().closeDriver();
+                TauLogger.console("Драйвер закрыт");
+            }
+            try {
                 File harFile = new File(harPath);
                 TauLogger.attachFile(harFile.getParentFile().getName() + ".har", harPath);
-            } catch (Exception e){
-                TauLogger.console(e);
+                FileUtils.getDirFileList(harFile.getParentFile().getAbsolutePath())
+                        .stream()
+                        .filter(file -> file.getName().endsWith(".json"))
+                        .forEach(file -> TauLogger.attachJson(file.getName(), FileUtils.readFile(file.getAbsolutePath())));
+            } catch (Exception e) {
+                TauLogger.error("Не удалось прикрепить файл HAR", e);
             }
         }
         Config.getDependencies().changeStatus(getTagList(), testStatus.toLowerCase());

@@ -4,6 +4,8 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.TimeoutError;
+import com.microsoft.playwright.options.HarMode;
+import com.microsoft.playwright.options.RouteFromHarUpdateContentPolicy;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebDriver;
@@ -60,10 +62,14 @@ public class PlaywrightDriver implements IWebDriver {
                 Chromium chromium = new Chromium(browserType, browserList.size(), args);
                 browserList.add(chromium);
                 currentBrowserIndex = browserList.size() - 1;
-                if (Config.getBooleanProperty("har-file.save")) {
+                Boolean harFileSave = scenarioData().get("har-file.save");
+                if (Config.getBooleanProperty("har-file.save") || harFileSave) {
                     chromium.context.routeFromHAR(
                             Path.of(getHarFilePath()),
-                            new BrowserContext.RouteFromHAROptions().setUpdate(true));
+                            new BrowserContext.RouteFromHAROptions()
+                                    .setUpdate(true)
+                                    .setUpdateContent(RouteFromHarUpdateContentPolicy.ATTACH)
+                                    .setUpdateMode(HarMode.FULL));
                 }
                 return true;
             } catch (Exception e) {
