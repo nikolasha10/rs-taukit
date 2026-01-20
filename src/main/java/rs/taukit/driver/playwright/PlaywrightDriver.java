@@ -4,6 +4,8 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.TimeoutError;
+import com.microsoft.playwright.options.HarMode;
+import com.microsoft.playwright.options.RouteFromHarUpdateContentPolicy;
 import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebDriver;
@@ -14,10 +16,7 @@ import rs.taukit.utils.TimeStringParser;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
@@ -60,10 +59,14 @@ public class PlaywrightDriver implements IWebDriver {
                 Chromium chromium = new Chromium(browserType, browserList.size(), args);
                 browserList.add(chromium);
                 currentBrowserIndex = browserList.size() - 1;
-                if (Config.getBooleanProperty("har-file.save")) {
+                Boolean harFileSave = scenarioData().getOptional("har-file.save");
+                if (Config.getBooleanProperty("har-file.save") || Optional.ofNullable(harFileSave).orElse(false)) {
                     chromium.context.routeFromHAR(
                             Path.of(getHarFilePath()),
-                            new BrowserContext.RouteFromHAROptions().setUpdate(true));
+                            new BrowserContext.RouteFromHAROptions()
+                                    .setUpdate(true)
+                                    .setUpdateContent(RouteFromHarUpdateContentPolicy.ATTACH)
+                                    .setUpdateMode(HarMode.FULL));
                 }
                 return true;
             } catch (Exception e) {

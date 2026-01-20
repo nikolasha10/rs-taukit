@@ -25,40 +25,42 @@ public class ConditionManager extends StepManager {
 
     @Step("проверить выполнение условий '{conditionsName}':")
     public void checkConditions(String conditionsName, DataTable dataTable) {
-        TauLogger.attachDataTable("Ожидаемый результат", dataTable);
-        Map<String, String> expectedHeaders = dataTable.asMaps().getFirst();
-        List<List<String>> unexpectedResultList = new ArrayList<>();
-        List<String> resultsHeaders = new ArrayList<>(expectedHeaders.keySet().stream().toList());
-        resultsHeaders.add("Текущее значение");
-        unexpectedResultList.add(resultsHeaders);
-        AtomicReference<Exception> exception = new AtomicReference<>();
-        dataTable.asMaps().stream()
-                .map(data -> new TestCondition(data).checkResult())
-                .filter(result -> !result.isConditionMet())
-                .forEach(result -> {
-                    List<String> unexpected = getUnexpectedResults(result, expectedHeaders, resultsHeaders);
-                    unexpectedResultList.add(unexpected);
-                            if (result.getThrownException() != null) {
-                                if (exception.get() == null) {
-                                    exception.set(result.getThrownException());
-                                } else {
-                                    exception.get().addSuppressed(result.getThrownException());
-                                }
+        run(() -> {
+            TauLogger.attachDataTable("Ожидаемый результат", dataTable);
+            Map<String, String> expectedHeaders = dataTable.asMaps().getFirst();
+            List<List<String>> unexpectedResultList = new ArrayList<>();
+            List<String> resultsHeaders = new ArrayList<>(expectedHeaders.keySet().stream().toList());
+            resultsHeaders.add("Текущее значение");
+            unexpectedResultList.add(resultsHeaders);
+            AtomicReference<Exception> exception = new AtomicReference<>();
+            dataTable.asMaps().stream()
+                    .map(data -> new TestCondition(data).checkResult())
+                    .filter(result -> !result.isConditionMet())
+                    .forEach(result -> {
+                                List<String> unexpected = getUnexpectedResults(result, expectedHeaders, resultsHeaders);
+                                unexpectedResultList.add(unexpected);
+                                if (result.getThrownException() != null) {
+                                    if (exception.get() == null) {
+                                        exception.set(result.getThrownException());
+                                    } else {
+                                        exception.get().addSuppressed(result.getThrownException());
+                                    }
 
+                                }
                             }
-                        }
-                );
-        if (unexpectedResultList.size() > 1) {
-            Runnable runnable = () -> {
-                DataTable unexpectedResultsTable = DataTable.create(unexpectedResultList, TextUtils.tableConverter);
-                TauLogger.console("Результаты неуспешных проверок", unexpectedResultsTable);
-                TauLogger.attachDataTable("Результаты неуспешных проверок", unexpectedResultsTable);
-            };
-            TauLogger.fail(runnable, exception.get(), "Результаты проверки условий '%s' не соответствуют ожидаемым", conditionsName);
-        } else {
-            TauLogger.report("Условия '%s' выполнены", conditionsName);
-        }
-        TauLogger.resetNotCritical();
+                    );
+            if (unexpectedResultList.size() > 1) {
+                Runnable runnable = () -> {
+                    DataTable unexpectedResultsTable = DataTable.create(unexpectedResultList, TextUtils.tableConverter);
+                    TauLogger.console("Результаты неуспешных проверок", unexpectedResultsTable);
+                    TauLogger.attachDataTable("Результаты неуспешных проверок", unexpectedResultsTable);
+                };
+                TauLogger.fail(runnable, exception.get(), "Результаты проверки условий '%s' не соответствуют ожидаемым", conditionsName);
+            } else {
+                TauLogger.console("Условия '%s' выполнены", conditionsName);
+            }
+            TauLogger.resetNotCritical();
+        });
     }
 
     private static List<String> getUnexpectedResults(TestCondition result, Map<String, String> expectedHeaders, List<String> resultsHeaders) {
