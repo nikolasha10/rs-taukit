@@ -57,7 +57,7 @@ public class TestCondition {
         this.testObject = new TestObject(object, expectedValue);
         this.condition = () -> TestObjectState.get(objectState).check.apply(testObject);
         if (parentNodeName != null) {
-            while (Objects.requireNonNull(page()).dropCurrentContext() != currentContext);
+            while (Objects.requireNonNull(page()).dropCurrentContext() != currentContext) ;
         }
     }
 
@@ -87,7 +87,8 @@ public class TestCondition {
         }
         String debug = scenarioData().getOptional("debug");
         if (debug != null && debug.equals("debug")) {
-            TauLogger.report("Текущее значение: %s, Условие выполнено: %s", this.currentValue, this.isConditionMet());
+            TauLogger.report("%s '%s'. Текущее значение: %s; Условие выполнено: %s",
+                    this.objectType, this.objectName, this.currentValue, this.isConditionMet());
             if (this.thrownException != null) {
                 TauLogger.console(this.thrownException);
             }
@@ -110,7 +111,8 @@ public class TestCondition {
         }
         String debug = scenarioData().getOptional("debug");
         if (debug != null && debug.equals("debug")) {
-            TauLogger.report("Текущее значение: %s, Условие выполнено: %s", this.currentValue, this.isConditionMet());
+            TauLogger.report("%s '%s'. Текущее значение: %s; Условие выполнено: %s",
+                    this.objectType, this.objectName, this.currentValue, this.isConditionMet());
             if (this.thrownException != null) {
                 TauLogger.console(this.thrownException);
             }

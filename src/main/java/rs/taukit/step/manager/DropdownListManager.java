@@ -26,15 +26,12 @@ public class DropdownListManager extends StepManager {
     public void verifyDropdownOptions(String elementName, DataTable dataTable) {
         TauLogger.attachDataTable("Ожидаемые значения в списке", dataTable);
         List<String> expectedValues = dataTable.asList();
-        AtomicReference<String> errorMessage = new AtomicReference<>(
-                String.format("Не удалось проверить значения в выпадающем списке '%s'", elementName));
         run(() -> {
             Selectable dropdown = getElement(elementName);
             List<String> actualValues = dropdown.getOptions();
             if (expectedValues.size() != actualValues.size()
                     || !new HashSet<>(expectedValues).containsAll(actualValues)
                     || !new HashSet<>(actualValues).containsAll(expectedValues)) {
-                errorMessage.set(String.format("Значения выпадающего списка '%s' не совпадают с ожидаемыми", elementName));
                 List<List<String>> diff = new ArrayList<>();
                 diff.add(Arrays.asList("Ожидаемые значения", "Фактические значения"));
                 for (int i = 0; i < Math.max(actualValues.size(), expectedValues.size()); i++) {
@@ -44,10 +41,10 @@ public class DropdownListManager extends StepManager {
                 }
                 DataTable diffTable = DataTable.create(diff, TextUtils.tableConverter);
                 TauLogger.attachDataTable("Разница в значениях", diffTable);
-                System.out.println(diffTable);
-                throw new AssertionError(errorMessage.get());
+                TauLogger.console("Разница в значениях", diffTable);
+                throw new RuntimeException();
             }
-        }, errorMessage.get());
+        }, "Значения выпадающего списка '%s' не совпадают с ожидаемыми", elementName);
         TauLogger.console("Выпадающий список '%s' содержит ожидаемые значения: %s", elementName, expectedValues);
     }
 

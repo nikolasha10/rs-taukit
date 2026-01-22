@@ -177,12 +177,19 @@ public class TableManager extends StepManager {
         BooleanSupplier conditions = () -> {
             IHasTableElements table = getElement(tableName);
             rowIndex.set(table.findRowByConditions(dataTable));
+            if (scenarioData().getOptional("debug") != null){
+                TauLogger.console("Таблица отображается: %s, Индекс строки: %d", table.isVisible(), rowIndex.get());
+            }
             return table.isVisible() && rowIndex.get() > -1;
         };
         Runnable runnable = () -> getDriver().waitForCondition(
                 conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage.getStepActions());
-        runOnce(runnable, exception.get(),
+        String tableRowNotFoundMessage = String.format(
                 "В таблице '%s' не удалось дождаться строки, соответствующей заданным условиям", tableName);
+        String tableNotFoundMessage = String.format(
+                "Таблица '%s' не отображается на странице '%s'", tableName, getPage().getPageName());
+        runOnce(runnable, exception.get(),
+                ((IHasTableElements) getElement(tableName)).isVisible() ? tableRowNotFoundMessage : tableNotFoundMessage);
         scenarioStorage.clearStepActions();
         scenarioStorage.stopToSaveActions();
         TauLogger.console("Найдена строка № %d", rowIndex.get() + 1);
