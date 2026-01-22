@@ -6,6 +6,7 @@ import rs.taukit.exceptions.AutoTestBrokenException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static rs.taukit.utils.BasicUtils.scenarioData;
 
@@ -76,7 +77,8 @@ public enum TestObjectState {
     CONSISTS_OF("состоит из элементов",
             t -> hasListItems(t).containsItems(scenarioData().get(t.expectedValue()), true),
             t -> hasListItems(t).containsItems(scenarioData().get(t.expectedValue()), true)
-                    ? "состоит из элементов" : "состав списка отличается от контрольного"),
+                    ? "состоит из элементов" : hasListItems(t).getItemList().stream()
+                    .map(item -> item.castTo(HasText.class).getText()).collect(Collectors.joining(", "))),
     INCLUDED_IN("содержится в списке",
             t -> isIncludedIn(hasText(t), scenarioData().get(t.expectedValue())),
             t -> isIncludedIn(hasText(t), scenarioData().get(t.expectedValue()))
