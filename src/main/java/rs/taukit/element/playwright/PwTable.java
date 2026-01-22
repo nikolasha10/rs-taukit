@@ -102,6 +102,9 @@ public class PwTable extends PwBlock implements IHasTableElements {
                 page().dropCurrentContext();
                 return conditionsMet;
             } catch (Exception e) {
+                if (scenarioData().getOptional("debug") != null){
+                    TauLogger.console(e);
+                }
                 while (page().getCurrentContext() != currentContext) {
                     page().dropCurrentContext();
                 }
