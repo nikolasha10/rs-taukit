@@ -63,6 +63,14 @@ public class PwList extends PwElement implements HasListItems {
         Predicate<IContainer> containerPredicate = itemName.contains("[!]")
                 ? containsElementWithTextEquals(expectedItemText)
                 : containsElementWithText(expectedItemText);
+        condition = () -> getItemList().stream()
+                        .filter(PwElement::isVisible)
+                        .anyMatch(containerPredicate);
+        try {
+            driver.waitForCondition(condition, timeout);
+        } catch (Exception e) {
+            throw valueNotFoundException(expectedItemText, e).get();
+        }
         return getItemList().stream()
                 .filter(PwElement::isVisible)
                 .filter(containerPredicate)

@@ -7,6 +7,7 @@ import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TimeStringParser;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -59,6 +60,14 @@ public class TestCondition {
         if (parentNodeName != null) {
             while (Objects.requireNonNull(page()).dropCurrentContext() != currentContext) ;
         }
+    }
+
+    public String getExpectedValue() {
+        if (objectState.equals("состоит из элементов")) {
+            List<String> expectedValues = scenarioData().get(expectedValue);
+            return String.join(", ", expectedValues);
+        }
+        return expectedValue;
     }
 
     /**
