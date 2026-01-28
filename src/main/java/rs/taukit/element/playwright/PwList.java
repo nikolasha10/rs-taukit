@@ -49,7 +49,7 @@ public class PwList extends PwElement implements HasListItems {
 
     @Override
     public PwElement getItem(String itemName) {
-        double timeout = Config.getTimeProperty("element.check.interval");
+        double timeout = Config.getTimeProperty("condition.wait.timeout");
         String expectedItemText = itemName.replace("[!]", "").trim();
         Predicate<String> predicate = itemName.contains("[!]")
                 ? value -> value.equals(expectedItemText)
