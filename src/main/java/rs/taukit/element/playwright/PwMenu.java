@@ -99,13 +99,14 @@ public class PwMenu extends PwElement implements IHasMenu {
     @Override
     public boolean containsItem(String itemName) {
         PwList itemList = getDescendant("Пункты меню");
-        if (itemList.getItemList().stream().anyMatch(item -> item.getText().equals(itemName)))
+        if (itemList.getItemList().stream().anyMatch(item -> item.isVisible() && item.getText().equals(itemName)))
             return true;
         try {
             PwButton additionalButton = getDescendant("Дополнительные пункты");
             additionalButton.forceClick();
             PwList additionalItemList = getDescendant("Выпадающий список");
-            boolean contains = additionalItemList.getValues().stream().anyMatch(itemValue -> itemValue.equals(itemName));
+            boolean contains = additionalItemList.getItemList().stream()
+                    .anyMatch(item -> item.isVisible() && item.getText().equals(itemName));
             additionalButton.forceClick();
             return contains;
         } catch (Exception e) {
