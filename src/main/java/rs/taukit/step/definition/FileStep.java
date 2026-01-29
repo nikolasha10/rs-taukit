@@ -115,4 +115,11 @@ public class FileStep extends FileManager {
         super.init(fileDir, xmlFileName);
         super.validateByXsd(eval(xsdFileName));
     }
+
+    @И("^проверить, что файл \"(.+)\" не пуст$")
+    public void checkFileIsNotEmpty(String fileParameterName) {
+        TestDataFile testDataFile = scenarioData().get(fileParameterName);
+        super.init(testDataFile);
+        super.checkFileIsNotEmpty(fileParameterName);
+    }
 }

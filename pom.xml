@@ -32,6 +32,9 @@
         <ashot.version>1.5.4</ashot.version>
         <postgresql.version>42.2.18</postgresql.version>
         <itextpdf.version>5.5.13.2</itextpdf.version>
+        <commons-io.version>2.15.0</commons-io.version>
+        <poi.version>5.2.5</poi.version>
+        <log4j.version>2.25.3</log4j.version>
         <suite.XmlFile>testng.xml</suite.XmlFile>
     </properties>
 
@@ -186,6 +189,37 @@
             <version>${aspectj.version}</version>
             <scope>runtime</scope>
         </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+            <scope>compile</scope>
+        </dependency>        
     </dependencies>
 
     <build>
