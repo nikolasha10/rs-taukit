@@ -40,6 +40,9 @@ public class PwMenu extends PwElement implements IHasMenu {
             if (itemList.contains(expectedItemText)) {
                 return itemList.getItem(itemName);
             } else {
+                errorMessage.set(String.format("""
+                                    . Элемент с текстом '%s' не найден среди пунктов меню.
+                                    Доступны пункты: %s""", itemName, itemValues));
                 PwButton item = getDescendant("Дополнительные пункты");
                 PwList additionalItemList = getDescendant("Выпадающий список");
                 getDriver().getCurrentBrowser().setDefaultTimeout(Config.getTimeProperty("element.check.interval"));
@@ -106,7 +109,6 @@ public class PwMenu extends PwElement implements IHasMenu {
             additionalButton.forceClick();
             return contains;
         } catch (Exception e) {
-            TauLogger.console(e);
             return false;
         }
     }
