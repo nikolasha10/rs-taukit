@@ -176,17 +176,20 @@ public class PwElement extends Element implements HasText {
 
     @Override
     public boolean hasText(String value) {
+        if (isInvisible()) return false;
         return getText().equals(value);
     }
 
     @Override
     public Boolean matches(String format) {
+        if (isInvisible()) return false;
         Matcher matcher = Pattern.compile(format).matcher(getText());
         return matcher.matches();
     }
 
     @Override
     public Boolean containsText(String expectedText) {
+        if (isInvisible()) return false;
         return getText().contains(expectedText);
     }
 
