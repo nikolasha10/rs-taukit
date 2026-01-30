@@ -184,6 +184,10 @@ public final class TauLogger {
     public static void fail(String message, Throwable e) {
 //        attachPageSource();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
+        List<String> category = scenarioData().getOptional("ERROR_CATEGORIES");
+        if (category != null) {
+            e.addSuppressed(new Throwable("Категории: " + String.join(", ", category)));
+        }
         throw new AssertionError(message, e);
     }
 

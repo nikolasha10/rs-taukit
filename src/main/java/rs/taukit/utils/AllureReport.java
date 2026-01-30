@@ -9,6 +9,7 @@ import rs.taukit.scenario.CucumberScenario;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -20,6 +21,7 @@ import java.util.stream.IntStream;
 @Getter
 public class AllureReport {
     private static final List<String> errorList = new ArrayList<>();
+    private static final Set<String> categories = new HashSet<>();
 
     private static List<File> getFileList(String functionality, String scenarioName, long testEndTime) {
         File directory = new File(Config.getProperty("allure-results.path"));
@@ -108,6 +110,16 @@ public class AllureReport {
             }
             errorList.clear();
             Files.writeString(file.toPath(), gson.toJson(report));
+            List<Map<String, Object>> categoriesMap = new ArrayList<>();
+            categories.forEach(category -> {
+                Map<String, Object> categoryMap = new HashMap<>();
+                categoryMap.put("name", category);
+                categoryMap.put("matchedStatuses", Arrays.asList("failed", "broken"));
+                categoryMap.put("traceRegex", ".*Категории.*" + category + ".*");
+                categoriesMap.add(categoryMap);
+            });
+            Path categoriesPath = Path.of(Config.getProperty("allure-results.path"),"categories.json");
+            FileUtils.writeFile(categoriesPath, JsonParser.write(categoriesMap));
         } catch (IOException e) {
             throw new ConfigFileNotFoundException(e, file.getPath());
         }
@@ -148,6 +160,14 @@ public class AllureReport {
             } else if (s.get("status").equals("broken")) {
                 json.replace("status", "broken");
                 resultStatus.set(2);
+            }
+            Map<String, String> details = (Map<String, String>) s.get("statusDetails");
+            if (details != null) {
+                String trace = details.get("trace");
+                Matcher matcher = Pattern.compile("Категории: (.+)\\r\\n").matcher(trace);
+                if (matcher.find()) {
+                    categories.addAll(Arrays.asList(matcher.group(1).trim().split(", ")));
+                }
             }
         });
         return resultStatus.get();

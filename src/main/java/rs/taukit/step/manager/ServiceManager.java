@@ -72,4 +72,8 @@ public class ServiceManager extends StepManager {
     protected void releaseMutex(String mutexName) {
         scenario.releaseMutex(mutexName);
     }
+
+    protected void addErrorCategories(DataTable dataTable) {
+        scenarioData.put("ERROR_CATEGORIES", dataTable.asList());
+    }
 }

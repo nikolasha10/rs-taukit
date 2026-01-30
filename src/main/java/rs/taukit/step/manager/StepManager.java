@@ -116,6 +116,7 @@ public abstract class StepManager {
         };
         runnable.run();
         scenarioStorage.saveStepAction(runnable);
+        scenarioData.remove("ERROR_CATEGORIES");
     }
 
     /**
@@ -141,6 +142,7 @@ public abstract class StepManager {
         };
         runnable.run();
         scenarioStorage.saveStepAction(runnable);
+        scenarioData.remove("ERROR_CATEGORIES");
     }
 
     /**
