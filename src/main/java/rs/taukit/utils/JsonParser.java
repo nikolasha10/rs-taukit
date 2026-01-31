@@ -3,8 +3,11 @@ package rs.taukit.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import rs.taukit.exceptions.AutoTestBrokenException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,4 +32,14 @@ public class JsonParser {
             }
         }
     }
+
+    public static byte[] write(Object object) {
+        ObjectMapper jsonMapper = new JsonMapper();
+        try {
+            return jsonMapper.writeValueAsBytes(object);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

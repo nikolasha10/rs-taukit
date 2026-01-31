@@ -63,4 +63,9 @@ public class ServiceStep extends ServiceManager {
     public void releaseMutex(String mutexName) {
         super.releaseMutex(mutexName);
     }
+
+    @И("^служебный шаг: ошибка на следующем шаге относится к категориям:$")
+    public void releaseMutex(DataTable dataTable) {
+        super.addErrorCategories(dataTable);
+    }
 }

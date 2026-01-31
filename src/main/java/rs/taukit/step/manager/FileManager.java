@@ -17,15 +17,17 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import static rs.taukit.utils.BasicUtils.eval;
 import static rs.taukit.utils.BasicUtils.scenarioData;
@@ -52,6 +54,7 @@ public class FileManager extends StepManager {
     }
 
     public void init(TestDataFile testDataFile) {
+        this.testDataFile = testDataFile;
         this.fileName = testDataFile.getFileName();
         this.fileExtension = testDataFile.getFileExtension();
         this.filePath = testDataFile.getFilePath();
@@ -290,5 +293,40 @@ public class FileManager extends StepManager {
             throw new RuntimeException(e);
         }
         TauLogger.report("Файл валиден");
+    }
+
+    @Step("проверить, что файл '{fileParameterName}' не пуст")
+    protected void checkFileIsNotEmpty(String fileParameterName) {
+        boolean isEmpty;
+        switch (fileExtension) {
+            case "xlsx":
+                isEmpty = isXlsxFileEmpty();
+                break;
+            default:
+                isEmpty = FileUtils.readFile(filePath).isEmpty();
+        }
+        if (isEmpty) {
+            TauLogger.fail("Файл '%s' пуст", fileParameterName);
+        } else {
+            TauLogger.console("Файл '%s' не пуст", fileParameterName);
+        }
+    }
+
+    private boolean isXlsxFileEmpty() {
+        try (FileInputStream fis = new FileInputStream(filePath)){
+            Workbook workbook = new XSSFWorkbook(fis);
+            Sheet sheet = workbook.getSheetAt(0);
+
+            for (Row row : sheet) {
+                for (Cell cell : row) {
+                    if (cell.getCellType() != CellType.BLANK) {
+                        return false;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return true;
     }
 }

@@ -184,6 +184,10 @@ public final class TauLogger {
     public static void fail(String message, Throwable e) {
 //        attachPageSource();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
+        List<String> category = scenarioData().getOptional("ERROR_CATEGORIES");
+        if (category != null) {
+            e.addSuppressed(new Throwable("Категории: " + String.join(", ", category)));
+        }
         throw new AssertionError(message, e);
     }
 
@@ -383,6 +387,9 @@ public final class TauLogger {
             case "xls":
                 attachXlsFile(fileName, filePath);
                 break;
+            case "xlsx":
+                attachXlsxFile(fileName, filePath);
+                break;
             default:
                 attachFile(fileName, filePath);
         }
@@ -413,6 +420,17 @@ public final class TauLogger {
 
     @Attachment(value = "{fileName}", type = "application/vnd.ms-excel", fileExtension = ".xls")
     public static byte[] attachXlsFile(String fileName, String filePath) {
+        File file = new File(filePath);
+        try {
+            return Files.readAllBytes(file.toPath());
+        } catch (IOException ioException) {
+            warnWOSS(ioException, "Не удалось приложить файл '%s' к отчету", filePath);
+        }
+        return null;
+    }
+
+    @Attachment(value = "{fileName}", type = "application/vnd.ms-excel", fileExtension = ".xlsx")
+    public static byte[] attachXlsxFile(String fileName, String filePath) {
         File file = new File(filePath);
         try {
             return Files.readAllBytes(file.toPath());
