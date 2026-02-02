@@ -40,11 +40,21 @@ public class AllureReport {
                 }).toList();
     }
 
+    private static List<String> getCategories() {
+        String categoriesPath = Config.getProperty("allure-results.path") + "/categories.json";
+        File file = new File(categoriesPath);
+        if (!file.exists()) return Collections.emptyList();
+        String categoriesText = FileUtils.readFile(categoriesPath);
+        List<Map<String, Object>> categoriesList = JsonParser.parse(categoriesText);
+        return categoriesList.stream().map(category -> (String) category.get("name")).toList();
+    }
+
     public static synchronized void editReports(CucumberScenario scenario, String status, long testEndTime) {
         String functionality = scenario.getFunctionality();
         String scenarioName = scenario.getName();
         List<String> tagList = scenario.getTagList();
         List<File> fileList = getFileList(functionality, scenarioName, testEndTime - 1000);
+        categories.addAll(getCategories());
         fileList.forEach(file -> replaceReport(file, scenarioName, functionality, status, tagList));
     }
 
