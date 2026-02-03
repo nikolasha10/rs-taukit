@@ -180,7 +180,7 @@ public class AllureReport {
             if (details != null) {
                 String trace = details.get("trace");
                 TauLogger.console("trace: %s", trace);
-                Matcher matcher = Pattern.compile("Категории: (.+?)\\r\\n").matcher(trace);
+                Matcher matcher = Pattern.compile("Категории: (.+?)(\\r)?\\n").matcher(trace);
                 if (matcher.find()) {
                     TauLogger.console("group_1: %s", matcher.group(1));
                     categories.addAll(Arrays.asList(matcher.group(1).trim().split(", ")));
