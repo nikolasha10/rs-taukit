@@ -121,6 +121,7 @@ public class AllureReport {
             errorList.clear();
             Files.writeString(file.toPath(), gson.toJson(report));
             List<Map<String, Object>> categoriesMap = new ArrayList<>();
+            TauLogger.console("categories: %s", categories);
             categories.forEach(category -> {
                 Map<String, Object> categoryMap = new HashMap<>();
                 categoryMap.put("name", category);
@@ -129,7 +130,9 @@ public class AllureReport {
                 categoriesMap.add(categoryMap);
             });
             Path categoriesPath = Path.of(Config.getProperty("allure-results.path"),"categories.json");
+            TauLogger.console("categoriesMap: %s", categoriesMap);
             if (!categoriesMap.isEmpty()) {
+                TauLogger.console("categoriesPath: %s", categoriesPath);
                 FileUtils.writeFile(categoriesPath, JsonParser.write(categoriesMap));
             }
         } catch (IOException e) {
@@ -176,8 +179,10 @@ public class AllureReport {
             Map<String, String> details = (Map<String, String>) s.get("statusDetails");
             if (details != null) {
                 String trace = details.get("trace");
-                Matcher matcher = Pattern.compile("Категории: (.+)\\r\\n").matcher(trace);
+                TauLogger.console("trace: %s", trace);
+                Matcher matcher = Pattern.compile("Категории: (.+?)\\r\\n").matcher(trace);
                 if (matcher.find()) {
+                    TauLogger.console("group_1: %s", matcher.group(1));
                     categories.addAll(Arrays.asList(matcher.group(1).trim().split(", ")));
                 }
             }
