@@ -176,7 +176,7 @@ public class AllureReport {
             Map<String, String> details = (Map<String, String>) s.get("statusDetails");
             if (details != null) {
                 String trace = details.get("trace");
-                Matcher matcher = Pattern.compile("Категории: (.+)\\r\\n").matcher(trace);
+                Matcher matcher = Pattern.compile("Категории: (.+?)(\\r)?\\n").matcher(trace);
                 if (matcher.find()) {
                     categories.addAll(Arrays.asList(matcher.group(1).trim().split(", ")));
                 }
