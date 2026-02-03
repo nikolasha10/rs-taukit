@@ -129,7 +129,9 @@ public class AllureReport {
                 categoriesMap.add(categoryMap);
             });
             Path categoriesPath = Path.of(Config.getProperty("allure-results.path"),"categories.json");
-            FileUtils.writeFile(categoriesPath, JsonParser.write(categoriesMap));
+            if (!categoriesMap.isEmpty()) {
+                FileUtils.writeFile(categoriesPath, JsonParser.write(categoriesMap));
+            }
         } catch (IOException e) {
             throw new ConfigFileNotFoundException(e, file.getPath());
         }
