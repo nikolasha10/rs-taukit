@@ -101,6 +101,7 @@ public class PwDropdownList extends PwBlock implements Editable, Selectable {
     public Clickable getOptionByNumber(int number) {
         try {
             driver.waitForCondition(() -> {
+                elementPwLocator.evaluate("el => el.scrollIntoView({ behavior: 'smooth', block: 'center' })");
                 try {
                     forceClick();
                 } catch (Exception e) {
