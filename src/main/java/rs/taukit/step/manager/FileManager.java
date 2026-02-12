@@ -297,19 +297,21 @@ public class FileManager extends StepManager {
 
     @Step("проверить, что файл '{fileParameterName}' не пуст")
     protected void checkFileIsNotEmpty(String fileParameterName) {
-        boolean isEmpty;
-        switch (fileExtension) {
-            case "xlsx":
-                isEmpty = isXlsxFileEmpty();
-                break;
-            default:
-                isEmpty = FileUtils.readFile(filePath).isEmpty();
-        }
-        if (isEmpty) {
-            TauLogger.fail("Файл '%s' пуст", fileParameterName);
-        } else {
-            TauLogger.console("Файл '%s' не пуст", fileParameterName);
-        }
+        run(() -> {
+            boolean isEmpty;
+            switch (fileExtension) {
+                case "xlsx":
+                    isEmpty = isXlsxFileEmpty();
+                    break;
+                default:
+                    isEmpty = FileUtils.readFile(filePath).isEmpty();
+            }
+            if (isEmpty) {
+                throw new RuntimeException(String.format("Файл '%s' пуст", filePath));
+            } else {
+                TauLogger.console("Файл '%s' не пуст", fileParameterName);
+            }
+        }, "Файл '%s' пуст", fileParameterName);
     }
 
     private boolean isXlsxFileEmpty() {
