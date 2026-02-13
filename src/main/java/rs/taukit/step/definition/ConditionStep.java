@@ -51,4 +51,9 @@ public class ConditionStep extends ConditionManager {
         super.waitForConditions(conditionsName, eval(datatable));
     }
 
+    @И("^подождать (\\d+) (секунд|минут|секунду|минуту|секунды|минуты) до возникновения необязательных условий \"([^\"]+)\":$")
+    public void waitForOptionalConditions(String timeValue, String timeUnit, String conditionsName, DataTable datatable) {
+        super.waitForOptionalConditions(timeValue + " " + timeUnit, conditionsName, eval(datatable));
+    }
+
 }
