@@ -14,6 +14,7 @@ import rs.taukit.testobject.TestCondition;
 import rs.taukit.utils.TauLogger;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 public abstract class StepManager {
@@ -163,6 +164,20 @@ public abstract class StepManager {
             } catch (Exception e) {
                 if (exception != null) e.addSuppressed(exception);
                 TauLogger.fail(e, format, args);
+            }
+        };
+        runnable.run();
+        scenarioData.remove("ERROR_CATEGORIES");
+    }
+
+    void runOnce(Runnable action, AtomicReference<Exception> exception, AtomicReference<String> errorMessage) {
+        Runnable runnable = () -> {
+            if (skipped()) return;
+            try {
+                action.run();
+            } catch (Exception e) {
+                if (exception != null && exception.get() != null) e.addSuppressed(exception.get());
+                TauLogger.fail(e, errorMessage.get());
             }
         };
         runnable.run();
