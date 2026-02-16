@@ -30,12 +30,12 @@ import static rs.taukit.utils.BasicUtils.*;
 public final class TauLogger {
     private static final Logger logger = LoggerFactory.getLogger(Config.getProperty("logger.name"));
 
-    @Step("{0}")
+    @Step("{message}")
     public static void report(String message) {
         logger.info(message);
     }
 
-    @Step("{0}")
+    @Step("{message}")
     public static void report(String message, DataTable dataTable) {
         logger.info(String.format("%s%n%s", message, dataTable));
     }
@@ -100,7 +100,7 @@ public final class TauLogger {
 //    /**
 //     * Выводит информационное сообщение о действии в Базе Данных.
 //     */
-//    @Step("{0}")
+//    @Step("{message}")
 //    public static void infoDB(String message, Throwable e) {
 //        logger.info(message, e);
 //    }
@@ -167,14 +167,23 @@ public final class TauLogger {
     public static void warn(Throwable e, String format, Object... args) {
         warn(String.format(format, args), e);
     }
-
+    
+    private static Throwable addCategory(Throwable e) {
+        e = Optional.ofNullable(e).orElse(new Throwable());
+        List<String> category = scenarioData().getOptional("ERROR_CATEGORIES");
+        if (category != null) {
+            e.addSuppressed(new Throwable("Категории: " + String.join(", ", category)));
+        }
+        return e;
+    }
+    
     /**
      * Выводит сообщение о критической ошибке, и делает скриншот.
      */
-    @Step("{0}")
+    @Step("{message}")
     public static void fail(String message) {
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
-        throw new AssertionError(message);
+        throw new AssertionError(message, addCategory(null));
     }
 
     /**
@@ -184,11 +193,7 @@ public final class TauLogger {
     public static void fail(String message, Throwable e) {
 //        attachPageSource();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
-        List<String> category = scenarioData().getOptional("ERROR_CATEGORIES");
-        if (category != null) {
-            e.addSuppressed(new Throwable("Категории: " + String.join(", ", category)));
-        }
-        throw new AssertionError(message, e);
+        throw new AssertionError(message, addCategory(e));
     }
 
     @Step("{message}")
@@ -199,7 +204,7 @@ public final class TauLogger {
             logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
             scenarioData().put("WARNING", "PASSED with ERRORS");
         } else {
-            throw new AssertionError(message);
+            throw new AssertionError(message, addCategory(null));
         }
     }
 
@@ -211,7 +216,7 @@ public final class TauLogger {
             logger.warn("ОШИБКА: {}", message.replaceAll("\n", "↵"), throwable);
             scenarioData().put("WARNING", "PASSED with ERRORS");
         } else {
-            throw new AssertionError(message, throwable);
+            throw new AssertionError(message, addCategory(throwable));
         }
     }
 
@@ -228,7 +233,7 @@ public final class TauLogger {
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
             warn(format, args);
         } else {
-            fail(String.format(format, args));
+            fail(new Throwable(), String.format(format, args));
         }
     }
 
@@ -245,17 +250,13 @@ public final class TauLogger {
         String message = String.format(format, args);
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
             warn(runnable, format, args);
-        } else if (throwable == null) {
-            fail(runnable, message);
-        } else {
-            fail(throwable, runnable, message);
-        }
+        } else fail(Objects.requireNonNullElseGet(throwable, Throwable::new), runnable, message);
     }
 
     /**
      * Выводит сообщение о фатальной ошибке в действии и НЕ делает скриншот
      */
-    @Step("{0}")
+    @Step("{message}")
     public static void failWOSS(String message) {
         throw new AssertionError(message);
     }
@@ -263,7 +264,7 @@ public final class TauLogger {
     /**
      * Выводит сообщение о фатальной ошибке в действии и НЕ делает скриншот
      */
-    @Step("{0}")
+    @Step("{message}")
     public static void failWOSS(String message, Throwable e) {
         throw new AssertionError(message, e);
     }
@@ -280,12 +281,12 @@ public final class TauLogger {
     /**
      * Выводит сообщение о непредвиденной ошибке (ошибке реализации теста)
      */
-    @Step("{0}")
+    @Step("{message}")
     public static void error(String message) {
         throw new RuntimeException(message);
     }
 
-    @Step("{0}")
+    @Step("{message}")
     public static void error(String message, Throwable e) {
         throw new RuntimeException(message, e);
     }

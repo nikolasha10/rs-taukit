@@ -67,7 +67,7 @@ public class ConditionManager extends StepManager {
         List<String> unexpected = new ArrayList<>();
         unexpected.add(result.getObjectType());
         unexpected.add(result.getObjectName());
-        if (expectedHeaders.containsKey("В блоке")){
+        if (expectedHeaders.containsKey("В блоке")) {
             unexpected.add(result.getParentNodeName());
         }
         unexpected.add(result.getObjectState());
@@ -173,7 +173,7 @@ public class ConditionManager extends StepManager {
                     };
                     TauLogger.fail(runnable, exception.get(), errorMessage);
                 }
-            } catch (TimeoutError te){
+            } catch (TimeoutError te) {
                 TauLogger.fail(te, errorMessage);
             }
         }
@@ -184,5 +184,15 @@ public class ConditionManager extends StepManager {
                 ? "Условия выполнены"
                 : String.format("Условия '%s' выполнены", conditionsName);
         TauLogger.console(message);
+    }
+
+    protected void waitForOptionalConditions(String timeout, String conditionsName, DataTable dataTable) {
+        TauLogger.console("Ожидается выполнение необязательных условий '%s'", conditionsName);
+        BooleanSupplier conditions = getConditions(dataTable);
+        try {
+            getDriver().waitForCondition(conditions, TimeStringParser.getTime(timeout));
+        } catch (Exception e) {
+            TauLogger.console("Условия не возникли. Продолжается выполнение сценария");
+        }
     }
 }

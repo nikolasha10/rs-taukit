@@ -172,27 +172,32 @@ public class TableManager extends StepManager {
                 ? Config.getTimeProperty("condition.wait.timeout")
                 : TimeStringParser.getTime(timeout);
         double elementCheckTimeout = TimeStringParser.getTime(timeoutString);
-        AtomicReference<Exception> exception = new AtomicReference<>();
+        AtomicReference<String> errorMessage = new AtomicReference<>();
         AtomicReference<Integer> rowIndex = new AtomicReference<>(-1);
         BooleanSupplier conditions = () -> {
             IHasTableElements table = getElement(tableName);
             rowIndex.set(table.findRowByConditions(dataTable));
-            if (scenarioData().getOptional("debug") != null){
+            if (scenarioData().getOptional("debug") != null) {
                 TauLogger.console("Таблица отображается: %s, Индекс строки: %d", table.isVisible(), rowIndex.get());
             }
-            return table.isVisible() && rowIndex.get() > -1;
+            if (table.isInvisible()) {
+                errorMessage.set(String.format("Таблица '%s' не отображается на странице '%s'",
+                        tableName, getPage().getPageName()));
+                return false;
+            }
+            if (rowIndex.get() < 0) {
+                errorMessage.set(String.format("В таблице '%s' не удалось найти строку, соответствующую заданным условиям",
+                        tableName));
+                return false;
+            }
+            return true;
         };
         Runnable runnable = () -> getDriver().waitForCondition(
                 conditions, elementCheckInterval, elementCheckTimeout, scenarioStorage.getStepActions());
-        String tableRowNotFoundMessage = String.format(
-                "В таблице '%s' не удалось дождаться строки, соответствующей заданным условиям", tableName);
-        String tableNotFoundMessage = String.format(
-                "Таблица '%s' не отображается на странице '%s'", tableName, getPage().getPageName());
-        runOnce(runnable, exception.get(),
-                ((IHasTableElements) getElement(tableName)).isVisible() ? tableRowNotFoundMessage : tableNotFoundMessage);
+        runOnce(runnable, null, errorMessage);
         scenarioStorage.clearStepActions();
         scenarioStorage.stopToSaveActions();
-        TauLogger.console("Найдена строка № %d", rowIndex.get() + 1);
+        TauLogger.report("Строка %d соответствует заданным условиям", rowIndex.get() + 1);
     }
 
     @Step("в таблице '{tableName}' проверить наличие столбцов:")
