@@ -91,6 +91,7 @@ public abstract class StepManager {
         };
         runnable.run();
         scenarioStorage.saveStepAction(runnable);
+        scenarioData.remove("ERROR_CATEGORIES");
     }
 
     /**
@@ -165,6 +166,7 @@ public abstract class StepManager {
             }
         };
         runnable.run();
+        scenarioData.remove("ERROR_CATEGORIES");
     }
 
     protected void waitForCondition(BooleanSupplier condition, String format, Object... args) {
