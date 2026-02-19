@@ -139,6 +139,9 @@ public class PwList extends PwElement implements HasListItems {
         IContainer originalContext = page().getCurrentContext();
         int foundIndex = IntStream.range(0, getItemList().size()).boxed()
                 .filter(index -> dataTable.asMaps().stream().allMatch(data -> {
+                    if (getItemList().size() <= index) {
+                        return false;
+                    }
                     IContainer item = getItemList().get(index);
                     page().replaceCurrentContext(item);
                     return new TestCondition(data).checkResult().isConditionMet();
