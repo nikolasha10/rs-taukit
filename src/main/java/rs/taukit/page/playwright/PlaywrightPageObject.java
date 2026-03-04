@@ -150,14 +150,18 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
     public PlaywrightPageObject getPopup(String popupName) {
         PlaywrightPageObject popup = this.popup.peekLast();
         if (popup == null || !popup.pageName.equals(popupName)) {
-            this.popup.add(new PlaywrightPageObject(page, popupName));
+            popup = new PlaywrightPageObject(page, popupName);
         }
-        return this.popup.peekLast();
+        return popup;
     }
 
     @Override
     public void waitForPopup(String popupName) {
         getPopup(popupName).waitForLoad();
+        PlaywrightPageObject popup = this.popup.peekLast();
+        if (popup == null || !popup.pageName.equals(popupName)) {
+            this.popup.add(new PlaywrightPageObject(page, popupName));
+        }
         this.currentContext.add(getPopup(popupName).getCurrentContext());
     }
 
