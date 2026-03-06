@@ -38,7 +38,7 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
     private final Page.ScreenshotOptions screenshotOptions;
     private final Deque<IContainer> currentContext = new LinkedList<>();
     private final Page.WaitForConditionOptions options;
-    private PlaywrightPageObject popup;
+    private final Deque<PlaywrightPageObject> popup = new LinkedList<>();
     private double pageTimeout;
     private Exception thrownException;
 
@@ -148,8 +148,9 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
 
     @Override
     public PlaywrightPageObject getPopup(String popupName) {
+        PlaywrightPageObject popup = this.popup.peekLast();
         if (popup == null || !popup.pageName.equals(popupName)) {
-            this.popup = new PlaywrightPageObject(page, popupName);
+            popup = new PlaywrightPageObject(page, popupName);
         }
         return popup;
     }
@@ -157,13 +158,17 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
     @Override
     public void waitForPopup(String popupName) {
         getPopup(popupName).waitForLoad();
-        this.currentContext.add(popup.getCurrentContext());
+        PlaywrightPageObject popup = this.popup.peekLast();
+        if (popup == null || !popup.pageName.equals(popupName)) {
+            this.popup.add(new PlaywrightPageObject(page, popupName));
+        }
+        this.currentContext.add(getPopup(popupName).getCurrentContext());
     }
 
     @Override
     public void waitForPopupClose(String pageName) {
-        popup.waitForClose();
-        popup = null;
+        assert popup.peekLast() != null;
+        popup.poll().waitForClose();
         dropCurrentContext();
     }
 
