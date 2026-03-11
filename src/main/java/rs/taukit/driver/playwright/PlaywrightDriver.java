@@ -47,7 +47,10 @@ public class PlaywrightDriver implements IWebDriver {
 
     @Override
     public void openBrowser() {
-        openBrowser(new ArrayList<>());
+        List<String> args = new ArrayList<>();
+        args.add("--no-zygote");
+        args.add("--no-zygote-sandbox");
+        openBrowser(args);
     }
 
     @Override
