@@ -177,7 +177,7 @@ public abstract class StepManager {
                 action.run();
             } catch (Exception e) {
                 if (exception != null && exception.get() != null) e.addSuppressed(exception.get());
-                TauLogger.fail(e, errorMessage.get());
+                TauLogger.fail(e, Optional.ofNullable(errorMessage.get()).orElse(""));
             }
         };
         runnable.run();
