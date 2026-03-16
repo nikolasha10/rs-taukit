@@ -10,6 +10,9 @@ import rs.taukit.utils.TestDataUtils;
 import rs.taukit.utils.TextUtils;
 
 import java.util.List;
+import java.util.Objects;
+
+import static rs.taukit.utils.BasicUtils.page;
 
 public class TextFieldManager extends StepManager {
 
@@ -59,7 +62,8 @@ public class TextFieldManager extends StepManager {
             String parameterName = TestDataUtils.get(data, "Параметр");
             HasText textElement;
             if (blockName != null) {
-                IContainer container = getElement(blockName);
+                IContainer currentContext = Objects.requireNonNull(page()).getCurrentContext();
+                IContainer container = currentContext.getElementByName(blockName).castTo(IContainer.class);
                 textElement = container.getElementByName(elementName).castTo(HasText.class);
             } else {
                 textElement = getElement(elementName);
