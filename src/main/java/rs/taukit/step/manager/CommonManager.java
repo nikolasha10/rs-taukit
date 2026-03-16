@@ -153,27 +153,29 @@ public class CommonManager extends StepManager {
 
     @Step("сохранить значения в параметры:")
     public void saveValues(DataTable dataTable) {
-        List<List<String>> resultList = new ArrayList<>();
-        resultList.add(Arrays.asList("Параметр", "Значение"));
-        AtomicReference<DataTable> atomicReference = new AtomicReference<>();
-        Runnable runnable = () -> {
-            dataTable.asMaps().forEach(data -> {
-                String value;
-                try {
-                    value = eval(TestDataUtils.get(data, "Значение"));
-                } catch (TestDataException e) {
-                    TauLogger.console(e);
-                    value = "null";
-                }
-                resultList.add(Arrays.asList(eval(TestDataUtils.get(data, "Параметр")), value));
-            });
-            DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
-            atomicReference.set(resultTable);
-            scenarioData.put(resultTable);
-        };
-        run(runnable);
-        TauLogger.attachDataTable("Значения параметров", atomicReference.get());
-        TauLogger.console("Значения сохранены в параметры", atomicReference.get());
+        run(() -> {
+            List<List<String>> resultList = new ArrayList<>();
+            resultList.add(Arrays.asList("Параметр", "Значение"));
+            AtomicReference<DataTable> atomicReference = new AtomicReference<>();
+            Runnable runnable = () -> {
+                dataTable.asMaps().forEach(data -> {
+                    String value;
+                    try {
+                        value = eval(TestDataUtils.get(data, "Значение"));
+                    } catch (TestDataException e) {
+                        TauLogger.console(e);
+                        value = "null";
+                    }
+                    resultList.add(Arrays.asList(eval(TestDataUtils.get(data, "Параметр")), value));
+                });
+                DataTable resultTable = DataTable.create(resultList, TextUtils.tableConverter);
+                atomicReference.set(resultTable);
+                scenarioData.put(resultTable);
+            };
+            run(runnable);
+            TauLogger.attachDataTable("Значения параметров", atomicReference.get());
+            TauLogger.console("Значения сохранены в параметры", atomicReference.get());
+        });
     }
 
     @Step("сгенерировать guid и сохранить его, как '{parameterName}'")

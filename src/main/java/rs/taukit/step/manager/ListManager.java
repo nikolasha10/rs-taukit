@@ -47,30 +47,32 @@ public class ListManager extends StepManager {
 
     @Step("в списке '{listName}' найти {itemType}, соответствующий условиям:")
     public void findItemByConditions(String listName, String itemType, DataTable dataTable) {
-        TauLogger.attachDataTable("Условия поиска элемента", dataTable);
-        AtomicReference<IContainer> foundItem = new AtomicReference<>();
-        BooleanSupplier condition = () -> {
-            HasListItems list = getElement(listName);
-            foundItem.set(list.findItemByConditions(dataTable));
-            return foundItem.get() != null;
-        };
-        waitForCondition(condition,
-                "Не удалось найти %s, соответствующий заданным условиям, в списке '%s' на странице '%s'",
-                itemType, listName, getPage().getPageName());
-        int foundItemNumber = 1;
-        if (foundItem.get() != null) {
-            foundItemNumber = foundItem.get().getCurrentIndex() + 1;
-            TauLogger.report("Найден %s № %d", itemType, foundItemNumber);
-        } else {
-            foundItem.set(((HasListItems) getElement(listName)).getItemList().getFirst().castTo(IContainer.class));
-        }
-        getPage().setCurrentContext(foundItem.get());
-        scenarioStorage.setCurrentContextName(foundItem.get().getElementName());
+        run(() -> {
+            TauLogger.attachDataTable("Условия поиска элемента", dataTable);
+            AtomicReference<IContainer> foundItem = new AtomicReference<>();
+            BooleanSupplier condition = () -> {
+                HasListItems list = getElement(listName);
+                foundItem.set(list.findItemByConditions(dataTable));
+                return foundItem.get() != null;
+            };
+            waitForCondition(condition,
+                    "Не удалось найти %s, соответствующий заданным условиям, в списке '%s' на странице '%s'",
+                    itemType, listName, getPage().getPageName());
+            int foundItemNumber = 1;
+            if (foundItem.get() != null) {
+                foundItemNumber = foundItem.get().getCurrentIndex() + 1;
+                TauLogger.report("Найден %s № %d", itemType, foundItemNumber);
+            } else {
+                foundItem.set(((HasListItems) getElement(listName)).getItemList().getFirst().castTo(IContainer.class));
+            }
+            getPage().setCurrentContext(foundItem.get());
+            scenarioStorage.setCurrentContextName(foundItem.get().getElementName());
 
-        scenarioStorage.clearStepActions();
-        scenarioStorage.stopToSaveActions();
-        TauLogger.resetNotCritical();
-        TauLogger.report("[примечание] текущий контекст: %d-й элемент списка '%s'", foundItemNumber, listName);
+            scenarioStorage.clearStepActions();
+            scenarioStorage.stopToSaveActions();
+            TauLogger.resetNotCritical();
+            TauLogger.report("[примечание] текущий контекст: %d-й элемент списка '%s'", foundItemNumber, listName);
+        });
     }
 
     @Step("проверить состав элементов списка '{listName}':")
