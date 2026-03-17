@@ -33,7 +33,9 @@ public class AllureReport {
                         boolean containsFunctionality = fileContent.contains(functionality);
                         return containsScenarioName && containsFunctionality;
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        TauLogger.console("Не удалось проанализировать содержимое файла %s из-за ошибки:", file.getName());
+                        TauLogger.console(e);
+                        return false;
                     }
                 }).toList();
     }
