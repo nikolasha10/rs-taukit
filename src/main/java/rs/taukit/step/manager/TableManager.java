@@ -50,8 +50,8 @@ public class TableManager extends StepManager {
 
     @Step("в таблице '{tableName}' нажать на '{elementName}' в строке, соответствующей условиям:")
     public void clickOnElementByConditions(String tableName, String elementName, DataTable conditions) {
-        TauLogger.attachDataTable("Условия выбора элемента", conditions);
         Runnable runnable = () -> {
+            TauLogger.attachDataTable("Условия выбора элемента", conditions);
             IHasTableElements table = waitForTable(tableName);
             table.clickOnElementByConditions(elementName, conditions);
         };

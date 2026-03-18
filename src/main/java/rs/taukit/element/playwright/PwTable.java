@@ -26,6 +26,7 @@ import static rs.taukit.utils.BasicUtils.*;
 
 public class PwTable extends PwBlock implements IHasTableElements {
     private PwBlock activeRow;
+    private DataTable rowConditions;
 
     public PwTable(String elementName, LinkedHashMap<String, Object> elementData) {
         this(elementName, new ElementModel(elementData));
@@ -88,9 +89,21 @@ public class PwTable extends PwBlock implements IHasTableElements {
         return cells -> dataTable.asMaps().stream().allMatch(condition(cells));
     }
 
+    private PwBlock getActiveRow() {
+        page().setCurrentContext(activeRow);
+        boolean conditionsMet = rowConditions.asMaps().stream()
+                .allMatch(conditionData -> new TestCondition(conditionData).checkResult().isConditionMet());
+        page().dropCurrentContext();
+        if (!conditionsMet) {
+            findRowByConditions(rowConditions);
+        }
+        return activeRow;
+    }
+
     @Override
     public int findRowByConditions(DataTable dataTable) {
         scenarioData().put("контекст таблицы", this);
+        this.rowConditions = dataTable;
         PwList rowList = getDescendant("Строки");
         IContainer currentContext = page().getCurrentContext();;
         int foundRowIndex = IntStream.range(0, rowList.getSize()).boxed().filter(index -> {
@@ -200,7 +213,7 @@ public class PwTable extends PwBlock implements IHasTableElements {
 
     @Override
     public void setCheckbox(String checkboxName, boolean state) {
-        PwCheckbox checkbox = activeRow.getElementByName(checkboxName).castTo(PwCheckbox.class);
+        PwCheckbox checkbox = getActiveRow().getElementByName(checkboxName).castTo(PwCheckbox.class);
         if (state) {
             checkbox.setCheckbox();
         } else {
@@ -210,25 +223,25 @@ public class PwTable extends PwBlock implements IHasTableElements {
 
     @Override
     public void setContext(String headerName) {
-        PwList cells = activeRow.getElementByName("Столбцы").castTo(PwList.class);
+        PwList cells = getActiveRow().getElementByName("Столбцы").castTo(PwList.class);
         IContainer cell = cells.getItemList().get(getHeaderIndex(headerName)).castTo(IContainer.class);
         Objects.requireNonNull(page()).setCurrentContext(cell);
     }
 
     @Override
     public void setContainerContext(String containerName) {
-        IContainer container = activeRow.getElementByName(containerName).castTo(IContainer.class);
+        IContainer container = getActiveRow().getElementByName(containerName).castTo(IContainer.class);
         Objects.requireNonNull(page()).setCurrentContext(container);
     }
 
     @Override
     public void selectMenuItem(String menuName, String itemName) {
-        this.activeRow.getElementByName(menuName).castTo(PwMenu.class).selectMenuItem(itemName);
+        getActiveRow().getElementByName(menuName).castTo(PwMenu.class).selectMenuItem(itemName);
     }
 
     @Override
     public IElement getMenuItem(String menuName, String itemName) {
-        return this.activeRow.getElementByName(menuName).castTo(PwMenu.class).getMenuItem(itemName);
+        return getActiveRow().getElementByName(menuName).castTo(PwMenu.class).getMenuItem(itemName);
     }
 
     @Override
@@ -264,6 +277,7 @@ public class PwTable extends PwBlock implements IHasTableElements {
 
     public void clickOnElement(String elementName) {
         PwList headers = descendants.get("Заголовки").castTo(PwList.class);
+        PwBlock activeRow = getActiveRow();
         if (activeRow.containsElement(elementName)) {
             activeRow.getElementByName(elementName).click();
         } else if (headers.contains(elementName)) {
