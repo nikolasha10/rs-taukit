@@ -13,9 +13,9 @@ public class DropdownListStep extends DropdownListManager {
         super.selectValue(elementName, eval(value));
     }
 
-    @И("^в выпадающем списке \"(.+)\" выбрать (\\d+)-й элемент$")
-    public void selectValue(String elementName, int number) {
-        super.selectElementByNumber(elementName, number);
+    @И("^в выпадающем списке \"(.+)\" выбрать (.+)-й элемент$")
+    public void selectItem(String elementName, String stringNumber) {
+        super.selectElementByNumber(elementName, Integer.parseInt(eval(stringNumber)));
     }
 
     /**
