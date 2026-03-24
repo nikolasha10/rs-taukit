@@ -79,6 +79,9 @@ public enum TestObjectState {
             t -> hasListItems(t).containsItems(scenarioData().get(t.expectedValue()), true)
                     ? "состоит из элементов" : hasListItems(t).getItemList().stream()
                     .map(item -> item.castTo(HasText.class).getText()).collect(Collectors.joining(", "))),
+    IS_EMPTY("не содержит элементов",
+            t -> hasListItems(t).getItemList().isEmpty(),
+            t -> hasListItems(t).getItemList().isEmpty() ? "не содержит элементов" : "содержит " + hasListItems(t).getItemList().size() + " элементов"),
     INCLUDED_IN("содержится в списке",
             t -> isIncludedIn(hasText(t), scenarioData().get(t.expectedValue())),
             t -> isIncludedIn(hasText(t), scenarioData().get(t.expectedValue()))
