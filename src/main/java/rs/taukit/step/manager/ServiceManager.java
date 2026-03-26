@@ -50,9 +50,11 @@ public class ServiceManager extends StepManager {
     }
 
     protected void forceClickElement(String elementName) {
-        IElement element = element(elementName);
-        element.forceClick();
-        TauLogger.report("[примечание] нажата ЛКМ над элементом '%s'", elementName);
+        run(() -> {
+            IElement element = element(elementName);
+            element.forceClick();
+            TauLogger.report("[примечание] нажата ЛКМ над элементом '%s'", elementName);
+        },"Не удалось кликнуть в области над элементом '%s'", elementName);
     }
 
     protected void createTestItAutotest() {
