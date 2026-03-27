@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
-public class PwMenu extends PwElement implements IHasMenu {
+public class PwMenu extends PwBlock implements IHasMenu {
     public PwMenu(String elementName, LinkedHashMap<String, Object> elementData) {
         this(elementName, new ElementModel(elementData));
     }
