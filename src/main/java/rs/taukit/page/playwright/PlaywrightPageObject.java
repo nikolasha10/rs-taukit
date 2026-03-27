@@ -267,7 +267,7 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
     }
 
     public byte[] takeScreenshot() {
-        return page.screenshot((new Page.ScreenshotOptions().setFullPage(true)));
+        return page.screenshot((new Page.ScreenshotOptions().setTimeout(300000).setFullPage(true)));
     }
 
     public String takeContent() {
