@@ -31,6 +31,7 @@ public class HttpRequestManager extends StepManager {
     private String queryParameterName;
     private Map<String, String> headers;
     private Map<String, String> queryParams;
+    private int expectedState;
 
     private static Runnable getRunnableParseResponse(DataTable dataTable, List<List<String>> parsedValues, String responseParameterName) {
         Runnable runnable = () -> {
@@ -137,6 +138,9 @@ public class HttpRequestManager extends StepManager {
                         row -> TestDataUtils.get(row, "Параметр"),
                         row -> TestDataUtils.get(row, "Значение")));
         String urlString = TestDataUtils.get(requestParametersMap, "url");
+        Optional<String> expectedState = Optional.ofNullable(
+                TestDataUtils.getOptional(requestParametersMap, "ожидаемый статус"));
+        this.expectedState = Integer.parseInt(expectedState.orElse("200"));
         requestParametersMap.remove("url");
         String query = requestParametersMap.entrySet().stream()
                 .map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
@@ -249,7 +253,7 @@ public class HttpRequestManager extends StepManager {
                 scenarioData().put(responseStatusParameterName, String.valueOf(response.status()));
                 scenarioData().put(responseTextParameterName, response.text());
                 status = response.status();
-                if (response.ok()) {
+                if (response.ok() || response.status() == this.expectedState) {
                     LinkedHashMap<String, ?> responseMap = parseJsonResponseToMap(response.text());
                     TestData testData = new TestData(this.name + "_response", responseMap);
                     testDataAtomicReference.set(testData);
