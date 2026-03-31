@@ -84,6 +84,7 @@ public class TestCondition {
         try {
             driver().waitForCondition(condition, checkTimeout);
             this.conditionMet = true;
+            this.currentValue = TestObjectState.get(objectState).value.apply(testObject).toString();
         } catch (Exception e) {
             try {
                 this.currentValue = TestObjectState.get(objectState).value.apply(testObject).toString();

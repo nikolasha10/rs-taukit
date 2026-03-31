@@ -68,4 +68,10 @@ public class ServiceStep extends ServiceManager {
     public void releaseMutex(DataTable dataTable) {
         super.addErrorCategories(dataTable);
     }
+
+    @И("^служебный шаг: сформировать условие \"([^\"]+)\":$")
+    public void createCondition(String conditionName, DataTable datatable) {
+        super.createCondition(conditionName, eval(datatable));
+    }
+
 }

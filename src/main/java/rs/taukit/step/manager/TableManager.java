@@ -200,6 +200,55 @@ public class TableManager extends StepManager {
         TauLogger.report("Строка %d соответствует заданным условиям", rowIndex.get() + 1);
     }
 
+    @Step("в таблице '{tableName}' дождаться строки, соответствующей любому из условий")
+    protected void waitForTableAnyConditions(String tableName, DataTable conditionsTable) {
+        List<String> conditionsNames = conditionsTable.asList();
+        List<DataTable> conditions = new ArrayList<>();
+        AtomicReference<String> errorMessage = new AtomicReference<>();
+        AtomicReference<Integer> rowIndex = new AtomicReference<>(-1);
+        TauLogger.console("В таблице '%s' ожидается появление строки, соответствующей любому из условий:", tableName);
+        for (String conditionName : conditionsNames) {
+            DataTable conditionTable = scenarioData.get(conditionName);
+            TauLogger.attachDataTable(conditionName, conditionTable);
+            conditions.add(conditionTable);
+            TauLogger.console("%s", conditionName, conditionTable);
+        }
+        BooleanSupplier condition = () -> {
+            IHasTableElements table = getElement(tableName);
+            int foundIndex = -1;
+            for (DataTable dataTable : conditions) {
+                foundIndex = table.findRowByConditions(dataTable);
+                if (foundIndex >= 0) {
+                    break;
+                }
+            }
+            rowIndex.set(foundIndex);
+            if (scenarioData().getOptional("debug") != null) {
+                TauLogger.console("Таблица отображается: %s, Индекс строки: %d", table.isVisible(), rowIndex.get());
+            }
+            if (table.isInvisible()) {
+                errorMessage.set(String.format("Таблица '%s' не отображается на странице '%s'",
+                        tableName, getPage().getPageName()));
+                return false;
+            }
+            if (rowIndex.get() < 0) {
+                errorMessage.set(String.format("В таблице '%s' не удалось найти строку, соответствующую заданным условиям",
+                        tableName));
+                return false;
+            }
+            return true;
+        };
+        double elementCheckInterval = Config.getTimeProperty("condition.wait.timeout");
+        double elementCheckTimeout = Config.getTimeProperty("conditions.wait.timeout");
+        Runnable runnable = () -> getDriver().waitForCondition(
+                condition, elementCheckInterval, elementCheckTimeout, scenarioStorage.getStepActions());
+        runOnce(runnable, null, errorMessage);
+        scenarioStorage.clearStepActions();
+        scenarioStorage.stopToSaveActions();
+        TauLogger.report("Строка %d соответствует заданным условиям", rowIndex.get() + 1);
+
+    }
+
     @Step("в таблице '{tableName}' проверить наличие столбцов:")
     protected void tableHeadersCheck(String tableName, DataTable dataTable) {
         TauLogger.attachDataTable("Список столбцов", dataTable);
@@ -288,7 +337,7 @@ public class TableManager extends StepManager {
 
     @Step("в таблице '{tableName}' для каждой строки проверить выполнение условий:")
     protected void tableAllRowsCheckConditions(String tableName, DataTable dataTable) {
-        TauLogger.attachDataTable("Условия проверки столбца таблицы", dataTable);
+        TauLogger.attachDataTable("Условия проверки строк таблицы", dataTable);
         IContainer original = getContext();
         IHasTableElements table = getElement(tableName);
         scenarioData().put("контекст таблицы", table);
@@ -328,6 +377,62 @@ public class TableManager extends StepManager {
             List<String> rowNumbers = failedRows.keySet().stream()
                     .map(name -> name.replace("Строка ", "")).toList();
             TauLogger.fail(runnable, "Ячейки таблицы '%s' в строках %s не соответствуют требованиям",
+                    tableName, rowNumbers);
+
+        }
+        getPage().replaceCurrentContext(original);
+        TauLogger.console("Строки таблицы '%s' соответствуют условиям проверки", tableName);
+    }
+
+    @Step("в таблице '{tableName}' для каждой строки проверить выполнение любого из условий:")
+    protected void tableAllRowsCheckAnyCondition(String tableName, DataTable conditionsTable) {
+        List<String> conditionsNames = conditionsTable.asList();
+        IContainer original = getContext();
+        IHasTableElements table = getElement(tableName);
+        scenarioData().put("контекст таблицы", table);
+        List<IContainer> rows = table.getRowList();
+        Map<String, DataTable> failedRows = new LinkedHashMap<>();
+        IntStream.range(0, rows.size()).boxed().forEach(index -> {
+            IContainer activeRow = table.setActiveRow(index);
+            if (activeRow == null) {
+                return;
+            }
+            getPage().setCurrentContext(activeRow);
+            Map<String, List<List<String>>> notMetConditionMap = new LinkedHashMap<>();
+            for (String conditionName : conditionsNames) {
+                DataTable dataTable = scenarioData().get(conditionName);
+                List<List<String>> notMetConditionList = new ArrayList<>();
+                notMetConditionList.add(dataTable.asLists().getFirst());
+                notMetConditionList.getFirst().remove("Ожидание");
+                notMetConditionList.getFirst().remove("Значение");
+                notMetConditionList.getFirst().add("Ожидаемое значение");
+                notMetConditionList.getFirst().add("Текущее значение");
+                dataTable.asMaps().forEach(conditionData -> {
+                    TestCondition testCondition = new TestCondition(conditionData).waitForResult();
+                    if (!testCondition.isConditionMet()) {
+                        notMetConditionList.add(Arrays.asList(
+                                testCondition.getObjectType(),
+                                testCondition.getObjectName(),
+                                testCondition.getObjectState(),
+                                testCondition.getExpectedValue(),
+                                testCondition.getCurrentValue()));
+                    }
+                });
+                notMetConditionMap.put(conditionName, notMetConditionList);
+            }
+            boolean notMet = notMetConditionMap.entrySet().stream().allMatch(entry -> entry.getValue().size() > 1);
+            if (notMet) {
+                List<List<String>> notMetConditionList = notMetConditionMap.get(conditionsNames.getFirst());
+                DataTable notMetConditionTable = DataTable.create(notMetConditionList, TextUtils.tableConverter);
+                failedRows.put("Строка " + (index + 1), notMetConditionTable);
+            }
+            getPage().dropCurrentContext();
+        });
+        if (!failedRows.isEmpty()) {
+            Runnable runnable = () -> failedRows.forEach(TauLogger::attachDataTable);
+            List<String> rowNumbers = failedRows.keySet().stream()
+                    .map(name -> name.replace("Строка ", "")).toList();
+            TauLogger.fail(runnable, "Ячейки таблицы '%s' в строках %s не соответствуют ни одному из требований",
                     tableName, rowNumbers);
 
         }
@@ -448,4 +553,5 @@ public class TableManager extends StepManager {
                 }, "Не удалось выполнить скроллинг %s в таблице '%s' на странице '%s'",
                 direction, tableName, getPage().getPageName());
     }
+
 }
