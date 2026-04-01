@@ -459,6 +459,17 @@ public final class TauLogger {
         return null;
     }
 
+    @Attachment(value = "{fileName}", type = "video/webm", fileExtension = ".webm")
+    public static byte[] attachWebmFile(String fileName, String filePath) {
+        File file = new File(filePath);
+        try {
+            return Files.readAllBytes(file.toPath());
+        } catch (IOException ioException) {
+            warnWOSS(ioException, "Не удалось приложить файл '%s' к отчету", filePath);
+        }
+        return null;
+    }
+
     @Attachment(value = "{fileName}", type = "application/json", fileExtension = ".json")
     public static byte[] attachJson(String fileName, String content) {
         try {
