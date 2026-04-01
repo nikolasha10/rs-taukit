@@ -19,7 +19,8 @@ public class FormDataManager extends StepManager {
                 String type = TestDataUtils.get(row, "Тип");
                 String name = TestDataUtils.get(row, "Название");
                 String value = Optional.ofNullable(TestDataUtils.getOptional(row, "Значение")).orElse("");
-                String containerName = TestDataUtils.getOptional(row, "Блок");
+                String containerName = Optional.ofNullable(TestDataUtils.getOptional(row, "Блок"))
+                        .orElse(TestDataUtils.getOptional(row, "В блоке"));
                 String control = TestDataUtils.getOptional(row, "Контроль");
                 IContainer container = null;
                 try {
