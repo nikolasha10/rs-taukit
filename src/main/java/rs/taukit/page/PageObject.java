@@ -5,6 +5,7 @@ import com.microsoft.playwright.Request;
 import rs.taukit.element.interfaces.IContainer;
 import rs.taukit.element.interfaces.IElement;
 
+import java.nio.file.Path;
 import java.util.function.Consumer;
 
 public interface PageObject {
@@ -69,4 +70,6 @@ public interface PageObject {
     Locator getByCss(String selector);
 
     void setRequestHandler(Consumer<Request> handler);
+
+    Path getVideoPath();
 }
