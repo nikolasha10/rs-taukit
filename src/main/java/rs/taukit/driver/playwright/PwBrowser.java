@@ -14,6 +14,7 @@ import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TestDataUtils;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -266,5 +267,22 @@ public abstract class PwBrowser implements IWebBrowser {
     @Override
     public void setDefaultTimeout(double timeProperty) {
         this.context.setDefaultTimeout(timeProperty);
+    }
+
+    @Override
+    public void startTraceRecord() {
+        this.context.tracing().start(new Tracing.StartOptions()
+                .setScreenshots(true)
+                .setSnapshots(true)
+                .setSources(true)
+        );
+    }
+
+    @Override
+    public void stopTraceRecord(String fileName) {
+        this.context.tracing().stop(new Tracing.StopOptions().setPath(Path.of(
+                FileUtils.getDownloadFilePath(),
+                fileName + ".zip"
+        )));
     }
 }

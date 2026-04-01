@@ -1,6 +1,7 @@
 package rs.taukit.step.manager;
 
 import io.cucumber.datatable.DataTable;
+import io.qameta.allure.Step;
 import rs.taukit.config.Config;
 import rs.taukit.element.interfaces.IElement;
 import rs.taukit.scenario.CucumberScenario;
@@ -81,5 +82,15 @@ public class ServiceManager extends StepManager {
 
     protected void createCondition(String conditionName, DataTable dataTable) {
         scenarioData.put(conditionName, dataTable);
+    }
+    @Step("служебный шаг: начать запись трассировки")
+    protected void startTraceRecord() {
+        getBrowser().startTraceRecord();
+    }
+
+    @Step("служебный шаг: сохранить запись трассировки, как '{fileName}'")
+    protected void stopTraceRecord(String fileName) {
+        getBrowser().stopTraceRecord(fileName);
+        TauLogger.attachFile(fileName, FileUtils.getDownloadFilePath() + "/" + fileName + ".zip");
     }
 }
