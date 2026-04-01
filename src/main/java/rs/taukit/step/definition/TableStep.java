@@ -35,6 +35,11 @@ public class TableStep extends TableManager {
         super.tableAllRowsCheckConditions(eval(tableName), eval(dataTable));
     }
 
+    @И("^в таблице \"(.+)\" для каждой строки проверить выполнение любого из условий:$")
+    public void tableAllRowsCheckAnyCondition(String tableName, DataTable dataTable) {
+        super.tableAllRowsCheckAnyCondition(eval(tableName), eval(dataTable));
+    }
+
     @И("^в таблице \"(.+)\" для каждой ячейки в столбце № (\\d+) проверить выполнение условий:$")
     public void tableColumnCellsCheckConditions(String tableName, int columnNumber, DataTable dataTable) {
         super.tableColumnCellsCheckConditions(eval(tableName), columnNumber, eval(dataTable));
@@ -80,6 +85,11 @@ public class TableStep extends TableManager {
     @И("^в таблице \"(.+)\" дождаться появления строки, соответствующей условиям:$")
     public void waitForTableConditions(String tableName, DataTable dataTable) {
         super.waitForTableConditions(eval(tableName), eval(dataTable));
+    }
+
+    @И("^в таблице \"(.+)\" дождаться появления строки, соответствующей любому из условий:$")
+    public void waitForTableAnyConditions(String tableName, DataTable dataTable) {
+        super.waitForTableAnyConditions(eval(tableName), eval(dataTable));
     }
 
     @И("^в таблице \"(.+)\" дождаться отсутствия строки, соответствующей условиям:$")

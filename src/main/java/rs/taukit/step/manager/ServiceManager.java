@@ -54,7 +54,7 @@ public class ServiceManager extends StepManager {
             IElement element = element(elementName);
             element.forceClick();
             TauLogger.report("[примечание] нажата ЛКМ над элементом '%s'", elementName);
-        },"Не удалось кликнуть в области над элементом '%s'", elementName);
+        }, "Не удалось кликнуть в области над элементом '%s'", elementName);
     }
 
     protected void createTestItAutotest() {
@@ -77,5 +77,9 @@ public class ServiceManager extends StepManager {
 
     protected void addErrorCategories(DataTable dataTable) {
         scenarioData.put("ERROR_CATEGORIES", dataTable.asList());
+    }
+
+    protected void createCondition(String conditionName, DataTable dataTable) {
+        scenarioData.put(conditionName, dataTable);
     }
 }

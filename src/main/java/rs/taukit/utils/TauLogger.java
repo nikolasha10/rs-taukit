@@ -8,10 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import rs.taukit.config.Config;
+import rs.taukit.driver.IWebDriver;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 import rs.taukit.exceptions.TestDataException;
 import rs.taukit.page.PageObject;
-import rs.taukit.testdata.TestData;
 import rs.taukit.testdata.TestDataFile;
 
 import java.io.File;
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -134,20 +135,17 @@ public final class TauLogger {
     /**
      * Выводит сообщение об ошибке в действии, и НЕ делает скриншот.
      */
-    @Step("Некритическая ошибка: {message}")
-    public static void warnWOSS(String message) {
-        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
-        scenarioData().put("WARNING", "PASSED with ERRORS");
-    }
 
     @Step("Некритическая ошибка: {message}")
     public static void warnWOSS(String message, Throwable e) {
-        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
-        scenarioData().put("WARNING", "PASSED with ERRORS");
+        logger.warn("ОШИБКА: {}", message.replaceAll("\n", "↵"), e);
+        if (scenario() != null) {
+            scenarioData().put("WARNING", "PASSED with ERRORS");
+        }
     }
 
     public static void warnWOSS(String message, Object... args) {
-        warnWOSS(String.format(message, args));
+        warnWOSS(String.format(message, args), new Throwable());
     }
 
     public static void warnWOSS(Throwable e, String message, Object... args) {
@@ -167,7 +165,7 @@ public final class TauLogger {
     public static void warn(Throwable e, String format, Object... args) {
         warn(String.format(format, args), e);
     }
-    
+
     private static Throwable addCategory(Throwable e) {
         e = Optional.ofNullable(e).orElse(new Throwable());
         List<String> category = scenarioData().getOptional("ERROR_CATEGORIES");
@@ -176,7 +174,7 @@ public final class TauLogger {
         }
         return e;
     }
-    
+
     /**
      * Выводит сообщение о критической ошибке, и делает скриншот.
      */
@@ -334,19 +332,39 @@ public final class TauLogger {
     }
 
     public static void attachFullScreenshots() {
-        if (driver().isBrowserOpen()) {
-            List<byte[]> screenshotList = driver().getCurrentBrowser().takeScreenshots();
-            IntStream.range(0, screenshotList.size())
-                    .forEach(index -> {
-                        browser().setActiveTab(index);
-                        String pageName = page() != null ? page().getPageName() : "Без названия";
-                        attachScreenshot(
-                                String.format("Снимок: Вкладка %d. %s", index + 1, pageName),
-                                screenshotList.get(index));
-                        attachFile(String.format("Исходный код: Вкладка %d. %s", index + 1, pageName),
-                                page().takeContent().getBytes());
-                    });
+        if (!driver().isBrowserOpen()) {
+            return;
         }
+        List<byte[]> screenshotList = new ArrayList<>();
+        IWebDriver driver = driver();
+        Thread thread = new Thread(() -> screenshotList.addAll(driver.getCurrentBrowser().takeScreenshots()));
+        Thread.UncaughtExceptionHandler handler = (t, e) -> {
+            TauLogger.warnWOSS("Не удалось сохранить снимки всех открытых вкладок браузера", e);
+        };
+        thread.setUncaughtExceptionHandler(handler);
+        thread.start();
+        long currentTimeMillis = new Date().getTime();
+        while (new Date().getTime() - currentTimeMillis <= 65000) {
+            if (!thread.isAlive()) {
+                break;
+            }
+        }
+        if (thread.isAlive()) {
+            thread.interrupt();
+        }
+        IntConsumer takeTabScreenshotAndPageSource = index -> {
+            if (screenshotList.get(index).length == 0) {
+                return;
+            }
+            browser().setActiveTab(index);
+            String pageName = page() != null ? page().getPageName() : "Без названия";
+            attachScreenshot(
+                    String.format("Снимок: Вкладка %d. %s", index + 1, pageName),
+                    screenshotList.get(index));
+            attachFile(String.format("Исходный код: Вкладка %d. %s", index + 1, pageName),
+                    page().takeContent().getBytes());
+        };
+        IntStream.range(0, screenshotList.size()).forEach(takeTabScreenshotAndPageSource);
     }
 
 

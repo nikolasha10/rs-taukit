@@ -62,19 +62,9 @@ public abstract class PwBrowser implements IWebBrowser {
     public List<byte[]> takeScreenshots() {
         return context.pages().stream()
                 .map(tab -> {
-                    Exception exception = null;
-                    for (int i = 0; i < 3; i++) {
-                        try {
-                            if (i > 0) tab.reload();
-                            tab.waitForLoadState();
-                            tab.bringToFront();
-                            return tab.screenshot((new Page.ScreenshotOptions().setFullPage(true)));
-                        } catch (Exception e) {
-                            exception = e;
-                        }
-                    }
-                    TauLogger.warnWOSS("Не удалось сделать снимок текущей вкладки браузера", exception);
-                    return new byte[0];
+                    tab.waitForLoadState();
+                    tab.bringToFront();
+                    return tab.screenshot((new Page.ScreenshotOptions().setTimeout(60000).setFullPage(true)));
                 }).collect(Collectors.toList());
     }
 
