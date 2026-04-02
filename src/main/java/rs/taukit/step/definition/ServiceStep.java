@@ -74,4 +74,14 @@ public class ServiceStep extends ServiceManager {
         super.createCondition(conditionName, eval(datatable));
     }
 
+    @И("^служебный шаг: начать запись трассировки$")
+    public void startTraceRecord() {
+        super.startTraceRecord();
+    }
+
+    @И("^служебный шаг: сохранить запись трассировки, как \"([^\"]+)\"$")
+    public void stopTraceRecord(String traceName) {
+        super.stopTraceRecord(eval(traceName));
+    }
+
 }

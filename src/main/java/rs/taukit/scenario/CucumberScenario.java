@@ -15,6 +15,7 @@ import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.function.Predicate;
@@ -125,22 +126,24 @@ public class CucumberScenario {
         finished = true;
         releaseAllMutexes();
         String testStatus = skipped ? "SKIPPED" : statusCode == 1 ? "PASSED" : "FAILED";
+        Boolean videoSaveTestRun = Config.getBooleanProperty("video.save");
+        Boolean videoSaveScenario = scenarioData().getOptional("video.save");
+        boolean videoSave = videoSaveTestRun || Optional.ofNullable(videoSaveScenario).orElse(false);
+        Path videoPath = videoSave ? page().getVideoPath() : null;
         Boolean harFileSave = scenarioData().getOptional("har-file.save");
-        if ((Config.getBooleanProperty("har-file.save") || Optional.ofNullable(harFileSave).orElse(false))
-                && testStatus.equalsIgnoreCase("failed")
-                && driver().isBrowserOpen()) {
-            String harPath = driver().getHarFilePath();
+        if (driver().isBrowserOpen()) {
             try {
                 browser().close();
             } catch (Exception e){
-                TauLogger.console("Не удалось закрыть браузер");
-                TauLogger.console(e);
-                TauLogger.console("Ждём 5 секунд");
-                driver().waitForTimeout(5000);
-                TauLogger.console("Пробуем закрыть драйвер");
-                driver().closeDriver();
-                TauLogger.console("Драйвер закрыт");
+                TauLogger.error(e, "Не удалось закрыть браузер");
             }
+        }
+        if (!driver().isBrowserOpen()) {
+            TauLogger.console("Браузер закрыт");
+        }
+        if ((Config.getBooleanProperty("har-file.save") || Optional.ofNullable(harFileSave).orElse(false))
+                && testStatus.equalsIgnoreCase("failed")) {
+            String harPath = driver().getHarFilePath();
             try {
                 File harFile = new File(harPath);
                 TauLogger.attachFile(harFile.getParentFile().getName() + ".har", harPath);
@@ -151,6 +154,9 @@ public class CucumberScenario {
             } catch (Exception e) {
                 TauLogger.error("Не удалось прикрепить файл HAR", e);
             }
+        }
+        if (videoSave && videoPath != null) {
+            TauLogger.attachWebmFile(getName() + ".webm", videoPath.toString());
         }
         Config.getDependencies().changeStatus(getTagList(), testStatus.toLowerCase());
         scenarioStorage.getDriverManager().close();

@@ -18,6 +18,7 @@ import rs.taukit.page.PageObject;
 import rs.taukit.utils.TimeStringParser;
 import rs.taukit.utils.YamlParser;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BooleanSupplier;
@@ -365,5 +366,10 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
     @Override
     public void setRequestHandler(Consumer<Request> handler) {
         page.onRequest(handler);
+    }
+
+    @Override
+    public Path getVideoPath() {
+        return page.video().path();
     }
 }

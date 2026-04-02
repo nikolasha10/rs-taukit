@@ -8,14 +8,17 @@ import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.FileNotCreatedException;
 import rs.taukit.utils.FileUtils;
-import rs.taukit.utils.TauLogger;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+
+import static rs.taukit.utils.BasicUtils.scenarioData;
 
 @Getter
 public class Chromium extends PwBrowser {
@@ -51,10 +54,10 @@ public class Chromium extends PwBrowser {
             }
         }
         File downloadDir = new File(Objects.requireNonNull(Config.getProperty("downloads.dir")));
+        int viewportWidth = Config.getIntegerProperty("window.width");
+        int viewportHeight = Config.getIntegerProperty("window.height");
         BrowserType.LaunchPersistentContextOptions options = new BrowserType.LaunchPersistentContextOptions()
-                .setViewportSize(
-                        Config.getIntegerProperty("window.width"),
-                        Config.getIntegerProperty("window.height"))
+                .setViewportSize(viewportWidth, viewportHeight)
                 .setHeadless(Config.getBooleanProperty("browser.headless"))
                 .setChannel("chromium")
                 .setDownloadsPath(downloadDir.toPath())
@@ -64,6 +67,11 @@ public class Chromium extends PwBrowser {
         if (proxyServer != null) {
             Proxy proxy = new Proxy(proxyServer);
             options.setProxy(proxy);
+        }
+        Boolean videoSave = scenarioData().getOptional("video.save");
+        if (Config.getBooleanProperty("video.save") || Optional.ofNullable(videoSave).orElse(false)) {
+            options.setRecordVideoDir(Path.of(FileUtils.getDownloadFilePath(), "videos"));
+            options.setRecordVideoSize(viewportWidth, viewportHeight);
         }
         return browser.browserType()
                 .launchPersistentContext(

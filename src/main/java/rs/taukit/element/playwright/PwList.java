@@ -8,7 +8,6 @@ import rs.taukit.element.interfaces.*;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.page.playwright.ElementBuilder;
 import rs.taukit.testobject.TestCondition;
-import rs.taukit.utils.TauLogger;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -51,30 +50,27 @@ public class PwList extends PwElement implements HasListItems {
     public PwElement getItem(String itemName) {
         double timeout = Config.getTimeProperty("condition.wait.timeout");
         String expectedItemText = itemName.replace("[!]", "").trim();
-        Predicate<String> predicate = itemName.contains("[!]")
-                ? value -> value.equals(expectedItemText)
-                : value -> value.contains(expectedItemText);
-        BooleanSupplier condition = () -> getValues().stream().anyMatch(predicate);
-        try {
-            driver.waitForCondition(condition, timeout);
-        } catch (Exception e) {
-            throw valueNotFoundException(expectedItemText, e).get();
-        }
         Predicate<IContainer> containerPredicate = itemName.contains("[!]")
                 ? containsElementWithTextEquals(expectedItemText)
                 : containsElementWithText(expectedItemText);
-        condition = () -> getItemList().stream()
-                        .filter(PwElement::isVisible)
-                        .anyMatch(containerPredicate);
+        AtomicReference<PwElement> item = new AtomicReference<>();
+        BooleanSupplier condition = () -> {
+            for (Locator locator : elementPwLocator.all()) {
+                PwBlock container = new PwBlock(elementName, model);
+                PwBlock element = ElementBuilder.buildElement(elementName, container, locator).castTo(PwBlock.class);
+                if (element.isVisible() && containerPredicate.test(element)) {
+                    item.set(element);
+                    return true;
+                }
+            }
+            return false;
+        };
         try {
             driver.waitForCondition(condition, timeout);
         } catch (Exception e) {
             throw valueNotFoundException(expectedItemText, e).get();
         }
-        return getItemList().stream()
-                .filter(PwElement::isVisible)
-                .filter(containerPredicate)
-                .findFirst().orElseThrow(valueNotFoundException(expectedItemText));
+        return item.get();
     }
 
     @Override

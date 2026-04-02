@@ -1,6 +1,7 @@
 package rs.taukit.utils;
 
 import io.qameta.allure.Step;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.FileNotCreatedException;
@@ -166,7 +167,8 @@ public class FileUtils {
         while (scenarioName.endsWith(".")) {
             scenarioName = scenarioName.substring(0, scenarioName.length() - 1);
         }
-        return String.format("%s/%s/%s", downloadDirPath, suites, scenarioName);
+        String hash = DigestUtils.md5Hex(String.format("%s/%s", suites, scenarioName));
+        return String.format("%s/%s", downloadDirPath, hash);
     }
 
     public static String getFileName(String filePath) {

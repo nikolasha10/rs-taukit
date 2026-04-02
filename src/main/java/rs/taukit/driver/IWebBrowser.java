@@ -55,4 +55,8 @@ public interface IWebBrowser {
     void setDefaultTimeout(double timeProperty);
 
     void goBack();
+
+    void startTraceRecord();
+
+    void stopTraceRecord(String fileName);
 }
