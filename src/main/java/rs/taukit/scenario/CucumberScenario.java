@@ -129,7 +129,7 @@ public class CucumberScenario {
         Boolean videoSaveTestRun = Config.getBooleanProperty("video.save");
         Boolean videoSaveScenario = scenarioData().getOptional("video.save");
         boolean videoSave = videoSaveTestRun || Optional.ofNullable(videoSaveScenario).orElse(false);
-        Path videoPath = videoSave ? page().getVideoPath() : null;
+        Path videoPath = videoSave && page() != null ? page().getVideoPath() : null;
         Boolean harFileSave = scenarioData().getOptional("har-file.save");
         if (driver().isBrowserOpen()) {
             try {
@@ -155,7 +155,7 @@ public class CucumberScenario {
                 TauLogger.error("Не удалось прикрепить файл HAR", e);
             }
         }
-        if (videoSave && videoPath != null) {
+        if (videoPath != null) {
             TauLogger.attachWebmFile(getName() + ".webm", videoPath.toString());
         }
         Config.getDependencies().changeStatus(getTagList(), testStatus.toLowerCase());
