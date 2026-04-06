@@ -57,7 +57,7 @@ public class PwSearchField extends PwBlock implements Editable {
             try {
                 driver.waitForCondition(() -> {
                     try {
-                        return valuesList.getItemList().stream().anyMatch(item -> item.getText().contains(value));
+                        return valuesList.getItem(value).isVisible();
                     } catch (Exception e) {
                         return false;
                     }
