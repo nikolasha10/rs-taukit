@@ -335,6 +335,14 @@ public class TableManager extends StepManager {
         tableHeadersCheckConditions(tableName, table.getHeadersList().getItemList(), dataTable);
     }
 
+    @Step("в таблице '{tableName}' сохранить заголовок столбца № {columnNumber}, как '{parameterName}'")
+    protected void tableHeaderSaveByNumber(String tableName, int columnNumber, String parameterName) {
+        IHasTableElements table = getElement(tableName);
+        String columnName = table.getHeadersList().getItemList().get(columnNumber - 1).castTo(HasText.class).getText();
+        scenarioData().put(parameterName, columnName);
+        TauLogger.report("Название заголовка столбца № %d сохранено как '%s'", columnNumber, columnName);
+    }
+
     @Step("в таблице '{tableName}' для каждой строки проверить выполнение условий:")
     protected void tableAllRowsCheckConditions(String tableName, DataTable dataTable) {
         TauLogger.attachDataTable("Условия проверки строк таблицы", dataTable);
@@ -553,5 +561,4 @@ public class TableManager extends StepManager {
                 }, "Не удалось выполнить скроллинг %s в таблице '%s' на странице '%s'",
                 direction, tableName, getPage().getPageName());
     }
-
 }

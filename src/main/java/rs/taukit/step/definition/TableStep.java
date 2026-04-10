@@ -30,6 +30,11 @@ public class TableStep extends TableManager {
         super.tableHeadersCheckConditions(eval(tableName), eval(dataTable));
     }
 
+    @И("^в таблице \"(.+)\" сохранить заголовок столбца № (\\d+), как \"(.+)\"$")
+    public void tableHeaderSaveByNumber(String tableName, int columnNumber, String parameterName) {
+        super.tableHeaderSaveByNumber(eval(tableName), columnNumber, parameterName);
+    }
+
     @И("^в таблице \"(.+)\" для каждой строки проверить выполнение условий:$")
     public void tableAllRowsCheckConditions(String tableName, DataTable dataTable) {
         super.tableAllRowsCheckConditions(eval(tableName), eval(dataTable));
