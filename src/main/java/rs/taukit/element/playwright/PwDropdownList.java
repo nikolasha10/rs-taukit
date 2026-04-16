@@ -110,7 +110,8 @@ public class PwDropdownList extends PwBlock implements Editable, Selectable {
                     return false;
                 }
                 try {
-                    return options.isVisible() && options.getSize() >= number;
+                    return options.isVisible() && options.getSize() >= number
+                            && options.get(number - 1).isVisible() && options.get(number - 1).isEnabled();
                 } catch (Exception e) {
                     this.exception = new RuntimeException(String.format(
                             "В выпадающем списке '%s' отсутствует %d-й элемент", elementName, number), e);
