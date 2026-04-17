@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 
 public class DropdownListManager extends StepManager {
 
@@ -50,11 +51,19 @@ public class DropdownListManager extends StepManager {
 
     @Step("в выпадающем списке '{elementName}' выбрать {number}-й элемент")
     protected void selectElementByNumber(String elementName, int number) {
-        run(() -> {
-                    Selectable dropdown = getElement(elementName);
-                    dropdown.getOptionByNumber(number).click();
-                    TauLogger.console("В выпадающем списке '%s' выбран %d-й элемент", elementName, number);
-                },
+        AtomicReference<RuntimeException> exception = new AtomicReference<>();
+        BooleanSupplier condition = () -> {
+            try {
+                Selectable dropdown = getElement(elementName);
+                dropdown.getOptionByNumber(number).click();
+                TauLogger.console("В выпадающем списке '%s' выбран %d-й элемент", elementName, number);
+                return true;
+            } catch (RuntimeException e) {
+                exception.set(e);
+                return false;
+            }
+        };
+        waitForCondition(condition, exception.get(),
                 "Не удалось выбрать %d-й элемент в выпадающем списке '%s'", number, elementName);
     }
 }
