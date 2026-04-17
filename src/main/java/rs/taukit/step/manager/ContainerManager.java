@@ -261,11 +261,21 @@ public class ContainerManager extends StepManager {
 
     @Step("в контейнере '{containerName}' в выпадающем списке '{dropdownListName}' выбрать '{value}'")
     protected void selectDropdownListItem(String containerName, String dropdownListName, String value) {
-        run(() -> {
-            IContainer container = getContainer(containerName);
-            Editable dropdownList = container.getElementByName(dropdownListName).castTo(Editable.class);
-            dropdownList.setValue(value);
-        }, "Не удалось выбрать элемент '%s' в выпадающем списке '%s' в контейнере '%s'", value, dropdownListName, containerName);
+        AtomicReference<RuntimeException> exception = new AtomicReference<>();
+        BooleanSupplier condition = () -> {
+            try {
+                IContainer container = getContainer(containerName);
+                Editable dropdownList = container.getElementByName(dropdownListName).castTo(Editable.class);
+                dropdownList.setValue(value);
+                return true;
+            } catch (RuntimeException e) {
+                exception.set(e);
+                return false;
+            }
+        };
+        waitForCondition(condition, exception.get(),
+                "Не удалось выбрать элемент '%s' в выпадающем списке '%s' в контейнере '%s'",
+                value, dropdownListName, containerName);
         TauLogger.console("Выбран элемент '%s' в выпадающем списке '%s' в контейнере '%s'",
                 value, dropdownListName, containerName);
     }
