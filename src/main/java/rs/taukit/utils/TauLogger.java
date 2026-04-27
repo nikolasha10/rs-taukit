@@ -409,6 +409,9 @@ public final class TauLogger {
             case "xlsx":
                 attachXlsxFile(fileName, filePath);
                 break;
+            case "html":
+                attachHtmlFile(fileName, filePath);
+                break;
             default:
                 attachFile(fileName, filePath);
         }
@@ -450,6 +453,17 @@ public final class TauLogger {
 
     @Attachment(value = "{fileName}", type = "application/vnd.ms-excel", fileExtension = ".xlsx")
     public static byte[] attachXlsxFile(String fileName, String filePath) {
+        File file = new File(filePath);
+        try {
+            return Files.readAllBytes(file.toPath());
+        } catch (IOException ioException) {
+            warnWOSS(ioException, "Не удалось приложить файл '%s' к отчету", filePath);
+        }
+        return null;
+    }
+
+    @Attachment(value = "{fileName}", type = "text/html", fileExtension = ".html")
+    public static byte[] attachHtmlFile(String fileName, String filePath) {
         File file = new File(filePath);
         try {
             return Files.readAllBytes(file.toPath());
