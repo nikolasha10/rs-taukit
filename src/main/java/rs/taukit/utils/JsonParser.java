@@ -1,13 +1,10 @@
 package rs.taukit.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import rs.taukit.exceptions.AutoTestBrokenException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,11 +20,11 @@ public class JsonParser {
         try {
             resultList = YamlParser.convert(jsonMapper.readValue(jsonText, resultList.getClass()));
             return (T) resultList;
-        } catch (JsonProcessingException ignored) {
+        } catch (JacksonException ignored) {
             try {
                 resultMap = YamlParser.convert(jsonMapper.readValue(jsonText, resultMap.getClass()));
                 return (T) resultMap;
-            } catch (JsonProcessingException e) {
+            } catch (Exception e) {
                 throw new AutoTestBrokenException(e, "Ошибка при разборе json");
             }
         }
@@ -35,11 +32,7 @@ public class JsonParser {
 
     public static byte[] write(Object object) {
         ObjectMapper jsonMapper = new JsonMapper();
-        try {
-            return jsonMapper.writeValueAsBytes(object);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        return jsonMapper.writeValueAsBytes(object);
     }
 
 }
