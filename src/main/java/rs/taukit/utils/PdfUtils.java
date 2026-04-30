@@ -7,6 +7,7 @@ import com.itextpdf.text.pdf.parser.TextExtractionStrategy;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import io.cucumber.datatable.DataTable;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSBase;
 import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSName;
@@ -198,7 +199,7 @@ public class PdfUtils {
         File editedFile = new File(editedFileName);
         List<String> templateLineList = templateContent.lines().toList();
         AtomicInteger lineIndex = new AtomicInteger(0);
-        try (PDDocument document = PDDocument.load(originFile)) {
+        try (PDDocument document = Loader.loadPDF(originFile)) {
             PDPageTree tree = document.getDocumentCatalog().getPages();
             IntStream.range(0, tree.getCount()).boxed().forEach(pageIndex -> {
                 PDPage page = tree.get(pageIndex);
@@ -325,9 +326,9 @@ public class PdfUtils {
 
 
         try {
-            PDDocument testedDocument = PDDocument.load(new File(testedFilePath));
+            PDDocument testedDocument = Loader.loadPDF(new File(testedFilePath));
             PDFRenderer testedRenderer = new PDFRenderer(testedDocument);
-            PDDocument standardDocument = PDDocument.load(new File(standardFilePath));
+            PDDocument standardDocument = Loader.loadPDF(new File(standardFilePath));
             PDFRenderer standardRenderer = new PDFRenderer(standardDocument);
             int testedPagesNumber = testedDocument.getNumberOfPages();
             int standardPagesNumber = standardDocument.getNumberOfPages();

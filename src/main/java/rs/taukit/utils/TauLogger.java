@@ -473,6 +473,11 @@ public final class TauLogger {
         return null;
     }
 
+    @Attachment(value = "{fileName}", type = "text/html", fileExtension = ".html")
+    public static byte[] attachHtmlFile(String fileName, byte[] fileContent) {
+        return fileContent;
+    }
+
     @Attachment(value = "{fileName}", type = "video/webm", fileExtension = ".webm")
     public static byte[] attachWebmFile(String fileName, String filePath) {
         File file = new File(filePath);
