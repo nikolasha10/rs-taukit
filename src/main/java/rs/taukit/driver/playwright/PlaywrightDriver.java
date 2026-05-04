@@ -10,6 +10,7 @@ import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.IContainer;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
@@ -86,7 +87,8 @@ public class PlaywrightDriver implements IWebDriver {
         double timeout = Config.getTimeProperty("conditions.wait.timeout");
         try {
             driver().waitForCondition(condition, interval, timeout);
-        } catch (TimeoutError te) {
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(suppressed.get());
         }
     }
@@ -156,9 +158,12 @@ public class PlaywrightDriver implements IWebDriver {
     @Override
     public void waitForCondition(BooleanSupplier condition, double interval, double timeout) {
         long start = new Date().getTime();
-        while (new Date().getTime() - start <= timeout && !condition.getAsBoolean()) {
+        while (new Date().getTime() - start <= timeout) {
+            if (condition.getAsBoolean()) return;
             waitForTimeout(interval);
         }
+        throw new AutoTestBrokenException("Превышено время ожидания (%s)",
+                TimeStringParser.formatInterval((long) timeout));
     }
 
     @Override
