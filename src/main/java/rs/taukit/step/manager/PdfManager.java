@@ -103,7 +103,7 @@ public class PdfManager extends StepManager {
                             pageDifferences.tested(),
                             pageDifferences.expected(),
                             pageDifferences.differences());
-                    TauLogger.attachFile(pageDifferences.name(), attachment.getBytes());
+                    TauLogger.attachHtmlFile(pageDifferences.name(), attachment.getBytes());
                 }
             };
         }
@@ -177,7 +177,7 @@ public class PdfManager extends StepManager {
                             imageMap.get("tested"),
                             imageMap.get("expected"),
                             imageMap.get("differences"));
-                    TauLogger.attachFile("Страница " + differentPages.get(i), attachment.getBytes());
+                    TauLogger.attachHtmlFile("Страница " + differentPages.get(i), attachment.getBytes());
                 }
             };
         }

@@ -47,7 +47,7 @@ public class ServiceManager extends StepManager {
         scenarioData.put("defaultBranch", Config.getProperty("defaultBranch"));
         String template = FileUtils.readFile("src/main/resources/templates/finalReportTemplate.html");
         FileUtils.writeFile("target/temp/finalReport.html", eval(template));
-        TauLogger.attachFile("Отчёт", "target/temp/finalReport.html");
+        TauLogger.attachFile("Отчёт", "target/temp/finalReport.html","html");
     }
 
     protected void forceClickElement(String elementName) {

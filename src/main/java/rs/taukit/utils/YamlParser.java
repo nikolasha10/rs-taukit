@@ -1,40 +1,30 @@
 package rs.taukit.utils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import rs.taukit.exceptions.ConfigFileNotFoundException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 import java.io.File;
-import java.io.IOException;
 
 @SuppressWarnings("unchecked")
 public class YamlParser {
 
     public static <T> T parse(String filePath) {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        ObjectMapper mapper = new YAMLMapper();
         File file = new File(filePath);
-        try {
-            return mapper.readValue(file, new TypeReference<>() {
-            });
-        } catch (IOException e) {
-            throw new ConfigFileNotFoundException(e, filePath);
-        }
+        return mapper.readValue(file, new TypeReference<>() {
+        });
     }
 
     public static byte[] write(Object object, boolean splitLines) {
-        YAMLFactory yamlFactory = new YAMLFactory();
+        YAMLMapper.Builder yamlBuilder = YAMLMapper.builder();
         if (!splitLines) {
-            yamlFactory.disable(YAMLGenerator.Feature.SPLIT_LINES);
+            yamlBuilder.disable(YAMLWriteFeature.SPLIT_LINES);
         }
-        ObjectMapper mapper = new ObjectMapper(yamlFactory);
+        ObjectMapper mapper = yamlBuilder.build();
 //        mapper.enable(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED);
-        try {
-            return mapper.writeValueAsBytes(object);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return mapper.writeValueAsBytes(object);
     }
 
     public static <T> T convert(Object object) {
