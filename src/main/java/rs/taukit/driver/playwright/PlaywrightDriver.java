@@ -59,12 +59,17 @@ public class PlaywrightDriver implements IWebDriver {
         BooleanSupplier condition = () -> {
             try {
                 BrowserType browserType = getBrowserType(Objects.requireNonNull(Config.getProperty("browser.type")));
-                Chromium chromium = new Chromium(browserType, browserList.size(), args);
-                browserList.add(chromium);
+                PwBrowser browser;
+                switch (browserType.name()) {
+                    case "firefox" -> browser = new Firefox(browserType, browserList.size(), args);
+                    case "webkit" -> browser = new Webkit(browserType, browserList.size(), args);
+                    default -> browser = new Chromium(browserType, browserList.size(), args);
+                }
+                browserList.add(browser);
                 currentBrowserIndex = browserList.size() - 1;
                 Boolean harFileSave = scenarioData().getOptional("har-file.save");
                 if (Config.getBooleanProperty("har-file.save") || Optional.ofNullable(harFileSave).orElse(false)) {
-                    chromium.context.routeFromHAR(
+                    browser.context.routeFromHAR(
                             Path.of(getHarFilePath()),
                             new BrowserContext.RouteFromHAROptions()
                                     .setUpdate(true)
