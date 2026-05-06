@@ -138,7 +138,8 @@ public class ConditionManager extends StepManager {
         BooleanSupplier conditions = getConditions(dataTable);
         Map<String, String> expectedHeaders = dataTable.asMaps().getFirst();
         List<List<String>> unexpectedResultList = new ArrayList<>();
-        List<String> resultsHeaders = new ArrayList<>(expectedHeaders.keySet().stream().toList());
+        List<String> resultsHeaders = new ArrayList<>(expectedHeaders.keySet().stream()
+                .filter(headerName -> !headerName.equals("Ожидание")).toList());
         resultsHeaders.add("Текущее значение");
         unexpectedResultList.add(resultsHeaders);
         AtomicReference<Exception> exception = new AtomicReference<>();
