@@ -114,6 +114,7 @@ public class ScenarioData {
     }
 
     public <T> T getOptional(String nameSpace, String fieldName) {
+        if (!nameSpaces.containsKey(nameSpace)) return null;
         return nameSpaces.get(nameSpace).getOptional(fieldName);
     }
 
