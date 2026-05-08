@@ -18,10 +18,13 @@ public class TestDataUtils {
         }
         Supplier<RuntimeException> exceptionSupplier = () -> new DataTableFormatMismatchException(
                 "Не найдено поле '%s'. Присутствуют поля: %s", fieldName, data.keySet());
-        if (fieldName.contains(".")) {
-            String[] chunks = fieldName.split("\\.");
+        if (fieldName.contains(".") || fieldName.contains("->")) {
+            String[] chunks = fieldName.split("->");
+            if (chunks.length == 1) {
+                chunks = fieldName.split("\\.");
+            }
             T testData = null;
-            for (int i = 0; i <chunks.length; i++) {
+            for (int i = 0; i < chunks.length; i++) {
                 String chunk = chunks[i].trim();
                 if (i == 0) {
                     if (chunk.equals("System properties")) {
@@ -33,7 +36,7 @@ public class TestDataUtils {
                 } else {
                     TestData testDataObject = YamlParser.convert(testData);
                     testData = testDataObject.getOptional(chunk);
-                    if (testData == null){
+                    if (testData == null) {
                         throw exceptionSupplier.get();
                     }
                 }

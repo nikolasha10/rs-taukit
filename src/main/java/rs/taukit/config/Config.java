@@ -42,8 +42,13 @@ public class Config {
         pageMapping = buildPageMapping(getProperty("pagesDirPath"));
         fragmentMapping = buildPageMapping(getProperty("pageFragmentsDirPath"));
         dependencies = new Dependencies(configDirPath + "/dependencies.yaml");
-        LinkedHashMap<String, ?> testDataMap = new LinkedHashMap<>(STAND.getStandData());
-        storage.put("Тестовый стенд", new TestData("StandData", testDataMap));
+        LinkedHashMap<String, ?> standDataMap = new LinkedHashMap<>(STAND.getStandData());
+        storage.put("Тестовый стенд", new TestData("StandData", standDataMap));
+        String testDataIndexPath = getProperty("testDataIndexPath");
+        if (testDataIndexPath != null) {
+            LinkedHashMap<String, ?> testDataMap = YamlParser.parse(testDataIndexPath);
+            storage.put("ТД", new TestData("TestData", testDataMap));
+        }
     }
 
     private static void setConfig(Properties properties, String filePath, boolean required) {
@@ -90,7 +95,7 @@ public class Config {
             return eval(Optional.ofNullable(Optional.ofNullable(System.getProperty(propertyName))
                             .orElse(RUNTIME_PROPERTIES.getProperty(propertyName)))
                     .orElse(CONFIG_PROPERTIES.getProperty(propertyName)));
-        } catch (Exception ignored){
+        } catch (Exception ignored) {
             return null;
         }
     }

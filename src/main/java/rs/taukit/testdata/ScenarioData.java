@@ -139,4 +139,8 @@ public class ScenarioData {
         lines.add(index + 1, "  " + newLines);
         FileUtils.writeFile(testDataFilePath, String.join("\n", lines));
     }
+
+    public void remove(String nameSpace, String fieldName) {
+        nameSpaces.get(nameSpace).remove(fieldName);
+    }
 }

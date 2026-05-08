@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static rs.taukit.utils.BasicUtils.scenarioData;
+
 @Getter
 public class DataStorage {
     private final Map<String, ?> dataStorage = new LinkedHashMap<>();
@@ -123,6 +125,7 @@ public class DataStorage {
             }
             String result = matcher.replaceAll(matchResult -> {
                 if (get(matchResult.group(1)) instanceof ITestData iTestData) {
+                    scenarioData().put("OBJECTS", iTestData.getStringValue(), get(matchResult.group(1)));
                     return iTestData.getStringValue();
                 } else {
                     return get(matchResult.group(1)).toString().replaceAll("\\$", "&dollar;");

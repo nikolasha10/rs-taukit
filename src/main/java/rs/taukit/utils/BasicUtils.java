@@ -108,6 +108,8 @@ public class BasicUtils {
             if (matcher.matches()) {
                 if (storage.evalObject(template) instanceof TestDataFile) {
                     return template;
+                } else if (storage.evalObject(template) instanceof TestData) {
+                    return template;
                 } else {
                     return storage.evalObjectField(template);
                 }
