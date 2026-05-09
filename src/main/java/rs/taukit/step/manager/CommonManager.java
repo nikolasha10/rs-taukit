@@ -241,7 +241,7 @@ public class CommonManager extends StepManager {
     public void parseParameterValue(String parameterName, DataTable dataTable) {
         TauLogger.attachDataTable("Параметры поиска результатов", dataTable);
         List<List<String>> parsedValues = new ArrayList<>();
-        String text = scenarioData.get(parameterName);
+        String text = scenarioData.get(parameterName).toString();
         Runnable runnable = () -> {
             parsedValues.clear();
             parsedValues.add(Arrays.asList("Параметр", "Значение"));
