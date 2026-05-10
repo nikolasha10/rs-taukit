@@ -34,8 +34,12 @@ public class TestDataUtils {
                     }
                     testData = Optional.ofNullable(data.get(chunk)).orElseThrow(exceptionSupplier);
                 } else {
-                    TestData testDataObject = YamlParser.convert(testData);
-                    testData = testDataObject.getOptional(chunk);
+                    if (testData instanceof TestData) {
+                        TestData testDataObject = YamlParser.convert(testData);
+                        testData = testDataObject.getOptional(chunk);
+                    } else {
+                        testData = null;
+                    }
                     if (testData == null) {
                         throw exceptionSupplier.get();
                     }

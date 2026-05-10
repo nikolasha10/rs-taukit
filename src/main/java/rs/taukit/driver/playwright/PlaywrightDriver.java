@@ -88,7 +88,6 @@ public class PlaywrightDriver implements IWebDriver {
         try {
             driver().waitForCondition(condition, interval, timeout);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException(suppressed.get());
         }
     }
