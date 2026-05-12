@@ -16,6 +16,14 @@ public class TestDataUtils {
         if (data.containsKey(fieldName)) {
             return data.get(fieldName);
         }
+        switch (fieldName) {
+            case "empty":
+                return YamlParser.convert("");
+            case "space":
+                return YamlParser.convert(" ");
+            case "nbsp":
+                return YamlParser.convert("\u00A0");
+        }
         Supplier<RuntimeException> exceptionSupplier = () -> new DataTableFormatMismatchException(
                 "Не найдено поле '%s'. Присутствуют поля: %s", fieldName, data.keySet());
         if (fieldName.contains(".") || fieldName.contains("->")) {
