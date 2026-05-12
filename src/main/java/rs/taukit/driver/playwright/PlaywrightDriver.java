@@ -10,6 +10,7 @@ import lombok.Getter;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.IContainer;
+import rs.taukit.exceptions.AutoTestBrokenException;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
 import rs.taukit.utils.TimeStringParser;
@@ -59,12 +60,17 @@ public class PlaywrightDriver implements IWebDriver {
         BooleanSupplier condition = () -> {
             try {
                 BrowserType browserType = getBrowserType(Objects.requireNonNull(Config.getProperty("browser.type")));
-                Chromium chromium = new Chromium(browserType, browserList.size(), args);
-                browserList.add(chromium);
+                PwBrowser browser;
+                switch (browserType.name()) {
+                    case "firefox" -> browser = new Firefox(browserType, browserList.size(), args);
+                    case "webkit" -> browser = new Webkit(browserType, browserList.size(), args);
+                    default -> browser = new Chromium(browserType, browserList.size(), args);
+                }
+                browserList.add(browser);
                 currentBrowserIndex = browserList.size() - 1;
                 Boolean harFileSave = scenarioData().getOptional("har-file.save");
                 if (Config.getBooleanProperty("har-file.save") || Optional.ofNullable(harFileSave).orElse(false)) {
-                    chromium.context.routeFromHAR(
+                    browser.context.routeFromHAR(
                             Path.of(getHarFilePath()),
                             new BrowserContext.RouteFromHAROptions()
                                     .setUpdate(true)
@@ -81,7 +87,7 @@ public class PlaywrightDriver implements IWebDriver {
         double timeout = Config.getTimeProperty("conditions.wait.timeout");
         try {
             driver().waitForCondition(condition, interval, timeout);
-        } catch (TimeoutError te) {
+        } catch (Exception e) {
             throw new RuntimeException(suppressed.get());
         }
     }
@@ -151,9 +157,12 @@ public class PlaywrightDriver implements IWebDriver {
     @Override
     public void waitForCondition(BooleanSupplier condition, double interval, double timeout) {
         long start = new Date().getTime();
-        while (new Date().getTime() - start <= timeout && !condition.getAsBoolean()) {
+        while (new Date().getTime() - start <= timeout) {
+            if (condition.getAsBoolean()) return;
             waitForTimeout(interval);
         }
+        throw new AutoTestBrokenException("Превышено время ожидания (%s)",
+                TimeStringParser.formatInterval((long) timeout));
     }
 
     @Override

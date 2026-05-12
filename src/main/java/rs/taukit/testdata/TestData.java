@@ -40,31 +40,37 @@ public class TestData implements ITestData, HasText {
             return;
         }
         filePath = Config.eval(filePath);
-        Map<String, String> searchBy = YamlParser.convert(parameters.get("поиск по полям"));
-        this.searchValue = searchBy.values().stream().toList().getFirst();
-        File file = new File(filePath);
-        if (!file.exists()) {
-            filePath = dirPath + File.separator + filePath;
-        }
-        List<Map<String, ?>> dataList = YamlParser.parse(filePath);
-        String filePathTmp = filePath;
-        Predicate<Map<String, ?>> condition = item -> searchBy.entrySet().stream().allMatch(entry -> {
-            String dataFieldName = entry.getKey();
-            String expectedValue = entry.getValue();
-            Object dataFieldValue = item.get(dataFieldName);
-            if (dataFieldValue instanceof List<?> listOfValues) {
-                List<String> values = YamlParser.convert(listOfValues);
-                return values.contains(expectedValue);
-            } else {
-                return dataFieldValue != null && dataFieldValue.toString().equalsIgnoreCase(expectedValue);
+        Map<String, ?> data;
+        if (!parameters.containsKey("поиск по полям")) {
+            data = YamlParser.parse(filePath);
+        } else {
+            Map<String, String> searchBy = YamlParser.convert(parameters.get("поиск по полям"));
+            this.searchValue = searchBy.values().stream().toList().getFirst();
+            File file = new File(filePath);
+            if (!file.exists()) {
+                filePath = dirPath + File.separator + filePath;
             }
-        });
-        Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля '%s'. %s",
-                fieldName, filePathTmp);
+            List<Map<String, ?>> dataList = YamlParser.parse(filePath);
+            String filePathTmp = filePath;
+            Predicate<Map<String, ?>> condition = item -> searchBy.entrySet().stream().allMatch(entry -> {
+                String dataFieldName = entry.getKey();
+                String expectedValue = entry.getValue();
+                Object dataFieldValue = item.get(dataFieldName);
+                if (dataFieldValue instanceof List<?> listOfValues) {
+                    List<String> values = YamlParser.convert(listOfValues);
+                    return values.contains(expectedValue);
+                } else {
+                    return dataFieldValue != null && dataFieldValue.toString().equalsIgnoreCase(expectedValue);
+                }
+            });
+            Supplier<RuntimeException> exception = () -> new TestDataException("Не удалось получить данные для поля '%s'. %s",
+                    fieldName, filePathTmp);
+            data = dataList.stream().filter(condition).findFirst().orElseThrow(exception);
+        }
         try {
-            dataStorage = new DataStorage(filePath, dataList.stream().filter(condition).findFirst().orElseThrow(exception));
+            this.dataStorage = new DataStorage(filePath, data);
         } catch (ClassCastException e) {
-            throw new TestDataException(e, "Неверный формат данных для поля '%s' в файле '%s'",fieldName, filePathTmp);
+            throw new TestDataException(e, "Неверный формат данных для поля '%s' в файле '%s'", fieldName, filePath);
         }
     }
 

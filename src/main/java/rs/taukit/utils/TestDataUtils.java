@@ -16,12 +16,23 @@ public class TestDataUtils {
         if (data.containsKey(fieldName)) {
             return data.get(fieldName);
         }
+        switch (fieldName) {
+            case "empty":
+                return YamlParser.convert("");
+            case "space":
+                return YamlParser.convert(" ");
+            case "nbsp":
+                return YamlParser.convert("\u00A0");
+        }
         Supplier<RuntimeException> exceptionSupplier = () -> new DataTableFormatMismatchException(
                 "Не найдено поле '%s'. Присутствуют поля: %s", fieldName, data.keySet());
-        if (fieldName.contains(".")) {
-            String[] chunks = fieldName.split("\\.");
+        if (fieldName.contains(".") || fieldName.contains("->")) {
+            String[] chunks = fieldName.split("->");
+            if (chunks.length == 1) {
+                chunks = fieldName.split("\\.");
+            }
             T testData = null;
-            for (int i = 0; i <chunks.length; i++) {
+            for (int i = 0; i < chunks.length; i++) {
                 String chunk = chunks[i].trim();
                 if (i == 0) {
                     if (chunk.equals("System properties")) {
@@ -31,9 +42,13 @@ public class TestDataUtils {
                     }
                     testData = Optional.ofNullable(data.get(chunk)).orElseThrow(exceptionSupplier);
                 } else {
-                    TestData testDataObject = YamlParser.convert(testData);
-                    testData = testDataObject.getOptional(chunk);
-                    if (testData == null){
+                    if (testData instanceof TestData) {
+                        TestData testDataObject = YamlParser.convert(testData);
+                        testData = testDataObject.getOptional(chunk);
+                    } else {
+                        testData = null;
+                    }
+                    if (testData == null) {
                         throw exceptionSupplier.get();
                     }
                 }

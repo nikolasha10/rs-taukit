@@ -412,6 +412,9 @@ public final class TauLogger {
             case "html":
                 attachHtmlFile(fileName, filePath);
                 break;
+            case "sql":
+                attachSqlFile(fileName, filePath);
+                break;
             default:
                 attachFile(fileName, filePath);
         }
@@ -473,6 +476,17 @@ public final class TauLogger {
         return null;
     }
 
+    @Attachment(value = "{fileName}", type = "text/x-sql", fileExtension = ".sql")
+    public static byte[] attachSqlFile(String fileName, String filePath) {
+        File file = new File(filePath);
+        try {
+            return Files.readAllBytes(file.toPath());
+        } catch (IOException ioException) {
+            warnWOSS(ioException, "Не удалось приложить файл '%s' к отчету", filePath);
+        }
+        return null;
+    }
+
     @Attachment(value = "{fileName}", type = "text/html", fileExtension = ".html")
     public static byte[] attachHtmlFile(String fileName, byte[] fileContent) {
         return fileContent;
@@ -509,6 +523,16 @@ public final class TauLogger {
         return null;
     }
 
+    @Attachment(value = "{fileName}", type = "plain/text", fileExtension = ".txt")
+    public static byte[] attachTxt(String fileName, byte[] content) {
+        try {
+            return content;
+        } catch (Exception e) {
+            warnWOSS(e, "Не удалось приложить файл '%s' к отчету", fileName);
+        }
+        return null;
+    }
+
     @Attachment(value = "{fileName}")
     public static byte[] attachFile(String fileName, byte[] file) {
         return file;
@@ -518,7 +542,7 @@ public final class TauLogger {
         switch (object) {
             case DataTable dataTable -> attachDataTable(name, dataTable);
             case TestDataFile file -> attachFile(name, file.getFilePath());
-            case String text -> attachFile(name, text.getBytes());
+            case String text -> attachTxt(name, text.getBytes());
             case null, default ->
                     throw new TestDataException("Не удалось прикрепить объект '%s' к отчёту. Не распознан тип вложения.", name);
         }

@@ -114,6 +114,7 @@ public class ScenarioData {
     }
 
     public <T> T getOptional(String nameSpace, String fieldName) {
+        if (!nameSpaces.containsKey(nameSpace)) return null;
         return nameSpaces.get(nameSpace).getOptional(fieldName);
     }
 
@@ -138,5 +139,9 @@ public class ScenarioData {
         int index = lines.indexOf("- Сценарий: " + scenarioName);
         lines.add(index + 1, "  " + newLines);
         FileUtils.writeFile(testDataFilePath, String.join("\n", lines));
+    }
+
+    public void remove(String nameSpace, String fieldName) {
+        nameSpaces.get(nameSpace).remove(fieldName);
     }
 }
