@@ -162,6 +162,14 @@ public class ServiceManager extends StepManager {
             yellowBackgroundStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
             yellowBackgroundStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             yellowBackgroundStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            yellowBackgroundStyle.setBorderBottom(BorderStyle.THIN);
+            yellowBackgroundStyle.setBorderTop(BorderStyle.THIN);
+            yellowBackgroundStyle.setBorderLeft(BorderStyle.THIN);
+            yellowBackgroundStyle.setBorderRight(BorderStyle.THIN);
+            yellowBackgroundStyle.setBottomBorderColor(IndexedColors.ORANGE.getIndex());
+            yellowBackgroundStyle.setTopBorderColor(IndexedColors.ORANGE.getIndex());
+            yellowBackgroundStyle.setLeftBorderColor(IndexedColors.ORANGE.getIndex());
+            yellowBackgroundStyle.setRightBorderColor(IndexedColors.ORANGE.getIndex());
 
             CellStyle blueBackgroundStyle = workbook.createCellStyle();
             blueBackgroundStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
@@ -236,19 +244,16 @@ public class ServiceManager extends StepManager {
                                 case "passed":
                                     passedCount++;
                                     statusCell.setCellStyle(statusPassedStyle);
-//                                        statusCell.setCellValue("✔");
                                     statusCell.setCellValue(status);
                                     break;
                                 case "failed", "unknown", "broken":
                                     failedCount++;
                                     statusCell.setCellStyle(statusFailedStyle);
-//                                        statusCell.setCellValue("✖");
-                                    statusCell.setCellValue(status);
+                                    statusCell.setCellValue("failed");
                                     break;
                                 case "skipped":
                                     skippedCount++;
                                     statusCell.setCellStyle(statusSkippedStyle);
-//                                        statusCell.setCellValue("»");
                                     statusCell.setCellValue(status);
                                     break;
                                 default:
@@ -285,7 +290,7 @@ public class ServiceManager extends StepManager {
                 }
             }
             String statistic = String.format("""
-                            Всего тестов: %d.   Пройдено: %d.   Провалено: %d.   Пропущено: %d.   Процент выполнения: %.2f%%
+                            Всего тестов: %d.   Пройдено: %d.   Провалено: %d.   Пропущено: %d.   Процент выполнения: %.0f%%
                             .   Требуется анализ: %d""",
                     testCount, passedCount, failedCount, skippedCount, 100.0 * passedCount / testCount, analysisCount);
             statisticCell.setCellValue(statistic);

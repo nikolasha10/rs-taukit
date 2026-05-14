@@ -196,7 +196,11 @@ public class ScenarioManager {
                 String category = "";
                 String[] lines = trace.split("Категории: ");
                 if (lines.length > 1) {
-                    category = lines[1].split("\r\n")[0];
+                    String[] chunks = lines[1].split("\r\n");
+                    if (chunks.length == 1) {
+                        chunks = lines[1].split("\n");
+                    }
+                    category = chunks[0].trim();
                 }
                 List<Map<String, String>> links = YamlParser.convert(result.get("links"));
                 String tmsLink = links.stream()
