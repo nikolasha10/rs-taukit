@@ -125,6 +125,7 @@ public class ScenarioManager {
             String subSuiteName,
             String scenarioName,
             String status,
+            String lastStatus,
             String finished,
             String errorMessage,
             String errorCategory,
@@ -145,7 +146,7 @@ public class ScenarioManager {
         TestSubSuiteResults testSubSuiteResults = testSuiteResults.testSubSuiteResults().getOrDefault(subSuiteName, new TestSubSuiteResults(new HashMap<>()));
         TestResults currentResults = testSubSuiteResults.testResults().get(scenarioName);
         String currentAutotestId = Optional.ofNullable(autotestId).orElse(currentResults == null ? null : currentResults.autotestId());
-        TestResults testResults = new TestResults(status, finished, errorMessage, errorCategory, currentAutotestId, tmsLink);
+        TestResults testResults = new TestResults(lastStatus, status, finished, errorMessage, errorCategory, currentAutotestId, tmsLink);
         testSubSuiteResults.testResults().put(scenarioName, testResults);
         testSuiteResults.testSubSuiteResults().put(subSuiteName, testSubSuiteResults);
         testParentSuiteResults.testSuiteResults().put(suiteName, testSuiteResults);
@@ -169,23 +170,38 @@ public class ScenarioManager {
                 null,
                 null,
                 null,
+                null,
                 new ScenarioData(scenario.getPickleWrapper().getPickle()).getOptional("TestITId"),
                 null));
         List<File> resultFiles = FileUtils.getDirFileList("target/allure-results").stream()
                 .filter(file -> file.getName().endsWith("result.json"))
                 .sorted(Comparator.comparingLong(File::lastModified)).toList();
-        ObjectMapper mapper = new JsonMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        ObjectMapper mapper = JsonMapper.builder()
+                .defaultPropertyInclusion(JsonInclude.Value.construct(
+                        JsonInclude.Include.NON_NULL,
+                        JsonInclude.Include.NON_NULL
+                )).build();
+        Map<String, Map<String, ?>> historyMap = new HashMap<>();
+        File historyFile = new File("target/allure-results/history/history.json");
+        try {
+            historyMap = YamlParser.convert(mapper.readValue(historyFile, historyMap.getClass()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Map<String, Map<String, ?>> history = historyMap;
         resultFiles.forEach(file -> {
             Map<String, ?> result = new HashMap<>();
             try {
                 result = YamlParser.convert(mapper.readValue(file, result.getClass()));
                 List<Map<String, String>> labels = YamlParser.convert(result.get("labels"));
+                String historyId = YamlParser.convert(result.get("historyId"));
                 String parentSuiteName = labels.get(0).get("value");
                 String suiteName = labels.size() > 1 ? labels.get(1).get("value") : "-";
                 String subSuiteName = labels.size() > 2 ? labels.get(2).get("value") : "-";
                 String scenarioName = result.get("name").toString();
                 String status = YamlParser.convert(result.get("status"));
+                List<Map<String, ?>> lastHistory = history.get(historyId) == null ? null : YamlParser.convert(history.get(historyId).get("items"));
+                String lastStatus = lastHistory == null ? null : lastHistory.getFirst().get("status").toString();
                 String finished = String.valueOf(file.lastModified());
                 Map<String, String> statusDetails = YamlParser.convert(result.get("statusDetails"));
                 String errorMessage = statusDetails.getOrDefault("message", "")
@@ -216,6 +232,7 @@ public class ScenarioManager {
                             subSuiteName,
                             scenarioName,
                             status,
+                            lastStatus,
                             finished,
                             errorMessage.isEmpty() ? null : errorMessage,
                             category.isEmpty() ? null : category,
