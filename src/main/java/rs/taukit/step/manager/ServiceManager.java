@@ -350,6 +350,7 @@ public class ServiceManager extends StepManager {
                                 sheet.addMergedRegion(new CellRangeAddress(rowNum - 1, rowNum, 4, 4));
                                 Cell statusCell2 = errorRow.createCell(5);
                                 sheet.addMergedRegion(new CellRangeAddress(rowNum - 1, rowNum, 5, 5));
+                                Cell noteCell = testRow.createCell(6);
                                 sheet.addMergedRegion(new CellRangeAddress(rowNum - 1, rowNum, 6, 6));
                                 String errorMessage = test.get("errorMessage").toString()
                                         .replaceAll("&quot;", "\"")
@@ -358,6 +359,7 @@ public class ServiceManager extends StepManager {
                                 reasonCell.setCellStyle(tanBackgroundStyle);
                                 String errorCategory = test.get("errorCategory") != null
                                         ? test.get("errorCategory").toString() : "Ожидается анализ";
+                                String note = test.get("note") != null ? test.get("note").toString() : "";
                                 Cell statusCell = testRow.createCell(5);
                                 statusCell.setCellStyle(resultCellStyle);
                                 if (errorCategory.contains("http")) {
@@ -365,7 +367,6 @@ public class ServiceManager extends StepManager {
                                     Hyperlink hyperlink = workbook.getCreationHelper().createHyperlink(HyperlinkType.URL);
                                     hyperlink.setAddress(errorCategory);
                                     String issueNumber = Arrays.stream(errorCategory.split("/")).toList().getLast();
-                                    Cell noteCell = testRow.createCell(6);
                                     noteCell.setCellStyle(cellStyle);
 
                                     noteCell.setHyperlink(hyperlink);
@@ -373,6 +374,8 @@ public class ServiceManager extends StepManager {
                                     noteCell.setCellStyle(hyperlinkStyle);
                                 } else {
                                     statusCell.setCellValue(errorCategory);
+                                    noteCell.setCellValue(note);
+                                    noteCell.setCellStyle(cellStyle);
                                     switch (statusCell.getStringCellValue()) {
                                         case "Ожидается анализ": {
                                             analysisCount++;

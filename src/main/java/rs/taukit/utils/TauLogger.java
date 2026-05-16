@@ -97,6 +97,7 @@ public final class TauLogger {
      */
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message) {
+        saveError(message);
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
         scenarioData().put("WARNING", "PASSED with ERRORS");
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
@@ -104,6 +105,7 @@ public final class TauLogger {
 
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message, Runnable runnable) {
+        saveError(message);
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
         scenarioData().put("WARNING", "PASSED with ERRORS");
         runnable.run();
@@ -124,6 +126,7 @@ public final class TauLogger {
 
     @Step("Некритическая ошибка: {message}")
     public static void warnWOSS(String message, Throwable e) {
+        saveError(message);
         logger.warn("ОШИБКА: {}", message.replaceAll("\n", "↵"), e);
         if (scenario() != null) {
             scenarioData().put("WARNING", "PASSED with ERRORS");
@@ -143,6 +146,7 @@ public final class TauLogger {
      */
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message, Throwable e) {
+        saveError(message);
         logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
         scenarioData().put("WARNING", "PASSED with ERRORS");
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
@@ -158,14 +162,25 @@ public final class TauLogger {
         if (category != null) {
             e.addSuppressed(new Throwable("Категории: " + String.join(", ", category)));
         }
+        e.addSuppressed(new Throwable("Шаг: " + scenarioData().get("STEP_PATH") + " " + scenarioData().get("CURRENT_STEP_NAME")));
         return e;
     }
 
+    private static void saveError(String message) {
+        LinkedHashMap<String, String> errorData = new LinkedHashMap<>();
+        errorData.put("Автотест", scenario().getFullName());
+        errorData.put("Шаг", scenarioData().getOptional("STEP_PATH") + " " + scenarioData().get("CURRENT_STEP_NAME"));
+        errorData.put("Ошибка", message);
+        errorData.put("Статус", "");
+        errorData.put("Примечание", "");
+        storage.pushErrorData(errorData);
+    }
     /**
      * Выводит сообщение о критической ошибке, и делает скриншот.
      */
     @Step("{message}")
     public static void fail(String message) {
+        saveError(message);
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         throw new AssertionError(message, addCategory(null));
     }
@@ -176,12 +191,14 @@ public final class TauLogger {
     @Step("{message}")
     public static void fail(String message, Throwable e) {
 //        attachPageSource();
+        saveError(message);
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         throw new AssertionError(message, addCategory(e));
     }
 
     @Step("{message}")
     public static void fail(Runnable runnable, String message) {
+        saveError(message);
         runnable.run();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
@@ -194,6 +211,7 @@ public final class TauLogger {
 
     @Step("{message}")
     public static void fail(Throwable throwable, Runnable runnable, String message) {
+        saveError(message);
         runnable.run();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {

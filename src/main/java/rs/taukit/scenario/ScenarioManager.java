@@ -129,6 +129,7 @@ public class ScenarioManager {
             String finished,
             String errorMessage,
             String errorCategory,
+            String note,
             String autotestId,
             String tmsLink) {
         parentSuiteName = parentSuiteName.replaceAll("\"", "&quot;");
@@ -146,7 +147,7 @@ public class ScenarioManager {
         TestSubSuiteResults testSubSuiteResults = testSuiteResults.testSubSuiteResults().getOrDefault(subSuiteName, new TestSubSuiteResults(new HashMap<>()));
         TestResults currentResults = testSubSuiteResults.testResults().get(scenarioName);
         String currentAutotestId = Optional.ofNullable(autotestId).orElse(currentResults == null ? null : currentResults.autotestId());
-        TestResults testResults = new TestResults(lastStatus, status, finished, errorMessage, errorCategory, currentAutotestId, tmsLink);
+        TestResults testResults = new TestResults(lastStatus, status, finished, errorMessage, errorCategory, note, currentAutotestId, tmsLink);
         testSubSuiteResults.testResults().put(scenarioName, testResults);
         testSuiteResults.testSubSuiteResults().put(subSuiteName, testSubSuiteResults);
         testParentSuiteResults.testSuiteResults().put(suiteName, testSuiteResults);
@@ -166,6 +167,7 @@ public class ScenarioManager {
                 scenario.getSuiteName(),
                 scenario.getSubSuiteName(),
                 scenario.getName(),
+                null,
                 null,
                 null,
                 null,
@@ -212,6 +214,7 @@ public class ScenarioManager {
                         .replaceAll("}", "&rbrace;");
                 String trace = statusDetails.getOrDefault("trace", "");
                 String category = "";
+                String note = statusDetails.getOrDefault("note", "");
                 String[] lines = trace.split("Категории: ");
                 if (lines.length > 1) {
                     String[] chunks = lines[1].split("\r\n");
@@ -238,6 +241,7 @@ public class ScenarioManager {
                             finished,
                             errorMessage.isEmpty() ? null : errorMessage,
                             category.isEmpty() ? null : category,
+                            note.isEmpty() ? null : note,
                             null,
                             tmsLink
                     );

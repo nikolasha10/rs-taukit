@@ -17,6 +17,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static rs.taukit.utils.BasicUtils.scenario;
+import static rs.taukit.utils.BasicUtils.storage;
+
 @SuppressWarnings("unchecked")
 @Getter
 public class AllureReport {
@@ -52,6 +55,7 @@ public class AllureReport {
     }
 
     public static synchronized void editReports(CucumberScenario scenario, String status, long testEndTime) {
+        storage.saveErrorData(new File("target/temp/errors.yml"));
         String functionality = scenario.getFunctionality();
         String scenarioName = scenario.getName();
         List<String> tagList = scenario.getTagList();
@@ -130,7 +134,7 @@ public class AllureReport {
                 categoryMap.put("traceRegex", ".*Категории.*" + category + ".*");
                 categoriesMap.add(categoryMap);
             });
-            Path categoriesPath = Path.of(Config.getProperty("allure-results.path"),"categories.json");
+            Path categoriesPath = Path.of(Config.getProperty("allure-results.path"), "categories.json");
             if (!categoriesMap.isEmpty()) {
                 FileUtils.writeFile(categoriesPath, JsonParser.write(categoriesMap));
             }
@@ -160,10 +164,18 @@ public class AllureReport {
         steps.forEach(s -> {
             resultStatus.set(checkBrokenSteps(s) * resultStatus.get());
             s.replace("parameters", new ArrayList<>());
-            if (s.get("name").toString().contains("Некритическая ошибка:")) {
+            String stepName = s.get("name").toString();
+            if (stepName.contains("Некритическая ошибка:")) {
                 s.replace("status", "failed");
-                errorList.add(s.get("name").toString()
-                        .replace("Некритическая ошибка:", ""));
+                String errorMessage = stepName.replace("Некритическая ошибка:", "");
+                errorList.add(errorMessage);
+                Map<String, String> statusDetails = Map.of(
+                        "known", "false",
+                        "muted", "false",
+                        "flaky", "false",
+                        "message", errorMessage,
+                        "trace", ""
+                );
                 resultStatus.set(0);
             }
             if (!s.containsKey("status")) {
@@ -176,14 +188,30 @@ public class AllureReport {
                 resultStatus.set(2);
             }
             Map<String, String> details = (Map<String, String>) s.get("statusDetails");
+            String errorMessage = "";
             if (details != null) {
+                errorMessage = details.get("message");
                 String trace = details.get("trace");
                 Matcher matcher = Pattern.compile("Категории: (.+?)(\\r)?\\n").matcher(trace);
                 if (matcher.find()) {
                     categories.addAll(Arrays.asList(matcher.group(1).trim().split(", ")));
                 }
+                matcher = Pattern.compile("Шаг: (.+?)(\\r)?\\n").matcher(trace);
+                if (matcher.find()) {
+                    stepName = matcher.group(1).trim();
+                }
+            }
+            details = (Map<String, String>) json.get("statusDetails");
+            Map<String, String> errorData = YamlParser.convert(storage.getErrorData(scenario().getFullName(), stepName, errorMessage));
+            if (errorData != null && !errorData.get("Статус").isEmpty() && details != null) {
+                details.put("status", errorData.get("Статус"));
+                details.put("note", errorData.get("Примечание"));
+                details.compute("trace", (k, trace) -> trace + " Категории: " + errorData.get("Статус") + "\n");
+                s.replace("statusDetails", details);
+                categories.add(errorData.get("Статус"));
             }
         });
+
         return resultStatus.get();
     }
 
