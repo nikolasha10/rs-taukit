@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static rs.taukit.utils.BasicUtils.element;
 import static rs.taukit.utils.BasicUtils.eval;
@@ -54,6 +56,7 @@ public class ServiceManager extends StepManager {
         String template = FileUtils.readFile("src/main/resources/templates/finalReportTemplate.html");
         FileUtils.writeFile("target/temp/finalReport.html", eval(template));
         TauLogger.attachFile("Отчёт", "target/temp/finalReport.html", "html");
+        TauLogger.attachYaml("Категории ошибок", FileUtils.readFile("target/temp/errors.yml").getBytes());
         createXLSXReport("target/temp/report.xlsx");
     }
 
@@ -348,6 +351,8 @@ public class ServiceManager extends StepManager {
                                 Cell resultCell2 = errorRow.createCell(4);
                                 resultCell2.setCellValue(resultCell.getStringCellValue());
                                 sheet.addMergedRegion(new CellRangeAddress(rowNum - 1, rowNum, 4, 4));
+                                Cell statusCell = testRow.createCell(5);
+                                statusCell.setCellStyle(resultCellStyle);
                                 Cell statusCell2 = errorRow.createCell(5);
                                 sheet.addMergedRegion(new CellRangeAddress(rowNum - 1, rowNum, 5, 5));
                                 Cell noteCell = testRow.createCell(6);
@@ -360,34 +365,14 @@ public class ServiceManager extends StepManager {
                                 String errorCategory = test.get("errorCategory") != null
                                         ? test.get("errorCategory").toString() : "Ожидается анализ";
                                 String note = test.get("note") != null ? test.get("note").toString() : "";
-                                Cell statusCell = testRow.createCell(5);
-                                statusCell.setCellStyle(resultCellStyle);
-                                if (errorCategory.contains("http")) {
-                                    statusCell.setCellValue("Зарегистрирован дефект");
+                                statusCell.setCellValue(errorCategory);
+                                noteCell.setCellValue(note);
+                                noteCell.setCellStyle(cellStyle);
+                                Matcher matcher = Pattern.compile(".*(http://.*)").matcher(note.toLowerCase());
+                                if (matcher.matches()) {
                                     Hyperlink hyperlink = workbook.getCreationHelper().createHyperlink(HyperlinkType.URL);
-                                    hyperlink.setAddress(errorCategory);
-                                    String issueNumber = Arrays.stream(errorCategory.split("/")).toList().getLast();
-                                    noteCell.setCellStyle(cellStyle);
-
+                                    hyperlink.setAddress(matcher.group(1));
                                     noteCell.setHyperlink(hyperlink);
-                                    noteCell.setCellValue("#" + issueNumber);
-                                    noteCell.setCellStyle(hyperlinkStyle);
-                                } else {
-                                    statusCell.setCellValue(errorCategory);
-                                    noteCell.setCellValue(note);
-                                    noteCell.setCellStyle(cellStyle);
-                                    switch (statusCell.getStringCellValue()) {
-                                        case "Ожидается анализ": {
-                                            analysisCount++;
-                                            break;
-                                        }
-                                        case "Ожидается подготовка ТУ": {
-//                                            statusCell.setCellStyle(blueBackgroundStyle);
-                                        }
-                                        case "Дефект": {
-//                                            statusCell.setCellStyle(redBackgroundStyle);
-                                        }
-                                    }
                                 }
                                 statusCell2.setCellStyle(statusCell.getCellStyle());
                             } else {
@@ -455,9 +440,15 @@ public class ServiceManager extends StepManager {
             statisticRow.createCell(1).setCellValue(skippedCount);
             statisticRow.createCell(2).setCellValue(skippedCountString);
             statisticRow.createCell(3).setCellValue(newSkippedCount);
-            statisticRow = statisticSheet.createRow(rowNum);
+            statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Ожидается анализ");
-            statisticRow.createCell(1).setCellValue(analysisCount);
+            statisticRow.createCell(1).setCellFormula("COUNTIF('Результаты автотестов'!F2:F" + sheet.getLastRowNum() + ",\"Ожидается анализ\")");
+            statisticRow = statisticSheet.createRow(rowNum++);
+            statisticRow.createCell(0).setCellValue("Ожидается подготовка ТУ");
+            statisticRow.createCell(1).setCellFormula("COUNTIF('Результаты автотестов'!F2:F" + sheet.getLastRowNum() + ",\"Ожидается подготовка ТУ\")");
+            statisticRow = statisticSheet.createRow(rowNum++);
+            statisticRow.createCell(0).setCellValue("Зарегистрирован дефект");
+            statisticRow.createCell(1).setCellFormula("COUNTIF('Результаты автотестов'!F2:F" + sheet.getLastRowNum() + ",\"Зарегистрирован дефект\")");
 
             statisticSheet.setDefaultColumnStyle(0, suiteNameStyle);
             statisticSheet.setDefaultColumnStyle(1, statisticCellStyle);
@@ -468,7 +459,7 @@ public class ServiceManager extends StepManager {
                 statisticHeaderRow.getCell(i).setCellStyle(statisticHeaderStyle);
             }
 
-            statisticSheet.setColumnWidth(0, 5000);
+            statisticSheet.setColumnWidth(0, 8000);
             statisticSheet.setColumnWidth(1, 2000);
             statisticSheet.setColumnWidth(2, 2000);
             statisticSheet.setColumnWidth(3, 2000);
