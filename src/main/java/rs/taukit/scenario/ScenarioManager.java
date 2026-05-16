@@ -183,10 +183,12 @@ public class ScenarioManager {
                 )).build();
         Map<String, Map<String, ?>> historyMap = new HashMap<>();
         File historyFile = new File("target/allure-results/history/history.json");
-        try {
-            historyMap = YamlParser.convert(mapper.readValue(historyFile, historyMap.getClass()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (historyFile.exists()) {
+            try {
+                historyMap = YamlParser.convert(mapper.readValue(historyFile, historyMap.getClass()));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         Map<String, Map<String, ?>> history = historyMap;
         resultFiles.forEach(file -> {

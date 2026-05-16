@@ -92,20 +92,6 @@ public final class TauLogger {
         }
     }
 
-
-//    public static void debug(DataTable dataTable) {
-//        System.out.println();
-//        System.out.println(TextUtils.correctDatatable(dataTable));
-//    }
-
-//    /**
-//     * Выводит информационное сообщение о действии в Базе Данных.
-//     */
-//    @Step("{message}")
-//    public static void infoDB(String message, Throwable e) {
-//        logger.info(message, e);
-//    }
-
     /**
      * Выводит сообщение об ошибке в действии, и делает скриншот.
      */
