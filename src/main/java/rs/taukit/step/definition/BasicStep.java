@@ -45,7 +45,6 @@ public class BasicStep extends CommonManager {
         super.waitForTimeout(timeValue, timeUnit);
     }
 
-
     @И("^дождаться отображения (элемента|поля|кнопки|ссылки|таблицы|списка|переключателя) \"(.+)\"$")
     public void waitForElement(String elementType, String elementName) {
         super.waitForElement(elementType, eval(elementName));
