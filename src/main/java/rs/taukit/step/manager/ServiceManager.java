@@ -383,7 +383,7 @@ public class ServiceManager extends StepManager {
                     }
                 }
             }
-            CellRangeAddress statusFilter = new CellRangeAddress(0, rowNum - 1, 4, 4);
+            CellRangeAddress statusFilter = new CellRangeAddress(0, rowNum - 1, 4, 5);
             sheet.setAutoFilter(statusFilter);
 
             DataValidationConstraint dataValidationConstraint = dataValidationHelper.createExplicitListConstraint(statusValues);
