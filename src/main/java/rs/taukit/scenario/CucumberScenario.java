@@ -134,7 +134,7 @@ public class CucumberScenario {
         if (driver().isBrowserOpen()) {
             try {
                 browser().close();
-            } catch (Exception e){
+            } catch (Exception e) {
                 TauLogger.error(e, "Не удалось закрыть браузер");
             }
         }
@@ -145,11 +145,21 @@ public class CucumberScenario {
                 && testStatus.equalsIgnoreCase("failed")) {
             String harPath = driver().getHarFilePath();
             try {
+//                Map<String, ?> har = YamlParser.parse(harPath);
+//                Map<String, ?> log = YamlParser.convert(har.get("log"));
+//                List<Map<String, ?>> entries = YamlParser.convert(log.get("entries"));
+//                List<Map<String, ?>> filteredEntries = entries.stream().filter(entry -> {
+//                   Map<String, ?> request = YamlParser.convert(entry.get("request"));
+//                   return !request.get("url").toString().contains("kaspersky");
+//                }).toList();
+//                log.put("entries", YamlParser.convert(filteredEntries));
+//                har.put("log", YamlParser.convert(log));
+//                FileUtils.writeFile(Path.of(harPath), JsonParser.write(har));
                 File harFile = new File(harPath);
                 TauLogger.attachFile(harFile.getParentFile().getName() + ".har", harPath);
                 FileUtils.getDirFileList(harFile.getParentFile().getAbsolutePath())
                         .stream()
-                        .filter(file -> file.getName().endsWith(".json"))
+                        .filter(file -> file.getName().endsWith(".json") || file.getName().endsWith(".txt"))
                         .forEach(file -> TauLogger.attachJson(file.getName(), FileUtils.readFile(file.getAbsolutePath())));
             } catch (Exception e) {
                 TauLogger.error("Не удалось прикрепить файл HAR", e);
