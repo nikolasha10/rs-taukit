@@ -252,6 +252,8 @@ public class ServiceManager extends StepManager {
             int skippedCount = 0;
             int newSkippedCount = 0;
             int analysisCount = 0;
+            int preparationCount = 0;
+            int defectCount = 0;
             Map<String, String> statusIcons = Map.of(
                     "passed", "✔",
                     "failed", "✖",
@@ -388,6 +390,11 @@ public class ServiceManager extends StepManager {
                                     noteCell.setHyperlink(hyperlink);
                                 }
                                 statusCell2.setCellStyle(statusCell.getCellStyle());
+                                switch (errorCategory) {
+                                    case "Ожидается анализ": analysisCount++; break;
+                                    case "Ожидается подготовка ТУ": preparationCount++; break;
+                                    case "Зарегистрирован дефект": defectCount++; break;
+                                }
                             } else {
                                 sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum, 0, 2));
                             }
@@ -466,15 +473,15 @@ public class ServiceManager extends StepManager {
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Ожидается анализ");
             statisticRow.createCell(1).setCellFormula("COUNTIF('Результаты автотестов'!F2:F" + sheet.getLastRowNum() + ",\"Ожидается анализ\")");
-            statistics.put("Ожидается анализ", String.valueOf((int) statisticRow.getCell(1).getNumericCellValue()));
+            statistics.put("Ожидается анализ", String.valueOf(analysisCount));
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Ожидается подготовка ТУ");
             statisticRow.createCell(1).setCellFormula("COUNTIF('Результаты автотестов'!F2:F" + sheet.getLastRowNum() + ",\"Ожидается подготовка ТУ\")");
-            statistics.put("Ожидается подготовка ТУ", String.valueOf((int) statisticRow.getCell(1).getNumericCellValue()));
+            statistics.put("Ожидается подготовка ТУ", String.valueOf(preparationCount));
             statisticRow = statisticSheet.createRow(rowNum);
             statisticRow.createCell(0).setCellValue("Зарегистрирован дефект");
             statisticRow.createCell(1).setCellFormula("COUNTIF('Результаты автотестов'!F2:F" + sheet.getLastRowNum() + ",\"Зарегистрирован дефект\")");
-            statistics.put("Зарегистрирован дефект", String.valueOf((int) statisticRow.getCell(1).getNumericCellValue()));
+            statistics.put("Зарегистрирован дефект", String.valueOf(defectCount));
 
             statisticSheet.setDefaultColumnStyle(0, suiteNameStyle);
             statisticSheet.setDefaultColumnStyle(1, statisticCellStyle);
