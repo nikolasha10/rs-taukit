@@ -54,15 +54,17 @@ public class Config {
         File savedErrorsDataFile = new File(Config.eval("${testDataPath}/errors.yml"));
         File newErrorsDataFile = new File(Config.eval("target/temp/errors.yml"));
         FileUtils.createDirectories(newErrorsDataFile.getParent());
-        try {
-            Files.copy(savedErrorsDataFile.toPath(), newErrorsDataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            String message = String.format("Не удалось скопировать файл с результатами анализа ошибок (%s)",
-                    savedErrorsDataFile.getPath());
-            throw new RuntimeException(message, e);
+        if (savedErrorsDataFile.exists() && savedErrorsDataFile.length() > 0) {
+            try {
+                Files.copy(savedErrorsDataFile.toPath(), newErrorsDataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                String message = String.format("Не удалось скопировать файл с результатами анализа ошибок (%s)",
+                        savedErrorsDataFile.getPath());
+                throw new RuntimeException(message, e);
+            }
+            List<Map<String, ?>> errorsData = YamlParser.parse(newErrorsDataFile.getPath());
+            errorsData.forEach(data -> storage.pushErrorData(data));
         }
-        List<Map<String, ?>> errorsData = YamlParser.parse(newErrorsDataFile.getPath());
-        errorsData.forEach(data -> storage.pushErrorData(data));
     }
 
     private static void setConfig(Properties properties, String filePath, boolean required) {

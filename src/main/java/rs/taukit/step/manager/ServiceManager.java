@@ -17,7 +17,9 @@ import rs.taukit.utils.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -28,6 +30,8 @@ import static rs.taukit.utils.BasicUtils.element;
 import static rs.taukit.utils.BasicUtils.eval;
 
 public class ServiceManager extends StepManager {
+    private final Map<String, String> statistics = new HashMap<>();
+
     public void skipActionsIfTrue(DataTable dataTable) {
         run(() -> {
             Predicate<Map<String, String>> predicate = condition -> new TestCondition(condition).checkResult().isConditionMet();
@@ -43,8 +47,8 @@ public class ServiceManager extends StepManager {
         scenarioStorage.saveStepAction(runnable);
     }
 
-    public void createReport() {
-        scenarioData.put("scenarioData", ScenarioManager.getInstance().generateFinalReport());
+    public void createReport(String tagName) {
+        scenarioData.put("scenarioData", ScenarioManager.getInstance().generateFinalReport(tagName));
         scenarioData.put("jenkinsPipelineUrl", Config.getProperty("jenkins.pipeline.url"));
         scenarioData.put("jenkinsAuth", Config.getProperty("jenkins.auth"));
         List<Map<String, ?>> standList = YamlParser.parse(Config.eval("${baseResourcesDir}/configs/stands.yaml"));
@@ -53,11 +57,19 @@ public class ServiceManager extends StepManager {
         scenarioData.put("currentStand", Config.getSTAND().getName());
         scenarioData.put("branches", Config.getProperty("branches"));
         scenarioData.put("defaultBranch", Config.getProperty("defaultBranch"));
+        String tagNameClean = tagName.substring(1);
         String template = FileUtils.readFile("src/main/resources/templates/finalReportTemplate.html");
-        FileUtils.writeFile("target/temp/finalReport.html", eval(template));
-        TauLogger.attachFile("Отчёт", "target/temp/finalReport.html", "html");
-        TauLogger.attachYaml("Категории ошибок", FileUtils.readFile("target/temp/errors.yml").getBytes());
-        createXLSXReport("target/temp/report.xlsx");
+        FileUtils.writeFile(String.format("target/temp/finalReport_%s.html", tagNameClean), eval(template));
+        TauLogger.attachFile("Отчёт по " + tagName + ".html", "target/temp/finalReport.html", "html");
+        TauLogger.attachYaml("Категории ошибок. " + tagName, FileUtils.readFile("target/temp/errors.yml").getBytes());
+        String xlsxFilePath = String.format("target/temp/report_%s.xlsx", tagNameClean);
+        createXLSXReport(xlsxFilePath);
+        TauLogger.attachFile("Отчёт по " + tagName + ".xlsx", xlsxFilePath, "xlsx");
+        FileUtils.writeFile(Path.of(String.format("target/temp/statistic_%s.json", tagNameClean)), getStatistics());
+    }
+
+    private byte[] getStatistics() {
+        return JsonParser.write(statistics);
     }
 
     private void createXLSXReport(String xlsxFilePath) {
@@ -422,33 +434,46 @@ public class ServiceManager extends StepManager {
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Всего тестов");
             statisticRow.createCell(1).setCellValue(testCount);
+            statistics.put("Всего тестов", String.valueOf(testCount));
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Успешных");
             String passedCountString = String.format("%.0f%%", 100.0 * passedCount / testCount);
             statisticRow.createCell(1).setCellValue(passedCount);
             statisticRow.createCell(2).setCellValue(passedCountString);
             statisticRow.createCell(3).setCellValue(newPassedCount);
+            statistics.put("Успешных", String.valueOf(passedCount));
+            statistics.put("% успешных", passedCountString);
+            statistics.put("Новых успешных", String.valueOf(newPassedCount));
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Проваленных");
             String failedCountString = String.format("%.0f%%", 100.0 * failedCount / testCount);
             statisticRow.createCell(1).setCellValue(failedCount);
             statisticRow.createCell(2).setCellValue(failedCountString);
             statisticRow.createCell(3).setCellValue(newFailedCount);
+            statistics.put("Проваленных", String.valueOf(failedCount));
+            statistics.put("% проваленных", failedCountString);
+            statistics.put("Новых проваленных", String.valueOf(newFailedCount));
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Пропущенных");
             String skippedCountString = String.format("%.0f%%", 100.0 * skippedCount / testCount);
             statisticRow.createCell(1).setCellValue(skippedCount);
             statisticRow.createCell(2).setCellValue(skippedCountString);
             statisticRow.createCell(3).setCellValue(newSkippedCount);
+            statistics.put("Пропущенных", String.valueOf(skippedCount));
+            statistics.put("% пропущенных", skippedCountString);
+            statistics.put("Новых пропущенных", String.valueOf(newSkippedCount));
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Ожидается анализ");
             statisticRow.createCell(1).setCellFormula("COUNTIF('Результаты автотестов'!F2:F" + sheet.getLastRowNum() + ",\"Ожидается анализ\")");
+            statistics.put("Ожидается анализ", String.valueOf((int) statisticRow.getCell(1).getNumericCellValue()));
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Ожидается подготовка ТУ");
             statisticRow.createCell(1).setCellFormula("COUNTIF('Результаты автотестов'!F2:F" + sheet.getLastRowNum() + ",\"Ожидается подготовка ТУ\")");
-            statisticRow = statisticSheet.createRow(rowNum++);
+            statistics.put("Ожидается подготовка ТУ", String.valueOf((int) statisticRow.getCell(1).getNumericCellValue()));
+            statisticRow = statisticSheet.createRow(rowNum);
             statisticRow.createCell(0).setCellValue("Зарегистрирован дефект");
             statisticRow.createCell(1).setCellFormula("COUNTIF('Результаты автотестов'!F2:F" + sheet.getLastRowNum() + ",\"Зарегистрирован дефект\")");
+            statistics.put("Зарегистрирован дефект", String.valueOf((int) statisticRow.getCell(1).getNumericCellValue()));
 
             statisticSheet.setDefaultColumnStyle(0, suiteNameStyle);
             statisticSheet.setDefaultColumnStyle(1, statisticCellStyle);
@@ -471,7 +496,6 @@ public class ServiceManager extends StepManager {
                 workbook.write(fos);
             }
             workbook.close();
-            TauLogger.attachFile("XLSX Отчёт", xlsxFilePath, "xlsx");
         } catch (Exception e) {
             throw new RuntimeException("Ошибка при создании XLSX-отчёта из JSON: " + e.getMessage(), e);
         }

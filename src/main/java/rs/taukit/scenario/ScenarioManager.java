@@ -21,6 +21,7 @@ import rs.taukit.utils.YamlParser;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static rs.taukit.utils.BasicUtils.storage;
@@ -154,12 +155,14 @@ public class ScenarioManager {
         parentSuiteResults.put(parentSuiteName, testParentSuiteResults);
     }
 
-    public String generateFinalReport() {
+    public String generateFinalReport(String tagName) {
         List<String> excludedScenarios = findScenariosByTags("@excluded").stream()
                 .map(scenario -> String.format("%s %s %s",
                         scenario.getParentSuiteName(), scenario.getSuiteName(), scenario.getName()))
                 .toList();
-        List<CucumberScenario> allScenarios = findAllScenariosExceptTag("@excluded");
+        List<CucumberScenario> allScenarios = tagName.equals("*")
+                ? findAllScenariosExceptTag("@excluded")
+                : findScenariosByTags(tagName);
         Map<String, TestParentSuiteResults> parentSuiteResults = new HashMap<>();
         allScenarios.forEach(scenario -> updateSuiteResults(
                 parentSuiteResults,
@@ -203,6 +206,12 @@ public class ScenarioManager {
                 String suiteName = labels.size() > 1 ? labels.get(1).get("value") : "-";
                 String subSuiteName = labels.size() > 2 ? labels.get(2).get("value") : "-";
                 String scenarioName = result.get("name").toString();
+                Predicate<CucumberScenario> predicate = scenario ->
+                        scenario.getParentSuiteName().equals(parentSuiteName) &&
+                                scenario.getSuiteName().equals(suiteName) &&
+                                scenario.getSubSuiteName().equals(subSuiteName) &&
+                                scenario.getName().equals(scenarioName);
+                if (allScenarios.stream().noneMatch(predicate)) return;
                 String status = YamlParser.convert(result.get("status"));
                 List<Map<String, ?>> lastHistory = history.get(historyId) == null ? null : YamlParser.convert(history.get(historyId).get("items"));
                 String lastStatus = lastHistory == null ? null : lastHistory.getFirst().get("status").toString();
