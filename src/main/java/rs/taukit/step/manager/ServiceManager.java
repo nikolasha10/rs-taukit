@@ -259,7 +259,7 @@ public class ServiceManager extends StepManager {
                     "failed", "✖",
                     "unknown", "✖",
                     "broken", "✖",
-                    "skipped", "≫");
+                        "skipped", "≫");
             Map<String, Font> statusStyles = Map.of(
                     "passed", greenFont,
                     "failed", redFont,
@@ -445,7 +445,7 @@ public class ServiceManager extends StepManager {
             statistics.put("Всего тестов", String.valueOf(testCount));
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Успешных");
-            String passedCountString = String.format("%.0f%%", 100.0 * passedCount / testCount);
+            String passedCountString = String.format("%.0f %%", 100.0 * passedCount / testCount);
             statisticRow.createCell(1).setCellValue(passedCount);
             statisticRow.createCell(2).setCellValue(passedCountString);
             statisticRow.createCell(3).setCellValue(newPassedCount);
@@ -454,7 +454,7 @@ public class ServiceManager extends StepManager {
             statistics.put("Новых успешных", String.valueOf(newPassedCount));
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Проваленных");
-            String failedCountString = String.format("%.0f%%", 100.0 * failedCount / testCount);
+            String failedCountString = String.format("%.0f %%", 100.0 * failedCount / testCount);
             statisticRow.createCell(1).setCellValue(failedCount);
             statisticRow.createCell(2).setCellValue(failedCountString);
             statisticRow.createCell(3).setCellValue(newFailedCount);
@@ -463,7 +463,7 @@ public class ServiceManager extends StepManager {
             statistics.put("Новых проваленных", String.valueOf(newFailedCount));
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Пропущенных");
-            String skippedCountString = String.format("%.0f%%", 100.0 * skippedCount / testCount);
+            String skippedCountString = String.format("%.0f %%", 100.0 * skippedCount / testCount);
             statisticRow.createCell(1).setCellValue(skippedCount);
             statisticRow.createCell(2).setCellValue(skippedCountString);
             statisticRow.createCell(3).setCellValue(newSkippedCount);
