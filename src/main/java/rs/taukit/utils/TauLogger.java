@@ -33,12 +33,12 @@ public final class TauLogger {
 
     @Step("{message}")
     public static void report(String message) {
-        logger.info(message);
+        logger.info(addIndentation(message));;
     }
 
     @Step("{message}")
     public static void report(String message, DataTable dataTable) {
-        logger.info(String.format("%s%n%s", message, dataTable));
+        logger.info(String.format("%s%n%s", addIndentation(message), dataTable));
     }
 
     public static void report(String format, Object... args) {
@@ -58,7 +58,16 @@ public final class TauLogger {
      * @param message сообщение выводимое в лог
      */
     public static void console(String message) {
-        logger.info(message);
+        logger.info(addIndentation(message));
+    }
+
+    private static String addIndentation(String message) {
+        if (scenario() != null && scenarioData() != null && scenarioData().getOptional("STEP_PATH") != null) {
+            List<String> stepPath = scenarioData().getOptional("STEP_PATH");
+            int stepPathSize = stepPath.size();
+            return String.valueOf(' ').repeat(stepPathSize * 2) + message;
+        }
+        return message;
     }
 
     public static void console(String format, Object... args) {
@@ -74,7 +83,7 @@ public final class TauLogger {
     }
 
     public static void console(Throwable throwable) {
-        logger.info("Ошибка", throwable);
+        logger.info(addIndentation("Ошибка"), throwable);
     }
 
     /**
@@ -92,33 +101,21 @@ public final class TauLogger {
         }
     }
 
-
-//    public static void debug(DataTable dataTable) {
-//        System.out.println();
-//        System.out.println(TextUtils.correctDatatable(dataTable));
-//    }
-
-//    /**
-//     * Выводит информационное сообщение о действии в Базе Данных.
-//     */
-//    @Step("{message}")
-//    public static void infoDB(String message, Throwable e) {
-//        logger.info(message, e);
-//    }
-
     /**
      * Выводит сообщение об ошибке в действии, и делает скриншот.
      */
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message) {
-        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
+        saveError(message);
+        logger.warn(addIndentation("ОШИБКА: " + message.replaceAll("\n", "↵")));
         scenarioData().put("WARNING", "PASSED with ERRORS");
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
     }
 
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message, Runnable runnable) {
-        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
+        saveError(message);
+        logger.warn(addIndentation("ОШИБКА: " + message.replaceAll("\n", "↵")));
         scenarioData().put("WARNING", "PASSED with ERRORS");
         runnable.run();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
@@ -138,7 +135,8 @@ public final class TauLogger {
 
     @Step("Некритическая ошибка: {message}")
     public static void warnWOSS(String message, Throwable e) {
-        logger.warn("ОШИБКА: {}", message.replaceAll("\n", "↵"), e);
+        saveError(message);
+        logger.warn(addIndentation("ОШИБКА: " + message.replaceAll("\n", "↵")), e);
         if (scenario() != null) {
             scenarioData().put("WARNING", "PASSED with ERRORS");
         }
@@ -157,7 +155,8 @@ public final class TauLogger {
      */
     @Step("Некритическая ошибка: {message}")
     public static void warn(String message, Throwable e) {
-        logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"), e);
+        saveError(message);
+        logger.warn(addIndentation("ОШИБКА: " + message.replaceAll("\n", "↵")), e);
         scenarioData().put("WARNING", "PASSED with ERRORS");
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
     }
@@ -172,14 +171,25 @@ public final class TauLogger {
         if (category != null) {
             e.addSuppressed(new Throwable("Категории: " + String.join(", ", category)));
         }
+        e.addSuppressed(new Throwable("Шаг: " + scenarioData().get("STEP_PATH") + " " + scenarioData().get("CURRENT_STEP_NAME")));
         return e;
     }
 
+    private static void saveError(String message) {
+        LinkedHashMap<String, String> errorData = new LinkedHashMap<>();
+        errorData.put("Автотест", scenario().getFullName());
+        errorData.put("Шаг", scenarioData().getOptional("STEP_PATH") + " " + scenarioData().get("CURRENT_STEP_NAME"));
+        errorData.put("Ошибка", message);
+        errorData.put("Статус", "");
+        errorData.put("Примечание", "");
+        storage.pushErrorData(errorData);
+    }
     /**
      * Выводит сообщение о критической ошибке, и делает скриншот.
      */
     @Step("{message}")
     public static void fail(String message) {
+        saveError(message);
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         throw new AssertionError(message, addCategory(null));
     }
@@ -190,16 +200,18 @@ public final class TauLogger {
     @Step("{message}")
     public static void fail(String message, Throwable e) {
 //        attachPageSource();
+        saveError(message);
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         throw new AssertionError(message, addCategory(e));
     }
 
     @Step("{message}")
     public static void fail(Runnable runnable, String message) {
+        saveError(message);
         runnable.run();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
-            logger.warn("ОШИБКА: " + message.replaceAll("\n", "↵"));
+            logger.warn(addIndentation("ОШИБКА: " + message.replaceAll("\n", "↵")));
             scenarioData().put("WARNING", "PASSED with ERRORS");
         } else {
             throw new AssertionError(message, addCategory(null));
@@ -208,10 +220,11 @@ public final class TauLogger {
 
     @Step("{message}")
     public static void fail(Throwable throwable, Runnable runnable, String message) {
+        saveError(message);
         runnable.run();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
-            logger.warn("ОШИБКА: {}", message.replaceAll("\n", "↵"), throwable);
+            logger.warn(addIndentation("ОШИБКА: " + message.replaceAll("\n", "↵")), throwable);
             scenarioData().put("WARNING", "PASSED with ERRORS");
         } else {
             throw new AssertionError(message, addCategory(throwable));

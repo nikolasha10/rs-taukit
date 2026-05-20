@@ -11,6 +11,8 @@ import rs.taukit.utils.YamlParser;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,6 +50,20 @@ public class Config {
         if (testDataIndexPath != null) {
             LinkedHashMap<String, ?> testDataMap = YamlParser.parse(testDataIndexPath);
             storage.put("ТД", new TestData("TestData", testDataMap));
+        }
+        File savedErrorsDataFile = new File(Config.eval("${testDataPath}/errors.yml"));
+        File newErrorsDataFile = new File(Config.eval("target/temp/errors.yml"));
+        FileUtils.createDirectories(newErrorsDataFile.getParent());
+        if (savedErrorsDataFile.exists() && savedErrorsDataFile.length() > 0) {
+            try {
+                Files.copy(savedErrorsDataFile.toPath(), newErrorsDataFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                String message = String.format("Не удалось скопировать файл с результатами анализа ошибок (%s)",
+                        savedErrorsDataFile.getPath());
+                throw new RuntimeException(message, e);
+            }
+            List<Map<String, ?>> errorsData = YamlParser.parse(newErrorsDataFile.getPath());
+            errorsData.forEach(data -> storage.pushErrorData(data));
         }
     }
 

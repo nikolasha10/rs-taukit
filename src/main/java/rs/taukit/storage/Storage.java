@@ -4,10 +4,15 @@ import lombok.Getter;
 import rs.taukit.records.Mutex;
 import rs.taukit.scenario.CucumberScenario;
 import rs.taukit.testdata.DataStorage;
+import rs.taukit.utils.FileUtils;
+import rs.taukit.utils.YamlParser;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
+import java.util.function.Predicate;
 
 import static rs.taukit.utils.BasicUtils.scenarioData;
 
@@ -16,6 +21,8 @@ public class Storage {
     private final DataStorage dataStorage = new DataStorage(new HashMap<>());
     @Getter
     private final Map<String, Mutex> semaphores = new HashMap<>();
+    @Getter
+    private final Stack<Map<String, ?>> errorStack = new Stack<>();
 
     public static Storage getInstance() {
         return StorageManagerHolder.INSTANCE;
@@ -69,6 +76,28 @@ public class Storage {
                 throw e;
             }
         }
+    }
+
+    public void pushErrorData(Map<String, ?> errorData) {
+        Map<String, ?> found = getErrorData(
+                errorData.get("Автотест").toString(),
+                errorData.get("Шаг").toString(),
+                errorData.get("Ошибка").toString());
+        if (found == null) {
+            errorStack.push(errorData);
+        }
+    }
+
+    public Map<String, ?> getErrorData(String scenarioName, String stepName, String errorMessage) {
+        Predicate<Map<String, ?>> predicate = item -> item.get("Автотест").equals(scenarioName)
+                && item.get("Шаг").equals(stepName)
+                && item.get("Ошибка").equals(errorMessage);
+        return errorStack.stream().filter(predicate).findFirst().orElse(null);
+    }
+
+    public void saveErrorData(File file) {
+        FileUtils.createDirectories(file.getParent());
+        FileUtils.writeFile(file.toPath(), YamlParser.write(errorStack, false));
     }
 
     private static class StorageManagerHolder {
