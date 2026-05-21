@@ -49,6 +49,8 @@ public class ServiceManager extends StepManager {
 
     public void createReport(String tagName) {
         scenarioData.put("scenarioData", ScenarioManager.getInstance().generateFinalReport(tagName));
+        statistics.put("testRunDuration", scenarioData.get("testRunDuration"));
+        statistics.put("durationDelta", scenarioData.get("durationDelta"));
         scenarioData.put("jenkinsPipelineUrl", Config.getProperty("jenkins.pipeline.url"));
         scenarioData.put("jenkinsAuth", Config.getProperty("jenkins.auth"));
         List<Map<String, ?>> standList = YamlParser.parse(Config.eval("${baseResourcesDir}/configs/stands.yaml"));

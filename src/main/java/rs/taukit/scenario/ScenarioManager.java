@@ -16,14 +16,17 @@ import rs.taukit.records.TestSubSuiteResults;
 import rs.taukit.records.TestSuiteResults;
 import rs.taukit.testdata.ScenarioData;
 import rs.taukit.utils.FileUtils;
+import rs.taukit.utils.TimeStringParser;
 import rs.taukit.utils.YamlParser;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static rs.taukit.utils.BasicUtils.scenarioData;
 import static rs.taukit.utils.BasicUtils.storage;
 
 public class ScenarioManager {
@@ -196,6 +199,10 @@ public class ScenarioManager {
             }
         }
         Map<String, Map<String, ?>> history = historyMap;
+        AtomicReference<Double> start = new AtomicReference<>(new Date().getTime() * 1.0);
+        AtomicReference<Double> stop = new AtomicReference<>(0.0);
+        AtomicReference<Long> previousStart = new AtomicReference<>(new Date().getTime());
+        AtomicReference<Long> previousStop = new AtomicReference<>(0L);
         resultFiles.forEach(file -> {
             Map<String, ?> result = new HashMap<>();
             try {
@@ -254,11 +261,28 @@ public class ScenarioManager {
                             null,
                             tmsLink
                     );
+                    double scenarioStart = Double.parseDouble(result.get("start").toString());
+                    double scenarioStop = Double.parseDouble(result.get("stop").toString());
+                    start.set(Math.min(start.get(), scenarioStart));
+                    stop.set(Math.max(stop.get(), scenarioStop));
+                    if (lastHistory != null && lastHistory.getFirst() != null) {
+                        Map<String, ?> time = YamlParser.convert(lastHistory.getFirst().get("time"));
+                        long scenarioPreviousStart = YamlParser.convert(time.get("start"));
+                        long scenarioPreviousStop = YamlParser.convert(time.get("stop"));
+                        previousStart.set(Math.min(previousStart.get(), scenarioPreviousStart));
+                        previousStop.set(Math.max(previousStop.get(), scenarioPreviousStop));
+                    }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         });
+        long duration = (long) (stop.get() - start.get());
+        long previousDuration = previousStop.get() - previousStart.get();
+        String durationString = TimeStringParser.formatInterval((long) (stop.get() - start.get()));
+        String durationDeltaString = TimeStringParser.formatInterval(Math.abs(duration - previousDuration));
+        scenarioData().put("testRunDuration", durationString);
+        scenarioData().put("durationDelta", (duration > previousDuration ? "+ " : "- ") + durationDeltaString);
         try {
             return mapper.writeValueAsString(parentSuiteResults);
         } catch (JsonProcessingException e) {
