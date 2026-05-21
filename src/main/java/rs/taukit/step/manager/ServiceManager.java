@@ -249,6 +249,7 @@ public class ServiceManager extends StepManager {
             List<Map.Entry<String, Object>> parentSuiteEntryList = jsonData.entrySet().stream()
                     .sorted(Map.Entry.comparingByKey()).toList();
             int testCount = 0;
+            int newTestCount = 0;
             int passedCount = 0;
             int newPassedCount = 0;
             int failedCount = 0;
@@ -258,6 +259,9 @@ public class ServiceManager extends StepManager {
             int analysisCount = 0;
             int preparationCount = 0;
             int defectCount = 0;
+            int previousPassedCount = 0;
+            int previousFailedCount = 0;
+            int previousSkippedCount = 0;
             Map<String, String> statusIcons = Map.of(
                     "passed", "✔",
                     "failed", "✖",
@@ -320,6 +324,15 @@ public class ServiceManager extends StepManager {
                             Map<String, Object> test = YamlParser.convert(testEntry.getValue());
                             String result = test.get("status") != null ? test.get("status").toString().toLowerCase() : "skipped";
                             String lastResult = test.get("lastStatus") != null ? test.get("lastStatus").toString().toLowerCase() : "skipped";
+                            if (test.get("lastStatus") == null) {
+                                newTestCount++;
+                            } else {
+                                switch (lastResult) {
+                                    case "passed": previousPassedCount++; break;
+                                    case "failed", "unknown", "broken": previousFailedCount++; break;
+                                    case "skipped": previousSkippedCount++; break;
+                                }
+                            }
                             Cell resultCell = testRow.createCell(4);
                             resultCell.setCellStyle(cellStyle);
                             RichTextString resultCellText;
@@ -447,6 +460,7 @@ public class ServiceManager extends StepManager {
             statisticRow.createCell(0).setCellValue("Всего тестов");
             statisticRow.createCell(1).setCellValue(testCount);
             statistics.put("Всего тестов", String.valueOf(testCount));
+            statistics.put("Новых тестов", String.valueOf(newTestCount));
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Успешных");
             String passedCountString = String.format("%.0f %%", 100.0 * passedCount / testCount);
@@ -456,6 +470,9 @@ public class ServiceManager extends StepManager {
             statistics.put("Успешных", String.valueOf(passedCount));
             statistics.put("% успешных", passedCountString);
             statistics.put("Новых успешных", String.valueOf(newPassedCount));
+            statistics.put("Прошлых успешных", String.valueOf(previousPassedCount));
+            statistics.put("Прошлых проваленных", String.valueOf(previousFailedCount));
+            statistics.put("Прошлых пропущенных", String.valueOf(previousSkippedCount));
             statisticRow = statisticSheet.createRow(rowNum++);
             statisticRow.createCell(0).setCellValue("Проваленных");
             String failedCountString = String.format("%.0f %%", 100.0 * failedCount / testCount);
