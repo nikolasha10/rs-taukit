@@ -62,7 +62,9 @@ public class ServiceManager extends StepManager {
         String htmlReportPath = String.format("target/temp/finalReport_%s.html", tagNameClean);
         FileUtils.writeFile(htmlReportPath, eval(template));
         TauLogger.attachFile("Отчёт по " + tagName + ".html", htmlReportPath, "html");
-        TauLogger.attachYaml("Категории ошибок. " + tagName, FileUtils.readFile("target/temp/errors.yml").getBytes());
+        if (new File("target/temp/errors.yml").exists()) {
+            TauLogger.attachYaml("Категории ошибок. " + tagName, FileUtils.readFile("target/temp/errors.yml").getBytes());
+        }
         String xlsxFilePath = String.format("target/temp/report_%s.xlsx", tagNameClean);
         createXLSXReport(xlsxFilePath);
         TauLogger.attachFile("Отчёт по " + tagName + ".xlsx", xlsxFilePath, "xlsx");
