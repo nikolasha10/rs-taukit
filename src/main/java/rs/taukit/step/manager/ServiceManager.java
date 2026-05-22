@@ -400,7 +400,7 @@ public class ServiceManager extends StepManager {
                                 statusCell.setCellValue(errorCategory);
                                 noteCell.setCellValue(note);
                                 noteCell.setCellStyle(cellStyle);
-                                Matcher matcher = Pattern.compile(".*(http://.*)").matcher(note.toLowerCase());
+                                Matcher matcher = Pattern.compile(".*(https://.*)").matcher(note.toLowerCase());
                                 if (matcher.matches()) {
                                     Hyperlink hyperlink = workbook.getCreationHelper().createHyperlink(HyperlinkType.URL);
                                     hyperlink.setAddress(matcher.group(1));
