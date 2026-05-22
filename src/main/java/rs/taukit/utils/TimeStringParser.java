@@ -12,19 +12,19 @@ public class TimeStringParser {
         return value * multiplier;
     }
 
-    public static String formatInterval(long time){
+    public static String formatInterval(long time) {
         long seconds = time / 1000;
         long minutes = 0;
         long hours = 0;
         long days = 0;
-        if (seconds >= 60){
+        if (seconds >= 60) {
             minutes = seconds / 60;
             seconds = seconds - minutes * 60;
-            if (minutes >= 60){
+            if (minutes >= 60) {
                 hours = minutes / 60;
                 minutes = minutes - hours * 60;
             }
-            if (hours >= 24){
+            if (hours >= 24) {
                 days = hours / 24;
                 hours = hours - days * 24;
             }
@@ -32,7 +32,7 @@ public class TimeStringParser {
         String dayString = days > 0 ? days + " д " : "";
         String hourString = hours > 0 ? hours + " ч " : "";
         String minutesString = minutes > 0 ? minutes + " м " : "";
-        String secondsString = seconds > 0 ? seconds + " с" : "меньше секунды";
+        String secondsString = seconds > 0 ? seconds + " с" : (dayString + hourString + minutesString).isEmpty() ? "меньше секунды" : "";
         return String.format("%s%s%s%s", dayString, hourString, minutesString, secondsString);
     }
 }
