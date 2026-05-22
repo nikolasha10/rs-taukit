@@ -36,7 +36,7 @@ public class ServiceStep extends ServiceManager {
 
     @И("^сформировать отчёт$")
     public void createReport() {
-        super.createReport("*");
+        super.createReport("");
     }
 
     @И("^сформировать отчёт по тегу \"(.+)\"$")

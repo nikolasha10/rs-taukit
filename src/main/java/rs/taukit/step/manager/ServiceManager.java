@@ -59,17 +59,17 @@ public class ServiceManager extends StepManager {
         scenarioData.put("currentStand", Config.getSTAND().getName());
         scenarioData.put("branches", Config.getProperty("branches"));
         scenarioData.put("defaultBranch", Config.getProperty("defaultBranch"));
-        String tagNameClean = tagName.substring(1);
+        String tagNameClean = tagName.isEmpty() ? tagName : tagName.substring(1);
         String template = FileUtils.readFile("src/main/resources/templates/finalReportTemplate.html");
         String htmlReportPath = String.format("target/temp/finalReport_%s.html", tagNameClean);
         FileUtils.writeFile(htmlReportPath, eval(template));
-        TauLogger.attachFile("Отчёт по " + tagName + ".html", htmlReportPath, "html");
+        TauLogger.attachFile( "Отчёт " + tagNameClean + ".html", htmlReportPath, "html");
         if (new File("target/temp/errors.yml").exists()) {
-            TauLogger.attachYaml("Категории ошибок. " + tagName, FileUtils.readFile("target/temp/errors.yml").getBytes());
+            TauLogger.attachYaml("Категории ошибок. " + tagNameClean, FileUtils.readFile("target/temp/errors.yml").getBytes());
         }
         String xlsxFilePath = String.format("target/temp/report_%s.xlsx", tagNameClean);
         createXLSXReport(xlsxFilePath);
-        TauLogger.attachFile("Отчёт по " + tagName + ".xlsx", xlsxFilePath, "xlsx");
+        TauLogger.attachFile("Отчёт " + tagNameClean + ".xlsx", xlsxFilePath, "xlsx");
         FileUtils.writeFile(Path.of(String.format("target/temp/statistic_%s.json", tagNameClean)), getStatistics());
     }
 

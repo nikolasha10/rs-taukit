@@ -163,7 +163,7 @@ public class ScenarioManager {
                 .map(scenario -> String.format("%s %s %s",
                         scenario.getParentSuiteName(), scenario.getSuiteName(), scenario.getName()))
                 .toList();
-        List<CucumberScenario> allScenarios = tagName.equals("*")
+        List<CucumberScenario> allScenarios = tagName.isEmpty()
                 ? findAllScenariosExceptTag("@excluded")
                 : findScenariosByTags(tagName);
         Map<String, TestParentSuiteResults> parentSuiteResults = new HashMap<>();
