@@ -78,7 +78,7 @@ public class Storage {
         }
     }
 
-    public void pushErrorData(Map<String, ?> errorData) {
+    public synchronized void pushErrorData(Map<String, ?> errorData) {
         Map<String, ?> found = getErrorData(
                 errorData.get("Автотест").toString(),
                 errorData.get("Шаг").toString(),
