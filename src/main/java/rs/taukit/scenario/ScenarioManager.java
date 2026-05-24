@@ -220,7 +220,9 @@ public class ScenarioManager {
                                 scenario.getName().equals(scenarioName);
                 if (allScenarios.stream().noneMatch(predicate)) return;
                 String status = YamlParser.convert(result.get("status"));
-                List<Map<String, ?>> lastHistory = history.get(historyId) == null ? null : YamlParser.convert(history.get(historyId).get("items"));
+                List<Map<String, ?>> lastHistory = history.get(historyId) == null
+                        ? null
+                        : YamlParser.convert(history.get(historyId).get("items"));
                 String lastStatus = lastHistory == null ? null : lastHistory.getFirst().get("status").toString();
                 String finished = String.valueOf(file.lastModified());
                 Map<String, String> statusDetails = YamlParser.convert(result.get("statusDetails"));

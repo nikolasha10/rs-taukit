@@ -323,7 +323,9 @@ public class ServiceManager extends StepManager {
                             testCount++;
                             Map<String, Object> test = YamlParser.convert(testEntry.getValue());
                             String result = test.get("status") != null ? test.get("status").toString().toLowerCase() : "skipped";
-                            String lastResult = test.get("lastStatus") != null ? test.get("lastStatus").toString().toLowerCase() : "skipped";
+                            String lastResult = test.get("lastStatus") != null
+                                    ? test.get("lastStatus").toString().toLowerCase()
+                                    : "skipped";
                             if (test.get("lastStatus") == null) {
                                 newTestCount++;
                             } else {
@@ -333,22 +335,6 @@ public class ServiceManager extends StepManager {
                                     case "skipped": previousSkippedCount++; break;
                                 }
                             }
-                            Cell resultCell = testRow.createCell(4);
-                            resultCell.setCellStyle(cellStyle);
-                            RichTextString resultCellText;
-                            if (result.equals(lastResult)) {
-                                resultCellText = workbook.getCreationHelper().createRichTextString(statusIcons.get(result));
-                                resultCellText.applyFont(0, 1, statusStyles.get(result));
-                            } else {
-                                String text = statusIcons.get(lastResult) + " ➝ " + statusIcons.get(result);
-                                resultCellText = workbook.getCreationHelper().createRichTextString(text);
-                                resultCellText.applyFont(0, 1, statusStyles.get(lastResult));
-                                resultCellText.applyFont(2, 3, blackFont);
-                                resultCellText.applyFont(4, 5, statusStyles.get(result));
-                            }
-//                            resultCellText.applyFont(whiteFont);
-                            resultCell.setCellValue(resultCellText);
-                            resultCell.setCellStyle(resultCellStyle);
                             switch (result) {
                                 case "passed":
                                     passedCount++;
@@ -375,6 +361,22 @@ public class ServiceManager extends StepManager {
 //                                    resultCell.setCellStyle(statusSkippedStyle);
                                     break;
                             }
+                            Cell resultCell = testRow.createCell(4);
+                            resultCell.setCellStyle(cellStyle);
+                            RichTextString resultCellText;
+                            if (result.equals(lastResult)) {
+                                resultCellText = workbook.getCreationHelper().createRichTextString(statusIcons.get(result));
+                                resultCellText.applyFont(0, 1, statusStyles.get(result));
+                            } else {
+                                String text = statusIcons.get(lastResult) + " ➝ " + statusIcons.get(result);
+                                resultCellText = workbook.getCreationHelper().createRichTextString(text);
+                                resultCellText.applyFont(0, 1, statusStyles.get(lastResult));
+                                resultCellText.applyFont(2, 3, blackFont);
+                                resultCellText.applyFont(4, 5, statusStyles.get(result));
+                            }
+//                            resultCellText.applyFont(whiteFont);
+                            resultCell.setCellValue(resultCellText);
+                            resultCell.setCellStyle(resultCellStyle);
                             if (test.get("errorMessage") != null) {
                                 rowNum++;
                                 Row errorRow = sheet.createRow(rowNum);
