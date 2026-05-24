@@ -236,4 +236,8 @@ public class CucumberScenario {
     public void releaseAllMutexes() {
         mutexes.forEach(this::releaseMutex);
     }
+
+    public void setCheckpointPassed(String status) {
+        Config.getDependencies().setCheckpointPassed(getTagList(), status);
+    }
 }
