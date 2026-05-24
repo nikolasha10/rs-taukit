@@ -63,7 +63,7 @@ public class ServiceManager extends StepManager {
         String template = FileUtils.readFile("src/main/resources/templates/finalReportTemplate.html");
         String htmlReportPath = String.format("target/temp/finalReport_%s.html", tagNameClean);
         FileUtils.writeFile(htmlReportPath, eval(template));
-        TauLogger.attachFile( "Отчёт " + tagNameClean + ".html", htmlReportPath, "html");
+        TauLogger.attachFile("Отчёт " + tagNameClean + ".html", htmlReportPath, "html");
         if (new File("target/temp/errors.yml").exists()) {
             TauLogger.attachYaml("Категории ошибок. " + tagNameClean, FileUtils.readFile("target/temp/errors.yml").getBytes());
         }
@@ -267,7 +267,7 @@ public class ServiceManager extends StepManager {
                     "failed", "✖",
                     "unknown", "✖",
                     "broken", "✖",
-                        "skipped", "≫");
+                    "skipped", "≫");
             Map<String, Font> statusStyles = Map.of(
                     "passed", greenFont,
                     "failed", redFont,
@@ -330,9 +330,15 @@ public class ServiceManager extends StepManager {
                                 newTestCount++;
                             } else {
                                 switch (lastResult) {
-                                    case "passed": previousPassedCount++; break;
-                                    case "failed", "unknown", "broken": previousFailedCount++; break;
-                                    case "skipped": previousSkippedCount++; break;
+                                    case "passed":
+                                        previousPassedCount++;
+                                        break;
+                                    case "failed", "unknown", "broken":
+                                        previousFailedCount++;
+                                        break;
+                                    case "skipped":
+                                        previousSkippedCount++;
+                                        break;
                                 }
                             }
                             switch (result) {
@@ -410,9 +416,15 @@ public class ServiceManager extends StepManager {
                                 }
                                 statusCell2.setCellStyle(statusCell.getCellStyle());
                                 switch (errorCategory) {
-                                    case "Ожидается анализ": analysisCount++; break;
-                                    case "Ожидается подготовка ТУ": preparationCount++; break;
-                                    case "Зарегистрирован дефект": defectCount++; break;
+                                    case "Ожидается анализ":
+                                        analysisCount++;
+                                        break;
+                                    case "Ожидается подготовка ТУ":
+                                        preparationCount++;
+                                        break;
+                                    case "Зарегистрирован дефект":
+                                        defectCount++;
+                                        break;
                                 }
                             } else {
                                 sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum, 0, 2));
@@ -601,5 +613,9 @@ public class ServiceManager extends StepManager {
     protected void stopTraceRecord(String fileName) {
         getBrowser().stopTraceRecord(fileName);
         TauLogger.attachFile(fileName, FileUtils.getDownloadFilePath() + "/" + fileName + ".zip");
+    }
+
+    protected void setCheckpointPassed(String checkpoint) {
+        scenario.setCheckpointPassed(checkpoint);
     }
 }

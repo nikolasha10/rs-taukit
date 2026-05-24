@@ -89,4 +89,9 @@ public class ServiceStep extends ServiceManager {
         super.stopTraceRecord(eval(traceName));
     }
 
+    @И("^служебный шаг: контрольная точка \"([^\"]+)\" пройдена$")
+    public void setCheckpointPassed(String checkpoint) {
+        super.setCheckpointPassed(eval(checkpoint));
+    }
+
 }
