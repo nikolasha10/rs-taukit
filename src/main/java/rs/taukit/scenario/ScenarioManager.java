@@ -87,6 +87,7 @@ public class ScenarioManager {
                 .filter(scenarioEntity -> Arrays.stream(tagList).anyMatch(tag -> hasTag(scenarioEntity, tag)))
                 .filter(scenarioEntity -> Arrays.stream(tagList).noneMatch(tag -> hasTag(scenarioEntity, "@disabled")))
                 .map(CucumberScenario::new)
+                .sorted(Comparator.comparing(CucumberScenario::getWeight))
                 .collect(Collectors.toList());
     }
 

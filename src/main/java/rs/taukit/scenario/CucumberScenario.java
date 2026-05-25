@@ -240,4 +240,11 @@ public class CucumberScenario {
     public void setCheckpointPassed(String status) {
         Config.getDependencies().setCheckpointPassed(getTagList(), status);
     }
+
+    public String getWeight() {
+        List<String> order = Config.getTestOrder();
+        String found = order.stream().filter(tag -> getTagList().contains(tag)).findFirst().orElse(null);
+        int weight = found == null ? order.size() : order.indexOf(found);
+        return String.format("%04d %s", weight, getFullName());
+    }
 }
