@@ -33,7 +33,7 @@ public class DBManager extends StepManager {
     @Step("в базе данных '{dbName}' выполнить sql-скрипт из файла '{sqlFileName}'")
     public void executeScriptFromFile(String dbName, String sqlFileName) {
         String sqlScript = eval(FileUtils.readFile(Config.getProperty("sql.files.dir") + sqlFileName));
-        TauLogger.attach("sql-скрипт", sqlScript);
+        TauLogger.attachTxt("sql-скрипт", sqlScript.getBytes());
         AtomicInteger count = new AtomicInteger(0);
         run(() -> count.set(getDbDriver(dbName).executeFile(sqlFileName, sqlScript)));
         String rowsUpdated = count.get() > 0 ? " Обновлено строк: " + count.get() : "";

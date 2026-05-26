@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static rs.taukit.utils.BasicUtils.driver;
 import static rs.taukit.utils.BasicUtils.scenarioStorage;
@@ -36,6 +37,7 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
     private final String pageControlUrl;
     private final PwBlock container;
     private final List<String> expectedElements;
+    private final List<String> preLoaders;
     private final Page.ScreenshotOptions screenshotOptions;
     private final Deque<IContainer> currentContext = new LinkedList<>();
     private final Page.WaitForConditionOptions options;
@@ -71,7 +73,9 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
         this.container = ElementBuilder.buildElement(pageName, PwBlock.class, bodyModel).castTo(PwBlock.class);
         this.currentContext.add(this.container);
         List<String> expectedElements = YamlParser.convert(pageConfig.get("Обязательные элементы"));
+        List<String> preLoaders = YamlParser.convert(pageConfig.get("Прелоадеры"));
         this.expectedElements = Optional.ofNullable(expectedElements).orElse(new ArrayList<>());
+        this.preLoaders = Optional.ofNullable(preLoaders).orElse(new ArrayList<>());
         this.options = new Page.WaitForConditionOptions().setTimeout(pageTimeout);
         this.screenshotOptions = new Page.ScreenshotOptions()
                 .setPath(Paths.get(pageName + ".png"))
@@ -100,6 +104,19 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
         }
     }
 
+    private boolean areAllPreLoadersClosed() {
+        if (preLoaders.isEmpty()) {
+            return true;
+        }
+        Predicate<String> isPreLoaderVisible = preLoaderName -> container.getElementByName(preLoaderName).isVisible();
+        try {
+            driver().waitForCondition(() -> this.preLoaders.stream().anyMatch(isPreLoaderVisible), 1000);
+        } catch (Exception ignored) {
+            //
+        }
+        return this.preLoaders.stream().noneMatch(isPreLoaderVisible);
+    }
+
     private List<String> getAllNotFoundElements() {
         return expectedElements.stream()
                 .filter(elementName -> container.getElementByName(elementName) != null && !container.getElementByName(elementName).isVisible())
@@ -120,7 +137,7 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
     }
 
     private BooleanSupplier getPageLoadCondition() {
-        return () -> isUrlCorrect() && hasPageAllExpectedElements();
+        return () -> isUrlCorrect() && hasPageAllExpectedElements() && areAllPreLoadersClosed();
     }
 
     public void waitForLoadAndContinue(double pageTimeout) {

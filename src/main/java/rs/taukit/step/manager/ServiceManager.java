@@ -59,17 +59,17 @@ public class ServiceManager extends StepManager {
         scenarioData.put("currentStand", Config.getSTAND().getName());
         scenarioData.put("branches", Config.getProperty("branches"));
         scenarioData.put("defaultBranch", Config.getProperty("defaultBranch"));
-        String tagNameClean = tagName.substring(1);
+        String tagNameClean = tagName.isEmpty() ? tagName : tagName.substring(1);
         String template = FileUtils.readFile("src/main/resources/templates/finalReportTemplate.html");
         String htmlReportPath = String.format("target/temp/finalReport_%s.html", tagNameClean);
         FileUtils.writeFile(htmlReportPath, eval(template));
-        TauLogger.attachFile("Отчёт по " + tagName + ".html", htmlReportPath, "html");
+        TauLogger.attachFile("Отчёт " + tagNameClean + ".html", htmlReportPath, "html");
         if (new File("target/temp/errors.yml").exists()) {
-            TauLogger.attachYaml("Категории ошибок. " + tagName, FileUtils.readFile("target/temp/errors.yml").getBytes());
+            TauLogger.attachYaml("Категории ошибок. " + tagNameClean, FileUtils.readFile("target/temp/errors.yml").getBytes());
         }
         String xlsxFilePath = String.format("target/temp/report_%s.xlsx", tagNameClean);
         createXLSXReport(xlsxFilePath);
-        TauLogger.attachFile("Отчёт по " + tagName + ".xlsx", xlsxFilePath, "xlsx");
+        TauLogger.attachFile("Отчёт " + tagNameClean + ".xlsx", xlsxFilePath, "xlsx");
         FileUtils.writeFile(Path.of(String.format("target/temp/statistic_%s.json", tagNameClean)), getStatistics());
     }
 
@@ -267,7 +267,7 @@ public class ServiceManager extends StepManager {
                     "failed", "✖",
                     "unknown", "✖",
                     "broken", "✖",
-                        "skipped", "≫");
+                    "skipped", "≫");
             Map<String, Font> statusStyles = Map.of(
                     "passed", greenFont,
                     "failed", redFont,
@@ -323,32 +323,24 @@ public class ServiceManager extends StepManager {
                             testCount++;
                             Map<String, Object> test = YamlParser.convert(testEntry.getValue());
                             String result = test.get("status") != null ? test.get("status").toString().toLowerCase() : "skipped";
-                            String lastResult = test.get("lastStatus") != null ? test.get("lastStatus").toString().toLowerCase() : "skipped";
+                            String lastResult = test.get("lastStatus") != null
+                                    ? test.get("lastStatus").toString().toLowerCase()
+                                    : "skipped";
                             if (test.get("lastStatus") == null) {
                                 newTestCount++;
                             } else {
                                 switch (lastResult) {
-                                    case "passed": previousPassedCount++; break;
-                                    case "failed", "unknown", "broken": previousFailedCount++; break;
-                                    case "skipped": previousSkippedCount++; break;
+                                    case "passed":
+                                        previousPassedCount++;
+                                        break;
+                                    case "failed", "unknown", "broken":
+                                        previousFailedCount++;
+                                        break;
+                                    case "skipped":
+                                        previousSkippedCount++;
+                                        break;
                                 }
                             }
-                            Cell resultCell = testRow.createCell(4);
-                            resultCell.setCellStyle(cellStyle);
-                            RichTextString resultCellText;
-                            if (result.equals(lastResult)) {
-                                resultCellText = workbook.getCreationHelper().createRichTextString(statusIcons.get(result));
-                                resultCellText.applyFont(0, 1, statusStyles.get(result));
-                            } else {
-                                String text = statusIcons.get(lastResult) + " ➝ " + statusIcons.get(result);
-                                resultCellText = workbook.getCreationHelper().createRichTextString(text);
-                                resultCellText.applyFont(0, 1, statusStyles.get(lastResult));
-                                resultCellText.applyFont(2, 3, blackFont);
-                                resultCellText.applyFont(4, 5, statusStyles.get(result));
-                            }
-//                            resultCellText.applyFont(whiteFont);
-                            resultCell.setCellValue(resultCellText);
-                            resultCell.setCellStyle(resultCellStyle);
                             switch (result) {
                                 case "passed":
                                     passedCount++;
@@ -375,6 +367,22 @@ public class ServiceManager extends StepManager {
 //                                    resultCell.setCellStyle(statusSkippedStyle);
                                     break;
                             }
+                            Cell resultCell = testRow.createCell(4);
+                            resultCell.setCellStyle(cellStyle);
+                            RichTextString resultCellText;
+                            if (result.equals(lastResult)) {
+                                resultCellText = workbook.getCreationHelper().createRichTextString(statusIcons.get(result));
+                                resultCellText.applyFont(0, 1, statusStyles.get(result));
+                            } else {
+                                String text = statusIcons.get(lastResult) + " ➝ " + statusIcons.get(result);
+                                resultCellText = workbook.getCreationHelper().createRichTextString(text);
+                                resultCellText.applyFont(0, 1, statusStyles.get(lastResult));
+                                resultCellText.applyFont(2, 3, blackFont);
+                                resultCellText.applyFont(4, 5, statusStyles.get(result));
+                            }
+//                            resultCellText.applyFont(whiteFont);
+                            resultCell.setCellValue(resultCellText);
+                            resultCell.setCellStyle(resultCellStyle);
                             if (test.get("errorMessage") != null) {
                                 rowNum++;
                                 Row errorRow = sheet.createRow(rowNum);
@@ -408,9 +416,15 @@ public class ServiceManager extends StepManager {
                                 }
                                 statusCell2.setCellStyle(statusCell.getCellStyle());
                                 switch (errorCategory) {
-                                    case "Ожидается анализ": analysisCount++; break;
-                                    case "Ожидается подготовка ТУ": preparationCount++; break;
-                                    case "Зарегистрирован дефект": defectCount++; break;
+                                    case "Ожидается анализ":
+                                        analysisCount++;
+                                        break;
+                                    case "Ожидается подготовка ТУ":
+                                        preparationCount++;
+                                        break;
+                                    case "Зарегистрирован дефект":
+                                        defectCount++;
+                                        break;
                                 }
                             } else {
                                 sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum, 0, 2));
@@ -599,5 +613,9 @@ public class ServiceManager extends StepManager {
     protected void stopTraceRecord(String fileName) {
         getBrowser().stopTraceRecord(fileName);
         TauLogger.attachFile(fileName, FileUtils.getDownloadFilePath() + "/" + fileName + ".zip");
+    }
+
+    protected void setCheckpointPassed(String checkpoint) {
+        scenario.setCheckpointPassed(checkpoint);
     }
 }

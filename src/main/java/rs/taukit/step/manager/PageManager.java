@@ -17,7 +17,7 @@ public class PageManager extends StepManager {
                     TauLogger.report("Отображается страница '%s'", pageName);
                     TauLogger.savePageSource(getBrowser().getPage(pageName));
                 },
-                "Не удалось дождаться загрузки страницы '%s'", pageName);
+                "Не удалось Дождаться окончания загрузки данных '%s'", pageName);
     }
 
     @Step("дождаться отображения всплывающего окна '{pageName}'")

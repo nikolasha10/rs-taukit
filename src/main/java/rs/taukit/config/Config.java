@@ -35,6 +35,8 @@ public class Config {
     private static Map<String, String> fragmentMapping;
     @Getter
     private static Dependencies dependencies;
+    @Getter
+    private static List<String> testOrder;
 
     public static void init(String configDirPath) {
         setConfig(CONFIG_PROPERTIES, configDirPath + "/taukit.properties", true);
@@ -44,6 +46,8 @@ public class Config {
         pageMapping = buildPageMapping(getProperty("pagesDirPath"));
         fragmentMapping = buildPageMapping(getProperty("pageFragmentsDirPath"));
         dependencies = new Dependencies(configDirPath + "/dependencies.yaml");
+        testOrder = new File(configDirPath + "/testOrder.yaml").exists()
+                ? YamlParser.parse(configDirPath + "/testOrder.yaml") : new ArrayList<>();
         LinkedHashMap<String, ?> standDataMap = new LinkedHashMap<>(STAND.getStandData());
         storage.put("Тестовый стенд", new TestData("StandData", standDataMap));
         String testDataIndexPath = getProperty("testDataIndexPath");

@@ -87,6 +87,7 @@ public class ScenarioManager {
                 .filter(scenarioEntity -> Arrays.stream(tagList).anyMatch(tag -> hasTag(scenarioEntity, tag)))
                 .filter(scenarioEntity -> Arrays.stream(tagList).noneMatch(tag -> hasTag(scenarioEntity, "@disabled")))
                 .map(CucumberScenario::new)
+                .sorted(Comparator.comparing(CucumberScenario::getWeight))
                 .collect(Collectors.toList());
     }
 
@@ -163,7 +164,7 @@ public class ScenarioManager {
                 .map(scenario -> String.format("%s %s %s",
                         scenario.getParentSuiteName(), scenario.getSuiteName(), scenario.getName()))
                 .toList();
-        List<CucumberScenario> allScenarios = tagName.equals("*")
+        List<CucumberScenario> allScenarios = tagName.isEmpty()
                 ? findAllScenariosExceptTag("@excluded")
                 : findScenariosByTags(tagName);
         Map<String, TestParentSuiteResults> parentSuiteResults = new HashMap<>();
@@ -220,7 +221,9 @@ public class ScenarioManager {
                                 scenario.getName().equals(scenarioName);
                 if (allScenarios.stream().noneMatch(predicate)) return;
                 String status = YamlParser.convert(result.get("status"));
-                List<Map<String, ?>> lastHistory = history.get(historyId) == null ? null : YamlParser.convert(history.get(historyId).get("items"));
+                List<Map<String, ?>> lastHistory = history.get(historyId) == null
+                        ? null
+                        : YamlParser.convert(history.get(historyId).get("items"));
                 String lastStatus = lastHistory == null ? null : lastHistory.getFirst().get("status").toString();
                 String finished = String.valueOf(file.lastModified());
                 Map<String, String> statusDetails = YamlParser.convert(result.get("statusDetails"));

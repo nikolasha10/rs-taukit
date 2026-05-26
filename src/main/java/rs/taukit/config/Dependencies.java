@@ -3,15 +3,13 @@ package rs.taukit.config;
 import rs.taukit.scenario.ScenarioManager;
 import rs.taukit.utils.YamlParser;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class Dependencies {
     private final Map<String, List<Map<String, String>>> oneToMany;
     private final Map<String, List<Map<String, String>>> manyToOne;
     private final Map<String, String> statusMap = new HashMap<>();
+    private final Map<String, Set<String>> checkpointMap = new HashMap<>();
 
     public Dependencies(String filePath) {
         Map<String, Object> dependencyMap = YamlParser.parse(filePath);
@@ -44,13 +42,20 @@ public class Dependencies {
         String current = statusMap.get(statusKey);
         boolean anyStatusExpected = expected.equals("any");
         boolean isDependencyInTestRun = ScenarioManager.getInstance().checkDependency("@" + statusKey);
+        boolean isCheckpointPassed = checkpointMap.getOrDefault(statusKey, new HashSet<>()).contains(expected);
         return Config.getBooleanProperty("trackDependencies")
                 && (current == null && isDependencyInTestRun
-                || !(current == null || current.equals(expected) || anyStatusExpected));
+                || !(current == null || current.equals(expected) || anyStatusExpected || isCheckpointPassed));
     }
 
     public void changeStatus(List<String> tagList, String status) {
         tagList.forEach(tag -> statusMap.put(tag.substring(1), status));
     }
 
+    public void setCheckpointPassed(List<String> tagList, String checkpoint) {
+        tagList.forEach(tag -> {
+            String key = tag.substring(1);
+            checkpointMap.computeIfAbsent(key, k -> new HashSet<>()).add(checkpoint);
+        });
+    }
 }

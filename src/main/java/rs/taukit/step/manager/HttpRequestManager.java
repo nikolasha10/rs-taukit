@@ -79,11 +79,13 @@ public class HttpRequestManager extends StepManager {
         String requestUrl = requestParametersMap.get("url");
         List<List<String>> parameters = new ArrayList<>(dataTable.asLists());
         String content;
+        String filePath = null;
+        String fullPath = null;
         if (requestParametersMap.containsKey("content") && !requestParametersMap.get("content").equalsIgnoreCase("null")) {
             content = requestParametersMap.get("content");
         } else if (requestParametersMap.containsKey("filePath")) {
-            String filePath = requestParametersMap.get("filePath");
-            String fullPath = Config.getProperty("baseResourcesDir") + "files/" + filePath;
+            filePath = requestParametersMap.get("filePath");
+            fullPath = Config.getProperty("baseResourcesDir") + "files/" + filePath;
             if (!requestParametersMap.containsKey("url")) {
                 parameters.add(1, Arrays.asList("url", requestUrl));
             }
@@ -101,7 +103,19 @@ public class HttpRequestManager extends StepManager {
         if (!queryParams.isEmpty()) {
             TauLogger.attachMap("Параметры запроса", queryParams);
         }
-        TauLogger.attach("Тело запроса", content);
+        if (filePath != null) {
+            String fileExtension = filePath.substring(filePath.lastIndexOf(".") + 1);
+            switch (fileExtension) {
+                case "json":
+                    TauLogger.attachJson("Тело запроса", content);
+                    break;
+                default:
+                    TauLogger.attachTxt("Тело запроса", content.getBytes());
+                    break;
+            }
+        } else {
+            TauLogger.attachTxt("Тело запроса", content.getBytes());
+        }
         sendPost(requestUrl, content);
         scenarioData().remove(headersParameterName);
         scenarioData().remove(queryParameterName);

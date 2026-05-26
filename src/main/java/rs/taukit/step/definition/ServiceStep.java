@@ -36,7 +36,7 @@ public class ServiceStep extends ServiceManager {
 
     @И("^сформировать отчёт$")
     public void createReport() {
-        super.createReport("*");
+        super.createReport("");
     }
 
     @И("^сформировать отчёт по тегу \"(.+)\"$")
@@ -87,6 +87,11 @@ public class ServiceStep extends ServiceManager {
     @И("^служебный шаг: сохранить запись трассировки, как \"([^\"]+)\"$")
     public void stopTraceRecord(String traceName) {
         super.stopTraceRecord(eval(traceName));
+    }
+
+    @И("^служебный шаг: контрольная точка \"([^\"]+)\" пройдена$")
+    public void setCheckpointPassed(String checkpoint) {
+        super.setCheckpointPassed(eval(checkpoint));
     }
 
 }

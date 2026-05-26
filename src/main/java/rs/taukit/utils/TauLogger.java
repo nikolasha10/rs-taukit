@@ -176,6 +176,7 @@ public final class TauLogger {
     }
 
     private static void saveError(String message) {
+        if (scenario() == null) return;
         LinkedHashMap<String, String> errorData = new LinkedHashMap<>();
         errorData.put("Автотест", scenario().getFullName());
         errorData.put("Шаг", scenarioData().getOptional("STEP_PATH") + " " + scenarioData().get("CURRENT_STEP_NAME"));
