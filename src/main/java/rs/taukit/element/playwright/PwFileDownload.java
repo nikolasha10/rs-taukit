@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
 
 import static rs.taukit.utils.BasicUtils.scenario;
 
-public class PwFileDownload extends PwElement implements Downloadable {
+public class PwFileDownload extends PwButton implements Downloadable {
 
     public PwFileDownload(String elementName, LinkedHashMap<String, Object> elementData) {
         super(elementName, elementData);
@@ -28,7 +28,7 @@ public class PwFileDownload extends PwElement implements Downloadable {
     }
 
     @Override
-    public void click(File file) {
+    public void clickAndDownloadFile(File file) {
         try {
             driver.getCurrentBrowser().downloadByClick(this, file);
         } catch (TimeoutError e) {
@@ -38,7 +38,7 @@ public class PwFileDownload extends PwElement implements Downloadable {
     }
 
     @Override
-    public void click(DataTable dataTable) {
+    public void clickAndDownloadFiles(DataTable dataTable) {
         driver.getCurrentBrowser().downloadByClick(this, dataTable);
     }
 

@@ -5,9 +5,9 @@ import io.cucumber.datatable.DataTable;
 import java.io.File;
 
 public interface Downloadable extends IElement {
-    void click(File file);
+    void clickAndDownloadFile(File file);
 
-    void click(DataTable dataTable);
+    void clickAndDownloadFiles(DataTable dataTable);
 
     boolean isDownloaded(String fileName);
 }
