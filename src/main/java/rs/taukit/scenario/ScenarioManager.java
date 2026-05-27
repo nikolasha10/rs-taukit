@@ -60,7 +60,9 @@ public class ScenarioManager {
         if (scenarioList.stream().allMatch(CucumberScenario::isFinished)) {
             finished = true;
             scenarioList.clear();
-            scenarioList.addAll(findScenariosByTags("@finalReport"));
+            if (Config.getBooleanProperty("generateFinalReport")) {
+                scenarioList.addAll(findScenariosByTags("@finalReport"));
+            }
         }
         return scenarioList.stream().map(CucumberScenario::getWrapper).toArray(Object[][]::new);
     }
