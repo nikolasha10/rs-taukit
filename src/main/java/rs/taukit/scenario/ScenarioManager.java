@@ -9,7 +9,6 @@ import io.cucumber.testng.PickleWrapper;
 import io.cucumber.testng.TestNGCucumberRunner;
 import lombok.Getter;
 import rs.taukit.config.Config;
-import rs.taukit.exceptions.ScenarioNotFoundException;
 import rs.taukit.records.TestParentSuiteResults;
 import rs.taukit.records.TestResults;
 import rs.taukit.records.TestSubSuiteResults;
@@ -58,23 +57,14 @@ public class ScenarioManager {
     }
 
     public synchronized Object[][] getScenariosToStart() {
-        List<CucumberScenario> readyToStartList = new ArrayList<>(
-                scenarioList.stream().filter(CucumberScenario::isReadyForStart).toList());
-        if (readyToStartList.isEmpty() && getRunningCount() == 0) {
-            List<CucumberScenario> pendingList = scenarioList.stream().filter(CucumberScenario::isPending).toList();
-            if (!pendingList.isEmpty()) {
-                pendingList.forEach(CucumberScenario::setSkipped);
-                pendingList.forEach(CucumberScenario::setSkipped);
-                readyToStartList.addAll(pendingList);
-            } else if (Config.getBooleanProperty("generateFinalReport")) {
-                List<CucumberScenario> finalReports = findScenariosByTags("@finalReport");
-                scenarioList.addAll(finalReports);
-                readyToStartList.addAll(finalReports);
-                finished = true;
+        if (scenarioList.stream().allMatch(CucumberScenario::isFinished)) {
+            finished = true;
+            scenarioList.clear();
+            if (Config.getBooleanProperty("generateFinalReport")) {
+                scenarioList.addAll(findScenariosByTags("@finalReport"));
             }
         }
-        readyToStartList.forEach(CucumberScenario::setStarted);
-        return readyToStartList.stream().map(CucumberScenario::getWrapper).toArray(Object[][]::new);
+        return scenarioList.stream().map(CucumberScenario::getWrapper).toArray(Object[][]::new);
     }
 
     /**
@@ -95,12 +85,50 @@ public class ScenarioManager {
         return scenarioEntity.length == 2 && ((PickleWrapper) scenarioEntity[0]).getPickle().getTags().contains(tag);
     }
 
-    public void run(PickleWrapper pickleWrapper, FeatureWrapper featureWrapper) {
+    private synchronized CucumberScenario getNextScenario() {
         CucumberScenario cucumberScenario = scenarioList.stream()
-                .filter(scenario -> scenario.equals(pickleWrapper, featureWrapper)).findFirst()
-                .orElseThrow(() -> new ScenarioNotFoundException(pickleWrapper.getPickle().getName()));
+                .filter(CucumberScenario::isReadyForStart).findFirst()
+                .orElse(null);
+        if (cucumberScenario == null) {
+            return null;
+        }
         storage.putScenario(cucumberScenario);
-        cucumberScenario.onStart(runner);
+        cucumberScenario.setStarted();
+        return cucumberScenario;
+    }
+
+    private synchronized CucumberScenario getNextPendingScenario() {
+        CucumberScenario cucumberScenario = scenarioList.stream().filter(CucumberScenario::isPending).findFirst().orElse(null);
+        if (cucumberScenario != null) {
+            storage.putScenario(cucumberScenario);
+        }
+        return cucumberScenario;
+    }
+
+    public void run(PickleWrapper pickleWrapper, FeatureWrapper cucumberFeature) {
+        CucumberScenario cucumberScenario = getNextScenario();
+        if (cucumberScenario != null) {
+            cucumberScenario.setCurrentPickleWrapper(pickleWrapper);
+            cucumberScenario.setCurrentFeature(cucumberFeature);
+            cucumberScenario.onStart(runner);
+        } else {
+            while (getRunningCount() > 0 && cucumberScenario == null) {
+                cucumberScenario = getNextScenario();
+            }
+            if (cucumberScenario != null) {
+                cucumberScenario.setCurrentPickleWrapper(pickleWrapper);
+                cucumberScenario.setCurrentFeature(cucumberFeature);
+                cucumberScenario.onStart(runner);
+            } else {
+                cucumberScenario = getNextPendingScenario();
+                if (cucumberScenario != null) {
+                    cucumberScenario.setCurrentPickleWrapper(pickleWrapper);
+                    cucumberScenario.setCurrentFeature(cucumberFeature);
+                    cucumberScenario.setSkipped();
+                    cucumberScenario.onStart(runner);
+                }
+            }
+        }
     }
 
     public CucumberScenario getCurrentScenario() {

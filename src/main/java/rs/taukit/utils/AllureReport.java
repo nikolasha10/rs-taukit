@@ -30,7 +30,7 @@ public class AllureReport {
         File directory = new File(Config.getProperty("allure-results.path"));
         return Arrays.stream(Objects.requireNonNull(directory.listFiles()))
                 .filter(file -> file.getName().endsWith("result.json"))
-                .filter(file -> (file.lastModified() >= testEndTime))
+                .filter(file -> (file.lastModified() >= testEndTime - 1000))
                 .filter(file -> {
                     try {
                         String fileContent = Files.readString(file.toPath());
@@ -58,8 +58,10 @@ public class AllureReport {
         storage.saveErrorData(new File("target/temp/errors.yml"));
         String functionality = scenario.getFunctionality();
         String scenarioName = scenario.getName();
+        String currentFunctionality = scenario.getCurrentFunctionality();
+        String currentScenarioName = scenario.getCurrentName();
         List<String> tagList = scenario.getTagList();
-        List<File> fileList = getFileList(functionality, scenarioName, testEndTime - 1000);
+        List<File> fileList = getFileList(currentFunctionality, currentScenarioName, testEndTime);
         categories.addAll(getCategories());
         fileList.forEach(file -> replaceReport(file, scenarioName, functionality, status, tagList));
     }

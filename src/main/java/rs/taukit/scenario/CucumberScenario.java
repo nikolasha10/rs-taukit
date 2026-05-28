@@ -4,6 +4,7 @@ import io.cucumber.testng.FeatureWrapper;
 import io.cucumber.testng.PickleWrapper;
 import io.cucumber.testng.TestNGCucumberRunner;
 import lombok.Getter;
+import lombok.Setter;
 import rs.taukit.config.Config;
 import rs.taukit.records.Mutex;
 import rs.taukit.storage.ScenarioStorage;
@@ -28,6 +29,10 @@ import static rs.taukit.utils.BasicUtils.*;
 public class CucumberScenario {
     private final FeatureWrapper featureWrapper;
     private final PickleWrapper pickleWrapper;
+    @Setter
+    private FeatureWrapper currentFeature;
+    @Setter
+    private PickleWrapper currentPickleWrapper;
     private final ScenarioStorage scenarioStorage = new ScenarioStorage();
     private final String parentSuiteName;
     private final String suiteName;
@@ -36,6 +41,9 @@ public class CucumberScenario {
     private boolean finished = false;
     private boolean started = false;
     private boolean skipped = false;
+    @Setter
+    private boolean reportCorrected = false;
+    private Runnable correctReportRunner;
 
     public CucumberScenario(FeatureWrapper featureWrapper, PickleWrapper pickleWrapper) {
         this.featureWrapper = featureWrapper;
@@ -68,6 +76,14 @@ public class CucumberScenario {
     public String getFunctionality() {
         String f = featureWrapper.toString();
         return f.substring(1, f.length() - 1);
+    }
+
+    public String getCurrentFunctionality() {
+        String f = currentFeature.toString();
+        return f.substring(1, f.length() - 1);
+    }
+    public String getCurrentName() {
+        return currentPickleWrapper.getPickle().getName();
     }
 
     public List<String> getTagList() {
@@ -113,7 +129,7 @@ public class CucumberScenario {
         scenarioStorage.getDriverManager().getDriver(Config.getProperty("web.driver.name"));
         TauLogger.setLogPath(getFunctionality(), getName());
         System.out.println();
-        TauLogger.console("TEST %s: %s %s", skipped ? "SKIPPED" : "STARTED", featureWrapper, getName());
+        TauLogger.console("TEST %s: %s", skipped ? "SKIPPED" : "STARTED", getFullName());
         scenarioStorage.setScenarioData(new ScenarioData(pickleWrapper.getPickle()));
         scenarioStorage.getScenarioData().put("SCENARIO_TEMP_DIR",
                 FileUtils.getScenarioTempDir(parentSuiteName, suiteName, subSuiteName, getName()));
@@ -123,7 +139,6 @@ public class CucumberScenario {
     }
 
     public void onFinish(int statusCode, long endMillis) {
-        finished = true;
         releaseAllMutexes();
         String testStatus = skipped ? "SKIPPED" : statusCode == 1 ? "PASSED" : "FAILED";
         Boolean videoSaveTestRun = Config.getBooleanProperty("video.save");
@@ -170,9 +185,10 @@ public class CucumberScenario {
         }
         Config.getDependencies().changeStatus(getTagList(), testStatus.toLowerCase());
         scenarioStorage.getDriverManager().close();
-        TauLogger.console("TEST %s: %s %s", testStatus, getFunctionality(), getName());
+        TauLogger.console("TEST %s: %s", testStatus, getFullName());
         AllureReport.editReports(this, testStatus, endMillis);
         TauLogger.collectLogs();
+        finished = true;
     }
 
     @Override
@@ -247,4 +263,5 @@ public class CucumberScenario {
         int weight = found == null ? order.size() : order.indexOf(found);
         return String.format("%04d %s", weight, getFullName());
     }
+
 }

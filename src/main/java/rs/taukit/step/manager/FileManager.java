@@ -3,6 +3,8 @@ package rs.taukit.step.manager;
 import io.cucumber.datatable.DataTable;
 import io.qameta.allure.Step;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.xml.sax.SAXException;
 import rs.taukit.config.Config;
 import rs.taukit.element.interfaces.Downloadable;
@@ -17,17 +19,16 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import static rs.taukit.utils.BasicUtils.eval;
 import static rs.taukit.utils.BasicUtils.scenarioData;
@@ -98,7 +99,7 @@ public class FileManager extends StepManager {
         String filePath = basePath + "-file." + fileExtension;
         File file = new File(filePath);
         run(() -> {
-            downloadable.click(file);
+            downloadable.clickAndDownloadFile(file);
         }, "Не удалось нажать на '%s' и скачать файл '%s'", buttonName, fileName);
         FileUtils.writeFile(Path.of(infoPath), YamlParser.write(info, false));
         TauLogger.attachFile(this.fileName, file.getAbsolutePath(), fileExtension);
@@ -113,7 +114,7 @@ public class FileManager extends StepManager {
     public void downloadFiles(String buttonName) {
         TauLogger.attachDataTable("Список загружаемых файлов", this.dataTable);
         Downloadable downloadable = getElement(buttonName);
-        run(() -> downloadable.click(this.dataTable),
+        run(() -> downloadable.clickAndDownloadFiles(this.dataTable),
                 "Не удалось нажать на '%s' и скачать указанные файлы", buttonName);
     }
 
@@ -315,7 +316,7 @@ public class FileManager extends StepManager {
     }
 
     private boolean isXlsxFileEmpty() {
-        try (FileInputStream fis = new FileInputStream(filePath)){
+        try (FileInputStream fis = new FileInputStream(filePath)) {
             Workbook workbook = new XSSFWorkbook(fis);
             Sheet sheet = workbook.getSheetAt(0);
 

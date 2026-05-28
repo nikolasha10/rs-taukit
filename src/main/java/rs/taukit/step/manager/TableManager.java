@@ -364,14 +364,18 @@ public class TableManager extends StepManager {
             notMetConditionList.getFirst().add("Ожидаемое значение");
             notMetConditionList.getFirst().add("Текущее значение");
             dataTable.asMaps().forEach(conditionData -> {
-                TestCondition testCondition = new TestCondition(conditionData).waitForResult();
-                if (!testCondition.isConditionMet()) {
-                    notMetConditionList.add(Arrays.asList(
-                            testCondition.getObjectType(),
-                            testCondition.getObjectName(),
-                            testCondition.getObjectState(),
-                            testCondition.getExpectedValue(),
-                            testCondition.getCurrentValue()));
+                try {
+                    TestCondition testCondition = new TestCondition(conditionData).waitForResult();
+                    if (!testCondition.isConditionMet()) {
+                        notMetConditionList.add(Arrays.asList(
+                                testCondition.getObjectType(),
+                                testCondition.getObjectName(),
+                                testCondition.getObjectState(),
+                                testCondition.getExpectedValue(),
+                                testCondition.getCurrentValue()));
+                    }
+                } catch (Exception e) {
+                    TauLogger.fail(e, "Не удалось проверить выполнение условий для строки № %d", index + 1);
                 }
             });
             if (notMetConditionList.size() > 1) {
