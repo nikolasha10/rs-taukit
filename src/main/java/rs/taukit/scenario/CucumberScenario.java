@@ -117,6 +117,7 @@ public class CucumberScenario {
         if (!isReadyForStart()) {
             this.skipped = true;
             Config.getDependencies().changeStatus(getTagList(), "skipped");
+            this.finished = true;
         } else {
             this.skipped = false;
         }
@@ -188,7 +189,9 @@ public class CucumberScenario {
         }
         Config.getDependencies().changeStatus(getTagList(), testStatus.toLowerCase());
         scenarioStorage.getDriverManager().close();
-        TauLogger.console("TEST %s: %s", testStatus, getFullName());
+        if (!testStatus.equalsIgnoreCase("skipped")) {
+            TauLogger.console("TEST %s: %s", testStatus, getFullName());
+        }
         AllureReport.editReports(this, testStatus, endMillis);
         TauLogger.collectLogs();
         finished = true;
