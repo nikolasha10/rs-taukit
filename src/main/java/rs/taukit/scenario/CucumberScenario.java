@@ -82,6 +82,7 @@ public class CucumberScenario {
         String f = currentFeature.toString();
         return f.substring(1, f.length() - 1);
     }
+
     public String getCurrentName() {
         return currentPickleWrapper.getPickle().getName();
     }
@@ -116,6 +117,7 @@ public class CucumberScenario {
         if (!isReadyForStart()) {
             this.skipped = true;
             Config.getDependencies().changeStatus(getTagList(), "skipped");
+            this.finished = true;
         } else {
             this.skipped = false;
         }
@@ -141,25 +143,26 @@ public class CucumberScenario {
     public void onFinish(int statusCode, long endMillis) {
         releaseAllMutexes();
         String testStatus = skipped ? "SKIPPED" : statusCode == 1 ? "PASSED" : "FAILED";
-        Boolean videoSaveTestRun = Config.getBooleanProperty("video.save");
-        Boolean videoSaveScenario = scenarioData().getOptional("video.save");
-        boolean videoSave = videoSaveTestRun || Optional.ofNullable(videoSaveScenario).orElse(false);
-        Path videoPath = videoSave && page() != null ? page().getVideoPath() : null;
-        Boolean harFileSave = scenarioData().getOptional("har-file.save");
-        if (driver().isBrowserOpen()) {
-            try {
-                browser().close();
-            } catch (Exception e) {
-                TauLogger.error(e, "Не удалось закрыть браузер");
+        if (scenarioData() != null) {
+            Boolean videoSaveTestRun = Config.getBooleanProperty("video.save");
+            Boolean videoSaveScenario = scenarioData().getOptional("video.save");
+            boolean videoSave = videoSaveTestRun || Optional.ofNullable(videoSaveScenario).orElse(false);
+            Path videoPath = videoSave && page() != null ? page().getVideoPath() : null;
+            Boolean harFileSave = scenarioData().getOptional("har-file.save");
+            if (driver().isBrowserOpen()) {
+                try {
+                    browser().close();
+                } catch (Exception e) {
+                    TauLogger.error(e, "Не удалось закрыть браузер");
+                }
             }
-        }
-        if (!driver().isBrowserOpen()) {
-            TauLogger.console("Браузер закрыт");
-        }
-        if ((Config.getBooleanProperty("har-file.save") || Optional.ofNullable(harFileSave).orElse(false))
-                && testStatus.equalsIgnoreCase("failed")) {
-            String harPath = driver().getHarFilePath();
-            try {
+            if (!driver().isBrowserOpen()) {
+                TauLogger.console("Браузер закрыт");
+            }
+            if ((Config.getBooleanProperty("har-file.save") || Optional.ofNullable(harFileSave).orElse(false))
+                    && testStatus.equalsIgnoreCase("failed")) {
+                String harPath = driver().getHarFilePath();
+                try {
 //                Map<String, ?> har = YamlParser.parse(harPath);
 //                Map<String, ?> log = YamlParser.convert(har.get("log"));
 //                List<Map<String, ?>> entries = YamlParser.convert(log.get("entries"));
@@ -170,22 +173,25 @@ public class CucumberScenario {
 //                log.put("entries", YamlParser.convert(filteredEntries));
 //                har.put("log", YamlParser.convert(log));
 //                FileUtils.writeFile(Path.of(harPath), JsonParser.write(har));
-                File harFile = new File(harPath);
-                TauLogger.attachFile(harFile.getParentFile().getName() + ".har", harPath);
-                FileUtils.getDirFileList(harFile.getParentFile().getAbsolutePath())
-                        .stream()
-                        .filter(file -> file.getName().endsWith(".json") || file.getName().endsWith(".txt"))
-                        .forEach(file -> TauLogger.attachJson(file.getName(), FileUtils.readFile(file.getAbsolutePath())));
-            } catch (Exception e) {
-                TauLogger.error("Не удалось прикрепить файл HAR", e);
+                    File harFile = new File(harPath);
+                    TauLogger.attachFile(harFile.getParentFile().getName() + ".har", harPath);
+                    FileUtils.getDirFileList(harFile.getParentFile().getAbsolutePath())
+                            .stream()
+                            .filter(file -> file.getName().endsWith(".json") || file.getName().endsWith(".txt"))
+                            .forEach(file -> TauLogger.attachJson(file.getName(), FileUtils.readFile(file.getAbsolutePath())));
+                } catch (Exception e) {
+                    TauLogger.error("Не удалось прикрепить файл HAR", e);
+                }
             }
-        }
-        if (videoPath != null) {
-            TauLogger.attachWebmFile(getName() + ".webm", videoPath.toString());
+            if (videoPath != null) {
+                TauLogger.attachWebmFile(getName() + ".webm", videoPath.toString());
+            }
         }
         Config.getDependencies().changeStatus(getTagList(), testStatus.toLowerCase());
         scenarioStorage.getDriverManager().close();
-        TauLogger.console("TEST %s: %s", testStatus, getFullName());
+        if (!testStatus.equalsIgnoreCase("skipped")) {
+            TauLogger.console("TEST %s: %s", testStatus, getFullName());
+        }
         AllureReport.editReports(this, testStatus, endMillis);
         TauLogger.collectLogs();
         finished = true;
