@@ -105,7 +105,7 @@ public abstract class PwBrowser implements IWebBrowser {
             context.pages().get(tabIndex).bringToFront();
             activeTabIndex = tabIndex;
         }
-        return context.pages().size() - 1 == tabIndex;
+        return context.pages().size() - 1 == activeTabIndex;
     }
 
     @Override
