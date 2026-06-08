@@ -100,6 +100,7 @@ public class ScenarioManager {
     private synchronized CucumberScenario getNextPendingScenario() {
         CucumberScenario cucumberScenario = scenarioList.stream().filter(CucumberScenario::isPending).findFirst().orElse(null);
         if (cucumberScenario != null) {
+            cucumberScenario.setStarted();
             storage.putScenario(cucumberScenario);
         }
         return cucumberScenario;
