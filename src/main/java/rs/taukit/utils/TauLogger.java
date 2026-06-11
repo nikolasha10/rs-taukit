@@ -33,7 +33,7 @@ public final class TauLogger {
 
     @Step("{message}")
     public static void report(String message) {
-        logger.info(addIndentation(message));;
+        logger.info(addIndentation(message));
     }
 
     @Step("{message}")
@@ -185,6 +185,7 @@ public final class TauLogger {
         errorData.put("Примечание", "");
         storage.pushErrorData(errorData);
     }
+
     /**
      * Выводит сообщение о критической ошибке, и делает скриншот.
      */
@@ -373,10 +374,12 @@ public final class TauLogger {
             browser().setActiveTab(index);
             String pageName = page() != null ? page().getPageName() : "Без названия";
             attachScreenshot(
-                    String.format("Снимок: Вкладка %d. %s", index + 1, pageName),
+                    String.format(" Вкладка %d. %s. Снимок", index + 1, pageName),
                     screenshotList.get(index));
-            attachFile(String.format("Исходный код: Вкладка %d. %s", index + 1, pageName),
+            attachFile(String.format("Вкладка %d. %s. Исходный код", index + 1, pageName),
                     page().takeContent().getBytes());
+            attachFile(String.format("Вкладка %d. %s. Консоль", index + 1, pageName),
+                    page().getConsoleMessages());
         };
         IntStream.range(0, screenshotList.size()).forEach(takeTabScreenshotAndPageSource);
     }
