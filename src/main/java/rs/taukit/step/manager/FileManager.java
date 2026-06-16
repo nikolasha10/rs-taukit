@@ -121,7 +121,8 @@ public class FileManager extends StepManager {
     @Step("нажать на '{buttonName}' и выбрать загруженный файл '{fileName}'")
     public void attachDownloadedFile(String buttonName, String fileName) {
         IHasAttachment attachment = getElement(buttonName);
-        run(() -> attachment.attach(this.testDataFile.getFilePath()),
+        TestDataFile testDataFile = scenarioData.get(fileName);
+        run(() -> attachment.attach(testDataFile.getFilePath()),
                 "Не удалось нажать на кнопку '%s' и выбрать файл '%s'", buttonName, fileName);
         TauLogger.console("Нажата кнопка '%s'", buttonName);
         TauLogger.console("Выбран файл '%s' из папки '%s'", fileName, fileDir);
