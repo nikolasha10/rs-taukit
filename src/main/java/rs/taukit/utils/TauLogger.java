@@ -213,6 +213,7 @@ public final class TauLogger {
         runnable.run();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             logger.warn(addIndentation("ОШИБКА: " + message.replaceAll("\n", "↵")));
             scenarioData().put("WARNING", "PASSED with ERRORS");
         } else {
@@ -226,6 +227,7 @@ public final class TauLogger {
         runnable.run();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             logger.warn(addIndentation("ОШИБКА: " + message.replaceAll("\n", "↵")), throwable);
             scenarioData().put("WARNING", "PASSED with ERRORS");
         } else {
@@ -236,6 +238,7 @@ public final class TauLogger {
     public static void fail(Throwable e, String format, Object... args) {
         String message = String.format(format, args);
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             warn(message, e);
         } else {
             fail(message, e);
@@ -244,6 +247,7 @@ public final class TauLogger {
 
     public static void fail(String format, Object... args) {
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             warn(format, args);
         } else {
             fail(new Throwable(), String.format(format, args));
@@ -253,6 +257,7 @@ public final class TauLogger {
     public static void fail(Runnable runnable, String format, Object... args) {
         String message = String.format(format, args);
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             warn(runnable, format, args);
         } else {
             fail(runnable, message);
@@ -262,6 +267,7 @@ public final class TauLogger {
     public static void fail(Runnable runnable, Throwable throwable, String format, Object... args) {
         String message = String.format(format, args);
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             warn(runnable, format, args);
         } else fail(Objects.requireNonNullElseGet(throwable, Throwable::new), runnable, message);
     }
