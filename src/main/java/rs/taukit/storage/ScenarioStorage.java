@@ -1,5 +1,6 @@
 package rs.taukit.storage;
 
+import com.microsoft.playwright.ConsoleMessage;
 import io.cucumber.testng.Pickle;
 import io.cucumber.testng.PickleWrapper;
 import lombok.Getter;
@@ -39,7 +40,9 @@ public class ScenarioStorage {
     private boolean saveActions = false;
     @Setter
     private long freeSince;
-    private Stack<String> stepStack = new Stack<>();
+    private final Stack<String> stepStack = new Stack<>();
+    @Getter
+    private List<String> consoleMessages = new ArrayList<>();
 
     public void update(PickleWrapper pickleWrapper, String functionality) {
         this.pickle = pickleWrapper.getPickle();
@@ -89,4 +92,9 @@ public class ScenarioStorage {
     public String getStepStack() {
         return String.join(" -> ", stepStack);
     }
+
+    public void addConsoleMessage(String message) {
+        consoleMessages.add(message);
+    }
+
 }

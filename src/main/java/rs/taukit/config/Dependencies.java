@@ -42,10 +42,11 @@ public class Dependencies {
         String current = statusMap.get(statusKey);
         boolean anyStatusExpected = expected.equals("any");
         boolean isDependencyInTestRun = ScenarioManager.getInstance().checkDependency("@" + statusKey);
-        boolean isCheckpointPassed = checkpointMap.getOrDefault(statusKey, new HashSet<>()).contains(expected);
+        boolean isCheckpointPassed = checkpointMap.getOrDefault(statusKey, new HashSet<>())
+                .contains(expected.replace('~', ' ').trim());
         return Config.getBooleanProperty("trackDependencies")
-                && (current == null && isDependencyInTestRun
-                || !(current == null || current.equals(expected) || anyStatusExpected || isCheckpointPassed));
+                && (current == null && isDependencyInTestRun && !isCheckpointPassed
+                || !(current == null || current.equals(expected) || anyStatusExpected || expected.startsWith("~")));
     }
 
     public void changeStatus(List<String> tagList, String status) {

@@ -33,7 +33,7 @@ public final class TauLogger {
 
     @Step("{message}")
     public static void report(String message) {
-        logger.info(addIndentation(message));;
+        logger.info(addIndentation(message));
     }
 
     @Step("{message}")
@@ -185,6 +185,7 @@ public final class TauLogger {
         errorData.put("Примечание", "");
         storage.pushErrorData(errorData);
     }
+
     /**
      * Выводит сообщение о критической ошибке, и делает скриншот.
      */
@@ -212,6 +213,7 @@ public final class TauLogger {
         runnable.run();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             logger.warn(addIndentation("ОШИБКА: " + message.replaceAll("\n", "↵")));
             scenarioData().put("WARNING", "PASSED with ERRORS");
         } else {
@@ -225,6 +227,7 @@ public final class TauLogger {
         runnable.run();
         if (driver().isBrowserOpen() && page() != null) attachFullScreenshots();
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             logger.warn(addIndentation("ОШИБКА: " + message.replaceAll("\n", "↵")), throwable);
             scenarioData().put("WARNING", "PASSED with ERRORS");
         } else {
@@ -235,6 +238,7 @@ public final class TauLogger {
     public static void fail(Throwable e, String format, Object... args) {
         String message = String.format(format, args);
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             warn(message, e);
         } else {
             fail(message, e);
@@ -243,6 +247,7 @@ public final class TauLogger {
 
     public static void fail(String format, Object... args) {
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             warn(format, args);
         } else {
             fail(new Throwable(), String.format(format, args));
@@ -252,6 +257,7 @@ public final class TauLogger {
     public static void fail(Runnable runnable, String format, Object... args) {
         String message = String.format(format, args);
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             warn(runnable, format, args);
         } else {
             fail(runnable, message);
@@ -261,6 +267,7 @@ public final class TauLogger {
     public static void fail(Runnable runnable, Throwable throwable, String format, Object... args) {
         String message = String.format(format, args);
         if (scenarioData().getOptional("NEXT_CHECK_NOT_CRITICAL") != null) {
+            resetNotCritical();
             warn(runnable, format, args);
         } else fail(Objects.requireNonNullElseGet(throwable, Throwable::new), runnable, message);
     }
@@ -373,10 +380,12 @@ public final class TauLogger {
             browser().setActiveTab(index);
             String pageName = page() != null ? page().getPageName() : "Без названия";
             attachScreenshot(
-                    String.format("Снимок: Вкладка %d. %s", index + 1, pageName),
+                    String.format(" Вкладка %d. %s. Снимок", index + 1, pageName),
                     screenshotList.get(index));
-            attachFile(String.format("Исходный код: Вкладка %d. %s", index + 1, pageName),
+            attachFile(String.format("Вкладка %d. %s. Исходный код", index + 1, pageName),
                     page().takeContent().getBytes());
+            attachFile(String.format("Вкладка %d. %s. Консоль", index + 1, pageName),
+                    page().getConsoleMessages());
         };
         IntStream.range(0, screenshotList.size()).forEach(takeTabScreenshotAndPageSource);
     }

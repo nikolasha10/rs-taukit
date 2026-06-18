@@ -15,11 +15,13 @@ import rs.taukit.exceptions.PageFragmentNotFoundException;
 import rs.taukit.exceptions.PageNotClosedException;
 import rs.taukit.exceptions.PageNotLoadException;
 import rs.taukit.page.PageObject;
+import rs.taukit.utils.JsonParser;
 import rs.taukit.utils.TimeStringParser;
 import rs.taukit.utils.YamlParser;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -388,5 +390,20 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
     @Override
     public Path getVideoPath() {
         return page.video().path();
+    }
+
+    @Override
+    public byte[] getConsoleMessages() {
+        LinkedHashMap<String, LinkedHashMap<String, List<String>>> consoleMessages = new LinkedHashMap<>();
+        SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.forLanguageTag("ru"));
+        page.consoleMessages().forEach(message -> {
+            String time = df.format(new Date((long) message.timestamp()));
+            consoleMessages.computeIfAbsent(time, k -> new LinkedHashMap<>());
+            String location = message.location();
+            LinkedHashMap<String, List<String>> locationGroup = consoleMessages.get(time);
+            String line = String.format("%s: %s", message.type(), message.text());
+            locationGroup.computeIfAbsent(location, k -> new ArrayList<>()).add(line);
+        });
+        return JsonParser.write(consoleMessages);
     }
 }

@@ -72,4 +72,6 @@ public interface PageObject {
     void setRequestHandler(Consumer<Request> handler);
 
     Path getVideoPath();
+
+    byte[] getConsoleMessages();
 }
