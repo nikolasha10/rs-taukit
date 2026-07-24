@@ -89,6 +89,11 @@ public class ContainerStep extends ContainerManager {
     }
 
     @И("^в контейнере \"(.+)\" нажать на \"(.+)\" и выбрать загруженный файл \"(.+)\"$")
+    public void attachDownloadedFile(String containerName, String fileName, String buttonName) {
+        super.attachDownloadedFile(eval(containerName), eval(fileName), buttonName);
+    }
+
+    @И("^в контейнере \"(.+)\" нажать на \"(.+)\" и выбрать файл \"(.+)\"$")
     public void attachFile(String containerName, String fileName, String buttonName) {
         super.attachFile(eval(containerName), eval(fileName), buttonName);
     }

@@ -5,6 +5,7 @@ import io.qameta.allure.Step;
 import rs.taukit.config.Config;
 import rs.taukit.driver.IWebDriver;
 import rs.taukit.element.interfaces.*;
+import rs.taukit.testdata.TestDataFile;
 import rs.taukit.testobject.TestCondition;
 import rs.taukit.utils.FileUtils;
 import rs.taukit.utils.TauLogger;
@@ -176,7 +177,7 @@ public class ContainerManager extends StepManager {
     }
 
     @Step("в контейнере '{containerName}' нажать на '{buttonName}' и выбрать загруженный файл '{fileName}'")
-    public void attachFile(String containerName, String buttonName, String fileName) {
+    public void attachDownloadedFile(String containerName, String buttonName, String fileName) {
         String dirPath = FileUtils.getDownloadFilePath();
         Runnable runnable = () -> {
             IContainer container = getContainer(containerName);
@@ -187,6 +188,21 @@ public class ContainerManager extends StepManager {
                 buttonName, containerName, fileName);
         TauLogger.report("В контейнере '%s' нажата кнопка '%s'", containerName, buttonName);
         TauLogger.report("Выбран файл '%s' из папки '%s'", fileName, dirPath);
+    }
+
+    @Step("в контейнере '{containerName}' нажать на '{buttonName}' и выбрать файл '{fileName}'")
+    public void attachFile(String containerName, String buttonName, String fileName) {
+        TestDataFile testDataFile = scenarioData.get(fileName);
+        String filePath = testDataFile.getFilePath();
+        Runnable runnable = () -> {
+            IContainer container = getContainer(containerName);
+            IHasAttachment attachment = container.getElementByName(buttonName).castTo(IHasAttachment.class);
+            attachment.attach(filePath);
+        };
+        run(runnable, "Не удалось нажать на '%s' в контейнере '%s' и выбрать файл '%s'",
+                buttonName, containerName, fileName);
+        TauLogger.report("В контейнере '%s' нажата кнопка '%s'", containerName, buttonName);
+        TauLogger.report("Выбран файл '%s'", fileName);
     }
 
     @Step("дождаться отображения контейнера '{containerName}'")
