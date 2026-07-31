@@ -308,4 +308,17 @@ public class ContainerManager extends StepManager {
                 "Не удалось выбрать %d-й элемент в выпадающем списке '%s' в контейнере '%s'",
                 number, dropdownListName, containerName);
     }
+
+    @Step("в контейнере '{containerName}' в выпадающем списке '{dropdownListName}' выбрать значение, отличное от текущего")
+    protected void selectDropdownListAnotherItem(String containerName, String dropdownListName) {
+        run(() -> {
+                    IContainer container = getContainer(containerName);
+                    Selectable dropdown = container.getElementByName(dropdownListName).castTo(Selectable.class);
+                    Editable editable = container.getElementByName(dropdownListName).castTo(Editable.class);
+                    String currentValue = editable.getText();
+                    String otherValue = dropdown.getOptions().stream().filter(option -> option.equals(currentValue)).findFirst().get();
+                    editable.setValue(otherValue);
+                }, "Не удалось выбрать значение, отличное от текущего, в выпадающем списке '%s' в контейнере '%s'",
+                dropdownListName, containerName);
+    }
 }
