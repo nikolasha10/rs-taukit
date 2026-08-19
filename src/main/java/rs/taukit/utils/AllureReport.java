@@ -18,8 +18,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static rs.taukit.utils.BasicUtils.scenario;
-import static rs.taukit.utils.BasicUtils.storage;
+import static rs.taukit.utils.BasicUtils.*;
 
 @SuppressWarnings("unchecked")
 @Getter
@@ -98,6 +97,18 @@ public class AllureReport {
                 parentSuitName.put("value", functionality);
                 labels.add(parentSuitName);
             }
+
+            // Получаем severity, если есть
+            String severity = scenarioData().getOptional("severity");
+            if (severity != null && !severity.isBlank()) {
+                labels.add(Map.of("name", "severity", "value", severity));
+            }
+
+            // Получаем теги, если есть
+            String allureTag = scenarioData().getOptional("allureTag");
+            String[] allureTags = Optional.ofNullable(allureTag).orElse("").split("[, ]+");
+            Arrays.stream(allureTags).forEach(tag -> labels.add(Map.of("name", "tag", "value", tag)));
+
             String projectFullName = Config.getProperty("project.full.name");
             if (projectFullName != null) {
                 report.replace("fullName", Config.getProperty("project.full.name"));
