@@ -2,6 +2,7 @@ package rs.taukit.utils;
 
 import com.google.gson.Gson;
 import lombok.Getter;
+import org.apache.commons.codec.digest.DigestUtils;
 import rs.taukit.config.Config;
 import rs.taukit.exceptions.ConfigFileNotFoundException;
 import rs.taukit.scenario.CucumberScenario;
@@ -101,6 +102,7 @@ public class AllureReport {
             if (projectFullName != null) {
                 report.replace("fullName", Config.getProperty("project.full.name"));
             }
+            report.replace("historyId", DigestUtils.md5Hex(scenario().getTestId()));
             report.replace("labels", labels);
             report.put("links", getLinksFromTags(tagList));
             report.remove("parameters");
