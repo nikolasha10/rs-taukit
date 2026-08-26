@@ -239,9 +239,12 @@ public class ScenarioManager {
                 result = YamlParser.convert(mapper.readValue(file, result.getClass()));
                 List<Map<String, String>> labels = YamlParser.convert(result.get("labels"));
                 String historyId = YamlParser.convert(result.get("historyId"));
-                String parentSuiteName = labels.get(0).get("value");
-                String suiteName = labels.size() > 1 ? labels.get(1).get("value") : "-";
-                String subSuiteName = labels.size() > 2 ? labels.get(2).get("value") : "-";
+                Map<String, String> parentSuite = labels.stream().filter(label -> label.get("name").equals("parentSuite")).findFirst().orElse(null);
+                String parentSuiteName = parentSuite == null ? "-" : parentSuite.get("value");
+                Map<String, String> suite = labels.stream().filter(label -> label.get("name").equals("suite")).findFirst().orElse(null);
+                String suiteName = suite == null ? "-" : suite.get("value");
+                Map<String, String> subSuite = labels.stream().filter(label -> label.get("name").equals("subSuite")).findFirst().orElse(null);
+                String subSuiteName = subSuite == null ? "-" : subSuite.get("value");
                 String scenarioName = result.get("name").toString();
                 Predicate<CucumberScenario> predicate = scenario ->
                         scenario.getParentSuiteName().equals(parentSuiteName) &&

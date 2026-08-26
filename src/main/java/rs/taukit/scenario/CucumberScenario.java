@@ -5,6 +5,7 @@ import io.cucumber.testng.PickleWrapper;
 import io.cucumber.testng.TestNGCucumberRunner;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.codec.digest.DigestUtils;
 import rs.taukit.config.Config;
 import rs.taukit.records.Mutex;
 import rs.taukit.storage.ScenarioStorage;
@@ -217,11 +218,11 @@ public class CucumberScenario {
     }
 
     public String getTestId() {
-        return getTagList().stream()
+        List<String> tagList = getTagList().stream()
                 .map(tag -> tag.substring(1))
                 .filter(tag -> tag.matches("[\\d.]+"))
-                .toList()
-                .getLast();
+                .toList();
+        return tagList.isEmpty() ? DigestUtils.md5Hex(getFullName()) : tagList.getLast();
     }
 
     public synchronized void setMutex(String mutexName) {
