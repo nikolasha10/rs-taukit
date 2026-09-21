@@ -1,5 +1,7 @@
 package rs.taukit.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import rs.taukit.exceptions.AutoTestBrokenException;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -33,6 +35,19 @@ public class JsonParser {
     public static byte[] write(Object object) {
         ObjectMapper jsonMapper = new JsonMapper();
         return jsonMapper.writeValueAsBytes(object);
+    }
+
+    public static String writeAsString(Object object) {
+        com.fasterxml.jackson.databind.ObjectMapper mapper = com.fasterxml.jackson.databind.json.JsonMapper.builder()
+                .defaultPropertyInclusion(JsonInclude.Value.construct(
+                        JsonInclude.Include.NON_NULL,
+                        JsonInclude.Include.NON_NULL
+                )).build();
+        try {
+            return mapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
