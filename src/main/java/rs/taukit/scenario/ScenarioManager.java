@@ -61,6 +61,9 @@ public class ScenarioManager {
             finished = true;
             scenarioList.clear();
             if (Config.getBooleanProperty("generateFinalReport")) {
+                if (Config.getProperty("reportTag") == null){
+                    System.setProperty("reportTag","@Regress");
+                }
                 scenarioList.addAll(findScenariosByTags("@finalReport"));
             }
         }

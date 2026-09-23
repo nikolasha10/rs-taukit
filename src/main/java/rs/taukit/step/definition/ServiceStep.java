@@ -41,7 +41,7 @@ public class ServiceStep extends ServiceManager {
 
     @И("^сформировать отчёт по тегу \"(.+)\"$")
     public void createReport(String tagName) {
-        super.createReport(tagName);
+        super.createReport(eval(tagName));
     }
 
     @И("^служебный шаг: кликнуть ЛКМ в области над элементом \"(.+)\"$")
