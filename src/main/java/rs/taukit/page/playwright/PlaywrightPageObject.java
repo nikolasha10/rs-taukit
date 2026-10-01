@@ -283,7 +283,6 @@ public class PlaywrightPageObject implements PageObject, CanBeVisible {
 
     public void reload() {
         page.reload();
-        waitForLoad();
     }
 
     public byte[] takeScreenshot() {
