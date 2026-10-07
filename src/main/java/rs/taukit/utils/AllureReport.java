@@ -217,11 +217,18 @@ public class AllureReport {
                 }
             }
             details = (Map<String, String>) json.get("statusDetails");
-            Map<String, String> errorData = YamlParser.convert(storage.getErrorData(scenario().getFullName(), stepName, errorMessage));
+            Map<String, String> errorData;
+            try {
+                errorData = YamlParser.convert(storage.getErrorData(scenario().getFullName(), stepName, errorMessage));
+            } catch (Exception e) {
+                errorData = null;
+            }
+
             if (errorData != null && !errorData.get("Статус").isEmpty() && details != null) {
                 details.put("status", errorData.get("Статус"));
                 details.put("note", errorData.get("Примечание"));
-                details.compute("trace", (k, trace) -> trace + " Категории: " + errorData.get("Статус") + "\n");
+                Map<String, String> finalErrorData = errorData;
+                details.compute("trace", (k, trace) -> trace + " Категории: " + finalErrorData.get("Статус") + "\n");
                 s.replace("statusDetails", details);
                 categories.add(errorData.get("Статус"));
             }
